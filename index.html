@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#5c6bc0">
+<link rel="manifest" href="manifest.json">
+<title>AAC Board</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-yellow: #FFE066;
+  --color-green: #7BC67E;
+  --color-red: #FF6B6B;
+  --color-blue: #64B5F6;
+  --color-pink: #F48FB1;
+  --color-orange: #FFB74D;
+  --color-home: #B0BEC5;
+  --bar-bg: #5c6bc0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f0f0;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Message Bar ── */
+#message-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bar-bg);
+  color: #fff;
+  min-height: 56px;
+  flex-shrink: 0;
+}
+
+#message-words {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 36px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  overflow-y: auto;
+  max-height: 80px;
+}
+
+#message-words .word-chip {
+  background: rgba(255,255,255,0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.bar-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-speak {
+  background: #43A047;
+  color: #fff;
+}
+
+#btn-clear {
+  background: #e53935;
+  color: #fff;
+}
+
+#btn-backspace {
+  background: #FF8F00;
+  color: #fff;
+}
+
+/* ── Grid ── */
+#grid-container {
+  flex: 1;
+  padding: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#folder-label {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #555;
+  padding: 2px 0 6px;
+  display: none;
+}
+
+#grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.cell {
+  border: none;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  gap: 4px;
+  font-family: inherit;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.08s;
+  overflow: hidden;
+}
+
+.cell:active {
+  transform: scale(0.93);
+}
+
+.cell img {
+  max-width: 70%;
+  max-height: 60%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.cell .cell-label {
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.cell .cell-big-text {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: #333;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cell.folder-btn::after {
+  content: '📁';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.8rem;
+}
+
+/* Fitzgerald Key colors */
+.cell[data-color="yellow"] { background: var(--color-yellow); }
+.cell[data-color="green"]  { background: var(--color-green); }
+.cell[data-color="red"]    { background: var(--color-red); }
+.cell[data-color="blue"]   { background: var(--color-blue); }
+.cell[data-color="pink"]   { background: var(--color-pink); }
+.cell[data-color="orange"] { background: var(--color-orange); }
+.cell[data-color="home"]   { background: var(--color-home); }
+
+/* ── Bottom Bar ── */
+#bottom-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 12px;
+  background: #e8e8e8;
+  flex-shrink: 0;
+}
+
+#btn-settings {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+#btn-settings:active { background: #ccc; }
+
+/* ── Settings Modal ── */
+#settings-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+#settings-overlay.open { display: flex; }
+
+#settings-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+#settings-panel h2 {
+  margin-bottom: 16px;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.settings-section {
+  margin-bottom: 18px;
+}
+
+.settings-section h3 {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.settings-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.settings-btn:active { background: #eee; }
+.settings-btn.active { border-color: var(--bar-bg); background: #ede7f6; }
+
+#btn-close-settings {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--bar-bg);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* ── Edit Button Modal ── */
+#edit-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#edit-overlay.open { display: flex; }
+
+#edit-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 380px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+#edit-panel h2 {
+  margin-bottom: 14px;
+  font-size: 1.2rem;
+}
+
+#edit-panel label {
+  display: block;
+  font-weight: 600;
+  margin: 10px 0 4px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+#edit-panel input[type="text"],
+#edit-panel select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+#edit-image-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  display: none;
+  margin: 6px 0;
+}
+
+.edit-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.edit-btn-row button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#btn-edit-save { background: #43A047; color: #fff; }
+#btn-edit-cancel { background: #999; color: #fff; }
+#btn-edit-remove { background: #e53935; color: #fff; }
+
+#edit-image-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+#edit-image-btns button {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+#toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Message Bar -->
+<div id="message-bar">
+  <div id="message-words"></div>
+  <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
+  <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
+  <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
+</div>
+
+<!-- Grid -->
+<div id="grid-container">
+  <div id="folder-label"></div>
+  <div id="grid"></div>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bottom-bar">
+  <button id="btn-settings" aria-label="Settings">⚙️</button>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-overlay">
+  <div id="settings-panel">
+    <h2>Settings</h2>
+    <div class="settings-section">
+      <h3>Edit Buttons</h3>
+      <button class="settings-btn" id="btn-toggle-edit">Tap a button on the board to edit it</button>
+    </div>
+    <div class="settings-section">
+      <h3>Add Button</h3>
+      <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+    </div>
+    <div class="settings-section">
+      <h3>Voice</h3>
+      <button class="settings-btn" id="btn-voice-slower">Slower voice</button>
+      <button class="settings-btn" id="btn-voice-faster">Faster voice</button>
+      <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
+    </div>
+    <div class="settings-section">
+      <h3>Data</h3>
+      <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
+    </div>
+    <button id="btn-close-settings">Done</button>
+  </div>
+</div>
+
+<!-- Edit Button Modal -->
+<div id="edit-overlay">
+  <div id="edit-panel">
+    <h2>Edit Button</h2>
+    <label for="edit-label">Word / Label</label>
+    <input type="text" id="edit-label">
+    <label for="edit-color">Color Category</label>
+    <select id="edit-color">
+      <option value="yellow">Yellow — Pronouns</option>
+      <option value="green">Green — Verbs</option>
+      <option value="red">Red — Negation/Stop</option>
+      <option value="blue">Blue — Descriptors</option>
+      <option value="pink">Pink — Social</option>
+      <option value="orange">Orange — Nouns</option>
+    </select>
+    <label>Image</label>
+    <img id="edit-image-preview" alt="preview">
+    <div id="edit-image-btns">
+      <button id="btn-edit-upload">Upload Image</button>
+      <button id="btn-edit-clear-img">Remove Image</button>
+    </div>
+    <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+    <div class="edit-btn-row">
+      <button id="btn-edit-cancel">Cancel</button>
+      <button id="btn-edit-remove">Delete</button>
+      <button id="btn-edit-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── Default Vocabulary ──
+const DEFAULT_BUTTONS = [
+  // Home grid
+  { id: 'i',       label: 'I',       color: 'yellow', type: 'core',   folderId: null, position: 0 },
+  { id: 'want',    label: 'want',    color: 'green',  type: 'core',   folderId: null, position: 1 },
+  { id: 'more',    label: 'more',    color: 'blue',   type: 'core',   folderId: null, position: 2 },
+  { id: 'help',    label: 'help',    color: 'green',  type: 'core',   folderId: null, position: 3 },
+  { id: 'go',      label: 'go',      color: 'green',  type: 'core',   folderId: null, position: 4 },
+  { id: 'stop',    label: 'stop',    color: 'red',    type: 'core',   folderId: null, position: 5 },
+  { id: 'like',    label: 'like',    color: 'green',  type: 'core',   folderId: null, position: 6 },
+  { id: 'no',      label: 'no',      color: 'red',    type: 'core',   folderId: null, position: 7 },
+  { id: 'yes',     label: 'yes',     color: 'green',  type: 'core',   folderId: null, position: 8 },
+  { id: 'hi',      label: 'hi',      color: 'pink',   type: 'core',   folderId: null, position: 9 },
+  { id: 'bye',     label: 'bye',     color: 'pink',   type: 'core',   folderId: null, position: 10 },
+  { id: 'please',  label: 'please',  color: 'pink',   type: 'core',   folderId: null, position: 11 },
+  { id: 'happy',   label: 'happy',   color: 'blue',   type: 'core',   folderId: null, position: 12 },
+  { id: 'sad',     label: 'sad',     color: 'blue',   type: 'core',   folderId: null, position: 13 },
+  { id: 'folder-food',   label: 'Food',   color: 'orange', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-people', label: 'People', color: 'orange', type: 'folder', folderId: null, position: 15 },
+
+  // Food folder
+  { id: 'apple',   label: 'apple',   color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
+  { id: 'banana',  label: 'banana',  color: 'orange', type: 'fringe', folderId: 'food', position: 1 },
+  { id: 'cookie',  label: 'cookie',  color: 'orange', type: 'fringe', folderId: 'food', position: 2 },
+  { id: 'milk',    label: 'milk',    color: 'orange', type: 'fringe', folderId: 'food', position: 3 },
+  { id: 'water',   label: 'water',   color: 'orange', type: 'fringe', folderId: 'food', position: 4 },
+  { id: 'juice',   label: 'juice',   color: 'orange', type: 'fringe', folderId: 'food', position: 5 },
+  { id: 'bread',   label: 'bread',   color: 'orange', type: 'fringe', folderId: 'food', position: 6 },
+  { id: 'cheese',  label: 'cheese',  color: 'orange', type: 'fringe', folderId: 'food', position: 7 },
+  { id: 'cracker', label: 'cracker', color: 'orange', type: 'fringe', folderId: 'food', position: 8 },
+  { id: 'pizza',   label: 'pizza',   color: 'orange', type: 'fringe', folderId: 'food', position: 9 },
+  { id: 'chicken', label: 'chicken', color: 'orange', type: 'fringe', folderId: 'food', position: 10 },
+  { id: 'cereal',  label: 'cereal',  color: 'orange', type: 'fringe', folderId: 'food', position: 11 },
+  { id: 'snack',   label: 'snack',   color: 'orange', type: 'fringe', folderId: 'food', position: 12 },
+  { id: 'hungry',  label: 'hungry',  color: 'blue',   type: 'fringe', folderId: 'food', position: 13 },
+  { id: 'yummy',   label: 'yummy',   color: 'blue',   type: 'fringe', folderId: 'food', position: 14 },
+
+  // People folder
+  { id: 'mom',     label: 'mom',     color: 'orange', type: 'fringe', folderId: 'people', position: 0 },
+  { id: 'dad',     label: 'dad',     color: 'orange', type: 'fringe', folderId: 'people', position: 1 },
+  { id: 'sister',  label: 'sister',  color: 'orange', type: 'fringe', folderId: 'people', position: 2 },
+  { id: 'brother', label: 'brother', color: 'orange', type: 'fringe', folderId: 'people', position: 3 },
+  { id: 'grandma', label: 'grandma', color: 'orange', type: 'fringe', folderId: 'people', position: 4 },
+  { id: 'grandpa', label: 'grandpa', color: 'orange', type: 'fringe', folderId: 'people', position: 5 },
+  { id: 'teacher', label: 'teacher', color: 'orange', type: 'fringe', folderId: 'people', position: 6 },
+  { id: 'friend',  label: 'friend',  color: 'orange', type: 'fringe', folderId: 'people', position: 7 },
+  { id: 'baby',    label: 'baby',    color: 'orange', type: 'fringe', folderId: 'people', position: 8 },
+  { id: 'dog',     label: 'dog',     color: 'orange', type: 'fringe', folderId: 'people', position: 9 },
+  { id: 'cat',     label: 'cat',     color: 'orange', type: 'fringe', folderId: 'people', position: 10 },
+];
+
+// ── State ──
+let buttons = [];
+let currentFolder = null;  // null = home grid
+let editMode = false;
+let editingButtonId = null;
+let messageWords = [];
+let speechRate = 0.85;
+const DB_NAME = 'aac-board';
+const DB_VERSION = 1;
+const STORE_BUTTONS = 'buttons';
+const STORE_IMAGES = 'images';
+
+// ── IndexedDB ──
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_BUTTONS)) {
+        db.createObjectStore(STORE_BUTTONS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_IMAGES)) {
+        db.createObjectStore(STORE_IMAGES);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function loadButtons() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readonly');
+    const store = tx.objectStore(STORE_BUTTONS);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveButton(btn) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readwrite');
+    tx.objectStore(STORE_BUTTONS).put(btn);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteButton(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readwrite');
+    tx.objectStore(STORE_BUTTONS).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function saveImage(buttonId, blob) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readwrite');
+    tx.objectStore(STORE_IMAGES).put(blob, buttonId);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadImage(buttonId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readonly');
+    const req = tx.objectStore(STORE_IMAGES).get(buttonId);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function deleteImage(buttonId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readwrite');
+    tx.objectStore(STORE_IMAGES).delete(buttonId);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function clearAllData() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE_BUTTONS, STORE_IMAGES], 'readwrite');
+    tx.objectStore(STORE_BUTTONS).clear();
+    tx.objectStore(STORE_IMAGES).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── Init ──
+async function init() {
+  const saved = await loadButtons();
+  if (saved.length > 0) {
+    buttons = saved;
+  } else {
+    buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  }
+  renderGrid();
+  updateSpeedDisplay();
+  initSpeech();
+}
+
+// ── Speech ──
+let voices = [];
+function initSpeech() {
+  if (!('speechSynthesis' in window)) return;
+  const load = () => {
+    voices = speechSynthesis.getVoices();
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+
+function getVoice() {
+  // Prefer a female English voice
+  const prefs = [
+    v => v.lang.startsWith('en') && /female|samantha|karen|fiona|victoria|moira/i.test(v.name),
+    v => v.lang.startsWith('en') && v.localService,
+    v => v.lang.startsWith('en'),
+  ];
+  for (const test of prefs) {
+    const found = voices.find(test);
+    if (found) return found;
+  }
+  return voices[0] || null;
+}
+
+function speak(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = getVoice();
+  if (voice) utter.voice = voice;
+  utter.rate = speechRate;
+  utter.pitch = 1.0;
+  speechSynthesis.speak(utter);
+}
+
+// ── Render Grid ──
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const folderLabel = document.getElementById('folder-label');
+  grid.innerHTML = '';
+
+  let items;
+  if (currentFolder) {
+    items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
+    folderLabel.textContent = currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
+    folderLabel.style.display = 'block';
+    // Add Home button at end
+    const homeBtn = document.createElement('button');
+    homeBtn.className = 'cell';
+    homeBtn.setAttribute('data-color', 'home');
+    homeBtn.innerHTML = '<span class="cell-big-text">⬅</span><span class="cell-label">Home</span>';
+    homeBtn.addEventListener('click', () => {
+      currentFolder = null;
+      renderGrid();
+    });
+
+    items.forEach(btn => grid.appendChild(createCell(btn)));
+    grid.appendChild(homeBtn);
+  } else {
+    items = buttons.filter(b => b.folderId === null).sort((a, b) => a.position - b.position);
+    folderLabel.style.display = 'none';
+    items.forEach(btn => grid.appendChild(createCell(btn)));
+  }
+
+  // Set grid rows dynamically
+  const totalCells = grid.children.length;
+  const rows = Math.ceil(totalCells / 4);
+  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+}
+
+function createCell(btn) {
+  const cell = document.createElement('button');
+  cell.className = 'cell';
+  if (btn.type === 'folder') cell.classList.add('folder-btn');
+  cell.setAttribute('data-color', btn.color);
+  cell.setAttribute('data-id', btn.id);
+
+  // Async load image
+  loadImage(btn.id).then(blob => {
+    if (blob) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(blob);
+      img.alt = btn.label;
+      cell.prepend(img);
+      // Remove big text if present
+      const big = cell.querySelector('.cell-big-text');
+      if (big) big.remove();
+    }
+  });
+
+  // If no image, show big text
+  const bigText = document.createElement('span');
+  bigText.className = 'cell-big-text';
+  bigText.textContent = btn.label;
+  cell.appendChild(bigText);
+
+  const label = document.createElement('span');
+  label.className = 'cell-label';
+  label.textContent = btn.label;
+  cell.appendChild(label);
+
+  cell.addEventListener('click', () => {
+    if (editMode) {
+      openEditModal(btn.id);
+      return;
+    }
+    if (btn.type === 'folder') {
+      const folderId = btn.id.replace('folder-', '');
+      currentFolder = folderId;
+      renderGrid();
+      return;
+    }
+    // Speak word and add to message bar
+    speak(btn.label);
+    addWordToMessage(btn.label);
+  });
+
+  return cell;
+}
+
+// ── Message Bar ──
+function addWordToMessage(word) {
+  messageWords.push(word);
+  renderMessage();
+}
+
+function renderMessage() {
+  const container = document.getElementById('message-words');
+  container.innerHTML = '';
+  messageWords.forEach(w => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.textContent = w;
+    container.appendChild(chip);
+  });
+}
+
+document.getElementById('btn-speak').addEventListener('click', () => {
+  if (messageWords.length === 0) return;
+  speak(messageWords.join(' '));
+});
+
+document.getElementById('btn-clear').addEventListener('click', () => {
+  messageWords = [];
+  renderMessage();
+});
+
+document.getElementById('btn-backspace').addEventListener('click', () => {
+  messageWords.pop();
+  renderMessage();
+});
+
+// ── Settings ──
+document.getElementById('btn-settings').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.add('open');
+});
+
+document.getElementById('btn-close-settings').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+  editMode = false;
+  document.getElementById('btn-toggle-edit').classList.remove('active');
+  document.getElementById('btn-toggle-edit').textContent = 'Tap a button on the board to edit it';
+});
+
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('btn-close-settings').click();
+  }
+});
+
+document.getElementById('btn-toggle-edit').addEventListener('click', () => {
+  editMode = !editMode;
+  const btn = document.getElementById('btn-toggle-edit');
+  if (editMode) {
+    btn.classList.add('active');
+    btn.textContent = 'Edit mode ON — tap a button to edit';
+    document.getElementById('settings-overlay').classList.remove('open');
+    showToast('Edit mode: tap any button to edit it');
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = 'Tap a button on the board to edit it';
+  }
+});
+
+document.getElementById('btn-add-button').addEventListener('click', () => {
+  const folder = currentFolder;
+  const existing = buttons.filter(b => b.folderId === folder);
+  const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
+  const newId = 'btn-' + Date.now();
+  const newBtn = {
+    id: newId,
+    label: 'new',
+    color: 'orange',
+    type: 'fringe',
+    folderId: folder,
+    position: nextPos,
+  };
+  buttons.push(newBtn);
+  saveButton(newBtn).then(() => {
+    renderGrid();
+    document.getElementById('settings-overlay').classList.remove('open');
+    editMode = true;
+    openEditModal(newId);
+  });
+});
+
+document.getElementById('btn-voice-slower').addEventListener('click', () => {
+  speechRate = Math.max(0.3, speechRate - 0.15);
+  updateSpeedDisplay();
+  speak('This is how I sound');
+});
+
+document.getElementById('btn-voice-faster').addEventListener('click', () => {
+  speechRate = Math.min(1.5, speechRate + 0.15);
+  updateSpeedDisplay();
+  speak('This is how I sound');
+});
+
+function updateSpeedDisplay() {
+  const display = document.getElementById('voice-speed-display');
+  if (speechRate < 0.6) display.textContent = 'Speed: slow';
+  else if (speechRate < 0.9) display.textContent = 'Speed: normal';
+  else if (speechRate < 1.2) display.textContent = 'Speed: fast';
+  else display.textContent = 'Speed: very fast';
+}
+
+document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
+  if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
+  await clearAllData();
+  buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  currentFolder = null;
+  renderGrid();
+  showToast('Reset to defaults');
+});
+
+// ── Edit Modal ──
+function openEditModal(buttonId) {
+  editingButtonId = buttonId;
+  const btn = buttons.find(b => b.id === buttonId);
+  if (!btn) return;
+
+  document.getElementById('edit-label').value = btn.label;
+  document.getElementById('edit-color').value = btn.color;
+
+  const preview = document.getElementById('edit-image-preview');
+  preview.style.display = 'none';
+  loadImage(buttonId).then(blob => {
+    if (blob) {
+      preview.src = URL.createObjectURL(blob);
+      preview.style.display = 'block';
+    }
+  });
+
+  document.getElementById('edit-overlay').classList.add('open');
+}
+
+document.getElementById('btn-edit-cancel').addEventListener('click', () => {
+  document.getElementById('edit-overlay').classList.remove('open');
+  editingButtonId = null;
+});
+
+document.getElementById('edit-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('btn-edit-cancel').click();
+  }
+});
+
+document.getElementById('btn-edit-save').addEventListener('click', async () => {
+  const btn = buttons.find(b => b.id === editingButtonId);
+  if (!btn) return;
+
+  btn.label = document.getElementById('edit-label').value.trim() || btn.label;
+  btn.color = document.getElementById('edit-color').value;
+
+  await saveButton(btn);
+  renderGrid();
+  document.getElementById('edit-overlay').classList.remove('open');
+  editingButtonId = null;
+  showToast('Button saved');
+});
+
+document.getElementById('btn-edit-remove').addEventListener('click', async () => {
+  if (!confirm('Delete this button?')) return;
+  buttons = buttons.filter(b => b.id !== editingButtonId);
+  await deleteButton(editingButtonId);
+  await deleteImage(editingButtonId);
+  renderGrid();
+  document.getElementById('edit-overlay').classList.remove('open');
+  editingButtonId = null;
+  showToast('Button deleted');
+});
+
+document.getElementById('btn-edit-upload').addEventListener('click', () => {
+  document.getElementById('edit-image-input').click();
+});
+
+document.getElementById('edit-image-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await saveImage(editingButtonId, file);
+  const preview = document.getElementById('edit-image-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  e.target.value = '';
+});
+
+document.getElementById('btn-edit-clear-img').addEventListener('click', async () => {
+  await deleteImage(editingButtonId);
+  const preview = document.getElementById('edit-image-preview');
+  preview.style.display = 'none';
+  preview.src = '';
+  renderGrid();
+  showToast('Image removed');
+});
+
+// ── Toast ──
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ── Register Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+
+// ── Start ──
+init();
+</script>
+</body>
+</html>
