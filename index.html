@@ -425,6 +425,8 @@ body {
     </div>
     <div class="settings-section">
       <h3>Voice</h3>
+      <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
+      <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
       <button class="settings-btn" id="btn-voice-slower">Slower voice</button>
       <button class="settings-btn" id="btn-voice-faster">Faster voice</button>
       <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
@@ -639,39 +641,79 @@ async function init() {
 
 // ── Speech ──
 let voices = [];
+let selectedVoiceName = localStorage.getItem('aac-voice') || '';
+
 function initSpeech() {
   if (!('speechSynthesis' in window)) return;
   const load = () => {
     voices = speechSynthesis.getVoices();
+    populateVoiceSelect();
   };
   load();
   speechSynthesis.onvoiceschanged = load;
 }
 
-function getVoice() {
-  // Prefer an adult female English voice (30s-sounding)
-  // Priority order: best natural-sounding female voices by platform
+function getUSVoices() {
+  return voices.filter(v => v.lang === 'en-US');
+}
+
+function populateVoiceSelect() {
+  const select = document.getElementById('voice-select');
+  const usVoices = getUSVoices();
+  select.innerHTML = '';
+  if (usVoices.length === 0) {
+    const opt = document.createElement('option');
+    opt.textContent = 'No US English voices found';
+    select.appendChild(opt);
+    return;
+  }
+  usVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = v.name;
+    if (v.name === selectedVoiceName) opt.selected = true;
+    select.appendChild(opt);
+  });
+  // If no saved selection, auto-select the best default
+  if (!selectedVoiceName || !usVoices.find(v => v.name === selectedVoiceName)) {
+    const best = pickDefaultVoice(usVoices);
+    if (best) {
+      select.value = best.name;
+      selectedVoiceName = best.name;
+      localStorage.setItem('aac-voice', best.name);
+    }
+  }
+}
+
+function pickDefaultVoice(usVoices) {
+  // Prefer an adult female US English voice
   const prefs = [
-    // iOS/macOS premium female voices
-    v => v.lang.startsWith('en') && /samantha\s*\(enhanced\)|samantha\s*\(premium\)/i.test(v.name),
-    // Google / Android natural female voices
-    v => v.lang.startsWith('en') && /google.*female|google uk english female/i.test(v.name),
-    // Windows female voices (Zira = adult female)
-    v => v.lang.startsWith('en') && /zira|hazel|susan|jenny/i.test(v.name),
-    // macOS / iOS standard female voices
-    v => v.lang.startsWith('en') && /samantha|karen|moira|fiona|victoria|tessa|serena/i.test(v.name),
-    // Any voice with "female" in the name
-    v => v.lang.startsWith('en') && /female/i.test(v.name),
-    // Fallback: any English local voice
-    v => v.lang.startsWith('en') && v.localService,
-    // Fallback: any English voice
-    v => v.lang.startsWith('en'),
+    v => /samantha\s*\(enhanced\)|samantha\s*\(premium\)/i.test(v.name),
+    v => /google.*us.*female/i.test(v.name),
+    v => /zira|jenny/i.test(v.name),
+    v => /samantha/i.test(v.name),
+    v => /female/i.test(v.name),
   ];
   for (const test of prefs) {
-    const found = voices.find(test);
+    const found = usVoices.find(test);
     if (found) return found;
   }
-  return voices[0] || null;
+  return usVoices[0] || null;
+}
+
+document.getElementById('voice-select').addEventListener('change', e => {
+  selectedVoiceName = e.target.value;
+  localStorage.setItem('aac-voice', selectedVoiceName);
+  speak('This is how I sound');
+});
+
+function getVoice() {
+  if (selectedVoiceName) {
+    const match = voices.find(v => v.name === selectedVoiceName);
+    if (match) return match;
+  }
+  const usVoices = getUSVoices();
+  return pickDefaultVoice(usVoices) || voices[0] || null;
 }
 
 function speak(text) {
