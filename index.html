@@ -2928,13 +2928,12 @@ function renderGrid() {
       renderGrid();
     });
 
+    grid.appendChild(homeBtn);
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${i * 25}ms`;
+      c.style.animationDelay = `${(i + 1) * 25}ms`;
       grid.appendChild(c);
     });
-    homeBtn.style.animationDelay = `${items.length * 25}ms`;
-    grid.appendChild(homeBtn);
   } else {
     items = buttons.filter(b => b.folderId === null).sort((a, b) => a.position - b.position);
     folderLabel.style.display = 'none';
