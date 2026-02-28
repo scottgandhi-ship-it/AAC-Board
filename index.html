@@ -2806,10 +2806,10 @@ async function clearActiveSchedule() {
 
 // ── Init ──
 async function init() {
-  const saved = await loadButtons();
-  if (saved.length > 0) {
-    buttons = saved;
-  } else {
+  try {
+    const saved = await loadButtons();
+    buttons = saved.length > 0 ? saved : JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  } catch {
     buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
   }
   renderGrid();
