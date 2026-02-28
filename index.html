@@ -186,25 +186,7 @@ body {
 .cell[data-color="orange"] { background: var(--color-orange); }
 .cell[data-color="home"]   { background: var(--color-home); }
 
-/* ── Bottom Bar ── */
-#bottom-bar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 6px 12px;
-  background: #e8e8e8;
-  flex-shrink: 0;
-}
-
-#btn-settings {
-  background: none;
-  border: none;
-  font-size: 1.6rem;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-
-#btn-settings:active { background: #ccc; }
+/* (bottom-bar replaced by #tab-bar -- see Tab Bar section below) */
 
 /* ── Settings Modal ── */
 #settings-overlay {
@@ -388,40 +370,1397 @@ body {
 }
 
 #toast.show { opacity: 1; }
+
+/* ── App Header ── */
+#app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 40px;
+  background: #fff;
+  border-bottom: 2px solid transparent;
+  flex-shrink: 0;
+  padding: 0 12px;
+}
+
+#app-header.parent-active {
+  border-bottom-color: #FF8F00;
+}
+
+#app-header-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #555;
+}
+
+#btn-lock {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-lock:active { background: #eee; }
+
+#btn-parent-settings {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-parent-settings:active { background: #eee; }
+
+/* ── Views ── */
+.view {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.view.active {
+  display: flex;
+}
+
+/* ── Tab Bar ── */
+#tab-bar {
+  display: flex;
+  background: #e8e8e8;
+  flex-shrink: 0;
+  border-top: 1px solid #d0d0d0;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 0;
+  min-height: 56px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #888;
+  position: relative;
+}
+
+.tab-btn:active { background: #d8d8d8; }
+
+.tab-btn.active {
+  color: var(--bar-bg);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: var(--bar-bg);
+  border-radius: 0 0 3px 3px;
+}
+
+.tab-btn svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab-btn.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.tab-label {
+  line-height: 1;
+}
+
+/* ── Placeholder Views ── */
+.view-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+.view-placeholder-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+
+.view-placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.view-placeholder-sub {
+  font-size: 0.9rem;
+}
+
+/* ── Reward Tracker ── */
+#rewards-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#rewards-track-tabs {
+  display: none;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+#rewards-track-tabs.visible {
+  display: flex;
+}
+
+.track-tab {
+  padding: 6px 14px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  background: #fafafa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: inherit;
+  min-height: 36px;
+}
+
+.track-tab.active {
+  border-color: var(--bar-bg);
+  background: #ede7f6;
+  color: var(--bar-bg);
+}
+
+#rewards-path-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  position: relative;
+}
+
+#rewards-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  text-align: center;
+  flex: 1;
+}
+
+#rewards-empty-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+#rewards-empty-sub {
+  font-size: 0.9rem;
+}
+
+.path-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+  padding: 20px 0;
+}
+
+.stone {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ccc;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.stone.filled {
+  border-color: #FFB300;
+  background: #FFF8E1;
+  color: #FFB300;
+  box-shadow: 0 0 8px rgba(255, 179, 0, 0.3);
+}
+
+.stone.filled::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #FFB300;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.stone.animate-fill {
+  animation: stoneFill 0.4s ease;
+}
+
+@keyframes stoneFill {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.path-connector {
+  width: 20px;
+  height: 3px;
+  background: #ddd;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.path-connector.filled {
+  background: #FFB300;
+}
+
+.reward-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C4DFF, #536DFE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3);
+  animation: rewardPulse 2s ease-in-out infinite;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.reward-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.reward-icon.earned {
+  animation: none;
+  box-shadow: 0 4px 20px rgba(124, 77, 255, 0.5);
+}
+
+@keyframes rewardPulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3); }
+  50% { box-shadow: 0 4px 20px rgba(124, 77, 255, 0.5); }
+}
+
+#rewards-task-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  text-align: center;
+  margin-top: 8px;
+}
+
+#rewards-progress-text {
+  font-size: 0.9rem;
+  color: #888;
+  text-align: center;
+  margin-top: 4px;
+}
+
+#btn-did-it {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 12px;
+  padding: 18px;
+  border: none;
+  border-radius: 16px;
+  background: #43A047;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  min-height: 64px;
+  transition: opacity 0.2s, transform 0.08s;
+}
+
+#btn-did-it:active { transform: scale(0.96); }
+#btn-did-it.cooldown { opacity: 0.5; pointer-events: none; }
+
+/* Reward-active / timer state */
+#reward-active-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  padding: 32px;
+  text-align: center;
+}
+
+#reward-active-screen.visible { display: flex; }
+
+#reward-active-label {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #333;
+}
+
+#reward-timer-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--bar-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+#reward-timer-status {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #888;
+}
+
+/* Parent mode reward controls */
+#rewards-parent-controls {
+  display: none;
+  gap: 8px;
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+.parent-mode #rewards-parent-controls { display: flex; }
+
+.rewards-parent-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.rewards-parent-btn:active { background: #eee; }
+
+/* Celebration overlay */
+#celebration-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(255,255,255,0.95);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+#celebration-overlay.visible { display: flex; }
+
+#celebration-reward {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C4DFF, #536DFE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #fff;
+  font-weight: 800;
+  animation: celebrationPop 0.6s ease;
+  overflow: hidden;
+}
+
+#celebration-reward img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+#celebration-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #333;
+}
+
+@keyframes celebrationPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  z-index: 251;
+  pointer-events: none;
+  animation: confettiFall 2.5s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stone.animate-fill { animation: none; }
+  @keyframes rewardPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3); } }
+  @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
+  .confetti-piece { animation: none; display: none; }
+}
+
+/* ── Reward Config Modal ── */
+#reward-config-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#reward-config-overlay.open { display: flex; }
+
+#reward-config-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+#reward-config-panel h2 {
+  margin-bottom: 14px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+#reward-config-panel label {
+  display: block;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+#reward-config-panel input[type="text"],
+#reward-config-panel select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stepper-btn {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.stepper-btn:active { background: #eee; }
+
+#stepper-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  min-width: 40px;
+  text-align: center;
+}
+
+.timer-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #ccc;
+  border-radius: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--bar-bg);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+
+#timer-duration-row {
+  display: none;
+  margin-top: 8px;
+}
+
+#timer-duration-row.visible { display: block; }
+
+#reward-image-preview {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  display: none;
+  margin: 6px 0;
+}
+
+#reward-config-image-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+#reward-config-image-btns button {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.reward-config-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.reward-config-btn-row button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+#btn-reward-save { background: #43A047; color: #fff; }
+#btn-reward-cancel { background: #999; color: #fff; }
+#btn-reward-delete { background: #e53935; color: #fff; }
+
+/* ── Visual Schedules ── */
+#schedule-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#schedule-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+#schedule-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+#schedule-progress-text {
+  font-size: 0.8rem;
+  color: #888;
+  margin-left: 8px;
+}
+
+#schedule-steps-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 12px 12px;
+  scroll-behavior: smooth;
+}
+
+.sched-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: opacity 0.3s, transform 0.2s;
+  min-height: 72px;
+  border-left: 4px solid transparent;
+}
+
+.sched-step.current {
+  border-left-color: var(--bar-bg);
+  background: #EDE7F6;
+  min-height: 88px;
+  box-shadow: 0 2px 8px rgba(92,107,192,0.25);
+}
+
+.sched-step.done {
+  opacity: 0.45;
+  background: #f5f5f5;
+}
+
+.sched-step.done .sched-step-check {
+  display: flex;
+}
+
+.sched-step-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.sched-step.current .sched-step-img {
+  width: 60px;
+  height: 60px;
+}
+
+.sched-step-img svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sched-step-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.sched-step-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.sched-step.current .sched-step-label {
+  font-size: 1.15rem;
+  color: #333;
+}
+
+.sched-step-check {
+  display: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #43A047;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sched-step-check svg {
+  width: 16px;
+  height: 16px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+
+.sched-step-tap-hint {
+  display: none;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.sched-step.current .sched-step-tap-hint { display: block; }
+
+/* Schedule empty / all-done states */
+#schedule-empty,
+#schedule-all-done {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+#schedule-all-done { color: #333; }
+
+.schedule-done-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #43A047;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-done-icon svg {
+  width: 40px;
+  height: 40px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+
+/* Schedule parent controls */
+#schedule-parent-controls {
+  display: none;
+  gap: 8px;
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+.parent-mode #schedule-parent-controls { display: flex; }
+
+.sched-parent-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.sched-parent-btn:active { background: #eee; }
+
+/* ── Template Editor Modal ── */
+#tmpl-editor-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20px;
+  overflow-y: auto;
+}
+
+#tmpl-editor-overlay.open { display: flex; }
+
+#tmpl-editor-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+#tmpl-editor-panel h2 {
+  margin-bottom: 14px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+#tmpl-editor-panel label {
+  display: block;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+#tmpl-name-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+#tmpl-steps-list {
+  margin: 8px 0;
+}
+
+.tmpl-step-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  margin-bottom: 6px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.tmpl-step-img {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+}
+
+.tmpl-step-img svg, .tmpl-step-img img {
+  width: 100%;
+  height: 100%;
+}
+
+.tmpl-step-img img { object-fit: cover; }
+
+.tmpl-step-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.tmpl-step-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  padding: 0;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.tmpl-step-btn:active { background: #eee; }
+
+#btn-tmpl-add-step {
+  width: 100%;
+  padding: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+#btn-tmpl-add-step:active { background: #f5f5f5; }
+
+.tmpl-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tmpl-btn-row button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+#btn-tmpl-save { background: #43A047; color: #fff; }
+#btn-tmpl-cancel { background: #999; color: #fff; }
+#btn-tmpl-delete { background: #e53935; color: #fff; }
+
+/* ── Activity Picker Modal ── */
+#activity-picker-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 210;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 30px;
+  overflow-y: auto;
+}
+
+#activity-picker-overlay.open { display: flex; }
+
+#activity-picker-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+#activity-picker-panel h2 {
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.picker-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.picker-tab {
+  flex: 1;
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+}
+
+.picker-tab.active {
+  border-color: var(--bar-bg);
+  background: #ede7f6;
+  color: var(--bar-bg);
+}
+
+.picker-category-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #888;
+  margin: 12px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 70px;
+}
+
+.picker-item:active { background: #f0f0f0; }
+
+.picker-item-img {
+  width: 36px;
+  height: 36px;
+}
+
+.picker-item-img svg {
+  width: 100%;
+  height: 100%;
+}
+
+.picker-item-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #555;
+  text-align: center;
+  line-height: 1.1;
+}
+
+#custom-step-section {
+  display: none;
+}
+
+#custom-step-section.visible { display: block; }
+
+#custom-step-label-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  margin-bottom: 8px;
+}
+
+#custom-step-image-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#custom-step-image-btns button {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+#custom-step-preview {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  display: none;
+  margin-bottom: 8px;
+}
+
+#btn-add-custom-step {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #43A047;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#btn-close-picker {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #999;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 12px;
+}
+
+/* Template list modal */
+#tmpl-list-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#tmpl-list-overlay.open { display: flex; }
+
+#tmpl-list-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 92%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+#tmpl-list-panel h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.tmpl-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  background: #fafafa;
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.tmpl-list-item:active { background: #eee; }
+
+.tmpl-list-item-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.tmpl-list-item-count {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.tmpl-list-empty {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-size: 0.95rem;
+}
+
+#btn-close-tmpl-list {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #999;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+}
 </style>
 </head>
 <body>
 
-<!-- Message Bar -->
-<div id="message-bar">
-  <div id="message-words"></div>
-  <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
-  <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
-  <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
+<!-- App Header -->
+<div id="app-header">
+  <button id="btn-parent-settings" aria-label="Settings">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+  <span id="app-header-title">Talk</span>
+  <button id="btn-lock" aria-label="Unlock parent mode">
+    <svg id="lock-icon-locked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <svg id="lock-icon-unlocked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+  </button>
 </div>
 
-<!-- Grid -->
-<div id="grid-container">
-  <div id="folder-label"></div>
-  <div id="grid"></div>
+<!-- Talk View (AAC Board) -->
+<div id="view-talk" class="view active" role="tabpanel" aria-labelledby="tab-talk">
+  <div id="message-bar">
+    <div id="message-words"></div>
+    <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
+    <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
+    <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
+  </div>
+  <div id="grid-container">
+    <div id="folder-label"></div>
+    <div id="grid"></div>
+  </div>
 </div>
 
-<!-- Bottom Bar -->
-<div id="bottom-bar">
-  <button id="btn-settings" aria-label="Settings">⚙️</button>
+<!-- Schedule View -->
+<div id="view-schedule" class="view" role="tabpanel" aria-labelledby="tab-schedule">
+  <div id="schedule-content">
+    <div id="schedule-header-bar">
+      <span id="schedule-name"></span>
+      <span id="schedule-progress-text" aria-live="polite"></span>
+    </div>
+    <div id="schedule-steps-list"></div>
+    <div id="schedule-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <div style="font-size:1.1rem;font-weight:600;">No schedule for today</div>
+      <div style="font-size:0.9rem;">Unlock parent mode to start one</div>
+    </div>
+    <div id="schedule-all-done">
+      <div class="schedule-done-icon">
+        <svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+      </div>
+      <div style="font-size:1.6rem;font-weight:800;">All Done!</div>
+      <div id="schedule-done-msg" style="font-size:1rem;color:#555;"></div>
+    </div>
+    <div id="schedule-parent-controls">
+      <button class="sched-parent-btn" id="btn-start-schedule">Start Schedule</button>
+      <button class="sched-parent-btn" id="btn-edit-templates">Edit Templates</button>
+    </div>
+  </div>
 </div>
+
+<!-- Rewards View -->
+<div id="view-rewards" class="view" role="tabpanel" aria-labelledby="tab-rewards">
+  <div id="rewards-content">
+    <div id="rewards-track-tabs" role="tablist" aria-label="Reward tracks"></div>
+    <div id="rewards-path-area" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0">
+      <div id="rewards-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div id="rewards-empty-text">No reward tracks yet</div>
+        <div id="rewards-empty-sub">Unlock parent mode to create one</div>
+      </div>
+      <div id="rewards-path" style="display:none"></div>
+      <div id="rewards-task-label"></div>
+      <div id="rewards-progress-text" aria-live="polite"></div>
+    </div>
+    <div id="reward-active-screen">
+      <div id="reward-active-icon" class="reward-icon earned"></div>
+      <div id="reward-active-label"></div>
+      <div id="reward-timer-display" aria-live="polite"></div>
+      <div id="reward-timer-status"></div>
+    </div>
+    <div id="rewards-parent-controls">
+      <button class="rewards-parent-btn" id="btn-new-track">New Track</button>
+      <button class="rewards-parent-btn" id="btn-edit-track">Configure</button>
+      <button class="rewards-parent-btn" id="btn-reset-track">Reset</button>
+    </div>
+    <button id="btn-did-it" aria-label="Mark task complete">I did it!</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<nav id="tab-bar" role="tablist" aria-label="App navigation">
+  <button class="tab-btn active" id="tab-talk" role="tab" aria-selected="true" aria-controls="view-talk">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="tab-label">Talk</span>
+  </button>
+  <button class="tab-btn" id="tab-schedule" role="tab" aria-selected="false" aria-controls="view-schedule">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span class="tab-label">Schedule</span>
+  </button>
+  <button class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span class="tab-label">Rewards</span>
+  </button>
+</nav>
 
 <!-- Settings Modal -->
 <div id="settings-overlay">
   <div id="settings-panel">
     <h2>Settings</h2>
     <div class="settings-section">
-      <h3>Edit Buttons</h3>
-      <button class="settings-btn" id="btn-toggle-edit">Tap a button on the board to edit it</button>
-    </div>
-    <div class="settings-section">
-      <h3>Add Button</h3>
+      <h3>Buttons</h3>
       <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Tap any button on the board to edit it while parent mode is active.</p>
     </div>
     <div class="settings-section">
       <h3>Voice</h3>
@@ -467,6 +1806,112 @@ body {
       <button id="btn-edit-save">Save</button>
     </div>
   </div>
+</div>
+
+<!-- Reward Config Modal -->
+<div id="reward-config-overlay">
+  <div id="reward-config-panel">
+    <h2 id="reward-config-title">New Reward Track</h2>
+    <label for="reward-task-input">Task</label>
+    <input type="text" id="reward-task-input">
+    <label>Steps needed</label>
+    <div class="stepper-row">
+      <button class="stepper-btn" id="stepper-minus" aria-label="Decrease steps">-</button>
+      <span id="stepper-value">5</span>
+      <button class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
+    </div>
+    <label for="reward-label-input">Reward</label>
+    <input type="text" id="reward-label-input">
+    <label>Reward image</label>
+    <img id="reward-image-preview" alt="Reward preview">
+    <div id="reward-config-image-btns">
+      <button id="btn-reward-upload">Upload Image</button>
+      <button id="btn-reward-clear-img">Remove</button>
+    </div>
+    <input type="file" id="reward-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+    <label>Timer</label>
+    <div class="timer-toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" id="timer-toggle">
+        <span class="toggle-slider"></span>
+      </label>
+      <span style="font-size:0.9rem;color:#666;">Enable countdown timer</span>
+    </div>
+    <div id="timer-duration-row">
+      <label for="timer-duration-select">Duration</label>
+      <select id="timer-duration-select">
+        <option value="5">5 minutes</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="20">20 minutes</option>
+        <option value="30" selected>30 minutes</option>
+        <option value="45">45 minutes</option>
+        <option value="60">60 minutes</option>
+      </select>
+    </div>
+    <div class="reward-config-btn-row">
+      <button id="btn-reward-cancel">Cancel</button>
+      <button id="btn-reward-delete" style="display:none">Delete</button>
+      <button id="btn-reward-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Template List Modal -->
+<div id="tmpl-list-overlay">
+  <div id="tmpl-list-panel">
+    <h2 id="tmpl-list-title">Choose Schedule</h2>
+    <div id="tmpl-list-items"></div>
+    <button id="btn-close-tmpl-list">Cancel</button>
+  </div>
+</div>
+
+<!-- Template Editor Modal -->
+<div id="tmpl-editor-overlay">
+  <div id="tmpl-editor-panel">
+    <h2 id="tmpl-editor-title">New Schedule</h2>
+    <label for="tmpl-name-input">Schedule name</label>
+    <input type="text" id="tmpl-name-input">
+    <label>Steps</label>
+    <div id="tmpl-steps-list"></div>
+    <button id="btn-tmpl-add-step">+ Add Step</button>
+    <div class="tmpl-btn-row">
+      <button id="btn-tmpl-cancel">Cancel</button>
+      <button id="btn-tmpl-delete" style="display:none">Delete</button>
+      <button id="btn-tmpl-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Picker Modal -->
+<div id="activity-picker-overlay">
+  <div id="activity-picker-panel">
+    <h2>Add Step</h2>
+    <div class="picker-tabs">
+      <button class="picker-tab active" id="picker-tab-defaults">Defaults</button>
+      <button class="picker-tab" id="picker-tab-custom">Custom</button>
+    </div>
+    <div id="defaults-section"></div>
+    <div id="custom-step-section">
+      <label for="custom-step-label-input">Step name</label>
+      <input type="text" id="custom-step-label-input">
+      <label>Image</label>
+      <img id="custom-step-preview" alt="Custom step preview">
+      <div id="custom-step-image-btns">
+        <button id="btn-custom-step-upload">Upload Image</button>
+        <button id="btn-custom-step-clear">Remove</button>
+      </div>
+      <input type="file" id="custom-step-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+      <button id="btn-add-custom-step">Add Step</button>
+    </div>
+    <button id="btn-close-picker">Done</button>
+  </div>
+</div>
+
+<!-- Celebration Overlay -->
+<div id="celebration-overlay">
+  <div id="celebration-reward"></div>
+  <div id="celebration-text"></div>
 </div>
 
 <!-- Toast -->
@@ -527,14 +1972,25 @@ const DEFAULT_BUTTONS = [
 // ── State ──
 let buttons = [];
 let currentFolder = null;  // null = home grid
-let editMode = false;
+let parentMode = false;
 let editingButtonId = null;
 let messageWords = [];
 let speechRate = 0.85;
+let activeTab = 'talk';
+
+// ── Parent Mode ──
+let lockTaps = [];
+let parentAutoLockTimer = null;
+const PARENT_LOCK_TAP_COUNT = 3;
+const PARENT_LOCK_TAP_WINDOW = 2000;
+const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 const STORE_BUTTONS = 'buttons';
 const STORE_IMAGES = 'images';
+const STORE_REWARD_TRACKS = 'rewardTracks';
+const STORE_SCHED_TEMPLATES = 'scheduleTemplates';
+const STORE_ACTIVE_SCHED = 'activeSchedule';
 
 // ── IndexedDB ──
 function openDB() {
@@ -547,6 +2003,15 @@ function openDB() {
       }
       if (!db.objectStoreNames.contains(STORE_IMAGES)) {
         db.createObjectStore(STORE_IMAGES);
+      }
+      if (!db.objectStoreNames.contains(STORE_REWARD_TRACKS)) {
+        db.createObjectStore(STORE_REWARD_TRACKS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_SCHED_TEMPLATES)) {
+        db.createObjectStore(STORE_SCHED_TEMPLATES, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_ACTIVE_SCHED)) {
+        db.createObjectStore(STORE_ACTIVE_SCHED, { keyPath: 'id' });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -621,6 +2086,160 @@ async function clearAllData() {
     const tx = db.transaction([STORE_BUTTONS, STORE_IMAGES], 'readwrite');
     tx.objectStore(STORE_BUTTONS).clear();
     tx.objectStore(STORE_IMAGES).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── Reward Track DB Helpers ──
+async function loadTracks() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TRACKS, 'readonly');
+    const req = tx.objectStore(STORE_REWARD_TRACKS).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveTrack(track) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TRACKS, 'readwrite');
+    tx.objectStore(STORE_REWARD_TRACKS).put(track);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteTrackFromDB(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TRACKS, 'readwrite');
+    tx.objectStore(STORE_REWARD_TRACKS).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── Default Schedule Activities ──
+const DEFAULT_SCHEDULE_ACTIVITIES = [
+  { key: 'wake-up', label: 'Wake up', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="16" fill="#FFD54F" stroke="#F9A825" stroke-width="2"/><line x1="30" y1="8" x2="30" y2="2" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="58" x2="30" y2="52" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="30" x2="2" y2="30" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="58" y1="30" x2="52" y2="30" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="14" x2="10" y2="10" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="46" y1="14" x2="50" y2="10" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { key: 'go-potty', label: 'Go potty', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><rect x="15" y="18" width="30" height="28" rx="4" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="2"/><rect x="12" y="14" width="36" height="6" rx="3" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="2"/><rect x="20" y="46" width="20" height="4" rx="2" fill="#BDBDBD"/></svg>' },
+  { key: 'brush-teeth', label: 'Brush teeth', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><rect x="27" y="6" width="6" height="36" rx="3" fill="#64B5F6" stroke="#1E88E5" stroke-width="1.5"/><rect x="24" y="40" width="12" height="14" rx="3" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="1.5"/><line x1="24" y1="44" x2="36" y2="44" stroke="#9E9E9E" stroke-width="1"/><line x1="24" y1="48" x2="36" y2="48" stroke="#9E9E9E" stroke-width="1"/></svg>' },
+  { key: 'get-dressed', label: 'Get dressed', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 20 L30 14 L40 20 L44 28 L38 28 L38 48 L22 48 L22 28 L16 28 Z" fill="#7986CB" stroke="#3F51B5" stroke-width="2"/><line x1="30" y1="28" x2="30" y2="44" stroke="#3F51B5" stroke-width="1.5"/></svg>' },
+  { key: 'eat-breakfast', label: 'Eat breakfast', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><ellipse cx="30" cy="34" rx="18" ry="12" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><path d="M18 30 Q30 22 42 30" fill="none" stroke="#FF8F00" stroke-width="2"/><rect x="28" y="8" width="4" height="18" rx="2" fill="#8D6E63"/></svg>' },
+  { key: 'take-medicine', label: 'Take medicine', category: 'Morning Routine',
+    svg: '<svg viewBox="0 0 60 60"><rect x="20" y="12" width="20" height="36" rx="10" fill="#EF9A9A" stroke="#E53935" stroke-width="2"/><line x1="20" y1="30" x2="40" y2="30" stroke="#E53935" stroke-width="2"/><rect x="20" y="30" width="20" height="18" rx="10" fill="#E53935"/></svg>' },
+  { key: 'go-to-school', label: 'Go to school', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><rect x="14" y="24" width="32" height="24" fill="#FFCC80" stroke="#E65100" stroke-width="2"/><polygon points="30,10 10,24 50,24" fill="#E53935" stroke="#C62828" stroke-width="2"/><rect x="26" y="34" width="8" height="14" fill="#8D6E63"/><rect x="18" y="28" width="6" height="6" fill="#BBDEFB" stroke="#1565C0" stroke-width="1"/><rect x="36" y="28" width="6" height="6" fill="#BBDEFB" stroke="#1565C0" stroke-width="1"/></svg>' },
+  { key: 'circle-time', label: 'Circle time', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="30" cy="20" r="6" fill="#FFB74D"/><circle cx="16" cy="34" r="6" fill="#7BC67E"/><circle cx="44" cy="34" r="6" fill="#64B5F6"/><circle cx="22" cy="48" r="6" fill="#F48FB1"/><circle cx="38" cy="48" r="6" fill="#CE93D8"/><circle cx="30" cy="34" r="10" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-dasharray="4 3"/></svg>' },
+  { key: 'work-time', label: 'Work time', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><rect x="14" y="12" width="32" height="40" rx="2" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="20" y1="22" x2="40" y2="22" stroke="#BDBDBD" stroke-width="2"/><line x1="20" y1="30" x2="40" y2="30" stroke="#BDBDBD" stroke-width="2"/><line x1="20" y1="38" x2="34" y2="38" stroke="#BDBDBD" stroke-width="2"/><path d="M38 14 L46 8 L46 20" fill="#FFB74D" stroke="#E65100" stroke-width="1.5"/></svg>' },
+  { key: 'school-snack', label: 'Snack', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="14" fill="#EF5350" stroke="#C62828" stroke-width="2"/><path d="M30 16 Q34 10 30 8 Q26 10 30 16" fill="#4CAF50" stroke="#2E7D32" stroke-width="1.5"/><ellipse cx="34" cy="26" rx="3" ry="2" fill="rgba(255,255,255,0.3)"/></svg>' },
+  { key: 'recess', label: 'Recess', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><line x1="30" y1="10" x2="30" y2="34" stroke="#8D6E63" stroke-width="3"/><line x1="16" y1="34" x2="44" y2="34" stroke="#8D6E63" stroke-width="3"/><path d="M16 34 Q16 50 24 50 L24 34" fill="none" stroke="#8D6E63" stroke-width="2"/><path d="M44 34 Q44 50 36 50 L36 34" fill="none" stroke="#8D6E63" stroke-width="2"/><circle cx="24" cy="50" r="3" fill="#FF7043"/><circle cx="36" cy="50" r="3" fill="#42A5F5"/></svg>' },
+  { key: 'lunch', label: 'Lunch', category: 'School / Learning',
+    svg: '<svg viewBox="0 0 60 60"><rect x="10" y="18" width="40" height="8" rx="4" fill="#FFCC80" stroke="#E65100" stroke-width="1.5"/><rect x="10" y="34" width="40" height="8" rx="4" fill="#FFCC80" stroke="#E65100" stroke-width="1.5"/><rect x="12" y="26" width="36" height="8" fill="#66BB6A"/><circle cx="20" cy="30" r="3" fill="#EF5350"/><circle cx="32" cy="30" r="3" fill="#FDD835"/></svg>' },
+  { key: 'speech-therapy', label: 'Speech therapy', category: 'Therapy / Appointments',
+    svg: '<svg viewBox="0 0 60 60"><rect x="10" y="14" width="28" height="20" rx="10" fill="#CE93D8" stroke="#8E24AA" stroke-width="2"/><polygon points="20,34 26,34 16,44" fill="#CE93D8" stroke="#8E24AA" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="24" r="2" fill="#fff"/><circle cx="28" cy="24" r="2" fill="#fff"/><line x1="20" y1="28" x2="28" y2="28" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'ot', label: 'Occupational therapy', category: 'Therapy / Appointments',
+    svg: '<svg viewBox="0 0 60 60"><path d="M24 44 L24 30 Q24 20 30 16 Q36 20 36 30 L36 44" fill="none" stroke="#FF8A65" stroke-width="3" stroke-linecap="round"/><circle cx="22" cy="26" r="4" fill="none" stroke="#FF8A65" stroke-width="2"/><circle cx="38" cy="26" r="4" fill="none" stroke="#FF8A65" stroke-width="2"/><line x1="18" y1="36" x2="42" y2="36" stroke="#FF8A65" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { key: 'doctor', label: 'Doctor visit', category: 'Therapy / Appointments',
+    svg: '<svg viewBox="0 0 60 60"><rect x="18" y="16" width="24" height="32" rx="4" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/><line x1="30" y1="24" x2="30" y2="38" stroke="#E53935" stroke-width="3"/><line x1="23" y1="31" x2="37" y2="31" stroke="#E53935" stroke-width="3"/></svg>' },
+  { key: 'waiting-room', label: 'Waiting room', category: 'Therapy / Appointments',
+    svg: '<svg viewBox="0 0 60 60"><rect x="12" y="24" width="16" height="20" rx="2" fill="#90CAF9" stroke="#1565C0" stroke-width="2"/><rect x="32" y="24" width="16" height="20" rx="2" fill="#90CAF9" stroke="#1565C0" stroke-width="2"/><rect x="12" y="44" width="16" height="4" fill="#1565C0"/><rect x="32" y="44" width="16" height="4" fill="#1565C0"/><rect x="14" y="18" width="12" height="6" rx="2" fill="#BBDEFB"/><rect x="34" y="18" width="12" height="6" rx="2" fill="#BBDEFB"/></svg>' },
+  { key: 'come-home', label: 'Come home', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><polygon points="30,10 8,28 52,28" fill="#FF8A65" stroke="#E64A19" stroke-width="2"/><rect x="16" y="28" width="28" height="22" fill="#FFCC80" stroke="#E65100" stroke-width="2"/><rect x="26" y="36" width="8" height="14" fill="#8D6E63"/><path d="M8 28 L4 28" stroke="#E64A19" stroke-width="2" stroke-linecap="round"/><path d="M52 28 L56 28" stroke="#E64A19" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { key: 'afternoon-snack', label: 'Snack', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="30" cy="28" r="12" fill="#FFCC80" stroke="#E65100" stroke-width="2"/><circle cx="26" cy="25" r="3" fill="#8D6E63"/><circle cx="34" cy="25" r="3" fill="#8D6E63"/><circle cx="30" cy="32" r="3" fill="#8D6E63"/><circle cx="26" cy="33" r="2" fill="#8D6E63"/></svg>' },
+  { key: 'play-inside', label: 'Play inside', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><rect x="14" y="32" width="16" height="16" rx="2" fill="#EF5350" stroke="#C62828" stroke-width="2"/><rect x="22" y="22" width="16" height="16" rx="2" fill="#42A5F5" stroke="#1565C0" stroke-width="2" transform="rotate(15 30 30)"/><polygon points="38,44 46,44 42,32" fill="#FDD835" stroke="#F9A825" stroke-width="2"/></svg>' },
+  { key: 'play-outside', label: 'Play outside', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="46" cy="14" r="8" fill="#FFD54F" stroke="#F9A825" stroke-width="1.5"/><rect x="8" y="44" width="44" height="8" rx="2" fill="#A5D6A7"/><path d="M24 44 L24 24 Q24 16 18 16 M24 30 Q24 26 30 24 M24 36 Q24 32 20 30" fill="none" stroke="#66BB6A" stroke-width="2.5" stroke-linecap="round"/></svg>' },
+  { key: 'screen-time', label: 'Screen time', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><rect x="12" y="14" width="36" height="26" rx="3" fill="#37474F" stroke="#263238" stroke-width="2"/><rect x="15" y="17" width="30" height="20" rx="1" fill="#4FC3F7"/><rect x="22" y="42" width="16" height="4" rx="1" fill="#78909C"/><rect x="18" y="46" width="24" height="2" rx="1" fill="#90A4AE"/></svg>' },
+  { key: 'clean-up', label: 'Clean up', category: 'Afternoon / Home',
+    svg: '<svg viewBox="0 0 60 60"><line x1="30" y1="8" x2="30" y2="36" stroke="#8D6E63" stroke-width="3" stroke-linecap="round"/><path d="M20 36 L22 52 L38 52 L40 36 Z" fill="#FFB74D" stroke="#E65100" stroke-width="2"/><line x1="24" y1="38" x2="25" y2="50" stroke="#E65100" stroke-width="1"/><line x1="30" y1="38" x2="30" y2="50" stroke="#E65100" stroke-width="1"/><line x1="36" y1="38" x2="35" y2="50" stroke="#E65100" stroke-width="1"/></svg>' },
+  { key: 'dinner', label: 'Dinner', category: 'Evening Routine',
+    svg: '<svg viewBox="0 0 60 60"><ellipse cx="30" cy="36" rx="20" ry="12" fill="#fff" stroke="#9E9E9E" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="40" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round"/><path d="M48 16 L48 26 Q48 32 44 32 L44 40" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round" fill="none"/><line x1="48" y1="16" x2="48" y2="26" stroke="#9E9E9E" stroke-width="2"/><circle cx="30" cy="34" r="6" fill="#FF8A65"/></svg>' },
+  { key: 'bath-time', label: 'Bath time', category: 'Evening Routine',
+    svg: '<svg viewBox="0 0 60 60"><path d="M8 30 L52 30" stroke="#42A5F5" stroke-width="3" stroke-linecap="round"/><path d="M12 30 L12 44 Q12 50 18 50 L42 50 Q48 50 48 44 L48 30" fill="#BBDEFB" stroke="#42A5F5" stroke-width="2"/><circle cx="20" cy="24" r="4" fill="#E0E0E0"/><circle cx="30" cy="22" r="5" fill="#E0E0E0"/><circle cx="38" cy="25" r="3" fill="#E0E0E0"/></svg>' },
+  { key: 'brush-teeth-pm', label: 'Brush teeth', category: 'Evening Routine',
+    svg: '<svg viewBox="0 0 60 60"><rect x="27" y="6" width="6" height="36" rx="3" fill="#64B5F6" stroke="#1E88E5" stroke-width="1.5"/><rect x="24" y="40" width="12" height="14" rx="3" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="1.5"/><line x1="24" y1="44" x2="36" y2="44" stroke="#9E9E9E" stroke-width="1"/><line x1="24" y1="48" x2="36" y2="48" stroke="#9E9E9E" stroke-width="1"/></svg>' },
+  { key: 'pajamas', label: 'Put on pajamas', category: 'Evening Routine',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 18 L30 14 L40 18 L42 26 L38 26 L38 48 L22 48 L22 26 L18 26 Z" fill="#CE93D8" stroke="#8E24AA" stroke-width="2"/><circle cx="28" cy="30" r="2" fill="#fff"/><circle cx="28" cy="38" r="2" fill="#fff"/></svg>' },
+  { key: 'story-time', label: 'Story time', category: 'Evening Routine',
+    svg: '<svg viewBox="0 0 60 60"><path d="M10 14 L10 46 Q10 48 12 48 L28 48 Q30 48 30 46 L30 14 Q30 12 28 12 L12 12 Q10 12 10 14 Z" fill="#FFCC80" stroke="#E65100" stroke-width="2"/><path d="M30 14 L30 46 Q30 48 32 48 L48 48 Q50 48 50 46 L50 14 Q50 12 48 12 L32 12 Q30 12 30 14 Z" fill="#FFF9C4" stroke="#E65100" stroke-width="2"/><line x1="16" y1="20" x2="24" y2="20" stroke="#BDBDBD" stroke-width="1.5"/><line x1="16" y1="26" x2="24" y2="26" stroke="#BDBDBD" stroke-width="1.5"/><line x1="16" y1="32" x2="22" y2="32" stroke="#BDBDBD" stroke-width="1.5"/></svg>' },
+  { key: 'go-to-bed', label: 'Go to bed', category: 'Bedtime',
+    svg: '<svg viewBox="0 0 60 60"><rect x="8" y="30" width="44" height="16" rx="4" fill="#7986CB" stroke="#3F51B5" stroke-width="2"/><rect x="8" y="44" width="44" height="4" rx="2" fill="#3F51B5"/><rect x="12" y="24" width="14" height="8" rx="4" fill="#E8EAF6" stroke="#7986CB" stroke-width="1.5"/><path d="M12 30 Q12 20 20 16" fill="none" stroke="#7986CB" stroke-width="1.5"/></svg>' },
+  { key: 'goodnight', label: 'Goodnight', category: 'Bedtime',
+    svg: '<svg viewBox="0 0 60 60"><path d="M34 10 Q20 12 16 26 Q12 40 24 48 Q36 56 46 44 Q40 48 32 44 Q20 38 22 24 Q24 14 34 10 Z" fill="#FFD54F" stroke="#F9A825" stroke-width="2"/><circle cx="42" cy="16" r="2" fill="#FFD54F"/><circle cx="48" cy="24" r="1.5" fill="#FFD54F"/><circle cx="44" cy="32" r="1" fill="#FFD54F"/></svg>' },
+];
+
+// ── Schedule DB Helpers ──
+async function loadTemplates() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SCHED_TEMPLATES, 'readonly');
+    const req = tx.objectStore(STORE_SCHED_TEMPLATES).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveTemplate(tmpl) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SCHED_TEMPLATES, 'readwrite');
+    tx.objectStore(STORE_SCHED_TEMPLATES).put(tmpl);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteTemplateFromDB(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SCHED_TEMPLATES, 'readwrite');
+    tx.objectStore(STORE_SCHED_TEMPLATES).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadActiveSchedule() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_ACTIVE_SCHED, 'readonly');
+    const req = tx.objectStore(STORE_ACTIVE_SCHED).get('current');
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveActiveSchedule(sched) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_ACTIVE_SCHED, 'readwrite');
+    tx.objectStore(STORE_ACTIVE_SCHED).put(sched);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function clearActiveSchedule() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_ACTIVE_SCHED, 'readwrite');
+    tx.objectStore(STORE_ACTIVE_SCHED).delete('current');
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -794,7 +2413,7 @@ function createCell(btn) {
   cell.appendChild(label);
 
   cell.addEventListener('click', () => {
-    if (editMode) {
+    if (parentMode) {
       openEditModal(btn.id);
       return;
     }
@@ -844,35 +2463,115 @@ document.getElementById('btn-backspace').addEventListener('click', () => {
   renderMessage();
 });
 
+// ── View Switching ──
+const TAB_VIEW_MAP = {
+  'tab-talk': { view: 'view-talk', title: 'Talk' },
+  'tab-schedule': { view: 'view-schedule', title: 'Schedule' },
+  'tab-rewards': { view: 'view-rewards', title: 'Rewards' },
+};
+
+function switchTab(tabId) {
+  const tabInfo = TAB_VIEW_MAP[tabId];
+  if (!tabInfo) return;
+
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  document.getElementById(tabId).classList.add('active');
+  document.getElementById(tabId).setAttribute('aria-selected', 'true');
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(tabInfo.view).classList.add('active');
+
+  document.getElementById('app-header-title').textContent = tabInfo.title;
+  activeTab = tabId.replace('tab-', '');
+
+  updateParentModeUI();
+}
+
+document.querySelectorAll('.tab-btn').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.id));
+});
+
+// ── Parent Mode ──
+function setParentMode(enabled) {
+  parentMode = enabled;
+  const header = document.getElementById('app-header');
+  const lockBtn = document.getElementById('btn-lock');
+  const lockedIcon = document.getElementById('lock-icon-locked');
+  const unlockedIcon = document.getElementById('lock-icon-unlocked');
+
+  if (enabled) {
+    header.classList.add('parent-active');
+    document.body.classList.add('parent-mode');
+    lockedIcon.style.display = 'none';
+    unlockedIcon.style.display = '';
+    lockBtn.setAttribute('aria-label', 'Lock parent mode');
+    showToast('Parent mode unlocked');
+    resetParentAutoLock();
+  } else {
+    header.classList.remove('parent-active');
+    document.body.classList.remove('parent-mode');
+    lockedIcon.style.display = '';
+    unlockedIcon.style.display = 'none';
+    lockBtn.setAttribute('aria-label', 'Unlock parent mode');
+    if (parentAutoLockTimer) {
+      clearTimeout(parentAutoLockTimer);
+      parentAutoLockTimer = null;
+    }
+  }
+  updateParentModeUI();
+}
+
+function resetParentAutoLock() {
+  if (parentAutoLockTimer) clearTimeout(parentAutoLockTimer);
+  if (!parentMode) return;
+  parentAutoLockTimer = setTimeout(() => {
+    setParentMode(false);
+    showToast('Parent mode locked (timeout)');
+  }, PARENT_AUTO_LOCK_MS);
+}
+
+document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
+document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
+
+document.getElementById('btn-lock').addEventListener('click', () => {
+  if (parentMode) {
+    setParentMode(false);
+    return;
+  }
+  const now = Date.now();
+  lockTaps.push(now);
+  lockTaps = lockTaps.filter(t => now - t < PARENT_LOCK_TAP_WINDOW);
+  if (lockTaps.length >= PARENT_LOCK_TAP_COUNT) {
+    lockTaps = [];
+    setParentMode(true);
+  }
+});
+
+function updateParentModeUI() {
+  const settingsBtn = document.getElementById('btn-parent-settings');
+  if (parentMode && activeTab === 'talk') {
+    settingsBtn.style.display = 'flex';
+  } else {
+    settingsBtn.style.display = 'none';
+  }
+}
+
 // ── Settings ──
-document.getElementById('btn-settings').addEventListener('click', () => {
+document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  if (!parentMode) return;
   document.getElementById('settings-overlay').classList.add('open');
 });
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
-  editMode = false;
-  document.getElementById('btn-toggle-edit').classList.remove('active');
-  document.getElementById('btn-toggle-edit').textContent = 'Tap a button on the board to edit it';
 });
 
 document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) {
     document.getElementById('btn-close-settings').click();
-  }
-});
-
-document.getElementById('btn-toggle-edit').addEventListener('click', () => {
-  editMode = !editMode;
-  const btn = document.getElementById('btn-toggle-edit');
-  if (editMode) {
-    btn.classList.add('active');
-    btn.textContent = 'Edit mode ON — tap a button to edit';
-    document.getElementById('settings-overlay').classList.remove('open');
-    showToast('Edit mode: tap any button to edit it');
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = 'Tap a button on the board to edit it';
   }
 });
 
@@ -893,7 +2592,6 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
   saveButton(newBtn).then(() => {
     renderGrid();
     document.getElementById('settings-overlay').classList.remove('open');
-    editMode = true;
     openEditModal(newId);
   });
 });
@@ -1015,6 +2713,1101 @@ function showToast(msg) {
   setTimeout(() => el.classList.remove('show'), 2000);
 }
 
+// ── Visual Schedules ──
+let schedTemplates = [];
+let activeSchedule = null;
+let editorSteps = [];
+let editingTemplateId = null;
+let customStepImageBlob = null;
+
+function makeStep(label, key) {
+  return { stepId: 'def-' + key + '-' + Math.random().toString(36).slice(2, 6), label, imageType: 'default', defaultImageKey: key, customImageKey: null };
+}
+
+const DEFAULT_TEMPLATES = [
+  { id: 'tmpl-default-full-day', name: 'Full Day', steps: [
+    makeStep('Wake up', 'wake-up'), makeStep('Go potty', 'go-potty'), makeStep('Brush teeth', 'brush-teeth'),
+    makeStep('Get dressed', 'get-dressed'), makeStep('Eat breakfast', 'eat-breakfast'),
+    makeStep('Play inside', 'play-inside'), makeStep('Snack', 'school-snack'),
+    makeStep('Play outside', 'play-outside'), makeStep('Lunch', 'lunch'),
+    makeStep('Screen time', 'screen-time'), makeStep('Snack', 'afternoon-snack'),
+    makeStep('Play inside', 'play-inside'), makeStep('Clean up', 'clean-up'),
+    makeStep('Dinner', 'dinner'), makeStep('Bath time', 'bath-time'),
+    makeStep('Brush teeth', 'brush-teeth-pm'), makeStep('Put on pajamas', 'pajamas'),
+    makeStep('Story time', 'story-time'), makeStep('Go to bed', 'go-to-bed'),
+    makeStep('Goodnight', 'goodnight'),
+  ]},
+  { id: 'tmpl-default-school-day', name: 'School Day', steps: [
+    makeStep('Wake up', 'wake-up'), makeStep('Go potty', 'go-potty'), makeStep('Brush teeth', 'brush-teeth'),
+    makeStep('Get dressed', 'get-dressed'), makeStep('Eat breakfast', 'eat-breakfast'),
+    makeStep('Go to school', 'go-to-school'), makeStep('Come home', 'come-home'),
+    makeStep('Snack', 'afternoon-snack'), makeStep('Play outside', 'play-outside'),
+    makeStep('Screen time', 'screen-time'), makeStep('Clean up', 'clean-up'),
+    makeStep('Dinner', 'dinner'), makeStep('Bath time', 'bath-time'),
+    makeStep('Brush teeth', 'brush-teeth-pm'), makeStep('Put on pajamas', 'pajamas'),
+    makeStep('Story time', 'story-time'), makeStep('Go to bed', 'go-to-bed'),
+    makeStep('Goodnight', 'goodnight'),
+  ]},
+  { id: 'tmpl-default-morning', name: 'Morning Routine', steps: [
+    makeStep('Wake up', 'wake-up'), makeStep('Go potty', 'go-potty'), makeStep('Brush teeth', 'brush-teeth'),
+    makeStep('Get dressed', 'get-dressed'), makeStep('Eat breakfast', 'eat-breakfast'),
+  ]},
+  { id: 'tmpl-default-bedtime', name: 'Bedtime Routine', steps: [
+    makeStep('Dinner', 'dinner'), makeStep('Bath time', 'bath-time'),
+    makeStep('Brush teeth', 'brush-teeth-pm'), makeStep('Put on pajamas', 'pajamas'),
+    makeStep('Story time', 'story-time'), makeStep('Go to bed', 'go-to-bed'),
+    makeStep('Goodnight', 'goodnight'),
+  ]},
+  { id: 'tmpl-default-therapy-day', name: 'Therapy Day', steps: [
+    makeStep('Wake up', 'wake-up'), makeStep('Go potty', 'go-potty'), makeStep('Brush teeth', 'brush-teeth'),
+    makeStep('Get dressed', 'get-dressed'), makeStep('Eat breakfast', 'eat-breakfast'),
+    makeStep('Speech therapy', 'speech-therapy'), makeStep('Snack', 'school-snack'),
+    makeStep('Play inside', 'play-inside'), makeStep('Lunch', 'lunch'),
+    makeStep('Occupational therapy', 'ot'), makeStep('Come home', 'come-home'),
+    makeStep('Snack', 'afternoon-snack'), makeStep('Screen time', 'screen-time'),
+    makeStep('Play outside', 'play-outside'), makeStep('Clean up', 'clean-up'),
+    makeStep('Dinner', 'dinner'), makeStep('Bath time', 'bath-time'),
+    makeStep('Brush teeth', 'brush-teeth-pm'), makeStep('Put on pajamas', 'pajamas'),
+    makeStep('Story time', 'story-time'), makeStep('Go to bed', 'go-to-bed'),
+    makeStep('Goodnight', 'goodnight'),
+  ]},
+  { id: 'tmpl-default-weekend', name: 'Weekend / Fun Day', steps: [
+    makeStep('Wake up', 'wake-up'), makeStep('Go potty', 'go-potty'),
+    makeStep('Eat breakfast', 'eat-breakfast'), makeStep('Get dressed', 'get-dressed'),
+    makeStep('Play outside', 'play-outside'), makeStep('Snack', 'school-snack'),
+    makeStep('Screen time', 'screen-time'), makeStep('Lunch', 'lunch'),
+    makeStep('Play inside', 'play-inside'), makeStep('Clean up', 'clean-up'),
+    makeStep('Snack', 'afternoon-snack'), makeStep('Play outside', 'play-outside'),
+    makeStep('Dinner', 'dinner'), makeStep('Bath time', 'bath-time'),
+    makeStep('Put on pajamas', 'pajamas'), makeStep('Story time', 'story-time'),
+    makeStep('Go to bed', 'go-to-bed'), makeStep('Goodnight', 'goodnight'),
+  ]},
+];
+
+async function initSchedules() {
+  schedTemplates = await loadTemplates();
+  if (schedTemplates.length === 0) {
+    const now = Date.now();
+    for (const tmpl of DEFAULT_TEMPLATES) {
+      const t = { ...tmpl, createdAt: now, updatedAt: now };
+      schedTemplates.push(t);
+      await saveTemplate(t);
+    }
+  }
+  activeSchedule = await loadActiveSchedule();
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const nameEl = document.getElementById('schedule-name');
+  const progressEl = document.getElementById('schedule-progress-text');
+  const stepsEl = document.getElementById('schedule-steps-list');
+  const emptyEl = document.getElementById('schedule-empty');
+  const doneEl = document.getElementById('schedule-all-done');
+  const doneMsgEl = document.getElementById('schedule-done-msg');
+
+  if (!activeSchedule) {
+    emptyEl.style.display = 'flex';
+    stepsEl.style.display = 'none';
+    doneEl.style.display = 'none';
+    nameEl.textContent = '';
+    progressEl.textContent = '';
+    return;
+  }
+
+  const doneCount = activeSchedule.steps.filter(s => s.status === 'done').length;
+  const total = activeSchedule.steps.length;
+  const allDone = doneCount === total;
+
+  if (allDone) {
+    emptyEl.style.display = 'none';
+    stepsEl.style.display = 'none';
+    doneEl.style.display = 'flex';
+    nameEl.textContent = activeSchedule.templateName;
+    progressEl.textContent = '';
+    doneMsgEl.textContent = 'Great job finishing ' + activeSchedule.templateName + '!';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  stepsEl.style.display = '';
+  doneEl.style.display = 'none';
+  nameEl.textContent = activeSchedule.templateName;
+  progressEl.textContent = 'Step ' + (doneCount + 1) + ' of ' + total;
+
+  stepsEl.innerHTML = '';
+  activeSchedule.steps.forEach((step, idx) => {
+    const row = document.createElement('div');
+    row.className = 'sched-step ' + step.status;
+    row.setAttribute('data-step-idx', idx);
+    if (step.status === 'current') {
+      row.setAttribute('aria-label', step.label + ' - current step, tap to mark done');
+    } else {
+      row.setAttribute('aria-label', step.label + ' - ' + step.status);
+    }
+
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'sched-step-img';
+    if (step.imageType === 'default' && step.defaultImageKey) {
+      const act = DEFAULT_SCHEDULE_ACTIVITIES.find(a => a.key === step.defaultImageKey);
+      if (act) imgDiv.innerHTML = act.svg;
+    } else if (step.imageType === 'custom' && step.customImageKey) {
+      loadImage(step.customImageKey).then(blob => {
+        if (blob) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(blob);
+          img.alt = step.label;
+          imgDiv.innerHTML = '';
+          imgDiv.appendChild(img);
+        }
+      });
+    }
+    row.appendChild(imgDiv);
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'sched-step-label';
+    labelSpan.textContent = step.label;
+    row.appendChild(labelSpan);
+
+    if (step.status === 'done') {
+      const check = document.createElement('div');
+      check.className = 'sched-step-check';
+      check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>';
+      row.appendChild(check);
+    }
+
+    if (step.status === 'current') {
+      const hint = document.createElement('div');
+      hint.className = 'sched-step-tap-hint';
+      hint.textContent = 'Tap when done';
+      row.appendChild(hint);
+
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', () => completeCurrentStep(idx));
+    }
+
+    stepsEl.appendChild(row);
+  });
+
+  // Auto-scroll to current step
+  requestAnimationFrame(() => {
+    const currentEl = stepsEl.querySelector('.sched-step.current');
+    if (currentEl) currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+async function completeCurrentStep(idx) {
+  if (!activeSchedule || activeSchedule.steps[idx].status !== 'current') return;
+
+  activeSchedule.steps[idx].status = 'done';
+
+  // Find next upcoming step
+  const nextIdx = activeSchedule.steps.findIndex(s => s.status === 'upcoming');
+  if (nextIdx !== -1) {
+    activeSchedule.steps[nextIdx].status = 'current';
+    playDing();
+    speak('Time to ' + activeSchedule.steps[nextIdx].label);
+  } else {
+    activeSchedule.completedAt = Date.now();
+    playTaDa();
+    speak('All done! Great job!');
+  }
+
+  await saveActiveSchedule(activeSchedule);
+  renderSchedule();
+}
+
+// Start schedule (pick template)
+document.getElementById('btn-start-schedule').addEventListener('click', () => {
+  if (schedTemplates.length === 0) {
+    showToast('Create a template first');
+    return;
+  }
+  openTemplateList('start');
+});
+
+let tmplListMode = 'start';
+
+function openTemplateList(mode) {
+  tmplListMode = mode;
+  const titleEl = document.getElementById('tmpl-list-title');
+  const itemsEl = document.getElementById('tmpl-list-items');
+  titleEl.textContent = mode === 'start' ? 'Choose Schedule' : 'Edit Templates';
+  itemsEl.innerHTML = '';
+
+  if (schedTemplates.length === 0) {
+    itemsEl.innerHTML = '<div class="tmpl-list-empty">No templates yet</div>';
+  } else {
+    schedTemplates.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tmpl-list-item';
+      btn.innerHTML = '<span class="tmpl-list-item-name">' + t.name + '</span><span class="tmpl-list-item-count">' + t.steps.length + ' steps</span>';
+      btn.addEventListener('click', () => {
+        document.getElementById('tmpl-list-overlay').classList.remove('open');
+        if (mode === 'start') {
+          activateTemplate(t.id);
+        } else {
+          openTemplateEditor(t.id);
+        }
+      });
+      itemsEl.appendChild(btn);
+    });
+  }
+
+  if (mode === 'edit') {
+    const newBtn = document.createElement('button');
+    newBtn.className = 'tmpl-list-item';
+    newBtn.style.justifyContent = 'center';
+    newBtn.style.color = 'var(--bar-bg)';
+    newBtn.style.fontWeight = '700';
+    newBtn.textContent = '+ New Template';
+    newBtn.addEventListener('click', () => {
+      document.getElementById('tmpl-list-overlay').classList.remove('open');
+      openTemplateEditor(null);
+    });
+    itemsEl.appendChild(newBtn);
+  }
+
+  document.getElementById('tmpl-list-overlay').classList.add('open');
+}
+
+document.getElementById('btn-close-tmpl-list').addEventListener('click', () => {
+  document.getElementById('tmpl-list-overlay').classList.remove('open');
+});
+
+document.getElementById('tmpl-list-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('tmpl-list-overlay').classList.remove('open');
+});
+
+async function activateTemplate(templateId) {
+  const tmpl = schedTemplates.find(t => t.id === templateId);
+  if (!tmpl) return;
+
+  if (activeSchedule && !activeSchedule.completedAt) {
+    if (!confirm('Replace the current schedule with ' + tmpl.name + '?')) return;
+  }
+
+  activeSchedule = {
+    id: 'current',
+    templateId: tmpl.id,
+    templateName: tmpl.name,
+    steps: tmpl.steps.map((s, i) => ({
+      ...s,
+      status: i === 0 ? 'current' : 'upcoming',
+    })),
+    activatedAt: Date.now(),
+    completedAt: null,
+  };
+
+  await saveActiveSchedule(activeSchedule);
+  renderSchedule();
+  showToast(tmpl.name + ' started');
+}
+
+// Edit templates
+document.getElementById('btn-edit-templates').addEventListener('click', () => {
+  openTemplateList('edit');
+});
+
+function openTemplateEditor(templateId) {
+  editingTemplateId = templateId;
+  const tmpl = templateId ? schedTemplates.find(t => t.id === templateId) : null;
+
+  document.getElementById('tmpl-editor-title').textContent = tmpl ? 'Edit Schedule' : 'New Schedule';
+  document.getElementById('tmpl-name-input').value = tmpl ? tmpl.name : '';
+  document.getElementById('btn-tmpl-delete').style.display = tmpl ? '' : 'none';
+  editorSteps = tmpl ? JSON.parse(JSON.stringify(tmpl.steps)) : [];
+
+  renderEditorSteps();
+  document.getElementById('tmpl-editor-overlay').classList.add('open');
+}
+
+function renderEditorSteps() {
+  const listEl = document.getElementById('tmpl-steps-list');
+  listEl.innerHTML = '';
+
+  editorSteps.forEach((step, idx) => {
+    const row = document.createElement('div');
+    row.className = 'tmpl-step-row';
+
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'tmpl-step-img';
+    if (step.imageType === 'default' && step.defaultImageKey) {
+      const act = DEFAULT_SCHEDULE_ACTIVITIES.find(a => a.key === step.defaultImageKey);
+      if (act) imgDiv.innerHTML = act.svg;
+    } else if (step.imageType === 'custom' && step.customImageKey) {
+      loadImage(step.customImageKey).then(blob => {
+        if (blob) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(blob);
+          img.alt = step.label;
+          imgDiv.innerHTML = '';
+          imgDiv.appendChild(img);
+        }
+      });
+    }
+    row.appendChild(imgDiv);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'tmpl-step-name';
+    nameSpan.textContent = step.label;
+    row.appendChild(nameSpan);
+
+    if (idx > 0) {
+      const upBtn = document.createElement('button');
+      upBtn.className = 'tmpl-step-btn';
+      upBtn.innerHTML = '&#9650;';
+      upBtn.setAttribute('aria-label', 'Move ' + step.label + ' up');
+      upBtn.addEventListener('click', () => { swapSteps(idx, idx - 1); });
+      row.appendChild(upBtn);
+    }
+
+    if (idx < editorSteps.length - 1) {
+      const downBtn = document.createElement('button');
+      downBtn.className = 'tmpl-step-btn';
+      downBtn.innerHTML = '&#9660;';
+      downBtn.setAttribute('aria-label', 'Move ' + step.label + ' down');
+      downBtn.addEventListener('click', () => { swapSteps(idx, idx + 1); });
+      row.appendChild(downBtn);
+    }
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'tmpl-step-btn';
+    removeBtn.innerHTML = '&#10005;';
+    removeBtn.style.color = '#e53935';
+    removeBtn.setAttribute('aria-label', 'Remove ' + step.label);
+    removeBtn.addEventListener('click', () => {
+      editorSteps.splice(idx, 1);
+      renderEditorSteps();
+    });
+    row.appendChild(removeBtn);
+
+    listEl.appendChild(row);
+  });
+}
+
+function swapSteps(a, b) {
+  [editorSteps[a], editorSteps[b]] = [editorSteps[b], editorSteps[a]];
+  renderEditorSteps();
+}
+
+document.getElementById('btn-tmpl-add-step').addEventListener('click', () => {
+  openActivityPicker();
+});
+
+document.getElementById('btn-tmpl-save').addEventListener('click', async () => {
+  const name = document.getElementById('tmpl-name-input').value.trim();
+  if (!name) { showToast('Enter a schedule name'); return; }
+  if (editorSteps.length === 0) { showToast('Add at least one step'); return; }
+
+  if (editingTemplateId) {
+    const tmpl = schedTemplates.find(t => t.id === editingTemplateId);
+    if (tmpl) {
+      tmpl.name = name;
+      tmpl.steps = editorSteps;
+      tmpl.updatedAt = Date.now();
+      await saveTemplate(tmpl);
+    }
+  } else {
+    const tmpl = {
+      id: 'tmpl-' + Date.now(),
+      name,
+      steps: editorSteps,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    schedTemplates.push(tmpl);
+    await saveTemplate(tmpl);
+  }
+
+  document.getElementById('tmpl-editor-overlay').classList.remove('open');
+  editingTemplateId = null;
+  renderSchedule();
+  showToast('Schedule saved');
+});
+
+document.getElementById('btn-tmpl-cancel').addEventListener('click', () => {
+  document.getElementById('tmpl-editor-overlay').classList.remove('open');
+  editingTemplateId = null;
+});
+
+document.getElementById('tmpl-editor-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('btn-tmpl-cancel').click();
+});
+
+document.getElementById('btn-tmpl-delete').addEventListener('click', async () => {
+  if (!editingTemplateId) return;
+  if (!confirm('Delete this schedule template?')) return;
+  await deleteTemplateFromDB(editingTemplateId);
+  schedTemplates = schedTemplates.filter(t => t.id !== editingTemplateId);
+  document.getElementById('tmpl-editor-overlay').classList.remove('open');
+  editingTemplateId = null;
+  renderSchedule();
+  showToast('Template deleted');
+});
+
+// Activity picker
+let pickerMode = 'defaults';
+
+function openActivityPicker() {
+  pickerMode = 'defaults';
+  document.getElementById('picker-tab-defaults').classList.add('active');
+  document.getElementById('picker-tab-custom').classList.remove('active');
+  document.getElementById('defaults-section').style.display = '';
+  document.getElementById('custom-step-section').classList.remove('visible');
+  renderDefaultActivities();
+  document.getElementById('activity-picker-overlay').classList.add('open');
+}
+
+document.getElementById('picker-tab-defaults').addEventListener('click', () => {
+  pickerMode = 'defaults';
+  document.getElementById('picker-tab-defaults').classList.add('active');
+  document.getElementById('picker-tab-custom').classList.remove('active');
+  document.getElementById('defaults-section').style.display = '';
+  document.getElementById('custom-step-section').classList.remove('visible');
+});
+
+document.getElementById('picker-tab-custom').addEventListener('click', () => {
+  pickerMode = 'custom';
+  document.getElementById('picker-tab-custom').classList.add('active');
+  document.getElementById('picker-tab-defaults').classList.remove('active');
+  document.getElementById('defaults-section').style.display = 'none';
+  document.getElementById('custom-step-section').classList.add('visible');
+  document.getElementById('custom-step-label-input').value = '';
+  document.getElementById('custom-step-preview').style.display = 'none';
+  customStepImageBlob = null;
+});
+
+function renderDefaultActivities() {
+  const container = document.getElementById('defaults-section');
+  container.innerHTML = '';
+
+  const categories = [...new Set(DEFAULT_SCHEDULE_ACTIVITIES.map(a => a.category))];
+  categories.forEach(cat => {
+    const title = document.createElement('div');
+    title.className = 'picker-category-title';
+    title.textContent = cat;
+    container.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'picker-grid';
+
+    DEFAULT_SCHEDULE_ACTIVITIES.filter(a => a.category === cat).forEach(act => {
+      const item = document.createElement('button');
+      item.className = 'picker-item';
+      item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><span class="picker-item-label">' + act.label + '</span>';
+      item.addEventListener('click', () => {
+        editorSteps.push({
+          stepId: 'step-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          label: act.label,
+          imageType: 'default',
+          defaultImageKey: act.key,
+          customImageKey: null,
+        });
+        renderEditorSteps();
+        showToast(act.label + ' added');
+      });
+      grid.appendChild(item);
+    });
+
+    container.appendChild(grid);
+  });
+}
+
+document.getElementById('btn-custom-step-upload').addEventListener('click', () => {
+  document.getElementById('custom-step-image-input').click();
+});
+
+document.getElementById('custom-step-image-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  customStepImageBlob = file;
+  const preview = document.getElementById('custom-step-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  e.target.value = '';
+});
+
+document.getElementById('btn-custom-step-clear').addEventListener('click', () => {
+  customStepImageBlob = null;
+  document.getElementById('custom-step-preview').style.display = 'none';
+  document.getElementById('custom-step-preview').src = '';
+});
+
+document.getElementById('btn-add-custom-step').addEventListener('click', async () => {
+  const label = document.getElementById('custom-step-label-input').value.trim();
+  if (!label) { showToast('Enter a step name'); return; }
+
+  const stepId = 'step-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const templateId = editingTemplateId || 'tmpl-new';
+  const imageKey = customStepImageBlob ? 'sched-' + templateId + '-' + stepId : null;
+
+  if (customStepImageBlob) {
+    await saveImage(imageKey, customStepImageBlob);
+  }
+
+  editorSteps.push({
+    stepId,
+    label,
+    imageType: customStepImageBlob ? 'custom' : 'none',
+    defaultImageKey: null,
+    customImageKey: imageKey,
+  });
+
+  renderEditorSteps();
+  showToast(label + ' added');
+  document.getElementById('custom-step-label-input').value = '';
+  document.getElementById('custom-step-preview').style.display = 'none';
+  customStepImageBlob = null;
+});
+
+document.getElementById('btn-close-picker').addEventListener('click', () => {
+  document.getElementById('activity-picker-overlay').classList.remove('open');
+});
+
+document.getElementById('activity-picker-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('activity-picker-overlay').classList.remove('open');
+});
+
+// ── Reward Tracker ──
+let rewardTracks = [];
+let activeTrackId = null;
+let rewardTimerInterval = null;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playDing() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch (e) { /* audio not available */ }
+}
+
+function playTaDa() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784];
+    const durations = [0.15, 0.15, 0.3];
+    let time = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(0.3, time + 0.01);
+      gain.gain.linearRampToValueAtTime(0, time + durations[i]);
+      osc.start(time);
+      osc.stop(time + durations[i]);
+      time += durations[i];
+    });
+  } catch (e) { /* audio not available */ }
+}
+
+function getActiveTrack() {
+  return rewardTracks.find(t => t.id === activeTrackId) || null;
+}
+
+async function initRewards() {
+  rewardTracks = await loadTracks();
+  rewardTracks.sort((a, b) => a.position - b.position);
+  if (rewardTracks.length > 0 && !activeTrackId) {
+    activeTrackId = rewardTracks[0].id;
+  }
+  renderRewards();
+}
+
+function renderRewards() {
+  const track = getActiveTrack();
+  const emptyEl = document.getElementById('rewards-empty');
+  const pathEl = document.getElementById('rewards-path');
+  const taskLabel = document.getElementById('rewards-task-label');
+  const progressText = document.getElementById('rewards-progress-text');
+  const didItBtn = document.getElementById('btn-did-it');
+  const activeScreen = document.getElementById('reward-active-screen');
+  const pathArea = document.getElementById('rewards-path-area');
+  const newBtn = document.getElementById('btn-new-track');
+  const editBtn = document.getElementById('btn-edit-track');
+  const resetBtn = document.getElementById('btn-reset-track');
+
+  renderTrackTabs();
+  clearRewardTimer();
+
+  if (!track) {
+    emptyEl.style.display = 'flex';
+    pathEl.style.display = 'none';
+    taskLabel.textContent = '';
+    progressText.textContent = '';
+    didItBtn.style.display = 'none';
+    activeScreen.classList.remove('visible');
+    pathArea.style.display = 'flex';
+    editBtn.style.display = 'none';
+    resetBtn.style.display = 'none';
+    newBtn.textContent = 'New Track';
+    return;
+  }
+
+  editBtn.style.display = '';
+  newBtn.disabled = rewardTracks.length >= 5;
+
+  const isRewardState = track.status === 'reward-earned' || track.status === 'timer-running' || track.status === 'timer-complete';
+
+  if (isRewardState) {
+    emptyEl.style.display = 'none';
+    pathEl.style.display = 'none';
+    taskLabel.textContent = '';
+    progressText.textContent = '';
+    didItBtn.style.display = 'none';
+    pathArea.style.display = 'none';
+    activeScreen.classList.add('visible');
+    resetBtn.style.display = '';
+    renderRewardActive(track);
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  pathEl.style.display = '';
+  pathArea.style.display = 'flex';
+  activeScreen.classList.remove('visible');
+  didItBtn.style.display = 'block';
+  resetBtn.style.display = track.currentCount > 0 ? '' : 'none';
+
+  pathArea.setAttribute('aria-valuenow', track.currentCount);
+  pathArea.setAttribute('aria-valuemax', track.targetCount);
+
+  taskLabel.textContent = track.taskLabel;
+  progressText.textContent = track.currentCount + ' of ' + track.targetCount;
+
+  renderPath(track);
+}
+
+function renderPath(track) {
+  const pathEl = document.getElementById('rewards-path');
+  pathEl.innerHTML = '';
+  pathEl.className = 'path-container';
+
+  for (let i = 0; i < track.targetCount; i++) {
+    if (i > 0) {
+      const conn = document.createElement('div');
+      conn.className = 'path-connector' + (i <= track.currentCount ? ' filled' : '');
+      pathEl.appendChild(conn);
+    }
+    const stone = document.createElement('div');
+    stone.className = 'stone' + (i < track.currentCount ? ' filled' : '');
+    stone.textContent = i + 1;
+    pathEl.appendChild(stone);
+  }
+
+  const conn = document.createElement('div');
+  conn.className = 'path-connector' + (track.currentCount >= track.targetCount ? ' filled' : '');
+  pathEl.appendChild(conn);
+
+  const reward = document.createElement('div');
+  reward.className = 'reward-icon';
+  if (track.rewardImageKey) {
+    loadImage(track.rewardImageKey).then(blob => {
+      if (blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.alt = track.rewardLabel;
+        reward.textContent = '';
+        reward.appendChild(img);
+      }
+    });
+  }
+  reward.textContent = track.rewardLabel ? track.rewardLabel.charAt(0).toUpperCase() : '?';
+  pathEl.appendChild(reward);
+}
+
+function renderTrackTabs() {
+  const tabsEl = document.getElementById('rewards-track-tabs');
+  tabsEl.innerHTML = '';
+  if (rewardTracks.length < 2) {
+    tabsEl.classList.remove('visible');
+    return;
+  }
+  tabsEl.classList.add('visible');
+  rewardTracks.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'track-tab' + (t.id === activeTrackId ? ' active' : '');
+    btn.textContent = t.taskLabel + ' (' + t.currentCount + '/' + t.targetCount + ')';
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', t.id === activeTrackId ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      activeTrackId = t.id;
+      renderRewards();
+    });
+    tabsEl.appendChild(btn);
+  });
+}
+
+function renderRewardActive(track) {
+  const iconEl = document.getElementById('reward-active-icon');
+  const labelEl = document.getElementById('reward-active-label');
+  const timerDisplay = document.getElementById('reward-timer-display');
+  const timerStatus = document.getElementById('reward-timer-status');
+
+  labelEl.textContent = track.rewardLabel + '!';
+
+  iconEl.innerHTML = '';
+  if (track.rewardImageKey) {
+    loadImage(track.rewardImageKey).then(blob => {
+      if (blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.alt = track.rewardLabel;
+        iconEl.appendChild(img);
+      } else {
+        iconEl.textContent = track.rewardLabel.charAt(0).toUpperCase();
+      }
+    });
+  } else {
+    iconEl.textContent = track.rewardLabel.charAt(0).toUpperCase();
+  }
+
+  if (track.status === 'timer-complete') {
+    timerDisplay.textContent = '';
+    timerStatus.textContent = "Time's up!";
+    return;
+  }
+
+  if (track.status === 'timer-running' && track.timerEnabled && track.timerStartedAt) {
+    timerStatus.textContent = '';
+    startRewardTimer(track);
+    return;
+  }
+
+  if (track.status === 'reward-earned' && track.timerEnabled) {
+    track.status = 'timer-running';
+    track.timerStartedAt = Date.now();
+    saveTrack(track).then(() => startRewardTimer(track));
+    return;
+  }
+
+  timerDisplay.textContent = '';
+  timerStatus.textContent = 'Reward earned!';
+}
+
+function startRewardTimer(track) {
+  const timerDisplay = document.getElementById('reward-timer-display');
+  const timerStatus = document.getElementById('reward-timer-status');
+  clearRewardTimer();
+
+  function tick() {
+    const elapsed = Date.now() - track.timerStartedAt;
+    const total = track.timerDuration * 60000;
+    const remaining = Math.max(0, total - elapsed);
+
+    if (remaining <= 0) {
+      clearRewardTimer();
+      track.status = 'timer-complete';
+      saveTrack(track);
+      timerDisplay.textContent = '';
+      timerStatus.textContent = "Time's up!";
+      playDing();
+      speak("Time's up!");
+      return;
+    }
+
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    timerDisplay.textContent = mins + ':' + String(secs).padStart(2, '0');
+    timerStatus.textContent = 'remaining';
+  }
+
+  tick();
+  rewardTimerInterval = setInterval(tick, 1000);
+}
+
+function clearRewardTimer() {
+  if (rewardTimerInterval) {
+    clearInterval(rewardTimerInterval);
+    rewardTimerInterval = null;
+  }
+}
+
+// "I did it!" handler
+document.getElementById('btn-did-it').addEventListener('click', async () => {
+  const track = getActiveTrack();
+  if (!track || track.status !== 'active') return;
+
+  const btn = document.getElementById('btn-did-it');
+  if (btn.classList.contains('cooldown')) return;
+  btn.classList.add('cooldown');
+  setTimeout(() => btn.classList.remove('cooldown'), 1500);
+
+  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
+  await saveTrack(track);
+
+  playDing();
+  speak(track.currentCount + ' out of ' + track.targetCount);
+
+  renderRewards();
+
+  // Animate the just-filled stone
+  const stones = document.querySelectorAll('#rewards-path .stone.filled');
+  const lastStone = stones[stones.length - 1];
+  if (lastStone) {
+    lastStone.classList.add('animate-fill');
+    setTimeout(() => lastStone.classList.remove('animate-fill'), 400);
+  }
+
+  if (track.currentCount >= track.targetCount) {
+    setTimeout(() => triggerCelebration(track), 500);
+  }
+});
+
+function triggerCelebration(track) {
+  const overlay = document.getElementById('celebration-overlay');
+  const rewardEl = document.getElementById('celebration-reward');
+  const textEl = document.getElementById('celebration-text');
+
+  rewardEl.innerHTML = '';
+  if (track.rewardImageKey) {
+    loadImage(track.rewardImageKey).then(blob => {
+      if (blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.alt = track.rewardLabel;
+        rewardEl.appendChild(img);
+      } else {
+        rewardEl.textContent = track.rewardLabel.charAt(0).toUpperCase();
+      }
+    });
+  } else {
+    rewardEl.textContent = track.rewardLabel.charAt(0).toUpperCase();
+  }
+
+  textEl.textContent = 'You earned ' + track.rewardLabel + '!';
+  overlay.classList.add('visible');
+
+  playTaDa();
+  setTimeout(() => speak('You earned ' + track.rewardLabel + '!'), 600);
+
+  spawnConfetti();
+
+  setTimeout(async () => {
+    overlay.classList.remove('visible');
+    document.querySelectorAll('.confetti-piece').forEach(p => p.remove());
+    track.status = 'reward-earned';
+    await saveTrack(track);
+    renderRewards();
+  }, 3500);
+}
+
+function spawnConfetti() {
+  const colors = ['#FF6B6B', '#FFE066', '#7BC67E', '#64B5F6', '#F48FB1', '#FFB74D', '#7C4DFF'];
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = -10 + 'px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = (Math.random() * 0.8) + 's';
+    piece.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    document.body.appendChild(piece);
+  }
+}
+
+// Reward config modal
+let editingTrackId = null;
+let configStepperValue = 5;
+
+function openRewardConfig(trackId) {
+  editingTrackId = trackId || null;
+  const track = trackId ? rewardTracks.find(t => t.id === trackId) : null;
+
+  document.getElementById('reward-config-title').textContent = track ? 'Edit Reward Track' : 'New Reward Track';
+  document.getElementById('reward-task-input').value = track ? track.taskLabel : '';
+  document.getElementById('reward-label-input').value = track ? track.rewardLabel : '';
+  configStepperValue = track ? track.targetCount : 5;
+  document.getElementById('stepper-value').textContent = configStepperValue;
+  document.getElementById('timer-toggle').checked = track ? track.timerEnabled : false;
+  document.getElementById('timer-duration-select').value = track ? track.timerDuration : 30;
+  document.getElementById('timer-duration-row').classList.toggle('visible', track ? track.timerEnabled : false);
+  document.getElementById('btn-reward-delete').style.display = track ? '' : 'none';
+
+  const preview = document.getElementById('reward-image-preview');
+  preview.style.display = 'none';
+  if (track && track.rewardImageKey) {
+    loadImage(track.rewardImageKey).then(blob => {
+      if (blob) {
+        preview.src = URL.createObjectURL(blob);
+        preview.style.display = 'block';
+      }
+    });
+  }
+
+  document.getElementById('reward-config-overlay').classList.add('open');
+}
+
+document.getElementById('stepper-minus').addEventListener('click', () => {
+  configStepperValue = Math.max(2, configStepperValue - 1);
+  document.getElementById('stepper-value').textContent = configStepperValue;
+});
+
+document.getElementById('stepper-plus').addEventListener('click', () => {
+  configStepperValue = Math.min(10, configStepperValue + 1);
+  document.getElementById('stepper-value').textContent = configStepperValue;
+});
+
+document.getElementById('timer-toggle').addEventListener('change', e => {
+  document.getElementById('timer-duration-row').classList.toggle('visible', e.target.checked);
+});
+
+document.getElementById('btn-reward-upload').addEventListener('click', () => {
+  document.getElementById('reward-image-input').click();
+});
+
+document.getElementById('reward-image-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const trackId = editingTrackId || 'reward-temp';
+  const imageKey = 'reward-' + trackId;
+  await saveImage(imageKey, file);
+  const preview = document.getElementById('reward-image-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  e.target.value = '';
+});
+
+document.getElementById('btn-reward-clear-img').addEventListener('click', async () => {
+  const trackId = editingTrackId || 'reward-temp';
+  const imageKey = 'reward-' + trackId;
+  await deleteImage(imageKey);
+  const preview = document.getElementById('reward-image-preview');
+  preview.style.display = 'none';
+  preview.src = '';
+});
+
+document.getElementById('btn-reward-save').addEventListener('click', async () => {
+  const taskLabel = document.getElementById('reward-task-input').value.trim();
+  const rewardLabel = document.getElementById('reward-label-input').value.trim();
+  if (!taskLabel || !rewardLabel) {
+    showToast('Please fill in task and reward');
+    return;
+  }
+
+  const timerEnabled = document.getElementById('timer-toggle').checked;
+  const timerDuration = parseInt(document.getElementById('timer-duration-select').value, 10);
+
+  if (editingTrackId) {
+    const track = rewardTracks.find(t => t.id === editingTrackId);
+    if (track) {
+      track.taskLabel = taskLabel;
+      track.rewardLabel = rewardLabel;
+      track.targetCount = Math.max(configStepperValue, track.currentCount);
+      track.timerEnabled = timerEnabled;
+      track.timerDuration = timerDuration;
+      track.rewardImageKey = 'reward-' + track.id;
+      await saveTrack(track);
+    }
+  } else {
+    const id = 'track-' + Date.now();
+    // Move temp image to permanent key
+    const tempKey = 'reward-reward-temp';
+    const permKey = 'reward-' + id;
+    const tempBlob = await loadImage(tempKey);
+    if (tempBlob) {
+      await saveImage(permKey, tempBlob);
+      await deleteImage(tempKey);
+    }
+
+    const newTrack = {
+      id,
+      taskLabel,
+      targetCount: configStepperValue,
+      currentCount: 0,
+      rewardLabel,
+      rewardImageKey: permKey,
+      timerEnabled,
+      timerDuration,
+      timerStartedAt: null,
+      status: 'active',
+      position: rewardTracks.length,
+      createdAt: Date.now(),
+    };
+    rewardTracks.push(newTrack);
+    activeTrackId = id;
+    await saveTrack(newTrack);
+  }
+
+  document.getElementById('reward-config-overlay').classList.remove('open');
+  editingTrackId = null;
+  renderRewards();
+  showToast('Track saved');
+});
+
+document.getElementById('btn-reward-cancel').addEventListener('click', () => {
+  document.getElementById('reward-config-overlay').classList.remove('open');
+  editingTrackId = null;
+});
+
+document.getElementById('reward-config-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('btn-reward-cancel').click();
+  }
+});
+
+document.getElementById('btn-reward-delete').addEventListener('click', async () => {
+  if (!editingTrackId) return;
+  if (!confirm('Delete this reward track?')) return;
+  const imageKey = 'reward-' + editingTrackId;
+  await deleteImage(imageKey);
+  await deleteTrackFromDB(editingTrackId);
+  rewardTracks = rewardTracks.filter(t => t.id !== editingTrackId);
+  if (activeTrackId === editingTrackId) {
+    activeTrackId = rewardTracks.length > 0 ? rewardTracks[0].id : null;
+  }
+  document.getElementById('reward-config-overlay').classList.remove('open');
+  editingTrackId = null;
+  renderRewards();
+  showToast('Track deleted');
+});
+
+document.getElementById('btn-new-track').addEventListener('click', () => {
+  if (rewardTracks.length >= 5) {
+    showToast('Maximum 5 tracks');
+    return;
+  }
+  openRewardConfig(null);
+});
+
+document.getElementById('btn-edit-track').addEventListener('click', () => {
+  if (!activeTrackId) return;
+  openRewardConfig(activeTrackId);
+});
+
+document.getElementById('btn-reset-track').addEventListener('click', async () => {
+  const track = getActiveTrack();
+  if (!track) return;
+  if (!confirm('Reset this track? Progress will start over.')) return;
+  track.currentCount = 0;
+  track.status = 'active';
+  track.timerStartedAt = null;
+  await saveTrack(track);
+  renderRewards();
+  showToast('Track reset');
+});
+
 // ── Register Service Worker ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
@@ -1022,6 +3815,8 @@ if ('serviceWorker' in navigator) {
 
 // ── Start ──
 init();
+initRewards();
+initSchedules();
 </script>
 </body>
 </html>
