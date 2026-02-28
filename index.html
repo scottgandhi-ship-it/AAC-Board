@@ -103,9 +103,10 @@ body {
 #grid-container {
   flex: 1;
   padding: 8px;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 #folder-label {
@@ -1920,54 +1921,301 @@ body {
 <script>
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
-  // Home grid
-  { id: 'i',       label: 'I',       color: 'yellow', type: 'core',   folderId: null, position: 0 },
-  { id: 'want',    label: 'want',    color: 'green',  type: 'core',   folderId: null, position: 1 },
-  { id: 'more',    label: 'more',    color: 'blue',   type: 'core',   folderId: null, position: 2 },
-  { id: 'help',    label: 'help',    color: 'green',  type: 'core',   folderId: null, position: 3 },
-  { id: 'go',      label: 'go',      color: 'green',  type: 'core',   folderId: null, position: 4 },
-  { id: 'stop',    label: 'stop',    color: 'red',    type: 'core',   folderId: null, position: 5 },
-  { id: 'like',    label: 'like',    color: 'green',  type: 'core',   folderId: null, position: 6 },
-  { id: 'no',      label: 'no',      color: 'red',    type: 'core',   folderId: null, position: 7 },
-  { id: 'yes',     label: 'yes',     color: 'green',  type: 'core',   folderId: null, position: 8 },
-  { id: 'hi',      label: 'hi',      color: 'pink',   type: 'core',   folderId: null, position: 9 },
-  { id: 'bye',     label: 'bye',     color: 'pink',   type: 'core',   folderId: null, position: 10 },
-  { id: 'please',  label: 'please',  color: 'pink',   type: 'core',   folderId: null, position: 11 },
-  { id: 'happy',   label: 'happy',   color: 'blue',   type: 'core',   folderId: null, position: 12 },
-  { id: 'sad',     label: 'sad',     color: 'blue',   type: 'core',   folderId: null, position: 13 },
-  { id: 'folder-food',   label: 'Food',   color: 'orange', type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-people', label: 'People', color: 'orange', type: 'folder', folderId: null, position: 15 },
+  // ── Home Grid (16 Category Folders, 4x4) ──
+  { id: 'folder-general',   label: 'General',   color: 'orange', type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
+  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-colours',   label: 'Colours',   color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 15 },
 
-  // Food folder
-  { id: 'apple',   label: 'apple',   color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
-  { id: 'banana',  label: 'banana',  color: 'orange', type: 'fringe', folderId: 'food', position: 1 },
-  { id: 'cookie',  label: 'cookie',  color: 'orange', type: 'fringe', folderId: 'food', position: 2 },
-  { id: 'milk',    label: 'milk',    color: 'orange', type: 'fringe', folderId: 'food', position: 3 },
-  { id: 'water',   label: 'water',   color: 'orange', type: 'fringe', folderId: 'food', position: 4 },
-  { id: 'juice',   label: 'juice',   color: 'orange', type: 'fringe', folderId: 'food', position: 5 },
-  { id: 'bread',   label: 'bread',   color: 'orange', type: 'fringe', folderId: 'food', position: 6 },
-  { id: 'cheese',  label: 'cheese',  color: 'orange', type: 'fringe', folderId: 'food', position: 7 },
-  { id: 'cracker', label: 'cracker', color: 'orange', type: 'fringe', folderId: 'food', position: 8 },
-  { id: 'pizza',   label: 'pizza',   color: 'orange', type: 'fringe', folderId: 'food', position: 9 },
-  { id: 'chicken', label: 'chicken', color: 'orange', type: 'fringe', folderId: 'food', position: 10 },
-  { id: 'cereal',  label: 'cereal',  color: 'orange', type: 'fringe', folderId: 'food', position: 11 },
-  { id: 'snack',   label: 'snack',   color: 'orange', type: 'fringe', folderId: 'food', position: 12 },
-  { id: 'hungry',  label: 'hungry',  color: 'blue',   type: 'fringe', folderId: 'food', position: 13 },
-  { id: 'yummy',   label: 'yummy',   color: 'blue',   type: 'fringe', folderId: 'food', position: 14 },
+  // ── General (Core Phrases) ──
+  { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
+  { id: 'gen-want',       label: 'want',       color: 'green',  type: 'fringe', folderId: 'general', position: 1 },
+  { id: 'gen-dont-want',  label: "don't want", color: 'red',    type: 'fringe', folderId: 'general', position: 2 },
+  { id: 'gen-need',       label: 'need',       color: 'green',  type: 'fringe', folderId: 'general', position: 3 },
+  { id: 'gen-help',       label: 'help',       color: 'green',  type: 'fringe', folderId: 'general', position: 4 },
+  { id: 'gen-dont-know',  label: "don't know", color: 'red',    type: 'fringe', folderId: 'general', position: 5 },
+  { id: 'gen-yes',        label: 'yes',        color: 'green',  type: 'fringe', folderId: 'general', position: 6 },
+  { id: 'gen-no',         label: 'no',         color: 'red',    type: 'fringe', folderId: 'general', position: 7 },
+  { id: 'gen-ok',         label: 'OK',         color: 'pink',   type: 'fringe', folderId: 'general', position: 8 },
+  { id: 'gen-im-fine',    label: "I'm fine",   color: 'pink',   type: 'fringe', folderId: 'general', position: 9 },
+  { id: 'gen-please',     label: 'please',     color: 'pink',   type: 'fringe', folderId: 'general', position: 10 },
+  { id: 'gen-thank-you',  label: 'thank you',  color: 'pink',   type: 'fringe', folderId: 'general', position: 11 },
+  { id: 'gen-hi',         label: 'hi',         color: 'pink',   type: 'fringe', folderId: 'general', position: 12 },
+  { id: 'gen-bye',        label: 'bye',        color: 'pink',   type: 'fringe', folderId: 'general', position: 13 },
+  { id: 'gen-more',       label: 'more',       color: 'blue',   type: 'fringe', folderId: 'general', position: 14 },
+  { id: 'gen-stop',       label: 'stop',       color: 'red',    type: 'fringe', folderId: 'general', position: 15 },
+  { id: 'gen-go',         label: 'go',         color: 'green',  type: 'fringe', folderId: 'general', position: 16 },
+  { id: 'gen-like',       label: 'like',       color: 'green',  type: 'fringe', folderId: 'general', position: 17 },
+  { id: 'gen-all-done',   label: 'all done',   color: 'red',    type: 'fringe', folderId: 'general', position: 18 },
+  { id: 'gen-wait',       label: 'wait',       color: 'green',  type: 'fringe', folderId: 'general', position: 19 },
+  { id: 'gen-look',       label: 'look',       color: 'green',  type: 'fringe', folderId: 'general', position: 20 },
+  { id: 'gen-my-turn',    label: 'my turn',    color: 'yellow', type: 'fringe', folderId: 'general', position: 21 },
+  { id: 'gen-sorry',      label: 'sorry',      color: 'pink',   type: 'fringe', folderId: 'general', position: 22 },
+  { id: 'gen-excuse-me',  label: 'excuse me',  color: 'pink',   type: 'fringe', folderId: 'general', position: 23 },
 
-  // People folder
-  { id: 'mom',     label: 'mom',     color: 'orange', type: 'fringe', folderId: 'people', position: 0 },
-  { id: 'dad',     label: 'dad',     color: 'orange', type: 'fringe', folderId: 'people', position: 1 },
-  { id: 'sister',  label: 'sister',  color: 'orange', type: 'fringe', folderId: 'people', position: 2 },
-  { id: 'brother', label: 'brother', color: 'orange', type: 'fringe', folderId: 'people', position: 3 },
-  { id: 'grandma', label: 'grandma', color: 'orange', type: 'fringe', folderId: 'people', position: 4 },
-  { id: 'grandpa', label: 'grandpa', color: 'orange', type: 'fringe', folderId: 'people', position: 5 },
-  { id: 'teacher', label: 'teacher', color: 'orange', type: 'fringe', folderId: 'people', position: 6 },
-  { id: 'friend',  label: 'friend',  color: 'orange', type: 'fringe', folderId: 'people', position: 7 },
-  { id: 'baby',    label: 'baby',    color: 'orange', type: 'fringe', folderId: 'people', position: 8 },
-  { id: 'dog',     label: 'dog',     color: 'orange', type: 'fringe', folderId: 'people', position: 9 },
-  { id: 'cat',     label: 'cat',     color: 'orange', type: 'fringe', folderId: 'people', position: 10 },
+  // ── Food (child-friendly) ──
+  { id: 'food-apple',     label: 'apple',          color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
+  { id: 'food-banana',    label: 'banana',         color: 'orange', type: 'fringe', folderId: 'food', position: 1 },
+  { id: 'food-cookie',    label: 'cookie',         color: 'orange', type: 'fringe', folderId: 'food', position: 2 },
+  { id: 'food-crackers',  label: 'crackers',       color: 'orange', type: 'fringe', folderId: 'food', position: 3 },
+  { id: 'food-pizza',     label: 'pizza',          color: 'orange', type: 'fringe', folderId: 'food', position: 4 },
+  { id: 'food-nuggets',   label: 'chicken nuggets',color: 'orange', type: 'fringe', folderId: 'food', position: 5 },
+  { id: 'food-pasta',     label: 'pasta',          color: 'orange', type: 'fringe', folderId: 'food', position: 6 },
+  { id: 'food-sandwich',  label: 'sandwich',       color: 'orange', type: 'fringe', folderId: 'food', position: 7 },
+  { id: 'food-rice',      label: 'rice',           color: 'orange', type: 'fringe', folderId: 'food', position: 8 },
+  { id: 'food-fries',     label: 'french fries',   color: 'orange', type: 'fringe', folderId: 'food', position: 9 },
+  { id: 'food-grilled-ch',label: 'grilled cheese', color: 'orange', type: 'fringe', folderId: 'food', position: 10 },
+  { id: 'food-pancakes',  label: 'pancakes',       color: 'orange', type: 'fringe', folderId: 'food', position: 11 },
+  { id: 'food-yogurt',    label: 'yogurt',         color: 'orange', type: 'fringe', folderId: 'food', position: 12 },
+  { id: 'food-fruit-snk', label: 'fruit snacks',   color: 'orange', type: 'fringe', folderId: 'food', position: 13 },
+  { id: 'food-ice-cream', label: 'ice cream',      color: 'orange', type: 'fringe', folderId: 'food', position: 14 },
+  { id: 'food-cereal',    label: 'cereal',         color: 'orange', type: 'fringe', folderId: 'food', position: 15 },
+  { id: 'food-soup',      label: 'soup',           color: 'orange', type: 'fringe', folderId: 'food', position: 16 },
+  { id: 'food-bread',     label: 'bread',          color: 'orange', type: 'fringe', folderId: 'food', position: 17 },
+  { id: 'food-cheese',    label: 'cheese',         color: 'orange', type: 'fringe', folderId: 'food', position: 18 },
+  { id: 'food-strawberry',label: 'strawberry',     color: 'orange', type: 'fringe', folderId: 'food', position: 19 },
+  { id: 'food-grapes',    label: 'grapes',         color: 'orange', type: 'fringe', folderId: 'food', position: 20 },
+  { id: 'food-eggs',      label: 'eggs',           color: 'orange', type: 'fringe', folderId: 'food', position: 21 },
+  { id: 'food-cake',      label: 'cake',           color: 'orange', type: 'fringe', folderId: 'food', position: 22 },
+  { id: 'food-hungry',    label: 'hungry',         color: 'blue',   type: 'fringe', folderId: 'food', position: 23 },
+  { id: 'food-yummy',     label: 'yummy',          color: 'blue',   type: 'fringe', folderId: 'food', position: 24 },
+
+  // ── Drinks (child-friendly, no coffee) ──
+  { id: 'drink-water',       label: 'water',          color: 'orange', type: 'fringe', folderId: 'drinks', position: 0 },
+  { id: 'drink-milk',        label: 'milk',           color: 'orange', type: 'fringe', folderId: 'drinks', position: 1 },
+  { id: 'drink-choc-milk',   label: 'chocolate milk', color: 'orange', type: 'fringe', folderId: 'drinks', position: 2 },
+  { id: 'drink-apple-juice', label: 'apple juice',    color: 'orange', type: 'fringe', folderId: 'drinks', position: 3 },
+  { id: 'drink-orange-juice',label: 'orange juice',   color: 'orange', type: 'fringe', folderId: 'drinks', position: 4 },
+  { id: 'drink-lemonade',    label: 'lemonade',       color: 'orange', type: 'fringe', folderId: 'drinks', position: 5 },
+  { id: 'drink-hot-choc',    label: 'hot chocolate',  color: 'orange', type: 'fringe', folderId: 'drinks', position: 6 },
+  { id: 'drink-smoothie',    label: 'smoothie',       color: 'orange', type: 'fringe', folderId: 'drinks', position: 7 },
+  { id: 'drink-thirsty',     label: 'thirsty',        color: 'blue',   type: 'fringe', folderId: 'drinks', position: 8 },
+
+  // ── People ──
+  { id: 'ppl-mom',      label: 'mom',      color: 'orange', type: 'fringe', folderId: 'people', position: 0 },
+  { id: 'ppl-dad',      label: 'dad',      color: 'orange', type: 'fringe', folderId: 'people', position: 1 },
+  { id: 'ppl-sister',   label: 'sister',   color: 'orange', type: 'fringe', folderId: 'people', position: 2 },
+  { id: 'ppl-brother',  label: 'brother',  color: 'orange', type: 'fringe', folderId: 'people', position: 3 },
+  { id: 'ppl-grandma',  label: 'grandma',  color: 'orange', type: 'fringe', folderId: 'people', position: 4 },
+  { id: 'ppl-grandpa',  label: 'grandpa',  color: 'orange', type: 'fringe', folderId: 'people', position: 5 },
+  { id: 'ppl-teacher',  label: 'teacher',  color: 'orange', type: 'fringe', folderId: 'people', position: 6 },
+  { id: 'ppl-friend',   label: 'friend',   color: 'orange', type: 'fringe', folderId: 'people', position: 7 },
+  { id: 'ppl-baby',     label: 'baby',     color: 'orange', type: 'fringe', folderId: 'people', position: 8 },
+  { id: 'ppl-dog',      label: 'dog',      color: 'orange', type: 'fringe', folderId: 'people', position: 9 },
+  { id: 'ppl-cat',      label: 'cat',      color: 'orange', type: 'fringe', folderId: 'people', position: 10 },
+  { id: 'ppl-doctor',   label: 'doctor',   color: 'orange', type: 'fringe', folderId: 'people', position: 11 },
+  { id: 'ppl-me',       label: 'me',       color: 'yellow', type: 'fringe', folderId: 'people', position: 12 },
+  { id: 'ppl-you',      label: 'you',      color: 'yellow', type: 'fringe', folderId: 'people', position: 13 },
+
+  // ── Clothes ──
+  { id: 'clo-shirt',      label: 'shirt',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 0 },
+  { id: 'clo-pants',      label: 'pants',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 1 },
+  { id: 'clo-shoes',      label: 'shoes',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 2 },
+  { id: 'clo-socks',      label: 'socks',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 3 },
+  { id: 'clo-underwear',  label: 'underwear',  color: 'orange', type: 'fringe', folderId: 'clothes', position: 4 },
+  { id: 'clo-jacket',     label: 'jacket',     color: 'orange', type: 'fringe', folderId: 'clothes', position: 5 },
+  { id: 'clo-hat',        label: 'hat',        color: 'orange', type: 'fringe', folderId: 'clothes', position: 6 },
+  { id: 'clo-pajamas',    label: 'pajamas',    color: 'orange', type: 'fringe', folderId: 'clothes', position: 7 },
+  { id: 'clo-dress',      label: 'dress',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 8 },
+  { id: 'clo-shorts',     label: 'shorts',     color: 'orange', type: 'fringe', folderId: 'clothes', position: 9 },
+  { id: 'clo-boots',      label: 'boots',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 10 },
+  { id: 'clo-gloves',     label: 'gloves',     color: 'orange', type: 'fringe', folderId: 'clothes', position: 11 },
+  { id: 'clo-coat',       label: 'coat',       color: 'orange', type: 'fringe', folderId: 'clothes', position: 12 },
+  { id: 'clo-swimsuit',   label: 'swimsuit',   color: 'orange', type: 'fringe', folderId: 'clothes', position: 13 },
+  { id: 'clo-diaper',     label: 'diaper',     color: 'orange', type: 'fringe', folderId: 'clothes', position: 14 },
+  { id: 'clo-scarf',      label: 'scarf',      color: 'orange', type: 'fringe', folderId: 'clothes', position: 15 },
+
+  // ── My Body (renamed from Disease) ──
+  { id: 'body-head',      label: 'head',      color: 'orange', type: 'fringe', folderId: 'body', position: 0 },
+  { id: 'body-tummy',     label: 'tummy',     color: 'orange', type: 'fringe', folderId: 'body', position: 1 },
+  { id: 'body-arm',       label: 'arm',       color: 'orange', type: 'fringe', folderId: 'body', position: 2 },
+  { id: 'body-leg',       label: 'leg',       color: 'orange', type: 'fringe', folderId: 'body', position: 3 },
+  { id: 'body-hand',      label: 'hand',      color: 'orange', type: 'fringe', folderId: 'body', position: 4 },
+  { id: 'body-foot',      label: 'foot',      color: 'orange', type: 'fringe', folderId: 'body', position: 5 },
+  { id: 'body-eyes',      label: 'eyes',      color: 'orange', type: 'fringe', folderId: 'body', position: 6 },
+  { id: 'body-ears',      label: 'ears',      color: 'orange', type: 'fringe', folderId: 'body', position: 7 },
+  { id: 'body-mouth',     label: 'mouth',     color: 'orange', type: 'fringe', folderId: 'body', position: 8 },
+  { id: 'body-nose',      label: 'nose',      color: 'orange', type: 'fringe', folderId: 'body', position: 9 },
+  { id: 'body-teeth',     label: 'teeth',     color: 'orange', type: 'fringe', folderId: 'body', position: 10 },
+  { id: 'body-back',      label: 'back',      color: 'orange', type: 'fringe', folderId: 'body', position: 11 },
+  { id: 'body-hurts',     label: 'hurts',     color: 'red',    type: 'fringe', folderId: 'body', position: 12 },
+  { id: 'body-sick',      label: 'sick',      color: 'red',    type: 'fringe', folderId: 'body', position: 13 },
+  { id: 'body-fever',     label: 'fever',     color: 'red',    type: 'fringe', folderId: 'body', position: 14 },
+  { id: 'body-medicine',  label: 'medicine',  color: 'orange', type: 'fringe', folderId: 'body', position: 15 },
+  { id: 'body-bathroom',  label: 'bathroom',  color: 'orange', type: 'fringe', folderId: 'body', position: 16 },
+  { id: 'body-itchy',     label: 'itchy',     color: 'blue',   type: 'fringe', folderId: 'body', position: 17 },
+  { id: 'body-dizzy',     label: 'dizzy',     color: 'blue',   type: 'fringe', folderId: 'body', position: 18 },
+  { id: 'body-too-loud',  label: 'too loud',  color: 'blue',   type: 'fringe', folderId: 'body', position: 19 },
+  { id: 'body-too-bright',label: 'too bright',color: 'blue',   type: 'fringe', folderId: 'body', position: 20 },
+  { id: 'body-allergic',  label: 'allergic',  color: 'red',    type: 'fringe', folderId: 'body', position: 21 },
+
+  // ── Feelings ──
+  { id: 'feel-happy',        label: 'happy',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 0 },
+  { id: 'feel-sad',          label: 'sad',         color: 'blue', type: 'fringe', folderId: 'feelings', position: 1 },
+  { id: 'feel-angry',        label: 'angry',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 2 },
+  { id: 'feel-scared',       label: 'scared',      color: 'blue', type: 'fringe', folderId: 'feelings', position: 3 },
+  { id: 'feel-tired',        label: 'tired',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 4 },
+  { id: 'feel-excited',      label: 'excited',     color: 'blue', type: 'fringe', folderId: 'feelings', position: 5 },
+  { id: 'feel-frustrated',   label: 'frustrated',  color: 'blue', type: 'fringe', folderId: 'feelings', position: 6 },
+  { id: 'feel-calm',         label: 'calm',        color: 'blue', type: 'fringe', folderId: 'feelings', position: 7 },
+  { id: 'feel-nervous',      label: 'nervous',     color: 'blue', type: 'fringe', folderId: 'feelings', position: 8 },
+  { id: 'feel-silly',        label: 'silly',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 9 },
+  { id: 'feel-proud',        label: 'proud',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 10 },
+  { id: 'feel-bored',        label: 'bored',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 11 },
+  { id: 'feel-confused',     label: 'confused',    color: 'blue', type: 'fringe', folderId: 'feelings', position: 12 },
+  { id: 'feel-love',         label: 'love',        color: 'blue', type: 'fringe', folderId: 'feelings', position: 13 },
+  { id: 'feel-worried',      label: 'worried',     color: 'blue', type: 'fringe', folderId: 'feelings', position: 14 },
+  { id: 'feel-overwhelmed',  label: 'overwhelmed', color: 'blue', type: 'fringe', folderId: 'feelings', position: 15 },
+  { id: 'feel-lonely',       label: 'lonely',      color: 'blue', type: 'fringe', folderId: 'feelings', position: 16 },
+  { id: 'feel-shy',          label: 'shy',         color: 'blue', type: 'fringe', folderId: 'feelings', position: 17 },
+  { id: 'feel-safe',         label: 'safe',        color: 'blue', type: 'fringe', folderId: 'feelings', position: 18 },
+  { id: 'feel-need-break',   label: 'need a break',color: 'red',  type: 'fringe', folderId: 'feelings', position: 19 },
+
+  // ── Actions (Verbs) ──
+  { id: 'act-eat',    label: 'eat',    color: 'green', type: 'fringe', folderId: 'actions', position: 0 },
+  { id: 'act-drink',  label: 'drink',  color: 'green', type: 'fringe', folderId: 'actions', position: 1 },
+  { id: 'act-play',   label: 'play',   color: 'green', type: 'fringe', folderId: 'actions', position: 2 },
+  { id: 'act-read',   label: 'read',   color: 'green', type: 'fringe', folderId: 'actions', position: 3 },
+  { id: 'act-run',    label: 'run',    color: 'green', type: 'fringe', folderId: 'actions', position: 4 },
+  { id: 'act-jump',   label: 'jump',   color: 'green', type: 'fringe', folderId: 'actions', position: 5 },
+  { id: 'act-sit',    label: 'sit',    color: 'green', type: 'fringe', folderId: 'actions', position: 6 },
+  { id: 'act-stand',  label: 'stand',  color: 'green', type: 'fringe', folderId: 'actions', position: 7 },
+  { id: 'act-walk',   label: 'walk',   color: 'green', type: 'fringe', folderId: 'actions', position: 8 },
+  { id: 'act-sleep',  label: 'sleep',  color: 'green', type: 'fringe', folderId: 'actions', position: 9 },
+  { id: 'act-wash',   label: 'wash',   color: 'green', type: 'fringe', folderId: 'actions', position: 10 },
+  { id: 'act-open',   label: 'open',   color: 'green', type: 'fringe', folderId: 'actions', position: 11 },
+  { id: 'act-close',  label: 'close',  color: 'green', type: 'fringe', folderId: 'actions', position: 12 },
+  { id: 'act-push',   label: 'push',   color: 'green', type: 'fringe', folderId: 'actions', position: 13 },
+  { id: 'act-pull',   label: 'pull',   color: 'green', type: 'fringe', folderId: 'actions', position: 14 },
+  { id: 'act-give',   label: 'give',   color: 'green', type: 'fringe', folderId: 'actions', position: 15 },
+  { id: 'act-listen', label: 'listen', color: 'green', type: 'fringe', folderId: 'actions', position: 16 },
+  { id: 'act-draw',   label: 'draw',   color: 'green', type: 'fringe', folderId: 'actions', position: 17 },
+  { id: 'act-sing',   label: 'sing',   color: 'green', type: 'fringe', folderId: 'actions', position: 18 },
+  { id: 'act-dance',  label: 'dance',  color: 'green', type: 'fringe', folderId: 'actions', position: 19 },
+  { id: 'act-hug',    label: 'hug',    color: 'green', type: 'fringe', folderId: 'actions', position: 20 },
+  { id: 'act-throw',  label: 'throw',  color: 'green', type: 'fringe', folderId: 'actions', position: 21 },
+  { id: 'act-share',  label: 'share',  color: 'green', type: 'fringe', folderId: 'actions', position: 22 },
+  { id: 'act-build',  label: 'build',  color: 'green', type: 'fringe', folderId: 'actions', position: 23 },
+
+  // ── Toys ──
+  { id: 'toy-ball',       label: 'ball',       color: 'orange', type: 'fringe', folderId: 'toys', position: 0 },
+  { id: 'toy-blocks',     label: 'blocks',     color: 'orange', type: 'fringe', folderId: 'toys', position: 1 },
+  { id: 'toy-doll',       label: 'doll',       color: 'orange', type: 'fringe', folderId: 'toys', position: 2 },
+  { id: 'toy-car',        label: 'car',        color: 'orange', type: 'fringe', folderId: 'toys', position: 3 },
+  { id: 'toy-train',      label: 'train',      color: 'orange', type: 'fringe', folderId: 'toys', position: 4 },
+  { id: 'toy-puzzle',     label: 'puzzle',     color: 'orange', type: 'fringe', folderId: 'toys', position: 5 },
+  { id: 'toy-bubbles',    label: 'bubbles',    color: 'orange', type: 'fringe', folderId: 'toys', position: 6 },
+  { id: 'toy-crayons',    label: 'crayons',    color: 'orange', type: 'fringe', folderId: 'toys', position: 7 },
+  { id: 'toy-book',       label: 'book',       color: 'orange', type: 'fringe', folderId: 'toys', position: 8 },
+  { id: 'toy-tablet',     label: 'tablet',     color: 'orange', type: 'fringe', folderId: 'toys', position: 9 },
+  { id: 'toy-swing',      label: 'swing',      color: 'orange', type: 'fringe', folderId: 'toys', position: 10 },
+  { id: 'toy-slide',      label: 'slide',      color: 'orange', type: 'fringe', folderId: 'toys', position: 11 },
+  { id: 'toy-bike',       label: 'bike',       color: 'orange', type: 'fringe', folderId: 'toys', position: 12 },
+  { id: 'toy-teddy',      label: 'teddy bear', color: 'orange', type: 'fringe', folderId: 'toys', position: 13 },
+  { id: 'toy-playdoh',    label: 'play-doh',   color: 'orange', type: 'fringe', folderId: 'toys', position: 14 },
+  { id: 'toy-stickers',   label: 'stickers',   color: 'orange', type: 'fringe', folderId: 'toys', position: 15 },
+  { id: 'toy-lego',       label: 'Lego',       color: 'orange', type: 'fringe', folderId: 'toys', position: 16 },
+  { id: 'toy-game',       label: 'game',       color: 'orange', type: 'fringe', folderId: 'toys', position: 17 },
+  { id: 'toy-balloon',    label: 'balloon',    color: 'orange', type: 'fringe', folderId: 'toys', position: 18 },
+  { id: 'toy-trampoline', label: 'trampoline', color: 'orange', type: 'fringe', folderId: 'toys', position: 19 },
+
+  // ── Places ──
+  { id: 'plc-home',       label: 'home',       color: 'orange', type: 'fringe', folderId: 'places', position: 0 },
+  { id: 'plc-school',     label: 'school',     color: 'orange', type: 'fringe', folderId: 'places', position: 1 },
+  { id: 'plc-bathroom',   label: 'bathroom',   color: 'orange', type: 'fringe', folderId: 'places', position: 2 },
+  { id: 'plc-park',       label: 'park',       color: 'orange', type: 'fringe', folderId: 'places', position: 3 },
+  { id: 'plc-outside',    label: 'outside',    color: 'orange', type: 'fringe', folderId: 'places', position: 4 },
+  { id: 'plc-inside',     label: 'inside',     color: 'orange', type: 'fringe', folderId: 'places', position: 5 },
+  { id: 'plc-store',      label: 'store',      color: 'orange', type: 'fringe', folderId: 'places', position: 6 },
+  { id: 'plc-car',        label: 'car',        color: 'orange', type: 'fringe', folderId: 'places', position: 7 },
+  { id: 'plc-bedroom',    label: 'bedroom',    color: 'orange', type: 'fringe', folderId: 'places', position: 8 },
+  { id: 'plc-kitchen',    label: 'kitchen',    color: 'orange', type: 'fringe', folderId: 'places', position: 9 },
+  { id: 'plc-playground', label: 'playground', color: 'orange', type: 'fringe', folderId: 'places', position: 10 },
+  { id: 'plc-hospital',   label: 'hospital',   color: 'orange', type: 'fringe', folderId: 'places', position: 11 },
+  { id: 'plc-library',    label: 'library',    color: 'orange', type: 'fringe', folderId: 'places', position: 12 },
+  { id: 'plc-pool',       label: 'pool',       color: 'orange', type: 'fringe', folderId: 'places', position: 13 },
+
+  // ── Colours ──
+  { id: 'clr-red',     label: 'red',     color: 'blue', type: 'fringe', folderId: 'colours', position: 0 },
+  { id: 'clr-blue',    label: 'blue',    color: 'blue', type: 'fringe', folderId: 'colours', position: 1 },
+  { id: 'clr-yellow',  label: 'yellow',  color: 'blue', type: 'fringe', folderId: 'colours', position: 2 },
+  { id: 'clr-green',   label: 'green',   color: 'blue', type: 'fringe', folderId: 'colours', position: 3 },
+  { id: 'clr-orange',  label: 'orange',  color: 'blue', type: 'fringe', folderId: 'colours', position: 4 },
+  { id: 'clr-purple',  label: 'purple',  color: 'blue', type: 'fringe', folderId: 'colours', position: 5 },
+  { id: 'clr-pink',    label: 'pink',    color: 'blue', type: 'fringe', folderId: 'colours', position: 6 },
+  { id: 'clr-black',   label: 'black',   color: 'blue', type: 'fringe', folderId: 'colours', position: 7 },
+  { id: 'clr-white',   label: 'white',   color: 'blue', type: 'fringe', folderId: 'colours', position: 8 },
+  { id: 'clr-brown',   label: 'brown',   color: 'blue', type: 'fringe', folderId: 'colours', position: 9 },
+  { id: 'clr-gray',    label: 'gray',    color: 'blue', type: 'fringe', folderId: 'colours', position: 10 },
+  { id: 'clr-rainbow', label: 'rainbow', color: 'blue', type: 'fringe', folderId: 'colours', position: 11 },
+
+  // ── Shapes ──
+  { id: 'shp-circle',    label: 'circle',    color: 'blue', type: 'fringe', folderId: 'shapes', position: 0 },
+  { id: 'shp-square',    label: 'square',    color: 'blue', type: 'fringe', folderId: 'shapes', position: 1 },
+  { id: 'shp-triangle',  label: 'triangle',  color: 'blue', type: 'fringe', folderId: 'shapes', position: 2 },
+  { id: 'shp-rectangle', label: 'rectangle', color: 'blue', type: 'fringe', folderId: 'shapes', position: 3 },
+  { id: 'shp-star',      label: 'star',      color: 'blue', type: 'fringe', folderId: 'shapes', position: 4 },
+  { id: 'shp-heart',     label: 'heart',     color: 'blue', type: 'fringe', folderId: 'shapes', position: 5 },
+  { id: 'shp-diamond',   label: 'diamond',   color: 'blue', type: 'fringe', folderId: 'shapes', position: 6 },
+  { id: 'shp-oval',      label: 'oval',      color: 'blue', type: 'fringe', folderId: 'shapes', position: 7 },
+
+  // ── Questions ──
+  { id: 'q-what',   label: 'what',   color: 'yellow', type: 'fringe', folderId: 'questions', position: 0 },
+  { id: 'q-where',  label: 'where',  color: 'yellow', type: 'fringe', folderId: 'questions', position: 1 },
+  { id: 'q-when',   label: 'when',   color: 'yellow', type: 'fringe', folderId: 'questions', position: 2 },
+  { id: 'q-who',    label: 'who',    color: 'yellow', type: 'fringe', folderId: 'questions', position: 3 },
+  { id: 'q-why',    label: 'why',    color: 'yellow', type: 'fringe', folderId: 'questions', position: 4 },
+  { id: 'q-how',    label: 'how',    color: 'yellow', type: 'fringe', folderId: 'questions', position: 5 },
+  { id: 'q-can-i',  label: 'can I',  color: 'yellow', type: 'fringe', folderId: 'questions', position: 6 },
+  { id: 'q-is-it',  label: 'is it',  color: 'yellow', type: 'fringe', folderId: 'questions', position: 7 },
+  { id: 'q-do-you', label: 'do you', color: 'yellow', type: 'fringe', folderId: 'questions', position: 8 },
+  { id: 'q-which',  label: 'which',  color: 'yellow', type: 'fringe', folderId: 'questions', position: 9 },
+
+  // ── Things (daily objects) ──
+  { id: 'thg-cup',        label: 'cup',        color: 'orange', type: 'fringe', folderId: 'things', position: 0 },
+  { id: 'thg-plate',      label: 'plate',      color: 'orange', type: 'fringe', folderId: 'things', position: 1 },
+  { id: 'thg-spoon',      label: 'spoon',      color: 'orange', type: 'fringe', folderId: 'things', position: 2 },
+  { id: 'thg-fork',       label: 'fork',       color: 'orange', type: 'fringe', folderId: 'things', position: 3 },
+  { id: 'thg-napkin',     label: 'napkin',     color: 'orange', type: 'fringe', folderId: 'things', position: 4 },
+  { id: 'thg-blanket',    label: 'blanket',    color: 'orange', type: 'fringe', folderId: 'things', position: 5 },
+  { id: 'thg-pillow',     label: 'pillow',     color: 'orange', type: 'fringe', folderId: 'things', position: 6 },
+  { id: 'thg-toothbrush', label: 'toothbrush', color: 'orange', type: 'fringe', folderId: 'things', position: 7 },
+  { id: 'thg-towel',      label: 'towel',      color: 'orange', type: 'fringe', folderId: 'things', position: 8 },
+  { id: 'thg-backpack',   label: 'backpack',   color: 'orange', type: 'fringe', folderId: 'things', position: 9 },
+  { id: 'thg-scissors',   label: 'scissors',   color: 'orange', type: 'fringe', folderId: 'things', position: 10 },
+  { id: 'thg-phone',      label: 'phone',      color: 'orange', type: 'fringe', folderId: 'things', position: 11 },
+  { id: 'thg-tv',         label: 'TV',         color: 'orange', type: 'fringe', folderId: 'things', position: 12 },
+  { id: 'thg-headphones', label: 'headphones', color: 'orange', type: 'fringe', folderId: 'things', position: 13 },
+  { id: 'thg-tissue',     label: 'tissue',     color: 'orange', type: 'fringe', folderId: 'things', position: 14 },
+  { id: 'thg-soap',       label: 'soap',       color: 'orange', type: 'fringe', folderId: 'things', position: 15 },
+  { id: 'thg-pencil',     label: 'pencil',     color: 'orange', type: 'fringe', folderId: 'things', position: 16 },
+  { id: 'thg-paper',      label: 'paper',      color: 'orange', type: 'fringe', folderId: 'things', position: 17 },
+  { id: 'thg-light',      label: 'light',      color: 'orange', type: 'fringe', folderId: 'things', position: 18 },
+  { id: 'thg-fan',        label: 'fan',        color: 'orange', type: 'fringe', folderId: 'things', position: 19 },
 ];
+
+// Generate number buttons 1-100
+for (let i = 1; i <= 100; i++) {
+  DEFAULT_BUTTONS.push({ id: `num-${i}`, label: `${i}`, color: 'blue', type: 'fringe', folderId: '123', position: i - 1 });
+}
+
+// Generate alphabet buttons A-Z
+for (let i = 0; i < 26; i++) {
+  const letter = String.fromCharCode(65 + i);
+  DEFAULT_BUTTONS.push({ id: `letter-${letter.toLowerCase()}`, label: letter, color: 'blue', type: 'fringe', folderId: 'abc', position: i });
+}
 
 // ── State ──
 let buttons = [];
@@ -2355,7 +2603,9 @@ function renderGrid() {
   let items;
   if (currentFolder) {
     items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
-    folderLabel.textContent = currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
+    // Use the folder button's label for display (handles multi-word names like "My Body")
+    const folderButton = buttons.find(b => b.id === `folder-${currentFolder}`);
+    folderLabel.textContent = folderButton ? folderButton.label : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
     folderLabel.style.display = 'block';
     // Add Home button at end
     const homeBtn = document.createElement('button');
@@ -2375,10 +2625,16 @@ function renderGrid() {
     items.forEach(btn => grid.appendChild(createCell(btn)));
   }
 
-  // Set grid rows dynamically
+  // Set grid rows dynamically — use scrollable fixed-height rows for large folders
   const totalCells = grid.children.length;
   const rows = Math.ceil(totalCells / 4);
-  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  if (rows > 6) {
+    grid.style.gridTemplateRows = `repeat(${rows}, minmax(70px, 80px))`;
+    grid.style.flex = '0 0 auto';
+  } else {
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    grid.style.flex = '1';
+  }
 }
 
 function createCell(btn) {
