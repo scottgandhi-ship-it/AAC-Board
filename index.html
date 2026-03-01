@@ -196,12 +196,11 @@ body {
 }
 
 .cell .cell-big-text {
-  font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+  font-size: clamp(1.6rem, 5vw, 2.5rem);
   font-weight: 900;
   color: rgba(0,0,0,0.6);
-  text-transform: uppercase;
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
 }
 
 /* Folder buttons get a special card style */
@@ -249,7 +248,7 @@ body {
 .cell.folder-btn[data-folder="actions"]   { background: linear-gradient(145deg, #E0F7FA, #B2EBF2) !important; border-color: #80DEEA; }
 .cell.folder-btn[data-folder="toys"]      { background: linear-gradient(145deg, #FFF8E1, #FFECB3) !important; border-color: #FFD54F; }
 .cell.folder-btn[data-folder="places"]    { background: linear-gradient(145deg, #E8EAF6, #C5CAE9) !important; border-color: #9FA8DA; }
-.cell.folder-btn[data-folder="colours"]   { background: linear-gradient(145deg, #F1F8E9, #DCEDC8) !important; border-color: #AED581; }
+.cell.folder-btn[data-folder="colors"]   { background: linear-gradient(145deg, #F1F8E9, #DCEDC8) !important; border-color: #AED581; }
 .cell.folder-btn[data-folder="shapes"]    { background: linear-gradient(145deg, #EDE7F6, #D1C4E9) !important; border-color: #B39DDB; }
 .cell.folder-btn[data-folder="123"]       { background: linear-gradient(145deg, #E3F2FD, #BBDEFB) !important; border-color: #90CAF9; }
 .cell.folder-btn[data-folder="abc"]       { background: linear-gradient(145deg, #FBE9E7, #FFCCBC) !important; border-color: #FF8A65; }
@@ -264,6 +263,13 @@ body {
 .cell[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
 .cell[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
 .cell[data-color="home"]   { background: linear-gradient(145deg, #ECEFF1, #B0BEC5); }
+.cell[data-color="purple"] { background: linear-gradient(145deg, #E1BEE7, #AB47BC); }
+.cell[data-color="black"]  { background: linear-gradient(145deg, #616161, #212121); color: #fff; }
+.cell[data-color="black"] .cell-label, .cell[data-color="black"] .cell-big-text { color: rgba(255,255,255,0.9); text-shadow: none; }
+.cell[data-color="white"]  { background: linear-gradient(145deg, #FAFAFA, #E0E0E0); }
+.cell[data-color="brown"]  { background: linear-gradient(145deg, #D7CCC8, #8D6E63); }
+.cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
+.cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
 /* (bottom-bar replaced by #tab-bar -- see Tab Bar section below) */
 
@@ -2205,7 +2211,7 @@ const DEFAULT_BUTTONS = [
   { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 7 },
   { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 8 },
   { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 9 },
-  { id: 'folder-colours',   label: 'Colours',   color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 10 },
   { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 11 },
   { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 12 },
   { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 13 },
@@ -2420,19 +2426,19 @@ const DEFAULT_BUTTONS = [
   { id: 'plc-library',    label: 'library',    color: 'orange', type: 'fringe', folderId: 'places', position: 12 },
   { id: 'plc-pool',       label: 'pool',       color: 'orange', type: 'fringe', folderId: 'places', position: 13 },
 
-  // ── Colours ──
-  { id: 'clr-red',     label: 'red',     color: 'blue', type: 'fringe', folderId: 'colours', position: 0 },
-  { id: 'clr-blue',    label: 'blue',    color: 'blue', type: 'fringe', folderId: 'colours', position: 1 },
-  { id: 'clr-yellow',  label: 'yellow',  color: 'blue', type: 'fringe', folderId: 'colours', position: 2 },
-  { id: 'clr-green',   label: 'green',   color: 'blue', type: 'fringe', folderId: 'colours', position: 3 },
-  { id: 'clr-orange',  label: 'orange',  color: 'blue', type: 'fringe', folderId: 'colours', position: 4 },
-  { id: 'clr-purple',  label: 'purple',  color: 'blue', type: 'fringe', folderId: 'colours', position: 5 },
-  { id: 'clr-pink',    label: 'pink',    color: 'blue', type: 'fringe', folderId: 'colours', position: 6 },
-  { id: 'clr-black',   label: 'black',   color: 'blue', type: 'fringe', folderId: 'colours', position: 7 },
-  { id: 'clr-white',   label: 'white',   color: 'blue', type: 'fringe', folderId: 'colours', position: 8 },
-  { id: 'clr-brown',   label: 'brown',   color: 'blue', type: 'fringe', folderId: 'colours', position: 9 },
-  { id: 'clr-gray',    label: 'gray',    color: 'blue', type: 'fringe', folderId: 'colours', position: 10 },
-  { id: 'clr-rainbow', label: 'rainbow', color: 'blue', type: 'fringe', folderId: 'colours', position: 11 },
+  // ── Colors ──
+  { id: 'clr-red',     label: 'red',     color: 'red',     type: 'fringe', folderId: 'colors', position: 0 },
+  { id: 'clr-blue',    label: 'blue',    color: 'blue',    type: 'fringe', folderId: 'colors', position: 1 },
+  { id: 'clr-yellow',  label: 'yellow',  color: 'yellow',  type: 'fringe', folderId: 'colors', position: 2 },
+  { id: 'clr-green',   label: 'green',   color: 'green',   type: 'fringe', folderId: 'colors', position: 3 },
+  { id: 'clr-orange',  label: 'orange',  color: 'orange',  type: 'fringe', folderId: 'colors', position: 4 },
+  { id: 'clr-purple',  label: 'purple',  color: 'purple',  type: 'fringe', folderId: 'colors', position: 5 },
+  { id: 'clr-pink',    label: 'pink',    color: 'pink',    type: 'fringe', folderId: 'colors', position: 6 },
+  { id: 'clr-black',   label: 'black',   color: 'black',   type: 'fringe', folderId: 'colors', position: 7 },
+  { id: 'clr-white',   label: 'white',   color: 'white',   type: 'fringe', folderId: 'colors', position: 8 },
+  { id: 'clr-brown',   label: 'brown',   color: 'brown',   type: 'fringe', folderId: 'colors', position: 9 },
+  { id: 'clr-gray',    label: 'gray',    color: 'gray',    type: 'fringe', folderId: 'colors', position: 10 },
+  { id: 'clr-rainbow', label: 'rainbow', color: 'rainbow', type: 'fringe', folderId: 'colors', position: 11 },
 
   // ── Shapes ──
   { id: 'shp-circle',    label: 'circle',    color: 'blue', type: 'fringe', folderId: 'shapes', position: 0 },
@@ -2812,6 +2818,13 @@ async function init() {
   } catch {
     buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
   }
+  // Migrate 'colours' -> 'colors' for existing users
+  let migrated = false;
+  buttons.forEach(b => {
+    if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
+    if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
+  });
+  if (migrated) saveButtons();
   renderGrid();
   updateSpeedDisplay();
   initSpeech();
@@ -2905,6 +2918,16 @@ function speak(text) {
   speechSynthesis.speak(utter);
 }
 
+// Quick-access action buttons injected at the top of most folder grids
+const QUICK_ACCESS_BUTTONS = [
+  { label: 'I want',        color: 'green',  icon: '👉' },
+  { label: "I don't want",  color: 'red',    icon: '🚫' },
+  { label: 'I need help',   color: 'green',  icon: '🆘' },
+  { label: 'thank you',     color: 'pink',   icon: '💕' },
+  { label: 'please',        color: 'pink',   icon: '🙏' },
+];
+const QUICK_ACCESS_EXCLUDED = new Set(['shapes', '123', 'abc', 'questions', 'body', 'feelings']);
+
 // ── Render Grid ──
 function renderGrid() {
   const grid = document.getElementById('grid');
@@ -2929,9 +2952,29 @@ function renderGrid() {
     });
 
     grid.appendChild(homeBtn);
+
+    // Inject quick-access action buttons for eligible folders
+    let offset = 1; // 1 because Home is already in the grid
+    if (!QUICK_ACCESS_EXCLUDED.has(currentFolder)) {
+      QUICK_ACCESS_BUTTONS.forEach(qa => {
+        const qaBtn = document.createElement('button');
+        qaBtn.className = 'cell';
+        qaBtn.setAttribute('data-color', qa.color);
+        qaBtn.innerHTML = `<span class="cell-big-text">${qa.icon}</span><span class="cell-label">${qa.label}</span>`;
+        qaBtn.style.animationDelay = `${offset * 25}ms`;
+        qaBtn.addEventListener('click', () => {
+          if (parentMode) return;
+          speak(qa.label);
+          addWordToMessage(qa.label);
+        });
+        grid.appendChild(qaBtn);
+        offset++;
+      });
+    }
+
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${(i + 1) * 25}ms`;
+      c.style.animationDelay = `${(i + offset) * 25}ms`;
       grid.appendChild(c);
     });
   } else {
@@ -2960,8 +3003,89 @@ function renderGrid() {
 const FOLDER_ICONS = {
   'general': '💬', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
   'clothes': '👕', 'body': '🩺', 'feelings': '😊', 'actions': '🏃',
-  'toys': '🧸', 'places': '🏠', 'colours': '🌈', 'shapes': '🔷',
+  'toys': '🧸', 'places': '🏠', 'colors': '🌈', 'shapes': '🔷',
   '123': '🔢', 'abc': '🔤', 'questions': '❓', 'things': '🎒'
+};
+
+// Emoji icons for individual buttons (keyed by button id)
+const BUTTON_ICONS = {
+  // General
+  'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
+  'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
+  'gen-ok': '👌', 'gen-im-fine': '😊', 'gen-please': '🙏', 'gen-thank-you': '💕',
+  'gen-hi': '👋', 'gen-bye': '👋', 'gen-more': '➕', 'gen-stop': '🛑',
+  'gen-go': '▶️', 'gen-like': '❤️', 'gen-all-done': '✅', 'gen-wait': '⏳',
+  'gen-look': '👀', 'gen-my-turn': '🙋', 'gen-sorry': '💙', 'gen-excuse-me': '🙋',
+  // Food
+  'food-apple': '🍎', 'food-banana': '🍌', 'food-cookie': '🍪', 'food-crackers': '🍘',
+  'food-pizza': '🍕', 'food-nuggets': '🍗', 'food-pasta': '🍝', 'food-sandwich': '🥪',
+  'food-rice': '🍚', 'food-fries': '🍟', 'food-grilled-ch': '🧀', 'food-pancakes': '🥞',
+  'food-yogurt': '🥛', 'food-fruit-snk': '🍬', 'food-ice-cream': '🍦', 'food-cereal': '🥣',
+  'food-soup': '🍲', 'food-bread': '🍞', 'food-cheese': '🧀', 'food-strawberry': '🍓',
+  'food-grapes': '🍇', 'food-eggs': '🥚', 'food-cake': '🎂', 'food-hungry': '😋',
+  'food-yummy': '😋',
+  // Drinks
+  'drink-water': '💧', 'drink-milk': '🥛', 'drink-choc-milk': '🍫',
+  'drink-apple-juice': '🧃', 'drink-orange-juice': '🍊', 'drink-lemonade': '🍋',
+  'drink-hot-choc': '☕', 'drink-smoothie': '🥤', 'drink-thirsty': '💧',
+  // People
+  'ppl-mom': '👩', 'ppl-dad': '👨', 'ppl-sister': '👧', 'ppl-brother': '👦',
+  'ppl-grandma': '👵', 'ppl-grandpa': '👴', 'ppl-teacher': '👩‍🏫', 'ppl-friend': '🤝',
+  'ppl-baby': '👶', 'ppl-dog': '🐕', 'ppl-cat': '🐈‍⬛', 'ppl-doctor': '👨‍⚕️',
+  'ppl-me': '🙋', 'ppl-you': '👉',
+  // Clothes
+  'clo-shirt': '👕', 'clo-pants': '👖', 'clo-shoes': '👟', 'clo-socks': '🧦',
+  'clo-underwear': '🩲', 'clo-jacket': '🧥', 'clo-hat': '🧢', 'clo-pajamas': '😴',
+  'clo-dress': '👗', 'clo-shorts': '🩳', 'clo-boots': '🥾', 'clo-gloves': '🧤',
+  'clo-coat': '🧥', 'clo-swimsuit': '🩱', 'clo-diaper': '👶', 'clo-scarf': '🧣',
+  // My Body
+  'body-head': '🗣️', 'body-tummy': '🫃', 'body-arm': '💪', 'body-leg': '🦵',
+  'body-hand': '✋', 'body-foot': '🦶', 'body-eyes': '👀', 'body-ears': '👂',
+  'body-mouth': '👄', 'body-nose': '👃', 'body-teeth': '🦷', 'body-back': '🔙',
+  'body-hurts': '🤕', 'body-sick': '🤢', 'body-fever': '🤒', 'body-medicine': '💊',
+  'body-bathroom': '🚽', 'body-itchy': '😣', 'body-dizzy': '😵', 'body-too-loud': '🔊',
+  'body-too-bright': '☀️', 'body-allergic': '🤧',
+  // Feelings
+  'feel-happy': '😊', 'feel-sad': '😢', 'feel-angry': '😠', 'feel-scared': '😨',
+  'feel-tired': '😴', 'feel-excited': '🤩', 'feel-frustrated': '😤', 'feel-calm': '😌',
+  'feel-nervous': '😰', 'feel-silly': '🤪', 'feel-proud': '😎', 'feel-bored': '😑',
+  'feel-confused': '😕', 'feel-love': '❤️', 'feel-worried': '😟', 'feel-overwhelmed': '😵',
+  'feel-lonely': '😔', 'feel-shy': '🫣', 'feel-safe': '🛡️', 'feel-need-break': '⏸️',
+  // Actions
+  'act-eat': '🍽️', 'act-drink': '🥤', 'act-play': '🎮', 'act-read': '📖',
+  'act-run': '🏃', 'act-jump': '🤸', 'act-sit': '🪑', 'act-stand': '🧍',
+  'act-walk': '🚶', 'act-sleep': '😴', 'act-wash': '🧼', 'act-open': '📭',
+  'act-close': '📪', 'act-push': '👐', 'act-pull': '🫳', 'act-give': '🎁',
+  'act-listen': '👂', 'act-draw': '✏️', 'act-sing': '🎤', 'act-dance': '💃',
+  'act-hug': '🤗', 'act-throw': '🏐', 'act-share': '🤝', 'act-build': '🏗️',
+  // Toys
+  'toy-ball': '⚽', 'toy-blocks': '🧱', 'toy-doll': '🪆', 'toy-car': '🚗',
+  'toy-train': '🚂', 'toy-puzzle': '🧩', 'toy-bubbles': '🫧', 'toy-crayons': '🖍️',
+  'toy-book': '📚', 'toy-tablet': '📱', 'toy-swing': '🎠', 'toy-slide': '🛝',
+  'toy-bike': '🚲', 'toy-teddy': '🧸', 'toy-playdoh': '🎨', 'toy-stickers': '⭐',
+  'toy-lego': '🧱', 'toy-game': '🎲', 'toy-balloon': '🎈', 'toy-trampoline': '🤸',
+  // Places
+  'plc-home': '🏠', 'plc-school': '🏫', 'plc-bathroom': '🚻', 'plc-park': '🏞️',
+  'plc-outside': '🌳', 'plc-inside': '🏡', 'plc-store': '🏪', 'plc-car': '🚗',
+  'plc-bedroom': '🛏️', 'plc-kitchen': '🍳', 'plc-playground': '🛝', 'plc-hospital': '🏥',
+  'plc-library': '📚', 'plc-pool': '🏊',
+  // Colors
+  'clr-red': '🔴', 'clr-blue': '🔵', 'clr-yellow': '🟡', 'clr-green': '🟢',
+  'clr-orange': '🟠', 'clr-purple': '🟣', 'clr-pink': '💗', 'clr-black': '⚫',
+  'clr-white': '⚪', 'clr-brown': '🟤', 'clr-gray': '🩶', 'clr-rainbow': '🌈',
+  // Shapes
+  'shp-circle': '⭕', 'shp-square': '⬜', 'shp-triangle': '🔺', 'shp-rectangle': '▬',
+  'shp-star': '⭐', 'shp-heart': '❤️', 'shp-diamond': '💎', 'shp-oval': '🥚',
+  // Questions
+  'q-what': '❓', 'q-where': '📍', 'q-when': '⏰', 'q-who': '👤',
+  'q-why': '🤔', 'q-how': '💡', 'q-can-i': '🙋', 'q-is-it': '🔍',
+  'q-do-you': '👉', 'q-which': '🤷',
+  // Things
+  'thg-cup': '🥤', 'thg-plate': '🍽️', 'thg-spoon': '🥄', 'thg-fork': '🍴',
+  'thg-napkin': '🧻', 'thg-blanket': '🛏️', 'thg-pillow': '💤', 'thg-toothbrush': '🪥',
+  'thg-towel': '🏖️', 'thg-backpack': '🎒', 'thg-scissors': '✂️', 'thg-phone': '📱',
+  'thg-tv': '📺', 'thg-headphones': '🎧', 'thg-tissue': '🧻', 'thg-soap': '🧴',
+  'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀'
 };
 
 function createCell(btn) {
@@ -2987,14 +3111,14 @@ function createCell(btn) {
     }
   });
 
-  // Show category emoji for folders, or label text for regular buttons
+  // Show emoji icon for all buttons (folder icon or button-specific icon)
   const bigText = document.createElement('span');
   bigText.className = 'cell-big-text';
   if (btn.type === 'folder') {
     const folderId = btn.id.replace('folder-', '');
     bigText.textContent = FOLDER_ICONS[folderId] || '📁';
   } else {
-    bigText.textContent = btn.label;
+    bigText.textContent = BUTTON_ICONS[btn.id] || '💬';
   }
   cell.appendChild(bigText);
 
