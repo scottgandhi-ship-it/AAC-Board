@@ -644,6 +644,41 @@ body {
 
 #btn-parent-settings:active { background: #eee; }
 
+/* ── Floating Back Button ── */
+#btn-back-nav {
+  position: fixed;
+  top: 58px;
+  left: 10px;
+  z-index: 150;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15), 0 0 0 1.5px rgba(108,99,255,0.18);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+#btn-back-nav.visible { display: flex; }
+#btn-back-nav:active {
+  transform: scale(0.88);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+#btn-back-nav svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--bar-bg);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* ── Views ── */
 .view {
   display: none;
@@ -2013,6 +2048,11 @@ body {
 </style>
 </head>
 <body>
+
+<!-- Floating Back Button -->
+<button id="btn-back-nav" aria-label="Go back">
+  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+</button>
 
 <!-- App Header -->
 <div id="app-header">
@@ -3453,6 +3493,42 @@ function switchTab(tabId) {
 document.querySelectorAll('.tab-btn').forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.id));
 });
+
+// ── Floating Back Button ──
+const backNavBtn = document.getElementById('btn-back-nav');
+
+function updateBackButton() {
+  // Show back button when inside a folder or on a non-Talk tab
+  const shouldShow = (activeTab === 'talk' && currentFolder !== null) || activeTab !== 'talk';
+  backNavBtn.classList.toggle('visible', shouldShow);
+}
+
+backNavBtn.addEventListener('click', () => {
+  if (activeTab !== 'talk') {
+    // On Schedule or Rewards → go back to Talk
+    switchTab('tab-talk');
+  } else if (currentFolder !== null) {
+    // Inside a folder → go back to home grid
+    currentFolder = null;
+    renderGrid();
+  }
+  updateBackButton();
+});
+
+// Patch switchTab and renderGrid to keep back button in sync
+const _origSwitchTab = switchTab;
+switchTab = function(tabId) {
+  _origSwitchTab(tabId);
+  updateBackButton();
+};
+
+const _origRenderGrid = renderGrid;
+renderGrid = function() {
+  _origRenderGrid();
+  updateBackButton();
+};
+
+updateBackButton();
 
 // ── Parent Mode ──
 function setParentMode(enabled) {
