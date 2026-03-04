@@ -644,35 +644,14 @@ body {
 
 #btn-parent-settings:active { background: #eee; }
 
-/* ── Floating Back Button ── */
+/* ── Back Button (inline in message bar) ── */
 #btn-back-nav {
-  position: fixed;
-  top: 58px;
-  left: 10px;
-  z-index: 150;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15), 0 0 0 1.5px rgba(108,99,255,0.18);
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15));
+  color: #fff;
 }
 #btn-back-nav.visible { display: flex; }
-#btn-back-nav:active {
-  transform: scale(0.88);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-}
 #btn-back-nav svg {
-  width: 26px;
-  height: 26px;
-  stroke: var(--bar-bg);
+  stroke: #fff;
   stroke-width: 2.5;
   fill: none;
   stroke-linecap: round;
@@ -2045,14 +2024,64 @@ body {
   font-family: inherit;
   margin-top: 8px;
 }
+
+/* ── Mobile Responsive ── */
+
+/* Small phones (< 360px) */
+@media (max-width: 359px) {
+  #app-header { height: 40px; padding: 0 8px; }
+  #app-header-title { font-size: 0.9rem; }
+  #message-bar { padding: 6px 6px; gap: 4px; min-height: 48px; }
+  .bar-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+  #message-words { padding: 4px 6px; font-size: 1rem; min-height: 32px; max-height: 60px; gap: 4px; }
+  #grid-container { padding: 6px; }
+  #grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .cell { padding: 6px 4px; border-radius: 14px; }
+  .cell .cell-label { font-size: clamp(0.6rem, 2.5vw, 0.85rem); }
+  .cell .cell-big-text { font-size: clamp(1.2rem, 5vw, 2rem); }
+  #tab-bar { padding: 2px 4px; gap: 2px; }
+  .tab-btn { padding: 4px 0; }
+  .tab-label { font-size: 0.65rem; }
+}
+
+/* Standard phones (360-479px) */
+@media (min-width: 360px) and (max-width: 479px) {
+  #app-header { height: 44px; }
+  #message-bar { padding: 8px 8px; gap: 6px; min-height: 52px; }
+  .bar-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+  #message-words { padding: 4px 8px; font-size: 1.1rem; min-height: 36px; max-height: 68px; }
+  #grid-container { padding: 8px; }
+  #grid { gap: 8px; }
+  .cell { padding: 6px 4px; }
+}
+
+/* Larger phones & small tablets (480-767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  #grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+}
+
+/* Tablets (768px+) */
+@media (min-width: 768px) {
+  #grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  #grid-container { padding: 14px; }
+}
+
+/* Safe area support for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #app-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  #tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
 </style>
 </head>
 <body>
-
-<!-- Floating Back Button -->
-<button id="btn-back-nav" aria-label="Go back">
-  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-</button>
 
 <!-- App Header -->
 <div id="app-header">
@@ -2069,6 +2098,9 @@ body {
 <!-- Talk View (AAC Board) -->
 <div id="view-talk" class="view active" role="tabpanel" aria-labelledby="tab-talk">
   <div id="message-bar">
+    <button class="bar-btn" id="btn-back-nav" aria-label="Go back" style="display:none;">
+      <svg viewBox="0 0 24 24" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
     <div id="message-words"></div>
     <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
     <button class="bar-btn" id="btn-search" aria-label="Search words">🔍</button>
@@ -3032,8 +3064,42 @@ function initSpeech() {
   speechSynthesis.onvoiceschanged = load;
 }
 
+// Novelty/joke voices that should never appear in an AAC board
+const NOVELTY_VOICES = /\b(bells|jester|bad news|good news|whisper|zarvox|trinoids|organ|cellos|boing|bahh|albert|bubbles|superstar|wobble|junior|kathy|princess|ralph|fred)\b/i;
+
+// Known good human-sounding voice names across platforms
+const GOOD_VOICE_NAMES = /\b(samantha|alex|allison|ava|susan|tom|kate|daniel|karen|fiona|moira|tessa|google|zira|david|jenny|aria|guy|mark|cortana|siri|eloquence)\b/i;
+
 function getUSVoices() {
   return voices.filter(v => v.lang === 'en-US');
+}
+
+function isNoveltyVoice(v) {
+  return NOVELTY_VOICES.test(v.name);
+}
+
+function isHighQualityVoice(v) {
+  return /enhanced|premium|natural|neural|wavenet/i.test(v.name);
+}
+
+function getUsableVoices(usVoices) {
+  // Filter out novelty voices first
+  const real = usVoices.filter(v => !isNoveltyVoice(v));
+
+  // Score and rank: higher = better
+  const scored = real.map(v => {
+    let score = 0;
+    if (isHighQualityVoice(v)) score += 20;
+    if (GOOD_VOICE_NAMES.test(v.name)) score += 10;
+    // Prefer non-compact voices (localService tends to be better on mobile)
+    if (/compact/i.test(v.name)) score -= 5;
+    return { voice: v, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+
+  // Return top 5, or all if 5 or fewer
+  return scored.slice(0, 5).map(s => s.voice);
 }
 
 function populateVoiceSelect() {
@@ -3046,35 +3112,27 @@ function populateVoiceSelect() {
     select.appendChild(opt);
     return;
   }
-  const highQuality = usVoices.filter(isHighQualityVoice);
-  const standard = usVoices.filter(v => !isHighQualityVoice(v));
-  if (highQuality.length > 0) {
-    const grp = document.createElement('optgroup');
-    grp.label = 'Recommended';
-    highQuality.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v.name;
-      opt.textContent = v.name;
-      if (v.name === selectedVoiceName) opt.selected = true;
-      grp.appendChild(opt);
-    });
-    select.appendChild(grp);
-  }
-  if (standard.length > 0) {
-    const grp = document.createElement('optgroup');
-    grp.label = highQuality.length > 0 ? 'Standard' : 'Available';
-    standard.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v.name;
-      opt.textContent = v.name;
-      if (v.name === selectedVoiceName) opt.selected = true;
-      grp.appendChild(opt);
-    });
-    select.appendChild(grp);
-  }
-  // If no saved selection, auto-select the best default
-  if (!selectedVoiceName || !usVoices.find(v => v.name === selectedVoiceName)) {
-    const best = pickDefaultVoice(usVoices);
+
+  const usable = getUsableVoices(usVoices);
+  // Fallback: if aggressive filtering removed everything, show first 5 non-novelty
+  const displayVoices = usable.length > 0 ? usable : usVoices.filter(v => !isNoveltyVoice(v)).slice(0, 5);
+  // Last resort: if still nothing (all novelty?), just show first 3 raw
+  const finalVoices = displayVoices.length > 0 ? displayVoices : usVoices.slice(0, 3);
+
+  finalVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    // Show a cleaner display name
+    let display = v.name;
+    if (isHighQualityVoice(v)) display += ' *';
+    opt.textContent = display;
+    if (v.name === selectedVoiceName) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  // If no saved selection or saved voice isn't in the list, auto-select best
+  if (!selectedVoiceName || !finalVoices.find(v => v.name === selectedVoiceName)) {
+    const best = pickDefaultVoice(finalVoices);
     if (best) {
       select.value = best.name;
       selectedVoiceName = best.name;
@@ -3083,26 +3141,18 @@ function populateVoiceSelect() {
   }
 }
 
-function isHighQualityVoice(v) {
-  return /enhanced|premium|natural|neural|wavenet/i.test(v.name);
-}
-
-function pickDefaultVoice(usVoices) {
-  // Prefer high-quality enhanced/natural voices, then known good defaults
+function pickDefaultVoice(voiceList) {
   const prefs = [
     v => /samantha\s*\(enhanced\)|samantha\s*\(premium\)/i.test(v.name),
-    v => /\(enhanced\)|\(premium\)|\(natural\)/i.test(v.name) && /female/i.test(v.name),
-    v => /\(enhanced\)|\(premium\)|\(natural\)/i.test(v.name),
+    v => isHighQualityVoice(v),
     v => /google.*us.*female/i.test(v.name),
-    v => /jenny|zira|aria/i.test(v.name),
-    v => /samantha/i.test(v.name),
-    v => /female/i.test(v.name),
+    v => /jenny|zira|aria|samantha|ava|allison/i.test(v.name),
   ];
   for (const test of prefs) {
-    const found = usVoices.find(test);
+    const found = voiceList.find(test);
     if (found) return found;
   }
-  return usVoices[0] || null;
+  return voiceList[0] || null;
 }
 
 document.getElementById('voice-select').addEventListener('change', e => {
@@ -3494,12 +3544,13 @@ document.querySelectorAll('.tab-btn').forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.id));
 });
 
-// ── Floating Back Button ──
+// ── Back Button (inline in message bar) ──
 const backNavBtn = document.getElementById('btn-back-nav');
 
 function updateBackButton() {
-  // Show back button when inside a folder or on a non-Talk tab
-  const shouldShow = (activeTab === 'talk' && currentFolder !== null) || activeTab !== 'talk';
+  // Show back button when inside a folder (Talk tab only)
+  const shouldShow = (activeTab === 'talk' && currentFolder !== null);
+  backNavBtn.style.display = shouldShow ? 'flex' : 'none';
   backNavBtn.classList.toggle('visible', shouldShow);
 }
 
