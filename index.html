@@ -271,6 +271,14 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
+/* Search result cells reuse same color system */
+.search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.search-result-cell[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.search-result-cell[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.search-result-cell[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.search-result-cell[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.search-result-cell[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+
 /* (bottom-bar replaced by #tab-bar -- see Tab Bar section below) */
 
 /* ── Settings Modal ── */
@@ -441,6 +449,109 @@ body {
   cursor: pointer;
   font-size: 0.85rem;
   font-family: inherit;
+}
+
+/* ── Search Overlay ── */
+#search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+#search-overlay.open { display: flex; }
+
+#search-panel {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 95%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lifted), 0 0 0 1px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+#search-header {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+#search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  outline: none;
+}
+#search-input:focus { border-color: #42A5F5; }
+
+#btn-close-search {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #bbb;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#search-results {
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+#search-results:empty::after {
+  content: 'Type to search all words...';
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #aaa;
+  padding: 32px 0;
+  font-size: 0.95rem;
+}
+
+#search-results .search-result-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 70px;
+  text-align: center;
+  transition: transform 0.1s;
+}
+#search-results .search-result-cell:active {
+  transform: scale(0.92);
+}
+#search-results .search-result-cell .search-icon {
+  font-size: 1.6rem;
+  margin-bottom: 2px;
+}
+#search-results .search-result-cell .search-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #333;
+}
+#search-results .search-result-cell .search-folder {
+  font-size: 0.65rem;
+  color: #888;
+  margin-top: 1px;
 }
 
 /* ── Toast ── */
@@ -1920,6 +2031,7 @@ body {
   <div id="message-bar">
     <div id="message-words"></div>
     <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
+    <button class="bar-btn" id="btn-search" aria-label="Search words">🔍</button>
     <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
     <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
   </div>
@@ -2009,6 +2121,8 @@ body {
     <div class="settings-section">
       <h3>Buttons</h3>
       <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+      <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
+      <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
       <p style="font-size:0.85rem;color:#888;margin-top:4px;">Tap any button on the board to edit it while parent mode is active.</p>
     </div>
     <div class="settings-section">
@@ -2018,6 +2132,10 @@ body {
       <button class="settings-btn" id="btn-voice-slower">Slower voice</button>
       <button class="settings-btn" id="btn-voice-faster">Faster voice</button>
       <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
+      <button class="settings-btn" id="btn-voice-lower">Lower pitch</button>
+      <button class="settings-btn" id="btn-voice-higher">Higher pitch</button>
+      <div id="voice-pitch-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Pitch: normal</div>
+      <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -2046,14 +2164,27 @@ body {
     <img id="edit-image-preview" alt="preview">
     <div id="edit-image-btns">
       <button id="btn-edit-upload">Upload Image</button>
+      <button id="btn-edit-camera">Take Photo</button>
       <button id="btn-edit-clear-img">Remove Image</button>
     </div>
     <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+    <input type="file" id="edit-camera-input" accept="image/*" capture="environment" style="display:none">
     <div class="edit-btn-row">
       <button id="btn-edit-cancel">Cancel</button>
       <button id="btn-edit-remove">Delete</button>
       <button id="btn-edit-save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Search Overlay -->
+<div id="search-overlay">
+  <div id="search-panel">
+    <div id="search-header">
+      <input type="text" id="search-input" placeholder="Search words..." autocomplete="off">
+      <button id="btn-close-search">Close</button>
+    </div>
+    <div id="search-results"></div>
   </div>
 </div>
 
@@ -2201,7 +2332,7 @@ body {
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
   // ── Home Grid (16 Category Folders, 4x4) ──
-  { id: 'folder-general',   label: 'General',   color: 'orange', type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-general',   label: 'Social',    color: 'orange', type: 'folder', folderId: null, position: 0 },
   { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
   { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
   { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 3 },
@@ -2218,7 +2349,7 @@ const DEFAULT_BUTTONS = [
   { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 14 },
   { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 15 },
 
-  // ── General (Core Phrases) ──
+  // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
   { id: 'gen-want',       label: 'want',       color: 'green',  type: 'fringe', folderId: 'general', position: 1 },
   { id: 'gen-dont-want',  label: "don't want", color: 'red',    type: 'fringe', folderId: 'general', position: 2 },
@@ -2243,6 +2374,22 @@ const DEFAULT_BUTTONS = [
   { id: 'gen-my-turn',    label: 'my turn',    color: 'yellow', type: 'fringe', folderId: 'general', position: 21 },
   { id: 'gen-sorry',      label: 'sorry',      color: 'pink',   type: 'fringe', folderId: 'general', position: 22 },
   { id: 'gen-excuse-me',  label: 'excuse me',  color: 'pink',   type: 'fringe', folderId: 'general', position: 23 },
+  { id: 'gen-hello',      label: 'hello',      color: 'pink',   type: 'fringe', folderId: 'general', position: 24 },
+  { id: 'gen-good-morning',label:'good morning',color: 'pink',   type: 'fringe', folderId: 'general', position: 25 },
+  { id: 'gen-goodnight',  label: 'goodnight',  color: 'pink',   type: 'fringe', folderId: 'general', position: 26 },
+  { id: 'gen-see-you',    label: 'see you later',color:'pink',   type: 'fringe', folderId: 'general', position: 27 },
+  { id: 'gen-yr-welcome', label: "you're welcome",color:'pink',  type: 'fringe', folderId: 'general', position: 28 },
+  { id: 'gen-no-thank-you',label:'no thank you',color: 'red',    type: 'fringe', folderId: 'general', position: 29 },
+  { id: 'gen-cool',       label: 'cool',       color: 'pink',   type: 'fringe', folderId: 'general', position: 30 },
+  { id: 'gen-awesome',    label: 'awesome',    color: 'pink',   type: 'fringe', folderId: 'general', position: 31 },
+  { id: 'gen-thats-funny',label: "that's funny",color:'pink',   type: 'fringe', folderId: 'general', position: 32 },
+  { id: 'gen-me-too',     label: 'me too',     color: 'pink',   type: 'fringe', folderId: 'general', position: 33 },
+  { id: 'gen-wow',        label: 'wow',        color: 'pink',   type: 'fringe', folderId: 'general', position: 34 },
+  { id: 'gen-i-did-it',   label: 'I did it',   color: 'pink',   type: 'fringe', folderId: 'general', position: 35 },
+  { id: 'gen-i-like-it',  label: 'I like it',  color: 'green',  type: 'fringe', folderId: 'general', position: 36 },
+  { id: 'gen-want-play',  label: 'want to play?',color:'green',  type: 'fringe', folderId: 'general', position: 37 },
+  { id: 'gen-your-turn',  label: 'your turn',  color: 'yellow', type: 'fringe', folderId: 'general', position: 38 },
+  { id: 'gen-tell-me',    label: 'tell me more',color:'green',   type: 'fringe', folderId: 'general', position: 39 },
 
   // ── Food (child-friendly) ──
   { id: 'food-apple',     label: 'apple',          color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
@@ -2503,6 +2650,7 @@ let parentMode = false;
 let editingButtonId = null;
 let messageWords = [];
 let speechRate = 0.85;
+let speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
 let activeTab = 'talk';
 
 // ── Parent Mode ──
@@ -2858,13 +3006,32 @@ function populateVoiceSelect() {
     select.appendChild(opt);
     return;
   }
-  usVoices.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.name;
-    opt.textContent = v.name;
-    if (v.name === selectedVoiceName) opt.selected = true;
-    select.appendChild(opt);
-  });
+  const highQuality = usVoices.filter(isHighQualityVoice);
+  const standard = usVoices.filter(v => !isHighQualityVoice(v));
+  if (highQuality.length > 0) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'Recommended';
+    highQuality.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = v.name;
+      if (v.name === selectedVoiceName) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    select.appendChild(grp);
+  }
+  if (standard.length > 0) {
+    const grp = document.createElement('optgroup');
+    grp.label = highQuality.length > 0 ? 'Standard' : 'Available';
+    standard.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = v.name;
+      if (v.name === selectedVoiceName) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    select.appendChild(grp);
+  }
   // If no saved selection, auto-select the best default
   if (!selectedVoiceName || !usVoices.find(v => v.name === selectedVoiceName)) {
     const best = pickDefaultVoice(usVoices);
@@ -2876,12 +3043,18 @@ function populateVoiceSelect() {
   }
 }
 
+function isHighQualityVoice(v) {
+  return /enhanced|premium|natural|neural|wavenet/i.test(v.name);
+}
+
 function pickDefaultVoice(usVoices) {
-  // Prefer an adult female US English voice
+  // Prefer high-quality enhanced/natural voices, then known good defaults
   const prefs = [
     v => /samantha\s*\(enhanced\)|samantha\s*\(premium\)/i.test(v.name),
+    v => /\(enhanced\)|\(premium\)|\(natural\)/i.test(v.name) && /female/i.test(v.name),
+    v => /\(enhanced\)|\(premium\)|\(natural\)/i.test(v.name),
     v => /google.*us.*female/i.test(v.name),
-    v => /zira|jenny/i.test(v.name),
+    v => /jenny|zira|aria/i.test(v.name),
     v => /samantha/i.test(v.name),
     v => /female/i.test(v.name),
   ];
@@ -2914,7 +3087,7 @@ function speak(text) {
   const voice = getVoice();
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
-  utter.pitch = 1.0;
+  utter.pitch = speechPitch;
   speechSynthesis.speak(utter);
 }
 
@@ -3001,7 +3174,7 @@ function renderGrid() {
 
 // Category emoji icons for folder buttons
 const FOLDER_ICONS = {
-  'general': '💬', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
+  'general': '🗣️', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
   'clothes': '👕', 'body': '🩺', 'feelings': '😊', 'actions': '🏃',
   'toys': '🧸', 'places': '🏠', 'colors': '🌈', 'shapes': '🔷',
   '123': '🔢', 'abc': '🔤', 'questions': '❓', 'things': '🎒'
@@ -3016,6 +3189,10 @@ const BUTTON_ICONS = {
   'gen-hi': '👋', 'gen-bye': '👋', 'gen-more': '➕', 'gen-stop': '🛑',
   'gen-go': '▶️', 'gen-like': '❤️', 'gen-all-done': '✅', 'gen-wait': '⏳',
   'gen-look': '👀', 'gen-my-turn': '🙋', 'gen-sorry': '💙', 'gen-excuse-me': '🙋',
+  'gen-hello': '👋', 'gen-good-morning': '🌅', 'gen-goodnight': '🌙', 'gen-see-you': '👋',
+  'gen-yr-welcome': '😊', 'gen-no-thank-you': '🙅', 'gen-cool': '😎', 'gen-awesome': '🌟',
+  'gen-thats-funny': '😄', 'gen-me-too': '🤝', 'gen-wow': '😮', 'gen-i-did-it': '🎉',
+  'gen-i-like-it': '👍', 'gen-want-play': '🎮', 'gen-your-turn': '👉', 'gen-tell-me': '👂',
   // Food
   'food-apple': '🍎', 'food-banana': '🍌', 'food-cookie': '🍪', 'food-crackers': '🍘',
   'food-pizza': '🍕', 'food-nuggets': '🍗', 'food-pasta': '🍝', 'food-sandwich': '🥪',
@@ -3178,6 +3355,74 @@ document.getElementById('btn-backspace').addEventListener('click', () => {
   renderMessage();
 });
 
+// ── Word Search ──
+document.getElementById('btn-search').addEventListener('click', () => {
+  document.getElementById('search-overlay').classList.add('open');
+  const input = document.getElementById('search-input');
+  input.value = '';
+  document.getElementById('search-results').innerHTML = '';
+  setTimeout(() => input.focus(), 100);
+});
+
+document.getElementById('btn-close-search').addEventListener('click', () => {
+  document.getElementById('search-overlay').classList.remove('open');
+});
+
+document.getElementById('search-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('search-overlay').classList.remove('open');
+  }
+});
+
+document.getElementById('search-input').addEventListener('input', e => {
+  const query = e.target.value.trim().toLowerCase();
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+  if (query.length === 0) return;
+
+  const matches = buttons.filter(b =>
+    b.type === 'fringe' && b.label.toLowerCase().includes(query)
+  ).slice(0, 30);
+
+  // Build a map of folderId -> folder label
+  const folderLabels = {};
+  buttons.filter(b => b.type === 'folder').forEach(b => {
+    folderLabels[b.id.replace('folder-', '')] = b.label;
+  });
+
+  matches.forEach(btn => {
+    const cell = document.createElement('button');
+    cell.className = 'search-result-cell';
+    cell.setAttribute('data-color', btn.color);
+
+    const icon = document.createElement('span');
+    icon.className = 'search-icon';
+    icon.textContent = BUTTON_ICONS[btn.id] || '💬';
+    cell.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.className = 'search-label';
+    label.textContent = btn.label;
+    cell.appendChild(label);
+
+    const folder = document.createElement('span');
+    folder.className = 'search-folder';
+    folder.textContent = folderLabels[btn.folderId] || btn.folderId || '';
+    cell.appendChild(folder);
+
+    cell.addEventListener('click', () => {
+      speak(btn.label);
+      addWordToMessage(btn.label);
+      document.getElementById('search-overlay').classList.remove('open');
+    });
+    resultsEl.appendChild(cell);
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">No matches found</div>';
+  }
+});
+
 // ── View Switching ──
 const TAB_VIEW_MAP = {
   'tab-talk': { view: 'view-talk', title: 'Talk' },
@@ -3331,6 +3576,33 @@ function updateSpeedDisplay() {
   else display.textContent = 'Speed: very fast';
 }
 
+document.getElementById('btn-voice-lower').addEventListener('click', () => {
+  speechPitch = Math.max(0.5, speechPitch - 0.2);
+  localStorage.setItem('aac-pitch', speechPitch);
+  updatePitchDisplay();
+  speak('This is how I sound');
+});
+
+document.getElementById('btn-voice-higher').addEventListener('click', () => {
+  speechPitch = Math.min(2.0, speechPitch + 0.2);
+  localStorage.setItem('aac-pitch', speechPitch);
+  updatePitchDisplay();
+  speak('This is how I sound');
+});
+
+function updatePitchDisplay() {
+  const display = document.getElementById('voice-pitch-display');
+  if (speechPitch < 0.7) display.textContent = 'Pitch: very low';
+  else if (speechPitch < 0.95) display.textContent = 'Pitch: low';
+  else if (speechPitch < 1.15) display.textContent = 'Pitch: normal';
+  else if (speechPitch < 1.5) display.textContent = 'Pitch: high';
+  else display.textContent = 'Pitch: very high';
+}
+
+document.getElementById('btn-voice-test').addEventListener('click', () => {
+  speak('Hi! This is how I sound when I talk.');
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
@@ -3418,6 +3690,50 @@ document.getElementById('btn-edit-clear-img').addEventListener('click', async ()
   preview.src = '';
   renderGrid();
   showToast('Image removed');
+});
+
+// Camera capture in edit modal
+document.getElementById('btn-edit-camera').addEventListener('click', () => {
+  document.getElementById('edit-camera-input').click();
+});
+
+document.getElementById('edit-camera-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await saveImage(editingButtonId, file);
+  const preview = document.getElementById('edit-image-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  e.target.value = '';
+});
+
+// Quick add with photo
+document.getElementById('btn-quick-photo').addEventListener('click', () => {
+  document.getElementById('quick-photo-input').click();
+});
+
+document.getElementById('quick-photo-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const folder = currentFolder;
+  const existing = buttons.filter(b => b.folderId === folder);
+  const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
+  const newId = 'btn-' + Date.now();
+  const newBtn = {
+    id: newId,
+    label: 'new',
+    color: 'orange',
+    type: 'fringe',
+    folderId: folder,
+    position: nextPos,
+  };
+  buttons.push(newBtn);
+  await saveButton(newBtn);
+  await saveImage(newId, file);
+  renderGrid();
+  document.getElementById('settings-overlay').classList.remove('open');
+  openEditModal(newId);
+  e.target.value = '';
 });
 
 // ── Toast ──
