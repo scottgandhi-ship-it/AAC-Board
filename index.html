@@ -813,8 +813,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 16px;
+  justify-content: flex-start;
+  padding: 12px 16px;
   overflow-y: auto;
   position: relative;
 }
@@ -839,69 +839,216 @@ body {
   font-size: 0.9rem;
 }
 
-.path-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  max-width: 360px;
-  padding: 20px 0;
+/* ── Daily-login reward grid ── */
+.rewards-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 8px 0;
 }
 
-.stone {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 3px solid #ccc;
+.rewards-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.rewards-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.rewards-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.rewards-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+.task-tile {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: 3px solid #e0e0e0;
   background: #f5f5f5;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #ccc;
-  transition: all 0.3s ease;
+  gap: 4px;
   position: relative;
+  transition: all 0.25s ease;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
 }
 
-.stone.filled {
-  border-color: #FFB300;
-  background: #FFF8E1;
-  color: #FFB300;
-  box-shadow: 0 0 8px rgba(255, 179, 0, 0.3);
+.task-tile-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #bbb;
+  line-height: 1;
+  transition: all 0.25s ease;
 }
 
-.stone.filled::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #FFB300;
-  border-radius: 50%;
-  opacity: 0.7;
+/* Completed tile */
+.task-tile.completed {
+  border-color: #43A047;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
 }
 
-.stone.animate-fill {
-  animation: stoneFill 0.4s ease;
+.task-tile.completed .task-tile-number {
+  font-size: 0.75rem;
+  color: #81C784;
 }
 
-@keyframes stoneFill {
+.task-tile-check {
+  display: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: #43A047;
+}
+
+.task-tile.completed .task-tile-check {
+  display: block;
+}
+
+/* Active / next tile — tappable */
+.task-tile.active {
+  border-color: var(--bar-bg);
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
+  animation: tileGlow 2s ease-in-out infinite;
+}
+
+.task-tile.active .task-tile-number {
+  color: var(--bar-bg);
+}
+
+.task-tile-tap {
+  display: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--bar-bg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.task-tile.active .task-tile-tap {
+  display: block;
+}
+
+.task-tile.active:active {
+  transform: scale(0.92);
+}
+
+@keyframes tileGlow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(124, 77, 255, 0.25); }
+}
+
+/* Locked tile */
+.task-tile.locked {
+  opacity: 0.45;
+}
+
+/* Fill animation */
+.task-tile.animate-fill {
+  animation: tilePop 0.45s ease;
+}
+
+@keyframes tilePop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
+  40% { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 
-.path-connector {
-  width: 20px;
-  height: 3px;
-  background: #ddd;
-  border-radius: 2px;
+/* ── Reward card (below grid) ── */
+.reward-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  margin: 6px auto 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 3px dashed #e0e0e0;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.reward-card.unlocked {
+  border-style: solid;
+  border-color: var(--bar-bg);
+  background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
+  box-shadow: 0 4px 20px rgba(124, 77, 255, 0.25);
+  cursor: pointer;
+  animation: rewardCardGlow 2s ease-in-out infinite;
+}
+
+.reward-card.unlocked:active {
+  transform: scale(0.97);
+}
+
+@keyframes rewardCardGlow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(124, 77, 255, 0.25); }
+  50% { box-shadow: 0 6px 28px rgba(124, 77, 255, 0.4); }
+}
+
+.reward-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #fff;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.reward-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.reward-card.locked .reward-card-icon {
+  filter: grayscale(0.7) opacity(0.5);
+}
+
+.reward-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.reward-card-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reward-card.locked .reward-card-label {
+  color: #999;
+}
+
+.reward-card-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #999;
+}
+
+.reward-card.unlocked .reward-card-status {
+  color: var(--bar-bg);
+}
+
+.reward-card-lock {
+  font-size: 1.3rem;
+  opacity: 0.4;
   flex-shrink: 0;
 }
 
-.path-connector.filled {
-  background: #FFB300;
+.reward-card.unlocked .reward-card-lock {
+  display: none;
 }
 
 .reward-icon {
@@ -938,14 +1085,27 @@ body {
   50% { box-shadow: 0 6px 24px rgba(108, 99, 255, 0.45); }
 }
 
+#rewards-task-header {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 8px;
+}
+
+#rewards-task-header.visible {
+  display: flex;
+}
+
 #rewards-task-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   display: none;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: #f0f0f0;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -961,46 +1121,27 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 12px;
+}
+
+#rewards-task-header-text {
+  flex: 1;
+  min-width: 0;
 }
 
 #rewards-task-label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #555;
-  text-align: center;
-  margin-top: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
 }
 
 #rewards-progress-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #888;
-  text-align: center;
-  margin-top: 4px;
+  margin-top: 1px;
 }
 
-#btn-did-it {
-  display: block;
-  width: calc(100% - 32px);
-  margin: 0 16px 12px;
-  padding: 18px;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #66BB6A, #43A047);
-  color: #fff;
-  font-size: 1.4rem;
-  font-weight: 800;
-  cursor: pointer;
-  font-family: inherit;
-  flex-shrink: 0;
-  min-height: 64px;
-  transition: opacity 0.2s, transform 0.08s;
-  box-shadow: 0 4px 16px rgba(67, 160, 71, 0.3);
-  letter-spacing: 0.02em;
-}
-
-#btn-did-it:active { transform: scale(0.96); }
-#btn-did-it.cooldown { opacity: 0.5; pointer-events: none; }
+/* btn-did-it removed — tapping tiles directly replaces it */
 
 /* Reward-active / timer state */
 #reward-active-screen {
@@ -1128,7 +1269,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stone.animate-fill { animation: none; }
+  .task-tile.animate-fill { animation: none; }
+  .task-tile.active { animation: none; }
+  .reward-card.unlocked { animation: none; }
   @keyframes rewardPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3); } }
   @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
   .confetti-piece { animation: none; display: none; }
@@ -2042,6 +2185,12 @@ body {
   #tab-bar { padding: 2px 4px; gap: 2px; }
   .tab-btn { padding: 4px 0; }
   .tab-label { font-size: 0.65rem; }
+  .rewards-grid { gap: 8px; }
+  .task-tile { border-radius: 12px; }
+  .task-tile-number { font-size: 1.1rem; }
+  .task-tile-check { font-size: 1.5rem; }
+  .reward-card { padding: 10px 14px; gap: 10px; }
+  .reward-card-icon { width: 44px; height: 44px; font-size: 1.1rem; }
 }
 
 /* Standard phones (360-479px) */
@@ -2064,6 +2213,13 @@ body {
 @media (min-width: 768px) {
   #grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
   #grid-container { padding: 14px; }
+  .rewards-grid { max-width: 500px; gap: 14px; }
+  .task-tile { border-radius: 20px; }
+  .task-tile-number { font-size: 1.6rem; }
+  .task-tile-check { font-size: 2.4rem; }
+  .reward-card { max-width: 500px; padding: 18px 22px; }
+  .reward-card-icon { width: 64px; height: 64px; font-size: 1.6rem; }
+  .reward-card-label { font-size: 1.15rem; }
 }
 
 /* Safe area support for notched devices */
@@ -2150,10 +2306,15 @@ body {
         <div id="rewards-empty-text">No reward tracks yet</div>
         <div id="rewards-empty-sub">Unlock parent mode to create one</div>
       </div>
-      <div id="rewards-task-image" role="img" aria-label=""></div>
-      <div id="rewards-task-label"></div>
+      <div id="rewards-task-header">
+        <div id="rewards-task-image" role="img" aria-label=""></div>
+        <div id="rewards-task-header-text">
+          <div id="rewards-task-label"></div>
+          <div id="rewards-progress-text" aria-live="polite"></div>
+        </div>
+      </div>
       <div id="rewards-path" style="display:none"></div>
-      <div id="rewards-progress-text" aria-live="polite"></div>
+      <div id="rewards-reward-card" style="display:none"></div>
     </div>
     <div id="reward-active-screen">
       <div id="reward-active-icon" class="reward-icon earned"></div>
@@ -2166,7 +2327,6 @@ body {
       <button class="rewards-parent-btn" id="btn-edit-track">Configure</button>
       <button class="rewards-parent-btn" id="btn-reset-track">Reset</button>
     </div>
-    <button id="btn-did-it" aria-label="Mark task complete">I did it!</button>
   </div>
 </div>
 
@@ -4530,13 +4690,14 @@ function renderRewards() {
   const pathEl = document.getElementById('rewards-path');
   const taskLabel = document.getElementById('rewards-task-label');
   const progressText = document.getElementById('rewards-progress-text');
-  const didItBtn = document.getElementById('btn-did-it');
   const activeScreen = document.getElementById('reward-active-screen');
   const pathArea = document.getElementById('rewards-path-area');
   const newBtn = document.getElementById('btn-new-track');
   const editBtn = document.getElementById('btn-edit-track');
   const resetBtn = document.getElementById('btn-reset-track');
   const taskImgEl = document.getElementById('rewards-task-image');
+  const taskHeader = document.getElementById('rewards-task-header');
+  const rewardCard = document.getElementById('rewards-reward-card');
 
   renderTrackTabs();
   clearRewardTimer();
@@ -4544,9 +4705,10 @@ function renderRewards() {
   if (!track) {
     emptyEl.style.display = 'flex';
     pathEl.style.display = 'none';
+    rewardCard.style.display = 'none';
+    taskHeader.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
-    didItBtn.style.display = 'none';
     activeScreen.classList.remove('visible');
     pathArea.style.display = 'flex';
     editBtn.style.display = 'none';
@@ -4565,9 +4727,10 @@ function renderRewards() {
   if (isRewardState) {
     emptyEl.style.display = 'none';
     pathEl.style.display = 'none';
+    rewardCard.style.display = 'none';
+    taskHeader.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
-    didItBtn.style.display = 'none';
     pathArea.style.display = 'none';
     activeScreen.classList.add('visible');
     resetBtn.style.display = '';
@@ -4581,55 +4744,140 @@ function renderRewards() {
   pathEl.style.display = '';
   pathArea.style.display = 'flex';
   activeScreen.classList.remove('visible');
-  didItBtn.style.display = 'block';
   resetBtn.style.display = track.currentCount > 0 ? '' : 'none';
 
   pathArea.setAttribute('aria-valuenow', track.currentCount);
   pathArea.setAttribute('aria-valuemax', track.targetCount);
 
   renderTaskImage(track);
+  taskHeader.classList.add('visible');
   taskLabel.textContent = track.taskLabel;
   progressText.textContent = track.currentCount + ' of ' + track.targetCount;
 
   renderPath(track);
 }
 
+function getGridCols(count) {
+  if (count <= 2) return 2;
+  if (count <= 3) return 3;
+  if (count <= 4) return 2;
+  if (count <= 6) return 3;
+  if (count <= 8) return 4;
+  return 5;
+}
+
+function handleTileTap(track) {
+  if (!track || track.status !== 'active') return;
+  if (track._cooldown) return;
+  track._cooldown = true;
+  setTimeout(() => { track._cooldown = false; }, 1500);
+
+  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
+  saveTrack(track);
+
+  playDing();
+  speak(track.currentCount + ' out of ' + track.targetCount);
+
+  renderRewards();
+
+  // Animate the just-filled tile
+  const tiles = document.querySelectorAll('#rewards-path .task-tile.completed');
+  const lastTile = tiles[tiles.length - 1];
+  if (lastTile) {
+    lastTile.classList.add('animate-fill');
+    setTimeout(() => lastTile.classList.remove('animate-fill'), 450);
+  }
+
+  if (track.currentCount >= track.targetCount) {
+    setTimeout(() => triggerCelebration(track), 500);
+  }
+}
+
 function renderPath(track) {
   const pathEl = document.getElementById('rewards-path');
   pathEl.innerHTML = '';
-  pathEl.className = 'path-container';
+  const cols = getGridCols(track.targetCount);
+  pathEl.className = 'rewards-grid cols-' + cols;
 
   for (let i = 0; i < track.targetCount; i++) {
-    if (i > 0) {
-      const conn = document.createElement('div');
-      conn.className = 'path-connector' + (i <= track.currentCount ? ' filled' : '');
-      pathEl.appendChild(conn);
+    const tile = document.createElement('div');
+    tile.className = 'task-tile';
+
+    const num = document.createElement('div');
+    num.className = 'task-tile-number';
+    num.textContent = i + 1;
+
+    const check = document.createElement('div');
+    check.className = 'task-tile-check';
+    check.textContent = '\u2713';
+
+    const tap = document.createElement('div');
+    tap.className = 'task-tile-tap';
+    tap.textContent = 'Tap!';
+
+    if (i < track.currentCount) {
+      tile.classList.add('completed');
+    } else if (i === track.currentCount) {
+      tile.classList.add('active');
+      tile.addEventListener('click', () => handleTileTap(track));
+    } else {
+      tile.classList.add('locked');
     }
-    const stone = document.createElement('div');
-    stone.className = 'stone' + (i < track.currentCount ? ' filled' : '');
-    stone.textContent = i + 1;
-    pathEl.appendChild(stone);
+
+    tile.appendChild(num);
+    tile.appendChild(check);
+    tile.appendChild(tap);
+    pathEl.appendChild(tile);
   }
 
-  const conn = document.createElement('div');
-  conn.className = 'path-connector' + (track.currentCount >= track.targetCount ? ' filled' : '');
-  pathEl.appendChild(conn);
+  // Render the reward card below
+  renderRewardCard(track);
+}
 
-  const reward = document.createElement('div');
-  reward.className = 'reward-icon';
+function renderRewardCard(track) {
+  const cardEl = document.getElementById('rewards-reward-card');
+  cardEl.innerHTML = '';
+  cardEl.style.display = '';
+  const allDone = track.currentCount >= track.targetCount;
+  cardEl.className = 'reward-card' + (allDone ? ' unlocked' : ' locked');
+
+  // Icon
+  const icon = document.createElement('div');
+  icon.className = 'reward-card-icon';
   if (track.rewardImageKey) {
     loadImage(track.rewardImageKey).then(blob => {
       if (blob) {
         const img = document.createElement('img');
         img.src = URL.createObjectURL(blob);
         img.alt = track.rewardLabel;
-        reward.textContent = '';
-        reward.appendChild(img);
+        icon.textContent = '';
+        icon.appendChild(img);
       }
     });
   }
-  reward.textContent = track.rewardLabel ? track.rewardLabel.charAt(0).toUpperCase() : '?';
-  pathEl.appendChild(reward);
+  icon.textContent = track.rewardLabel ? track.rewardLabel.charAt(0).toUpperCase() : '?';
+
+  // Info
+  const info = document.createElement('div');
+  info.className = 'reward-card-info';
+  const label = document.createElement('div');
+  label.className = 'reward-card-label';
+  label.textContent = track.rewardLabel;
+  const status = document.createElement('div');
+  status.className = 'reward-card-status';
+  const remaining = track.targetCount - track.currentCount;
+  status.textContent = allDone ? 'Reward unlocked!' : remaining + ' more to go';
+  info.appendChild(label);
+  info.appendChild(status);
+
+  // Lock icon
+  const lock = document.createElement('div');
+  lock.className = 'reward-card-lock';
+  lock.textContent = '\uD83D\uDD12';
+
+  cardEl.appendChild(icon);
+  cardEl.appendChild(info);
+  cardEl.appendChild(lock);
 }
 
 function renderTrackTabs() {
@@ -4739,36 +4987,7 @@ function clearRewardTimer() {
   }
 }
 
-// "I did it!" handler
-document.getElementById('btn-did-it').addEventListener('click', async () => {
-  const track = getActiveTrack();
-  if (!track || track.status !== 'active') return;
-
-  const btn = document.getElementById('btn-did-it');
-  if (btn.classList.contains('cooldown')) return;
-  btn.classList.add('cooldown');
-  setTimeout(() => btn.classList.remove('cooldown'), 1500);
-
-  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
-  await saveTrack(track);
-
-  playDing();
-  speak(track.currentCount + ' out of ' + track.targetCount);
-
-  renderRewards();
-
-  // Animate the just-filled stone
-  const stones = document.querySelectorAll('#rewards-path .stone.filled');
-  const lastStone = stones[stones.length - 1];
-  if (lastStone) {
-    lastStone.classList.add('animate-fill');
-    setTimeout(() => lastStone.classList.remove('animate-fill'), 400);
-  }
-
-  if (track.currentCount >= track.targetCount) {
-    setTimeout(() => triggerCelebration(track), 500);
-  }
-});
+// Tile tap handler is now inline in renderPath() via handleTileTap()
 
 function triggerCelebration(track) {
   const overlay = document.getElementById('celebration-overlay');
