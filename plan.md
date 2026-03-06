@@ -7,20 +7,18 @@ The home screen is **16 folder icons**. To say "I want more", a child must:
 
 That's 6+ taps for a 3-word sentence. Research says it should be **2 taps max** for common requests.
 
-There's also a `QUICK_ACCESS_BUTTONS` system that injects 5 phrase buttons ("I want", "I don't want", "I need help", "thank you", "please") into every folder view — but NOT the home screen. These are hardcoded DOM elements, not part of the data model, and they disappear when you go home.
+There's also a `QUICK_ACCESS_BUTTONS` system that injects 5 phrase buttons ("I want", "I don't want", "I need help", "thank you", "please") into every folder view — but NOT the home screen. These are hardcoded DOM elements, not part of the data model.
 
-## Design Philosophy: Freeform, Not Rigid
+## Design Philosophy: Core Words Everywhere, Folders Freeform
 
-Unlike Proloquo2Go which locks every single word to a permanent grid cell across all screens, we take a **lighter approach**:
-
-- **Core words get reserved positions on the home grid** — they always appear in the same cells on the home screen
-- **Inside folders, layout remains freeform** — folders are the user's space to organize however they want
-- **The quick-access bar (Home + "I want" + "I don't want" etc.) inside folders stays as-is** — it already provides consistency within folders without being rigid
-- **Core words are real data-model buttons** (not injected DOM hacks) so they persist, are editable, and survive IndexedDB round-trips
+- **Core words are pinned to fixed positions on EVERY screen** — home, inside folders, everywhere. A child always knows where "I", "want", "help" live regardless of context.
+- **Non-core words inside folders remain freeform** — parents and SLPs can organize those however they want.
+- **Replaces `QUICK_ACCESS_BUTTONS`** — the old system injected 5 hardcoded phrase buttons as DOM hacks. Core words on every screen replaces this with real data-model buttons that are consistent, persistent, and editable.
+- **Core words are real data-model buttons** with `type: 'core'` so they persist, survive IndexedDB round-trips, and can have custom images.
 
 ## Home Grid Layout (4 columns)
 
-New mixed layout — core words occupy the **top 2 rows**, folders fill the rest:
+New mixed layout — core words occupy the **top 2.5 rows**, folders fill the rest:
 
 ```
 Row 1:  [ I ]        [ want ]     [ don't want ] [ help ]
@@ -32,25 +30,34 @@ Row 6:  [ Clothes ]  [ My Body ]  [ Colors ]     [ Shapes ]
 Row 7:  [ 123 ]      [ ABC ]
 ```
 
-- **Rows 1-2**: 8 core words (always these positions, never move)
-- **Row 3**: 2 more core words + first 2 folders
-- **Rows 4-7**: Remaining folders
+## Inside Any Folder (e.g., Food)
+
+Core words pin to the same positions (top rows), folder content fills below:
+
+```
+Row 1:  [ I ]        [ want ]     [ don't want ] [ help ]
+Row 2:  [ more ]     [ stop ]     [ yes ]        [ no ]
+Row 3:  [ go ]       [ like ]     [ Home ⬅ ]     [           ]
+Row 4:  [ apple ]    [ banana ]   [ cookie ]     [ milk ]
+Row 5:  [ juice ]    [ water ]    [ bread ]      [ cheese ]
+...
+```
+
+The child builds motor memory: "I" is ALWAYS top-left. "want" is ALWAYS second. No matter what screen they're on.
 
 Core words use proper Fitzgerald Key colors:
 - `I` → yellow (pronoun)
-- `want`, `help`, `go`, `like` → green (verbs)
+- `want`, `help`, `go`, `like`, `yes` → green (verbs/affirmative)
 - `don't want`, `stop`, `no` → red (negatives)
 - `more` → blue (descriptor)
-- `yes` → green (affirmative)
 
 ## Implementation Steps
 
-### Step 1: Add core word buttons to the home grid data
+### Step 1: Define core words in the data model
 
-Move 10 core words from the `general` folder into `folderId: null` (home grid) with reserved positions 0-9. These become real home-grid buttons with `type: 'core'` (new type) to distinguish them from folders and fringe words.
+Add 10 core word entries to `DEFAULT_BUTTONS` with `type: 'core'` and `folderId: null` (home grid), positions 0-9:
 
 ```javascript
-// New type 'core' — rendered like fringe (tappable word) but position-locked
 { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
 { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
 { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
@@ -63,52 +70,65 @@ Move 10 core words from the `general` folder into `folderId: null` (home grid) w
 { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
 ```
 
-Shift all existing folder positions by +10 (folders start at position 10).
+Shift all existing folder positions by +10. Keep duplicate words in the `general` folder — the child can find "want" on home AND inside Social.
 
-Keep the duplicate words in the `general` folder too — a child should find "want" both on the home screen AND inside Social. No removal, only addition.
+### Step 2: Update `renderGrid()` to inject core words on every screen
 
-### Step 2: Update `renderGrid()` for mixed home grid
+**Home grid**: Core words render naturally at positions 0-9 since they have `folderId: null`. No change needed for home.
 
-Currently the home grid just renders all `folderId: null` items via `createCell()`. Since `createCell()` already handles both folders (navigates into folder) and fringe words (speaks + adds to message), the core words will "just work" as tappable words — no special rendering needed beyond what `createCell()` already does.
-
-The key change: add the new `'core'` type to `createCell()` so it behaves like `'fringe'` (tap to speak/add to message) rather than like `'folder'` (tap to navigate).
-
-In `createCell()` (~line 3540), the click handler checks `btn.type === 'folder'` to decide whether to navigate or speak. We add `'core'` to the "speak" path:
+**Folder views**: This is the key change. When rendering a folder, inject the core word buttons at the top of the grid (before the Home button and folder content). The core words are global — they don't belong to any folder but appear on all of them.
 
 ```javascript
-// Existing: if (btn.type === 'folder') { navigate } else { speak }
-// Core words fall into the else (speak) branch naturally since type !== 'folder'
+// In renderGrid(), folder branch:
+// 1. Render core words first (positions 0-9, always the same)
+const coreWords = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+coreWords.forEach(btn => {
+  const c = createCell(btn);
+  grid.appendChild(c);
+});
+
+// 2. Then Home button
+grid.appendChild(homeBtn);
+
+// 3. Then folder-specific items
+items.forEach(btn => {
+  grid.appendChild(createCell(btn));
+});
 ```
 
-Actually, looking at `createCell()`, it already does: `if (btn.type === 'folder') { ... } else { speak }`. So `type: 'core'` will automatically go to the speak path. No change needed in createCell for basic functionality.
+**Remove `QUICK_ACCESS_BUTTONS`**: Delete the `QUICK_ACCESS_BUTTONS` array and the injection logic in `renderGrid()`. Core words replace this entirely.
 
-### Step 3: Motor planning protection for core words
+### Step 3: `createCell()` handles core type
 
-Add a guard in the edit/delete flow so that `type: 'core'` buttons:
-- **Cannot be deleted** (hide delete button in edit modal)
-- **Cannot have their position changed** (position field locked)
-- **Can have their label/image customized** (parents may want to change the icon)
+`createCell()` already routes `type !== 'folder'` to the speak/add-to-message path. `type: 'core'` falls into this naturally — no change needed for basic tap behavior.
 
-In the edit modal logic, check `btn.type === 'core'` and disable the position/delete controls.
-
-### Step 4: IndexedDB migration for existing users
-
-Users who already have saved buttons in IndexedDB won't see the new core words because `init()` loads saved buttons and skips `DEFAULT_BUTTONS`.
-
-Add a migration in `init()`:
+Add `data-type` attribute to the cell element for CSS targeting:
 ```javascript
-// After loading saved buttons, check if core words exist
+cell.setAttribute('data-type', btn.type);
+```
+
+### Step 4: Motor planning protection
+
+Core words (`type: 'core'`) are protected:
+- **Cannot be deleted** — hide delete button in edit modal
+- **Cannot be repositioned** — position field locked/hidden
+- **Can have label/image customized** — parents may want to swap the emoji for a photo
+
+### Step 5: IndexedDB migration for existing users
+
+Existing users have saved buttons in IndexedDB without core words. Add migration in `init()`:
+
+```javascript
 const hasCoreWords = buttons.some(b => b.type === 'core');
 if (!hasCoreWords) {
-  // Inject core words at positions 0-9
-  // Shift existing home-grid items' positions by +10
+  // Define the 10 core words
+  // Shift all existing folderId:null buttons' positions by +10
+  // Prepend core words to the buttons array
   // Save back to IndexedDB
 }
 ```
 
-### Step 5: Add BUTTON_ICONS entries for core words
-
-The emoji icon lookup table (`BUTTON_ICONS`, ~line 3456) needs entries for the new core word IDs:
+### Step 6: Add BUTTON_ICONS entries
 
 ```javascript
 'core-i': '🙋',
@@ -123,9 +143,9 @@ The emoji icon lookup table (`BUTTON_ICONS`, ~line 3456) needs entries for the n
 'core-like': '❤️',
 ```
 
-### Step 6: Visual distinction for core words (subtle)
+### Step 7: Subtle CSS for core words
 
-Add a subtle CSS indicator so core words are visually distinct from folders on the home grid — slightly larger text or a thin border — so parents understand these are tappable words, not folders. Keep it minimal.
+Minimal visual distinction so parents understand these are always-present words:
 
 ```css
 .cell[data-type="core"] {
@@ -133,34 +153,33 @@ Add a subtle CSS indicator so core words are visually distinct from folders on t
 }
 ```
 
-Add `data-type` attribute in `createCell()`.
-
 ## What We're NOT Doing
 
-- **Not locking word positions inside folders** — folders stay freeform
-- **Not removing the QUICK_ACCESS_BUTTONS system** — it still serves its purpose inside folders
+- **Not locking non-core word positions inside folders** — those stay freeform
 - **Not changing grid column count** — that's a separate Grid Templates milestone
-- **Not adding new vocabulary** — just promoting existing words to the home screen
+- **Not adding new vocabulary** — just promoting existing words to be globally visible
 
 ## Files Changed
 
 - `index.html` — all changes in this single file:
-  - `DEFAULT_BUTTONS` array: add 10 core word entries, shift folder positions
-  - `BUTTON_ICONS` object: add core word emoji mappings
-  - `createCell()`: add `data-type` attribute to cell element
-  - `renderGrid()`: no changes needed (sorts by position, handles mixed types)
+  - `DEFAULT_BUTTONS`: add 10 core word entries, shift folder positions
+  - `BUTTON_ICONS`: add core word emoji mappings
+  - `renderGrid()`: inject core words at top of every folder view; remove `QUICK_ACCESS_BUTTONS`
+  - `createCell()`: add `data-type` attribute
   - Edit modal: protect core words from deletion/repositioning
-  - `init()`: add migration for existing IndexedDB users
+  - `init()`: migration for existing IndexedDB users
   - CSS: subtle core word styling
 
 ## Acceptance Criteria
 
 1. Home screen shows 10 core words in rows 1-3, folders in rows 3-7
-2. Tapping a core word speaks it and adds it to the message bar
-3. Tapping a folder still navigates into that folder
-4. "I want more" is achievable in 3 taps from home (I → want → more) without leaving the home screen
-5. Core words cannot be deleted or repositioned
-6. Core words appear in correct Fitzgerald Key colors
-7. Existing users with saved data get core words via migration
-8. Quick-access buttons inside folders still work as before
-9. App still works offline after changes
+2. Every folder view shows the same 10 core words in the same top positions
+3. Tapping a core word speaks it and adds it to the message bar (on any screen)
+4. Tapping a folder still navigates into that folder
+5. "I want more" is achievable in 3 taps without leaving any screen
+6. Core words cannot be deleted or repositioned
+7. Core words appear in correct Fitzgerald Key colors
+8. Non-core words inside folders can still be freely rearranged
+9. `QUICK_ACCESS_BUTTONS` system is fully removed (replaced by core words)
+10. Existing users with saved data get core words via migration
+11. App still works offline after changes
