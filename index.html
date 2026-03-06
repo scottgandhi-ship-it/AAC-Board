@@ -314,17 +314,44 @@ body {
 .prediction-chip[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
 .prediction-chip[data-color="purple"] { background: linear-gradient(145deg, #E1BEE7, #AB47BC); }
 
-/* Core words: visually distinct — always-present on every screen */
-.cell[data-type="core"] {
+/* ── Core Word Strip ── */
+#core-word-strip {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #F5F5F5, #EEEEEE);
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  justify-content: center;
+}
+.core-strip-btn {
+  flex: 1;
+  max-width: 120px;
+  min-width: 0;
+  padding: 10px 6px;
+  border-radius: 14px;
   border: 2px solid rgba(0,0,0,0.12);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
-  font-weight: 700;
-}
-.cell[data-type="core"] .cell-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
   font-weight: 800;
-  font-size: 0.85em;
-  letter-spacing: 0.02em;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.1;
 }
+.core-strip-btn:active { transform: scale(0.93); }
+.core-strip-btn .core-icon { font-size: 1.3em; }
+.core-strip-btn .core-label { font-size: 0.8em; }
+.core-strip-btn[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.core-strip-btn[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.core-strip-btn[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.core-strip-btn[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
 
 /* Search result cells reuse same color system */
 .search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
@@ -2349,6 +2376,7 @@ body {
     <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
   </div>
   <div id="prediction-bar"></div>
+  <div id="core-word-strip"></div>
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="grid"></div>
@@ -2648,17 +2676,13 @@ body {
 
 <script>
 // ── Core Word Definitions (single source of truth) ──
+// These live in a dedicated strip above the grid, not in the grid itself
 const CORE_WORD_DEFS = [
   { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
   { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
   { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
-  { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
-  { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
-  { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
-  { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
-  { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
-  { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
-  { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
+  { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 3 },
+  { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 4 },
 ];
 
 // ── Default Vocabulary ──
@@ -2666,22 +2690,22 @@ const DEFAULT_BUTTONS = [
   ...CORE_WORD_DEFS,
 
   // ── Home Grid (16 Category Folders) ──
-  { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 10 },
-  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 11 },
-  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 12 },
-  { id: 'folder-people',    label: 'People',    color: 'yellow', type: 'folder', folderId: null, position: 13 },
-  { id: 'folder-feelings',  label: 'Feelings',  color: 'blue',   type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 15 },
-  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 16 },
-  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 17 },
-  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 18 },
-  { id: 'folder-questions', label: 'Questions', color: 'purple', type: 'folder', folderId: null, position: 19 },
-  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 20 },
-  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 21 },
-  { id: 'folder-colors',    label: 'Colors',    color: 'blue',   type: 'folder', folderId: null, position: 22 },
-  { id: 'folder-shapes',    label: 'Shapes',    color: 'blue',   type: 'folder', folderId: null, position: 23 },
-  { id: 'folder-123',       label: '123',       color: 'purple', type: 'folder', folderId: null, position: 24 },
-  { id: 'folder-abc',       label: 'ABC',       color: 'purple', type: 'folder', folderId: null, position: 25 },
+  { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
+  { id: 'folder-people',    label: 'People',    color: 'yellow', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'blue',   type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-questions', label: 'Questions', color: 'purple', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'blue',   type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'blue',   type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-123',       label: '123',       color: 'purple', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'purple', type: 'folder', folderId: null, position: 15 },
 
   // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
@@ -3309,10 +3333,19 @@ async function init() {
   // Migrate: add core words for existing users who don't have them yet
   const hasCoreWords = buttons.some(b => b.type === 'core');
   if (!hasCoreWords) {
-    buttons.forEach(b => {
-      if (b.folderId === null) b.position += 10;
-    });
     buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
+    migrated = true;
+  }
+
+  // Migrate: remove old core words that moved to strip (keep only 5)
+  const validCoreIds = new Set(CORE_WORD_DEFS.map(d => d.id));
+  const removedCores = buttons.filter(b => b.type === 'core' && !validCoreIds.has(b.id));
+  if (removedCores.length > 0) {
+    buttons = buttons.filter(b => !(b.type === 'core' && !validCoreIds.has(b.id)));
+    // Reset home grid positions to start at 0 (core words no longer in grid)
+    buttons.filter(b => b.folderId === null && b.type !== 'core')
+      .sort((a, b) => a.position - b.position)
+      .forEach((b, i) => { b.position = i; });
     migrated = true;
   }
 
@@ -3462,20 +3495,33 @@ function speak(text) {
 
 // Quick-access action buttons injected at the top of most folder grids
 // ── Render Grid ──
+function renderCoreStrip() {
+  const strip = document.getElementById('core-word-strip');
+  strip.innerHTML = '';
+  coreWordsCache.forEach(btn => {
+    const el = document.createElement('button');
+    el.className = 'core-strip-btn';
+    el.setAttribute('data-color', btn.color);
+    el.setAttribute('data-id', btn.id);
+    const icon = BUTTON_ICONS[btn.id];
+    el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') +
+                   `<span class="core-label">${btn.label}</span>`;
+    el.addEventListener('click', () => {
+      speak(btn.label);
+      addWordToMessage(btn.label);
+      renderPredictions(btn.id);
+    });
+    strip.appendChild(el);
+  });
+}
+
 function renderGrid() {
   const grid = document.getElementById('grid');
   const folderLabel = document.getElementById('folder-label');
   grid.innerHTML = '';
 
-  // Core words appear on EVERY screen in fixed positions (motor planning consistency)
-  const coreWords = coreWordsCache;
-  let offset = 0;
-  coreWords.forEach((btn, i) => {
-    const c = createCell(btn);
-    c.style.animationDelay = `${i * 25}ms`;
-    grid.appendChild(c);
-    offset++;
-  });
+  // Core words are rendered in the dedicated strip above
+  renderCoreStrip();
 
   if (currentFolder) {
     const items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
@@ -3485,16 +3531,16 @@ function renderGrid() {
 
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${(i + offset) * 25}ms`;
+      c.style.animationDelay = `${i * 25}ms`;
       grid.appendChild(c);
     });
   } else {
-    // Home grid: folders (core words already rendered above)
+    // Home grid: folders only (core words in strip above)
     const items = buttons.filter(b => b.folderId === null && b.type !== 'core').sort((a, b) => a.position - b.position);
     folderLabel.style.display = 'none';
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${(i + offset) * 25}ms`;
+      c.style.animationDelay = `${i * 25}ms`;
       grid.appendChild(c);
     });
   }
@@ -3523,8 +3569,7 @@ const FOLDER_ICONS = {
 const BUTTON_ICONS = {
   // Core words
   'core-i': '🙋', 'core-want': '👉', 'core-dont-want': '🚫', 'core-help': '🆘',
-  'core-more': '➕', 'core-stop': '✋', 'core-yes': '👍', 'core-no': '👎',
-  'core-go': '🏃', 'core-like': '❤️',
+  'core-more': '➕',
   // General
   'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
   'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
@@ -3617,14 +3662,11 @@ const DEFAULT_NOUN_IDS = [
 
 // Prediction map keyed by button ID for robustness against renames/i18n
 const PREDICTIONS = {
-  'core-i':          ['core-want', 'core-dont-want', 'core-like', 'core-help', 'core-go'],
+  'core-i':          ['core-want', 'core-dont-want', 'core-help', 'core-more'],
   'core-want':       ['core-more', 'core-help', '__NOUNS__'],
-  'core-dont-want':  ['core-stop', 'core-no', '__NOUNS__'],
-  'core-like':       ['core-more', '__NOUNS__'],
-  'core-help':       ['core-more', 'gen-please', 'core-yes'],
+  'core-dont-want':  ['gen-stop', '__NOUNS__'],
+  'core-help':       ['core-more', 'gen-please'],
   'core-more':       ['gen-please', '__NOUNS__'],
-  'core-go':         ['gen-please', 'core-yes', 'core-no'],
-  'core-stop':       ['gen-please', 'core-no'],
 };
 
 // Icon lookup map built at init for O(1) access
@@ -3766,13 +3808,9 @@ function createCell(btn) {
       renderGrid();
       return;
     }
-    // All words speak on tap; core words also show predictions
+    // All words speak on tap
     addWordToMessage(btn.label);
     speak(btn.label);
-    if (btn.type === 'core') {
-      renderPredictions(btn.id);
-      clearPredictions();
-    }
   });
 
   return cell;
