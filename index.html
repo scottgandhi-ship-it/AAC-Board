@@ -140,7 +140,7 @@ body {
 #grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--grid-cols, 4), 1fr);
   gap: 10px;
 }
 
@@ -236,6 +236,17 @@ body {
 .cell.folder-btn::after {
   content: none;
 }
+
+/* Grid size adjustments for 6x6 */
+body.grid-6 .cell { padding: 4px 3px; gap: 2px; }
+body.grid-6 .cell .cell-label { font-size: clamp(0.55rem, 1.8vw, 0.8rem); }
+body.grid-6 .cell .cell-big-text { font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
+body.grid-6 .cell.folder-btn .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
+body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); }
+
+/* Grid size adjustments for 3x3 */
+body.grid-3 .cell .cell-label { font-size: clamp(1rem, 3.5vw, 1.4rem); }
+body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 /* Individual folder colors */
 .cell.folder-btn[data-folder="general"]   { background: linear-gradient(145deg, #E8F5E9, #C8E6C9) !important; border-color: #A5D6A7; }
@@ -936,6 +947,88 @@ body {
 .rewards-parent-btn:active { background: #eee; }
 
 /* Celebration overlay */
+/* Grid Size Picker (first-run) */
+#grid-picker-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 16px;
+}
+#grid-picker-overlay.visible { display: flex; }
+#grid-picker-overlay h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #333;
+  text-align: center;
+  margin: 0;
+}
+#grid-picker-overlay p {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin: 0 0 8px;
+}
+.grid-picker-options {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.grid-picker-card {
+  flex: 1;
+  min-width: 140px;
+  max-width: 180px;
+  border: 3px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.grid-picker-card:active {
+  transform: scale(0.96);
+}
+.grid-picker-card:hover, .grid-picker-card:focus-visible {
+  border-color: var(--bar-bg);
+  box-shadow: 0 4px 20px rgba(108,99,255,0.2);
+}
+.grid-picker-card .picker-grid-preview {
+  display: grid;
+  gap: 4px;
+  width: 80px;
+  height: 80px;
+}
+.grid-picker-card .picker-grid-preview span {
+  background: var(--bar-bg);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+.grid-picker-card .picker-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #333;
+}
+.grid-picker-card .picker-desc {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+  line-height: 1.3;
+}
+
 #celebration-overlay {
   display: none;
   position: fixed;
@@ -2020,6 +2113,15 @@ body {
       <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
     </div>
     <div class="settings-section">
+      <h3>Grid Size</h3>
+      <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
+        <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
+        <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
+        <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
+      </div>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
+    </div>
+    <div class="settings-section">
       <h3>Data</h3>
       <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
     </div>
@@ -2192,6 +2294,45 @@ body {
 <div id="celebration-overlay">
   <div id="celebration-reward"></div>
   <div id="celebration-text"></div>
+</div>
+
+<!-- Grid Size Picker (first-run) -->
+<div id="grid-picker-overlay" role="dialog" aria-label="Choose communication level">
+  <h2>Choose a starting layout</h2>
+  <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
+  <div class="grid-picker-options">
+    <button class="grid-picker-card" data-size="3" aria-label="3 by 3 Starter grid, 9 buttons, best for learning to request">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">3x3 Starter</span>
+      <span class="picker-desc">Learning to request</span>
+    </button>
+    <button class="grid-picker-card" data-size="4" aria-label="4 by 4 Growing grid, 16 buttons, best for building sentences">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">4x4 Growing</span>
+      <span class="picker-desc">Building sentences</span>
+    </button>
+    <button class="grid-picker-card" data-size="6" aria-label="6 by 6 Talker grid, 36 buttons, best for combining words fluently">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">6x6 Talker</span>
+      <span class="picker-desc">Combining words fluently</span>
+    </button>
+  </div>
 </div>
 
 <!-- Toast -->
@@ -2496,6 +2637,131 @@ for (let i = 0; i < 26; i++) {
   DEFAULT_BUTTONS.push({ id: `letter-${letter.toLowerCase()}`, label: letter, color: 'blue', type: 'fringe', folderId: 'abc', position: i });
 }
 
+// ── Grid Templates (Composition Pattern) ──
+const HOME_GRID_3X3 = [
+  { id: 's-i',     label: 'I',     color: 'yellow', type: 'core', folderId: null, position: 0 },
+  { id: 's-want',  label: 'want',  color: 'green',  type: 'core', folderId: null, position: 1 },
+  { id: 's-more',  label: 'more',  color: 'blue',   type: 'core', folderId: null, position: 2 },
+  { id: 's-help',  label: 'help',  color: 'green',  type: 'core', folderId: null, position: 3 },
+  { id: 's-stop',  label: 'stop',  color: 'red',    type: 'core', folderId: null, position: 4 },
+  { id: 's-yes',   label: 'yes',   color: 'green',  type: 'core', folderId: null, position: 5 },
+  { id: 's-no',    label: 'no',    color: 'red',    type: 'core', folderId: null, position: 6 },
+  { id: 's-eat',   label: 'eat',   color: 'green',  type: 'core', folderId: null, position: 7 },
+  { id: 's-drink', label: 'drink', color: 'green',  type: 'core', folderId: null, position: 8 }
+];
+
+const HOME_GRID_4X4 = [
+  // Core words (positions 0-4)
+  { id: 'g-i',     label: 'I',     color: 'yellow', type: 'core', folderId: null, position: 0 },
+  { id: 'g-want',  label: 'want',  color: 'green',  type: 'core', folderId: null, position: 1 },
+  { id: 'g-more',  label: 'more',  color: 'blue',   type: 'core', folderId: null, position: 2 },
+  { id: 'g-help',  label: 'help',  color: 'green',  type: 'core', folderId: null, position: 3 },
+  { id: 'g-stop',  label: 'stop',  color: 'red',    type: 'core', folderId: null, position: 4 },
+  // Folders (positions 5-15) -- 11 folders, dropping Shapes/123/ABC/Questions/Things for Growing level
+  { id: 'folder-general',   label: 'General',   color: 'orange', type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 15 }
+];
+
+const HOME_GRID_6X6 = [
+  // Core words (positions 0-19)
+  { id: 't-i',      label: 'I',      color: 'yellow', type: 'core', folderId: null, position: 0 },
+  { id: 't-you',    label: 'you',    color: 'yellow', type: 'core', folderId: null, position: 1 },
+  { id: 't-my',     label: 'my',     color: 'yellow', type: 'core', folderId: null, position: 2 },
+  { id: 't-it',     label: 'it',     color: 'yellow', type: 'core', folderId: null, position: 3 },
+  { id: 't-want',   label: 'want',   color: 'green',  type: 'core', folderId: null, position: 4 },
+  { id: 't-need',   label: 'need',   color: 'green',  type: 'core', folderId: null, position: 5 },
+  { id: 't-like',   label: 'like',   color: 'green',  type: 'core', folderId: null, position: 6 },
+  { id: 't-go',     label: 'go',     color: 'green',  type: 'core', folderId: null, position: 7 },
+  { id: 't-help',   label: 'help',   color: 'green',  type: 'core', folderId: null, position: 8 },
+  { id: 't-is',     label: 'is',     color: 'green',  type: 'core', folderId: null, position: 9 },
+  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 10 },
+  { id: 't-please', label: 'please', color: 'pink',   type: 'core', folderId: null, position: 11 },
+  { id: 't-hi',     label: 'hi',     color: 'pink',   type: 'core', folderId: null, position: 12 },
+  { id: 't-bye',    label: 'bye',    color: 'pink',   type: 'core', folderId: null, position: 13 },
+  { id: 't-more',   label: 'more',   color: 'blue',   type: 'core', folderId: null, position: 14 },
+  { id: 't-big',    label: 'big',    color: 'blue',   type: 'core', folderId: null, position: 15 },
+  { id: 't-little', label: 'little', color: 'blue',   type: 'core', folderId: null, position: 16 },
+  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 17 },
+  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 18 },
+  { id: 't-dont',   label: "don't",  color: 'red',    type: 'core', folderId: null, position: 19 },
+  // Same 16 folders at positions 20-35
+  { id: 'folder-general',   label: 'General',   color: 'orange', type: 'folder', folderId: null, position: 20 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 21 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 22 },
+  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 23 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 24 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 25 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 26 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 27 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 28 },
+  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 29 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 30 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 31 },
+  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 32 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 33 },
+  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 34 },
+  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 35 }
+];
+
+const FOUR_BY_FOUR_FOLDERS = new Set([
+  'general', 'food', 'drinks', 'people', 'clothes',
+  'body', 'feelings', 'actions', 'toys', 'places', 'colors'
+]);
+
+function getTemplate(size) {
+  if (size === 3) return JSON.parse(JSON.stringify(HOME_GRID_3X3));
+  if (size === 4) {
+    const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null && FOUR_BY_FOUR_FOLDERS.has(b.folderId));
+    return JSON.parse(JSON.stringify(HOME_GRID_4X4.concat(folderContents)));
+  }
+  if (size === 6) {
+    const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
+    return JSON.parse(JSON.stringify(HOME_GRID_6X6.concat(folderContents)));
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+}
+
+function getGridSize() {
+  const stored = localStorage.getItem('aac-grid-size');
+  if (stored === '3' || stored === '6') return parseInt(stored);
+  return 4;
+}
+
+function setGridSize(size) {
+  localStorage.setItem('aac-grid-size', String(size));
+  document.documentElement.style.setProperty('--grid-cols', size);
+  document.body.classList.remove('grid-3', 'grid-4', 'grid-6');
+  document.body.classList.add(`grid-${size}`);
+}
+
+function showGridPicker() {
+  const overlay = document.getElementById('grid-picker-overlay');
+  if (overlay.dataset.bound) return;
+  overlay.dataset.bound = 'true';
+  overlay.classList.add('visible');
+  overlay.querySelectorAll('.grid-picker-card').forEach(card => {
+    card.addEventListener('click', async () => {
+      const size = parseInt(card.dataset.size);
+      setGridSize(size);
+      buttons = getTemplate(size);
+      await saveButtons();
+      overlay.classList.remove('visible');
+      renderGrid();
+      updateSpeedDisplay();
+      initSpeech();
+    }, { once: true });
+  });
+}
+
 // ── State ──
 let buttons = [];
 let currentFolder = null;  // null = home grid
@@ -2562,6 +2828,18 @@ async function saveButton(btn) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_BUTTONS, 'readwrite');
     tx.objectStore(STORE_BUTTONS).put(btn);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function saveButtons() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readwrite');
+    const store = tx.objectStore(STORE_BUTTONS);
+    store.clear();
+    buttons.forEach(b => store.put(b));
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -2812,20 +3090,37 @@ async function clearActiveSchedule() {
 
 // ── Init ──
 async function init() {
+  const gridSize = getGridSize();
+  const hasStoredSize = localStorage.getItem('aac-grid-size') !== null;
+
+  let saved = [];
   try {
-    const saved = await loadButtons();
-    buttons = saved.length > 0 ? saved : JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
-  } catch {
-    buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+    saved = await loadButtons();
+  } catch { /* fall through to seeding */ }
+
+  if (saved.length > 0) {
+    buttons = saved;
+    // Migrate 'colours' -> 'colors' for existing users
+    let migrated = false;
+    buttons.forEach(b => {
+      if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
+      if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
+    });
+    if (migrated) saveButtons();
+    setGridSize(gridSize);
+    renderGrid();
+  } else if (!hasStoredSize) {
+    // First-run: show grid size picker and wait for selection
+    showGridPicker();
+    return;
+  } else {
+    // Has a stored size but empty IDB (e.g., after a reset)
+    buttons = getTemplate(gridSize);
+    await saveButtons();
+    setGridSize(gridSize);
+    renderGrid();
   }
-  // Migrate 'colours' -> 'colors' for existing users
-  let migrated = false;
-  buttons.forEach(b => {
-    if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
-    if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
-  });
-  if (migrated) saveButtons();
-  renderGrid();
+
   updateSpeedDisplay();
   initSpeech();
 }
@@ -2987,9 +3282,10 @@ function renderGrid() {
     });
   }
 
-  // Set grid rows dynamically — use scrollable fixed-height rows for large folders
+  // Set grid rows dynamically -- use scrollable fixed-height rows for large folders
   const totalCells = grid.children.length;
-  const rows = Math.ceil(totalCells / 4);
+  const cols = getGridSize();
+  const rows = Math.ceil(totalCells / cols);
   if (rows > 6) {
     grid.style.gridTemplateRows = `repeat(${rows}, minmax(70px, 80px))`;
     grid.style.flex = '0 0 auto';
@@ -3085,7 +3381,18 @@ const BUTTON_ICONS = {
   'thg-napkin': '🧻', 'thg-blanket': '🛏️', 'thg-pillow': '💤', 'thg-toothbrush': '🪥',
   'thg-towel': '🏖️', 'thg-backpack': '🎒', 'thg-scissors': '✂️', 'thg-phone': '📱',
   'thg-tv': '📺', 'thg-headphones': '🎧', 'thg-tissue': '🧻', 'thg-soap': '🧴',
-  'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀'
+  'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀',
+  // 4x4 Growing core words
+  'g-i': '🙋', 'g-want': '👉', 'g-more': '➕', 'g-help': '🆘', 'g-stop': '🛑',
+  // 3x3 Starter core words
+  's-i': '🙋', 's-want': '👉', 's-more': '➕', 's-help': '🆘',
+  's-stop': '🛑', 's-yes': '👍', 's-no': '👎', 's-eat': '🍽️', 's-drink': '🥤',
+  // 6x6 Talker core words
+  't-i': '🙋', 't-you': '👉', 't-my': '🙋', 't-it': '👆',
+  't-want': '👉', 't-need': '🙏', 't-like': '❤️', 't-go': '▶️',
+  't-help': '🆘', 't-is': '🔵', 't-yes': '👍', 't-please': '🙏',
+  't-hi': '👋', 't-bye': '👋', 't-more': '➕', 't-big': '⬆️',
+  't-little': '⬇️', 't-no': '👎', 't-stop': '🛑', 't-dont': '🚫'
 };
 
 function createCell(btn) {
@@ -3278,6 +3585,7 @@ function updateParentModeUI() {
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
   if (!parentMode) return;
   document.getElementById('settings-overlay').classList.add('open');
+  updateGridSizeButtons();
 });
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
@@ -3288,6 +3596,31 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) {
     document.getElementById('btn-close-settings').click();
   }
+});
+
+// ── Grid Size Settings ──
+function updateGridSizeButtons() {
+  const current = getGridSize();
+  document.querySelectorAll('.grid-size-opt').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.size) === current);
+  });
+}
+
+document.querySelectorAll('.grid-size-opt').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const newSize = parseInt(btn.dataset.size);
+    if (newSize === getGridSize()) return;
+    const names = { 3: '3x3 Starter', 4: '4x4 Growing', 6: '6x6 Talker' };
+    if (!confirm(`Switch to ${names[newSize]}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.`)) return;
+    await clearAllData();
+    setGridSize(newSize);
+    buttons = getTemplate(newSize);
+    await saveButtons();
+    currentFolder = null;
+    renderGrid();
+    updateGridSizeButtons();
+    showToast(`Switched to ${names[newSize]}`);
+  });
 });
 
 document.getElementById('btn-add-button').addEventListener('click', () => {
@@ -3334,7 +3667,8 @@ function updateSpeedDisplay() {
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
-  buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  buttons = getTemplate(getGridSize());
+  await saveButtons();
   currentFolder = null;
   renderGrid();
   showToast('Reset to defaults');
