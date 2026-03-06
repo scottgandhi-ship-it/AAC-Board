@@ -271,10 +271,16 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
-/* Core words: subtle visual distinction — always-present on every screen */
+/* Core words: visually distinct — always-present on every screen */
 .cell[data-type="core"] {
-  border-bottom: 3px solid rgba(0,0,0,0.15);
-  font-weight: 600;
+  border: 2px solid rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+  font-weight: 700;
+}
+.cell[data-type="core"] .cell-label {
+  font-weight: 800;
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
 }
 
 /* Search result cells reuse same color system */
@@ -674,13 +680,20 @@ body {
 
 /* ── Back Button (inline in message bar) ── */
 #btn-back-nav {
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15));
+  background: linear-gradient(135deg, #FF6F00, #FFA000);
   color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  min-width: 44px;
+  font-weight: 800;
+}
+#btn-back-nav:active {
+  background: linear-gradient(135deg, #E65100, #FF8F00);
+  transform: scale(0.95);
 }
 #btn-back-nav.visible { display: flex; }
 #btn-back-nav svg {
   stroke: #fff;
-  stroke-width: 2.5;
+  stroke-width: 3;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2605,22 +2618,22 @@ const DEFAULT_BUTTONS = [
   { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
 
   // ── Home Grid (16 Category Folders) ──
-  { id: 'folder-general',   label: 'Social',    color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 10 },
   { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 11 },
   { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 12 },
-  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 13 },
-  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-people',    label: 'People',    color: 'yellow', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'blue',   type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 15 },
   { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 16 },
-  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 17 },
+  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 17 },
   { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 18 },
-  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 19 },
+  { id: 'folder-questions', label: 'Questions', color: 'purple', type: 'folder', folderId: null, position: 19 },
   { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 20 },
   { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 21 },
-  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 22 },
-  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 23 },
-  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 24 },
-  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 25 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'blue',   type: 'folder', folderId: null, position: 22 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'blue',   type: 'folder', folderId: null, position: 23 },
+  { id: 'folder-123',       label: '123',       color: 'purple', type: 'folder', folderId: null, position: 24 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'purple', type: 'folder', folderId: null, position: 25 },
 
   // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
@@ -3394,10 +3407,15 @@ function getVoice() {
   return pickDefaultVoice(usVoices) || voices[0] || null;
 }
 
+// Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
+const SPEAK_OVERRIDES = { 'I': 'eye' };
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
+  // Apply overrides for single-word utterances
+  const spoken = SPEAK_OVERRIDES[text] || text;
+  const utter = new SpeechSynthesisUtterance(spoken);
   const voice = getVoice();
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
@@ -3427,19 +3445,6 @@ function renderGrid() {
     const folderButton = buttons.find(b => b.id === `folder-${currentFolder}`);
     folderLabel.textContent = folderButton ? folderButton.label : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
     folderLabel.style.display = 'block';
-
-    // Home button after core words
-    const homeBtn = document.createElement('button');
-    homeBtn.className = 'cell';
-    homeBtn.setAttribute('data-color', 'home');
-    homeBtn.innerHTML = '<span class="cell-big-text">⬅</span><span class="cell-label">Home</span>';
-    homeBtn.style.animationDelay = `${offset * 25}ms`;
-    homeBtn.addEventListener('click', () => {
-      currentFolder = null;
-      renderGrid();
-    });
-    grid.appendChild(homeBtn);
-    offset++;
 
     items.forEach((btn, i) => {
       const c = createCell(btn);
@@ -3617,9 +3622,11 @@ function createCell(btn) {
       renderGrid();
       return;
     }
-    // Speak word and add to message bar
-    speak(btn.label);
+    // Core words build sentences silently; other words speak immediately
     addWordToMessage(btn.label);
+    if (btn.type !== 'core') {
+      speak(btn.label);
+    }
   });
 
   return cell;
@@ -3634,12 +3641,15 @@ function addWordToMessage(word) {
 function renderMessage() {
   const container = document.getElementById('message-words');
   container.innerHTML = '';
-  messageWords.forEach(w => {
+  messageWords.forEach((w, i) => {
     const chip = document.createElement('span');
     chip.className = 'word-chip';
     chip.textContent = w;
+    chip.addEventListener('click', () => speak(w));
     container.appendChild(chip);
   });
+  // Auto-scroll to show latest word
+  container.scrollLeft = container.scrollWidth;
 }
 
 document.getElementById('btn-speak').addEventListener('click', () => {
