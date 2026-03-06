@@ -98,7 +98,16 @@
 - [ ] All data stored locally (privacy-first)
 - [ ] Optional: export data as CSV for SLPs
 
-### 4.3 Export/Share Boards
+### 4.3 Guided Setup & Teaching Tutorial
+- [ ] First-launch onboarding flow: walk parents through what AAC is and how to start
+- [ ] Guided setup wizard: pick grid size, child's age, communication level
+- [ ] Interactive modeling tutorial: step-by-step "try tapping 'I want more'" with the parent
+- [ ] Teaching tips surfaced contextually (e.g., "Tip: model 'help' when your child is struggling")
+- [ ] Progress-gated vocabulary unlocks: tutorial suggests when to reveal new words
+- [ ] "How to use AAC" reference section accessible from settings at any time
+- [ ] Tutorial can be replayed or skipped
+
+### 4.4 Export/Share Boards
 - [ ] Export board configuration as JSON file
 - [ ] Import board from JSON file
 - [ ] SLPs can create a board and share it with families
@@ -131,6 +140,7 @@
 | **P2** | Word prediction | Speeds up communication significantly. |
 | **P2** | Basic grammar | Makes output sound natural. |
 | **P2** | Modeling mode | Research-backed #1 teaching strategy. |
+| **P2** | Guided setup & teaching tutorial | Parents need hand-holding at first launch. Differentiator vs. Proloquo2Go. |
 | **P2** | Data/usage tracking | Parents and SLPs need visibility into progress. |
 | **P3** | Spanish language support | Largest non-English US population. |
 | **P3** | Export/share boards | Enables SLP-to-family workflow. |
@@ -143,3 +153,4 @@
 | Date | Change |
 |------|--------|
 | 2026-03-06 | Roadmap created with 5 milestones and 11 deliverables |
+| 2026-03-06 | Added 4.3 Guided Setup & Teaching Tutorial (P2) |
