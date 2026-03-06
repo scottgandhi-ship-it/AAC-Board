@@ -3407,10 +3407,15 @@ function getVoice() {
   return pickDefaultVoice(usVoices) || voices[0] || null;
 }
 
+// Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
+const SPEAK_OVERRIDES = { 'I': 'eye' };
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
+  // Apply overrides for single-word utterances
+  const spoken = SPEAK_OVERRIDES[text] || text;
+  const utter = new SpeechSynthesisUtterance(spoken);
   const voice = getVoice();
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
