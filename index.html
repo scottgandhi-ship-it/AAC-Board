@@ -271,6 +271,49 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
+/* ── Prediction Bar ── */
+#prediction-bar {
+  display: none;
+  gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+#prediction-bar::-webkit-scrollbar { display: none; }
+#prediction-bar.visible {
+  display: flex;
+  animation: slideDown 0.15s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.prediction-chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid rgba(0,0,0,0.08);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.1s;
+  white-space: nowrap;
+}
+.prediction-chip:active { transform: scale(0.93); }
+.prediction-chip[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.prediction-chip[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.prediction-chip[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.prediction-chip[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.prediction-chip[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.prediction-chip[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+.prediction-chip[data-color="purple"] { background: linear-gradient(145deg, #E1BEE7, #AB47BC); }
+
 /* Core words: visually distinct — always-present on every screen */
 .cell[data-type="core"] {
   border: 2px solid rgba(0,0,0,0.12);
@@ -2305,6 +2348,7 @@ body {
     <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
     <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
   </div>
+  <div id="prediction-bar"></div>
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="grid"></div>
@@ -2603,9 +2647,8 @@ body {
 <div id="toast"></div>
 
 <script>
-// ── Default Vocabulary ──
-const DEFAULT_BUTTONS = [
-  // ── Core Words (pinned to positions 0-9 on EVERY screen) ──
+// ── Core Word Definitions (single source of truth) ──
+const CORE_WORD_DEFS = [
   { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
   { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
   { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
@@ -2616,6 +2659,11 @@ const DEFAULT_BUTTONS = [
   { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
   { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
   { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
+];
+
+// ── Default Vocabulary ──
+const DEFAULT_BUTTONS = [
+  ...CORE_WORD_DEFS,
 
   // ── Home Grid (16 Category Folders) ──
   { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 10 },
@@ -3261,27 +3309,16 @@ async function init() {
   // Migrate: add core words for existing users who don't have them yet
   const hasCoreWords = buttons.some(b => b.type === 'core');
   if (!hasCoreWords) {
-    const CORE_WORDS = [
-      { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
-      { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
-      { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
-      { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
-      { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
-      { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
-      { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
-      { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
-      { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
-      { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
-    ];
-    // Shift existing home-grid items' positions by 10 to make room
     buttons.forEach(b => {
       if (b.folderId === null) b.position += 10;
     });
-    buttons.unshift(...CORE_WORDS);
+    buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
     migrated = true;
   }
 
   if (migrated) saveButtons();
+  rebuildCoreWordsCache();
+  buildIconLookup();
   renderGrid();
   updateSpeedDisplay();
   initSpeech();
@@ -3431,7 +3468,7 @@ function renderGrid() {
   grid.innerHTML = '';
 
   // Core words appear on EVERY screen in fixed positions (motor planning consistency)
-  const coreWords = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+  const coreWords = coreWordsCache;
   let offset = 0;
   coreWords.forEach((btn, i) => {
     const c = createCell(btn);
@@ -3571,6 +3608,112 @@ const BUTTON_ICONS = {
   'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀'
 };
 
+// ── Predictive Next-Word ──
+// Default noun IDs for prediction suggestions (common requests)
+const DEFAULT_NOUN_IDS = [
+  'drink-water', 'food-cookie', 'drink-milk', 'drink-apple-juice',
+  'food-crackers', 'food-apple', 'food-banana', 'food-yogurt'
+];
+
+// Prediction map keyed by button ID for robustness against renames/i18n
+const PREDICTIONS = {
+  'core-i':          ['core-want', 'core-dont-want', 'core-like', 'core-help', 'core-go'],
+  'core-want':       ['core-more', 'core-help', '__NOUNS__'],
+  'core-dont-want':  ['core-stop', 'core-no', '__NOUNS__'],
+  'core-like':       ['core-more', '__NOUNS__'],
+  'core-help':       ['core-more', 'gen-please', 'core-yes'],
+  'core-more':       ['gen-please', '__NOUNS__'],
+  'core-go':         ['gen-please', 'core-yes', 'core-no'],
+  'core-stop':       ['gen-please', 'core-no'],
+};
+
+// Icon lookup map built at init for O(1) access
+let iconByLabel = {};
+function buildIconLookup() {
+  iconByLabel = {};
+  for (const [id, icon] of Object.entries(BUTTON_ICONS)) {
+    const btn = buttons.find(b => b.id === id);
+    if (btn) iconByLabel[btn.label] = icon;
+  }
+}
+
+// Cached core words array rebuilt after button mutations
+let coreWordsCache = [];
+function rebuildCoreWordsCache() {
+  coreWordsCache = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+}
+
+function getTopNounIds() {
+  // Start with recently-added fringe nouns (newest first), then fill with defaults
+  const recentFringe = buttons
+    .filter(b => b.type === 'fringe' && b.folderId && ['food', 'drinks'].includes(b.folderId))
+    .slice(-8)
+    .reverse()
+    .map(b => b.id);
+  const combined = [...new Set([...recentFringe, ...DEFAULT_NOUN_IDS])];
+  return combined.slice(0, 10);
+}
+
+function resolvePredictions(btnId) {
+  const raw = PREDICTIONS[btnId];
+  if (!raw) return null;
+  const result = [];
+  for (const item of raw) {
+    if (item === '__NOUNS__') {
+      const nounIds = getTopNounIds();
+      nounIds.forEach(id => {
+        const btn = buttons.find(b => b.id === id);
+        if (btn) result.push({ id, label: btn.label, color: btn.color });
+      });
+    } else {
+      const btn = buttons.find(b => b.id === item);
+      if (btn) result.push({ id: item, label: btn.label, color: btn.color });
+    }
+  }
+  return result;
+}
+
+let predictionDebounce = false;
+
+function renderPredictions(btnId) {
+  const bar = document.getElementById('prediction-bar');
+  const predictions = resolvePredictions(btnId);
+  if (!predictions || predictions.length === 0) {
+    bar.innerHTML = '';
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.innerHTML = '';
+  predictions.forEach(pred => {
+    const chip = document.createElement('button');
+    chip.className = 'prediction-chip';
+    chip.setAttribute('data-color', pred.color);
+    const icon = iconByLabel[pred.label] || BUTTON_ICONS[pred.id] || '';
+    chip.textContent = (icon ? icon + ' ' : '') + pred.label;
+    chip.addEventListener('click', () => {
+      if (predictionDebounce) return;
+      predictionDebounce = true;
+      setTimeout(() => { predictionDebounce = false; }, 200);
+
+      addWordToMessage(pred.label);
+      if (PREDICTIONS[pred.id]) {
+        renderPredictions(pred.id);
+      } else {
+        speak(messageWords.join(' '));
+        renderPredictions(null);
+      }
+    });
+    bar.appendChild(chip);
+  });
+  bar.classList.add('visible');
+}
+
+function clearPredictions() {
+  const bar = document.getElementById('prediction-bar');
+  bar.innerHTML = '';
+  bar.classList.remove('visible');
+}
+
 function createCell(btn) {
   const cell = document.createElement('button');
   cell.className = 'cell';
@@ -3619,13 +3762,17 @@ function createCell(btn) {
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
       currentFolder = folderId;
+      clearPredictions();
       renderGrid();
       return;
     }
-    // Core words build sentences silently; other words speak immediately
+    // Core words build sentences silently and show predictions; other words speak immediately
     addWordToMessage(btn.label);
-    if (btn.type !== 'core') {
+    if (btn.type === 'core') {
+      renderPredictions(btn.id);
+    } else {
       speak(btn.label);
+      clearPredictions();
     }
   });
 
@@ -3655,16 +3802,27 @@ function renderMessage() {
 document.getElementById('btn-speak').addEventListener('click', () => {
   if (messageWords.length === 0) return;
   speak(messageWords.join(' '));
+  clearPredictions();
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
   messageWords = [];
   renderMessage();
+  clearPredictions();
 });
 
 document.getElementById('btn-backspace').addEventListener('click', () => {
   messageWords.pop();
   renderMessage();
+  // Show predictions for the new last word, or clear if empty
+  if (messageWords.length > 0) {
+    const lastWord = messageWords[messageWords.length - 1];
+    const lastBtn = buttons.find(b => b.label === lastWord && b.type === 'core');
+    if (lastBtn) renderPredictions(lastBtn.id);
+    else clearPredictions();
+  } else {
+    clearPredictions();
+  }
 });
 
 // ── Word Search ──
@@ -4003,6 +4161,8 @@ function openEditModal(buttonId) {
   // Protect core words from deletion (motor planning consistency)
   const isCoreWord = btn.type === 'core';
   document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
+  document.getElementById('edit-label').readOnly = isCoreWord;
+  document.getElementById('edit-color').disabled = isCoreWord;
 
   document.getElementById('edit-overlay').classList.add('open');
 }
