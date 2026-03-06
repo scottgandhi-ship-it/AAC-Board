@@ -21,6 +21,11 @@
 - **Activity-based organization**: Group vocabulary by activity (mealtime, playground, bath) not taxonomy (food, animals)
 - **Minimize taps**: Common requests should take 2 taps max, not 4+
 
+## Roadmap & Project Management
+
+- **Roadmap**: See `ROADMAP.md` for milestones, priorities, and task tracking.
+- **Larson**: Our project management agent. Run `/agents larson` to get task assignments, progress reports, and priority guidance. Larson enforces our design principles and keeps us shipping.
+
 ## Development Notes
 
 - Main branch: `master`
