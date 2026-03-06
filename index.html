@@ -3696,10 +3696,10 @@ function renderPredictions(btnId) {
       setTimeout(() => { predictionDebounce = false; }, 200);
 
       addWordToMessage(pred.label);
+      speak(pred.label);
       if (PREDICTIONS[pred.id]) {
         renderPredictions(pred.id);
       } else {
-        speak(messageWords.join(' '));
         renderPredictions(null);
       }
     });
@@ -3766,12 +3766,11 @@ function createCell(btn) {
       renderGrid();
       return;
     }
-    // Core words build sentences silently and show predictions; other words speak immediately
+    // All words speak on tap; core words also show predictions
     addWordToMessage(btn.label);
+    speak(btn.label);
     if (btn.type === 'core') {
       renderPredictions(btn.id);
-    } else {
-      speak(btn.label);
       clearPredictions();
     }
   });
