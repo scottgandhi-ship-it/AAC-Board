@@ -271,6 +271,49 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
+/* ── Prediction Bar ── */
+#prediction-bar {
+  display: none;
+  gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+#prediction-bar::-webkit-scrollbar { display: none; }
+#prediction-bar.visible {
+  display: flex;
+  animation: slideDown 0.15s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.prediction-chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid rgba(0,0,0,0.08);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.1s;
+  white-space: nowrap;
+}
+.prediction-chip:active { transform: scale(0.93); }
+.prediction-chip[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.prediction-chip[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.prediction-chip[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.prediction-chip[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.prediction-chip[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.prediction-chip[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+.prediction-chip[data-color="purple"] { background: linear-gradient(145deg, #E1BEE7, #AB47BC); }
+
 /* Core words: visually distinct — always-present on every screen */
 .cell[data-type="core"] {
   border: 2px solid rgba(0,0,0,0.12);
@@ -2305,6 +2348,7 @@ body {
     <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
     <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
   </div>
+  <div id="prediction-bar"></div>
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="grid"></div>
@@ -3571,6 +3615,102 @@ const BUTTON_ICONS = {
   'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀'
 };
 
+// ── Predictive Next-Word ──
+// Button IDs for top noun suggestions (common requests)
+const TOP_NOUN_IDS = [
+  'drink-water', 'food-cookie', 'drink-milk', 'drink-apple-juice',
+  'food-crackers', 'food-apple', 'food-banana', 'food-yogurt'
+];
+
+// Color lookup for predicted words (matches Fitzgerald Key)
+const PREDICTION_COLORS = {
+  'want': 'green', "don't want": 'red', 'like': 'green', 'help': 'green',
+  'go': 'green', 'more': 'blue', 'stop': 'red', 'yes': 'green', 'no': 'red',
+  'please': 'pink', 'I': 'yellow',
+};
+
+// Static prediction map — keys are word labels, values are arrays of suggested next words
+const PREDICTIONS = {
+  'I':          ['want', "don't want", 'like', 'help', 'go'],
+  'want':       ['more', 'help', '__NOUNS__'],
+  "don't want": ['stop', 'no', '__NOUNS__'],
+  'like':       ['more', '__NOUNS__'],
+  'help':       ['more', 'please', 'yes'],
+  'more':       ['please', '__NOUNS__'],
+  'go':         ['please', 'yes', 'no'],
+  'stop':       ['please', 'no'],
+};
+
+function getTopNouns() {
+  return TOP_NOUN_IDS
+    .map(id => buttons.find(b => b.id === id))
+    .filter(Boolean)
+    .map(b => b.label);
+}
+
+function resolvePredictions(key) {
+  const raw = PREDICTIONS[key];
+  if (!raw) return null;
+  const result = [];
+  for (const item of raw) {
+    if (item === '__NOUNS__') {
+      result.push(...getTopNouns());
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function getPredictionColor(word) {
+  if (PREDICTION_COLORS[word]) return PREDICTION_COLORS[word];
+  // Look up from buttons array for nouns
+  const btn = buttons.find(b => b.label === word && b.type !== 'core');
+  return btn ? btn.color : 'orange';
+}
+
+function renderPredictions(lastWord) {
+  const bar = document.getElementById('prediction-bar');
+  const predictions = resolvePredictions(lastWord);
+  if (!predictions || predictions.length === 0) {
+    bar.innerHTML = '';
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.innerHTML = '';
+  predictions.forEach(word => {
+    const chip = document.createElement('button');
+    chip.className = 'prediction-chip';
+    const color = getPredictionColor(word);
+    chip.setAttribute('data-color', color);
+    const icon = BUTTON_ICONS[Object.keys(BUTTON_ICONS).find(k => {
+      const btn = buttons.find(b => b.id === k);
+      return btn && btn.label === word;
+    })] || '';
+    chip.textContent = (icon ? icon + ' ' : '') + word;
+    chip.addEventListener('click', () => {
+      addWordToMessage(word);
+      // If it's a core-type word with further predictions, chain silently
+      const isCore = buttons.some(b => b.label === word && b.type === 'core') || PREDICTIONS[word];
+      if (isCore && PREDICTIONS[word]) {
+        renderPredictions(word);
+      } else {
+        // Non-core word (noun) — speak full sentence and clear
+        speak(messageWords.join(' '));
+        renderPredictions(null);
+      }
+    });
+    bar.appendChild(chip);
+  });
+  bar.classList.add('visible');
+}
+
+function clearPredictions() {
+  const bar = document.getElementById('prediction-bar');
+  bar.innerHTML = '';
+  bar.classList.remove('visible');
+}
+
 function createCell(btn) {
   const cell = document.createElement('button');
   cell.className = 'cell';
@@ -3619,13 +3759,17 @@ function createCell(btn) {
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
       currentFolder = folderId;
+      clearPredictions();
       renderGrid();
       return;
     }
-    // Core words build sentences silently; other words speak immediately
+    // Core words build sentences silently and show predictions; other words speak immediately
     addWordToMessage(btn.label);
-    if (btn.type !== 'core') {
+    if (btn.type === 'core') {
+      renderPredictions(btn.label);
+    } else {
       speak(btn.label);
+      clearPredictions();
     }
   });
 
@@ -3655,16 +3799,24 @@ function renderMessage() {
 document.getElementById('btn-speak').addEventListener('click', () => {
   if (messageWords.length === 0) return;
   speak(messageWords.join(' '));
+  clearPredictions();
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
   messageWords = [];
   renderMessage();
+  clearPredictions();
 });
 
 document.getElementById('btn-backspace').addEventListener('click', () => {
   messageWords.pop();
   renderMessage();
+  // Show predictions for the new last word, or clear if empty
+  if (messageWords.length > 0) {
+    renderPredictions(messageWords[messageWords.length - 1]);
+  } else {
+    clearPredictions();
+  }
 });
 
 // ── Word Search ──

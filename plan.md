@@ -1,185 +1,96 @@
-# Plan: Core Words on Home Screen + Consistent Motor Planning
+# Plan: Predictive Next-Word + Two-Tap Shortcuts
 
-## The Problem Today
+## The Problem
 
-The home screen is **16 folder icons**. To say "I want more", a child must:
-1. Tap "Social" folder → 2. Find "I" → 3. Go back → 4. Tap "Social" → 5. Find "want" → 6. Go back → repeat...
+Core words on every screen got us to 3 taps for "I want more." But common requests like "I want cookie" still require: tap "I" → tap "want" → open Food folder → find "cookie" = 4+ taps. We want 2-3 taps for the most common phrases.
 
-That's 6+ taps for a 3-word sentence. Research says it should be **2 taps max** for common requests.
+## Solution: Prediction Strip
 
-There's also a `QUICK_ACCESS_BUTTONS` system that injects 5 phrase buttons ("I want", "I don't want", "I need help", "thank you", "please") into every folder view — but NOT the home screen. These are hardcoded DOM elements, not part of the data model.
+A horizontal strip of suggested next-words appears between the message bar and the grid after tapping a core word. This is an **additive UI layer** — the grid never changes (motor planning safe).
 
-## Design Philosophy: Core Words Everywhere, Folders Freeform
-
-- **Core words are pinned to fixed positions on EVERY screen** — home, inside folders, everywhere. A child always knows where "I", "want", "help" live regardless of context.
-- **Non-core words inside folders remain freeform** — parents and SLPs can organize those however they want.
-- **Replaces `QUICK_ACCESS_BUTTONS`** — the old system injected 5 hardcoded phrase buttons as DOM hacks. Core words on every screen replaces this with real data-model buttons that are consistent, persistent, and editable.
-- **Core words are real data-model buttons** with `type: 'core'` so they persist, survive IndexedDB round-trips, and can have custom images.
-
-## Home Grid Layout (4 columns)
-
-New mixed layout — core words occupy the **top 2.5 rows**, folders fill the rest:
+### Layout
 
 ```
-Row 1:  [ I ]        [ want ]     [ don't want ] [ help ]
-Row 2:  [ more ]     [ stop ]     [ yes ]        [ no ]
-Row 3:  [ go ]       [ like ]     [ Social ]     [ Food ]
-Row 4:  [ Drinks ]   [ People ]   [ Feelings ]   [ Actions ]
-Row 5:  [ Toys ]     [ Places ]   [ Things ]     [ Questions ]
-Row 6:  [ Clothes ]  [ My Body ]  [ Colors ]     [ Shapes ]
-Row 7:  [ 123 ]      [ ABC ]
+┌──────────────────────────────────────────┐
+│ [←] [ I  want ]           [⌫][🔍][🔊][✕]│  ← message bar
+├──────────────────────────────────────────┤
+│ [want] [don't want] [like] [help] [go]  │  ← prediction strip (NEW)
+├──────────────────────────────────────────┤
+│ [ I ]  [want] [don't want] [help]       │  ← grid (unchanged)
+│ [more] [stop] [yes]        [no]         │
+│ ...                                      │
+└──────────────────────────────────────────┘
 ```
 
-## Inside Any Folder (e.g., Food)
+### Prediction Map (static, curated)
 
-Core words pin to the same positions (top rows), folder content fills below:
-
+```javascript
+const PREDICTIONS = {
+  'I':          ['want', "don't want", 'like', 'help', 'go'],
+  'want':       ['more', 'help', ...TOP_NOUNS],
+  "don't want": ['stop', 'no', ...TOP_NOUNS],
+  'like':       ['more', ...TOP_NOUNS],
+  'help':       ['more', 'please', 'yes'],
+  'more':       [...TOP_NOUNS],
+  'go':         ['home', 'outside', 'bathroom', 'please'],
+  'stop':       ['please', 'no', 'help'],
+};
 ```
-Row 1:  [ I ]        [ want ]     [ don't want ] [ help ]
-Row 2:  [ more ]     [ stop ]     [ yes ]        [ no ]
-Row 3:  [ go ]       [ like ]     [ Home ⬅ ]     [           ]
-Row 4:  [ apple ]    [ banana ]   [ cookie ]     [ milk ]
-Row 5:  [ juice ]    [ water ]    [ bread ]      [ cheese ]
-...
-```
 
-The child builds motor memory: "I" is ALWAYS top-left. "want" is ALWAYS second. No matter what screen they're on.
+`TOP_NOUNS` = the 4 most common request nouns pulled from the actual buttons array: water, cookie, milk, juice. These stay in sync with any customization the parent makes.
 
-Core words use proper Fitzgerald Key colors:
-- `I` → yellow (pronoun)
-- `want`, `help`, `go`, `like`, `yes` → green (verbs/affirmative)
-- `don't want`, `stop`, `no` → red (negatives)
-- `more` → blue (descriptor)
+### How Two-Tap Works
+
+| Taps | Action | Sentence |
+|------|--------|----------|
+| 1 | Tap "I" | bar: "I", predictions: [want, don't want, like, help, go] |
+| 2 | Tap prediction "want" | bar: "I want", predictions: [more, water, cookie, milk, juice, help] |
+| 3 | Tap prediction "cookie" | bar: "I want cookie", speaks "I want cookie", predictions clear |
+
+So "I want cookie" = 3 taps. "help please" = 2 taps. "more water" = 2 taps.
+
+### Behavior Rules
+
+1. Predictions appear after tapping a **core word** (grid or prediction chip)
+2. Tapping a **prediction chip** adds that word to the message bar
+3. If the predicted word is a **non-core word** (noun like "cookie"), it speaks the full sentence automatically and clears predictions
+4. If the predicted word is a **core word** (like "want"), it chains — shows next predictions silently
+5. Predictions **clear** when: sentence is cleared, backspace removes the triggering word, or user taps a folder
+6. Prediction chips inherit Fitzgerald Key colors matching the word type
 
 ## Implementation Steps
 
-### Step 1: Define core words in the data model
+### Step 1: Add HTML
+Add `<div id="prediction-bar"></div>` between `#message-bar` and `#grid-container` inside `#view-talk`.
 
-Add 10 core word entries to `DEFAULT_BUTTONS` with `type: 'core'` and `folderId: null` (home grid), positions 0-9:
+### Step 2: Add CSS
+- Horizontal scrollable strip, ~44px tall
+- Hidden by default (`display: none`), shown when predictions exist
+- Chips styled as rounded pills with Fitzgerald Key colors
+- Slide-down entrance animation
 
-```javascript
-{ id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
-{ id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
-{ id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
-{ id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
-{ id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
-{ id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
-{ id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
-{ id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
-{ id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
-{ id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
-```
+### Step 3: Add PREDICTIONS map + TOP_NOUN_IDS constant
+Define near the core word section. `TOP_NOUN_IDS` lists button IDs whose labels get pulled into noun predictions: `['drink-water', 'food-cookie', 'drink-milk', 'drink-apple-juice', 'food-crackers', 'food-apple']`.
 
-Shift all existing folder positions by +10. Keep duplicate words in the `general` folder — the child can find "want" on home AND inside Social.
+### Step 4: Add renderPredictions(lastWord) function
+- Looks up `PREDICTIONS[lastWord]`
+- For each predicted word, creates a tappable chip
+- Chips need to know if the word is core vs. noun for coloring and tap behavior
+- Populates `#prediction-bar` and shows it
 
-### Step 2: Update `renderGrid()` to inject core words on every screen
+### Step 5: Hook into addWordToMessage()
+- After adding a word, call `renderPredictions(word)` if predictions exist for that word
+- Clear predictions if no map entry exists (e.g., after a noun)
 
-**Home grid**: Core words render naturally at positions 0-9 since they have `folderId: null`. No change needed for home.
+### Step 6: Prediction chip tap handler
+- Adds word to message bar
+- If word is non-core: speak full sentence, clear predictions
+- If word is core: chain to next predictions silently
 
-**Folder views**: This is the key change. When rendering a folder, inject the core word buttons at the top of the grid (before the Home button and folder content). The core words are global — they don't belong to any folder but appear on all of them.
-
-```javascript
-// In renderGrid(), folder branch:
-// 1. Render core words first (positions 0-9, always the same)
-const coreWords = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
-coreWords.forEach(btn => {
-  const c = createCell(btn);
-  grid.appendChild(c);
-});
-
-// 2. Then Home button
-grid.appendChild(homeBtn);
-
-// 3. Then folder-specific items
-items.forEach(btn => {
-  grid.appendChild(createCell(btn));
-});
-```
-
-**Remove `QUICK_ACCESS_BUTTONS`**: Delete the `QUICK_ACCESS_BUTTONS` array and the injection logic in `renderGrid()`. Core words replace this entirely.
-
-### Step 3: `createCell()` handles core type
-
-`createCell()` already routes `type !== 'folder'` to the speak/add-to-message path. `type: 'core'` falls into this naturally — no change needed for basic tap behavior.
-
-Add `data-type` attribute to the cell element for CSS targeting:
-```javascript
-cell.setAttribute('data-type', btn.type);
-```
-
-### Step 4: Motor planning protection
-
-Core words (`type: 'core'`) are protected:
-- **Cannot be deleted** — hide delete button in edit modal
-- **Cannot be repositioned** — position field locked/hidden
-- **Can have label/image customized** — parents may want to swap the emoji for a photo
-
-### Step 5: IndexedDB migration for existing users
-
-Existing users have saved buttons in IndexedDB without core words. Add migration in `init()`:
-
-```javascript
-const hasCoreWords = buttons.some(b => b.type === 'core');
-if (!hasCoreWords) {
-  // Define the 10 core words
-  // Shift all existing folderId:null buttons' positions by +10
-  // Prepend core words to the buttons array
-  // Save back to IndexedDB
-}
-```
-
-### Step 6: Add BUTTON_ICONS entries
-
-```javascript
-'core-i': '🙋',
-'core-want': '👉',
-'core-dont-want': '🚫',
-'core-help': '🆘',
-'core-more': '➕',
-'core-stop': '✋',
-'core-yes': '👍',
-'core-no': '👎',
-'core-go': '🏃',
-'core-like': '❤️',
-```
-
-### Step 7: Subtle CSS for core words
-
-Minimal visual distinction so parents understand these are always-present words:
-
-```css
-.cell[data-type="core"] {
-  border-bottom: 3px solid rgba(0,0,0,0.15);
-}
-```
-
-## What We're NOT Doing
-
-- **Not locking non-core word positions inside folders** — those stay freeform
-- **Not changing grid column count** — that's a separate Grid Templates milestone
-- **Not adding new vocabulary** — just promoting existing words to be globally visible
+## What This Does NOT Do
+- No ML, no usage tracking — static curated map only
+- No grid rearrangement — predictions are a separate layer
+- No changes to existing button positions or behavior
 
 ## Files Changed
-
-- `index.html` — all changes in this single file:
-  - `DEFAULT_BUTTONS`: add 10 core word entries, shift folder positions
-  - `BUTTON_ICONS`: add core word emoji mappings
-  - `renderGrid()`: inject core words at top of every folder view; remove `QUICK_ACCESS_BUTTONS`
-  - `createCell()`: add `data-type` attribute
-  - Edit modal: protect core words from deletion/repositioning
-  - `init()`: migration for existing IndexedDB users
-  - CSS: subtle core word styling
-
-## Acceptance Criteria
-
-1. Home screen shows 10 core words in rows 1-3, folders in rows 3-7
-2. Every folder view shows the same 10 core words in the same top positions
-3. Tapping a core word speaks it and adds it to the message bar (on any screen)
-4. Tapping a folder still navigates into that folder
-5. "I want more" is achievable in 3 taps without leaving any screen
-6. Core words cannot be deleted or repositioned
-7. Core words appear in correct Fitzgerald Key colors
-8. Non-core words inside folders can still be freely rearranged
-9. `QUICK_ACCESS_BUTTONS` system is fully removed (replaced by core words)
-10. Existing users with saved data get core words via migration
-11. App still works offline after changes
+- `index.html` only — HTML, CSS, and JS additions
