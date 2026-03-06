@@ -2647,9 +2647,8 @@ body {
 <div id="toast"></div>
 
 <script>
-// ── Default Vocabulary ──
-const DEFAULT_BUTTONS = [
-  // ── Core Words (pinned to positions 0-9 on EVERY screen) ──
+// ── Core Word Definitions (single source of truth) ──
+const CORE_WORD_DEFS = [
   { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
   { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
   { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
@@ -2660,6 +2659,11 @@ const DEFAULT_BUTTONS = [
   { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
   { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
   { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
+];
+
+// ── Default Vocabulary ──
+const DEFAULT_BUTTONS = [
+  ...CORE_WORD_DEFS,
 
   // ── Home Grid (16 Category Folders) ──
   { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 10 },
@@ -3305,27 +3309,16 @@ async function init() {
   // Migrate: add core words for existing users who don't have them yet
   const hasCoreWords = buttons.some(b => b.type === 'core');
   if (!hasCoreWords) {
-    const CORE_WORDS = [
-      { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
-      { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
-      { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
-      { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
-      { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
-      { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
-      { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
-      { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
-      { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
-      { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
-    ];
-    // Shift existing home-grid items' positions by 10 to make room
     buttons.forEach(b => {
       if (b.folderId === null) b.position += 10;
     });
-    buttons.unshift(...CORE_WORDS);
+    buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
     migrated = true;
   }
 
   if (migrated) saveButtons();
+  rebuildCoreWordsCache();
+  buildIconLookup();
   renderGrid();
   updateSpeedDisplay();
   initSpeech();
@@ -3475,7 +3468,7 @@ function renderGrid() {
   grid.innerHTML = '';
 
   // Core words appear on EVERY screen in fixed positions (motor planning consistency)
-  const coreWords = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+  const coreWords = coreWordsCache;
   let offset = 0;
   coreWords.forEach((btn, i) => {
     const c = createCell(btn);
@@ -3616,86 +3609,96 @@ const BUTTON_ICONS = {
 };
 
 // ── Predictive Next-Word ──
-// Button IDs for top noun suggestions (common requests)
-const TOP_NOUN_IDS = [
+// Default noun IDs for prediction suggestions (common requests)
+const DEFAULT_NOUN_IDS = [
   'drink-water', 'food-cookie', 'drink-milk', 'drink-apple-juice',
   'food-crackers', 'food-apple', 'food-banana', 'food-yogurt'
 ];
 
-// Color lookup for predicted words (matches Fitzgerald Key)
-const PREDICTION_COLORS = {
-  'want': 'green', "don't want": 'red', 'like': 'green', 'help': 'green',
-  'go': 'green', 'more': 'blue', 'stop': 'red', 'yes': 'green', 'no': 'red',
-  'please': 'pink', 'I': 'yellow',
-};
-
-// Static prediction map — keys are word labels, values are arrays of suggested next words
+// Prediction map keyed by button ID for robustness against renames/i18n
 const PREDICTIONS = {
-  'I':          ['want', "don't want", 'like', 'help', 'go'],
-  'want':       ['more', 'help', '__NOUNS__'],
-  "don't want": ['stop', 'no', '__NOUNS__'],
-  'like':       ['more', '__NOUNS__'],
-  'help':       ['more', 'please', 'yes'],
-  'more':       ['please', '__NOUNS__'],
-  'go':         ['please', 'yes', 'no'],
-  'stop':       ['please', 'no'],
+  'core-i':          ['core-want', 'core-dont-want', 'core-like', 'core-help', 'core-go'],
+  'core-want':       ['core-more', 'core-help', '__NOUNS__'],
+  'core-dont-want':  ['core-stop', 'core-no', '__NOUNS__'],
+  'core-like':       ['core-more', '__NOUNS__'],
+  'core-help':       ['core-more', 'gen-please', 'core-yes'],
+  'core-more':       ['gen-please', '__NOUNS__'],
+  'core-go':         ['gen-please', 'core-yes', 'core-no'],
+  'core-stop':       ['gen-please', 'core-no'],
 };
 
-function getTopNouns() {
-  return TOP_NOUN_IDS
-    .map(id => buttons.find(b => b.id === id))
-    .filter(Boolean)
-    .map(b => b.label);
+// Icon lookup map built at init for O(1) access
+let iconByLabel = {};
+function buildIconLookup() {
+  iconByLabel = {};
+  for (const [id, icon] of Object.entries(BUTTON_ICONS)) {
+    const btn = buttons.find(b => b.id === id);
+    if (btn) iconByLabel[btn.label] = icon;
+  }
 }
 
-function resolvePredictions(key) {
-  const raw = PREDICTIONS[key];
+// Cached core words array rebuilt after button mutations
+let coreWordsCache = [];
+function rebuildCoreWordsCache() {
+  coreWordsCache = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+}
+
+function getTopNounIds() {
+  // Start with recently-added fringe nouns (newest first), then fill with defaults
+  const recentFringe = buttons
+    .filter(b => b.type === 'fringe' && b.folderId && ['food', 'drinks'].includes(b.folderId))
+    .slice(-8)
+    .reverse()
+    .map(b => b.id);
+  const combined = [...new Set([...recentFringe, ...DEFAULT_NOUN_IDS])];
+  return combined.slice(0, 10);
+}
+
+function resolvePredictions(btnId) {
+  const raw = PREDICTIONS[btnId];
   if (!raw) return null;
   const result = [];
   for (const item of raw) {
     if (item === '__NOUNS__') {
-      result.push(...getTopNouns());
+      const nounIds = getTopNounIds();
+      nounIds.forEach(id => {
+        const btn = buttons.find(b => b.id === id);
+        if (btn) result.push({ id, label: btn.label, color: btn.color });
+      });
     } else {
-      result.push(item);
+      const btn = buttons.find(b => b.id === item);
+      if (btn) result.push({ id: item, label: btn.label, color: btn.color });
     }
   }
   return result;
 }
 
-function getPredictionColor(word) {
-  if (PREDICTION_COLORS[word]) return PREDICTION_COLORS[word];
-  // Look up from buttons array for nouns
-  const btn = buttons.find(b => b.label === word && b.type !== 'core');
-  return btn ? btn.color : 'orange';
-}
+let predictionDebounce = false;
 
-function renderPredictions(lastWord) {
+function renderPredictions(btnId) {
   const bar = document.getElementById('prediction-bar');
-  const predictions = resolvePredictions(lastWord);
+  const predictions = resolvePredictions(btnId);
   if (!predictions || predictions.length === 0) {
     bar.innerHTML = '';
     bar.classList.remove('visible');
     return;
   }
   bar.innerHTML = '';
-  predictions.forEach(word => {
+  predictions.forEach(pred => {
     const chip = document.createElement('button');
     chip.className = 'prediction-chip';
-    const color = getPredictionColor(word);
-    chip.setAttribute('data-color', color);
-    const icon = BUTTON_ICONS[Object.keys(BUTTON_ICONS).find(k => {
-      const btn = buttons.find(b => b.id === k);
-      return btn && btn.label === word;
-    })] || '';
-    chip.textContent = (icon ? icon + ' ' : '') + word;
+    chip.setAttribute('data-color', pred.color);
+    const icon = iconByLabel[pred.label] || BUTTON_ICONS[pred.id] || '';
+    chip.textContent = (icon ? icon + ' ' : '') + pred.label;
     chip.addEventListener('click', () => {
-      addWordToMessage(word);
-      // If it's a core-type word with further predictions, chain silently
-      const isCore = buttons.some(b => b.label === word && b.type === 'core') || PREDICTIONS[word];
-      if (isCore && PREDICTIONS[word]) {
-        renderPredictions(word);
+      if (predictionDebounce) return;
+      predictionDebounce = true;
+      setTimeout(() => { predictionDebounce = false; }, 200);
+
+      addWordToMessage(pred.label);
+      if (PREDICTIONS[pred.id]) {
+        renderPredictions(pred.id);
       } else {
-        // Non-core word (noun) — speak full sentence and clear
         speak(messageWords.join(' '));
         renderPredictions(null);
       }
@@ -3766,7 +3769,7 @@ function createCell(btn) {
     // Core words build sentences silently and show predictions; other words speak immediately
     addWordToMessage(btn.label);
     if (btn.type === 'core') {
-      renderPredictions(btn.label);
+      renderPredictions(btn.id);
     } else {
       speak(btn.label);
       clearPredictions();
@@ -3813,7 +3816,10 @@ document.getElementById('btn-backspace').addEventListener('click', () => {
   renderMessage();
   // Show predictions for the new last word, or clear if empty
   if (messageWords.length > 0) {
-    renderPredictions(messageWords[messageWords.length - 1]);
+    const lastWord = messageWords[messageWords.length - 1];
+    const lastBtn = buttons.find(b => b.label === lastWord && b.type === 'core');
+    if (lastBtn) renderPredictions(lastBtn.id);
+    else clearPredictions();
   } else {
     clearPredictions();
   }
@@ -4155,6 +4161,8 @@ function openEditModal(buttonId) {
   // Protect core words from deletion (motor planning consistency)
   const isCoreWord = btn.type === 'core';
   document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
+  document.getElementById('edit-label').readOnly = isCoreWord;
+  document.getElementById('edit-color').disabled = isCoreWord;
 
   document.getElementById('edit-overlay').classList.add('open');
 }
