@@ -271,6 +271,12 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
+/* Core words: subtle visual distinction — always-present on every screen */
+.cell[data-type="core"] {
+  border-bottom: 3px solid rgba(0,0,0,0.15);
+  font-weight: 600;
+}
+
 /* Search result cells reuse same color system */
 .search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
 .search-result-cell[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
@@ -2586,23 +2592,35 @@ body {
 <script>
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
-  // ── Home Grid (16 Category Folders, 4x4) ──
-  { id: 'folder-general',   label: 'Social',    color: 'orange', type: 'folder', folderId: null, position: 0 },
-  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
-  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
-  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 3 },
-  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 4 },
-  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 5 },
-  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 6 },
-  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 7 },
-  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 8 },
-  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 9 },
-  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 10 },
-  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 11 },
-  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 12 },
-  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 13 },
-  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 15 },
+  // ── Core Words (pinned to positions 0-9 on EVERY screen) ──
+  { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
+  { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
+  { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
+  { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
+  { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
+  { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
+  { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
+  { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
+  { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
+  { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
+
+  // ── Home Grid (16 Category Folders) ──
+  { id: 'folder-general',   label: 'Social',    color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 16 },
+  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 17 },
+  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 18 },
+  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 19 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 20 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 21 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 22 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 23 },
+  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 24 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 25 },
 
   // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
@@ -3226,6 +3244,30 @@ async function init() {
     if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
     if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
   });
+
+  // Migrate: add core words for existing users who don't have them yet
+  const hasCoreWords = buttons.some(b => b.type === 'core');
+  if (!hasCoreWords) {
+    const CORE_WORDS = [
+      { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
+      { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
+      { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
+      { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 3 },
+      { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 4 },
+      { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 5 },
+      { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 6 },
+      { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 7 },
+      { id: 'core-go',         label: 'go',         color: 'green',  type: 'core', folderId: null, position: 8 },
+      { id: 'core-like',       label: 'like',       color: 'green',  type: 'core', folderId: null, position: 9 },
+    ];
+    // Shift existing home-grid items' positions by 10 to make room
+    buttons.forEach(b => {
+      if (b.folderId === null) b.position += 10;
+    });
+    buttons.unshift(...CORE_WORDS);
+    migrated = true;
+  }
+
   if (migrated) saveButtons();
   renderGrid();
   updateSpeedDisplay();
@@ -3364,58 +3406,40 @@ function speak(text) {
 }
 
 // Quick-access action buttons injected at the top of most folder grids
-const QUICK_ACCESS_BUTTONS = [
-  { label: 'I want',        color: 'green',  icon: '👉' },
-  { label: "I don't want",  color: 'red',    icon: '🚫' },
-  { label: 'I need help',   color: 'green',  icon: '🆘' },
-  { label: 'thank you',     color: 'pink',   icon: '💕' },
-  { label: 'please',        color: 'pink',   icon: '🙏' },
-];
-const QUICK_ACCESS_EXCLUDED = new Set(['shapes', '123', 'abc', 'questions', 'body', 'feelings']);
-
 // ── Render Grid ──
 function renderGrid() {
   const grid = document.getElementById('grid');
   const folderLabel = document.getElementById('folder-label');
   grid.innerHTML = '';
 
-  let items;
+  // Core words appear on EVERY screen in fixed positions (motor planning consistency)
+  const coreWords = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+  let offset = 0;
+  coreWords.forEach((btn, i) => {
+    const c = createCell(btn);
+    c.style.animationDelay = `${i * 25}ms`;
+    grid.appendChild(c);
+    offset++;
+  });
+
   if (currentFolder) {
-    items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
-    // Use the folder button's label for display (handles multi-word names like "My Body")
+    const items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
     const folderButton = buttons.find(b => b.id === `folder-${currentFolder}`);
     folderLabel.textContent = folderButton ? folderButton.label : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
     folderLabel.style.display = 'block';
-    // Add Home button at end
+
+    // Home button after core words
     const homeBtn = document.createElement('button');
     homeBtn.className = 'cell';
     homeBtn.setAttribute('data-color', 'home');
     homeBtn.innerHTML = '<span class="cell-big-text">⬅</span><span class="cell-label">Home</span>';
+    homeBtn.style.animationDelay = `${offset * 25}ms`;
     homeBtn.addEventListener('click', () => {
       currentFolder = null;
       renderGrid();
     });
-
     grid.appendChild(homeBtn);
-
-    // Inject quick-access action buttons for eligible folders
-    let offset = 1; // 1 because Home is already in the grid
-    if (!QUICK_ACCESS_EXCLUDED.has(currentFolder)) {
-      QUICK_ACCESS_BUTTONS.forEach(qa => {
-        const qaBtn = document.createElement('button');
-        qaBtn.className = 'cell';
-        qaBtn.setAttribute('data-color', qa.color);
-        qaBtn.innerHTML = `<span class="cell-big-text">${qa.icon}</span><span class="cell-label">${qa.label}</span>`;
-        qaBtn.style.animationDelay = `${offset * 25}ms`;
-        qaBtn.addEventListener('click', () => {
-          if (parentMode) return;
-          speak(qa.label);
-          addWordToMessage(qa.label);
-        });
-        grid.appendChild(qaBtn);
-        offset++;
-      });
-    }
+    offset++;
 
     items.forEach((btn, i) => {
       const c = createCell(btn);
@@ -3423,11 +3447,12 @@ function renderGrid() {
       grid.appendChild(c);
     });
   } else {
-    items = buttons.filter(b => b.folderId === null).sort((a, b) => a.position - b.position);
+    // Home grid: folders (core words already rendered above)
+    const items = buttons.filter(b => b.folderId === null && b.type !== 'core').sort((a, b) => a.position - b.position);
     folderLabel.style.display = 'none';
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${i * 25}ms`;
+      c.style.animationDelay = `${(i + offset) * 25}ms`;
       grid.appendChild(c);
     });
   }
@@ -3454,6 +3479,10 @@ const FOLDER_ICONS = {
 
 // Emoji icons for individual buttons (keyed by button id)
 const BUTTON_ICONS = {
+  // Core words
+  'core-i': '🙋', 'core-want': '👉', 'core-dont-want': '🚫', 'core-help': '🆘',
+  'core-more': '➕', 'core-stop': '✋', 'core-yes': '👍', 'core-no': '👎',
+  'core-go': '🏃', 'core-like': '❤️',
   // General
   'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
   'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
@@ -3545,6 +3574,7 @@ function createCell(btn) {
     cell.setAttribute('data-folder', btn.id.replace('folder-', ''));
   }
   cell.setAttribute('data-color', btn.color);
+  cell.setAttribute('data-type', btn.type);
   cell.setAttribute('data-id', btn.id);
 
   // Async load image
@@ -3959,6 +3989,10 @@ function openEditModal(buttonId) {
       preview.style.display = 'block';
     }
   });
+
+  // Protect core words from deletion (motor planning consistency)
+  const isCoreWord = btn.type === 'core';
+  document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
 
   document.getElementById('edit-overlay').classList.add('open');
 }
