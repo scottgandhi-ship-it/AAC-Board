@@ -1,7 +1,7 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-All three features implemented, awaiting developer validation
+Planning Symbol Library and Basic Grammar features
 
 ## Active Features
 
@@ -20,8 +20,18 @@ All three features implemented, awaiting developer validation
 - Notes: .project/features/VisualSchedules_Notes.md
 - Status: IMPLEMENTED -- awaiting device testing
 
+### Symbol Library (Milestone 2.2)
+- Plan: .project/features/SymbolLibrary.md
+- Notes: .project/features/SymbolLibrary_Notes.md
+- Status: PLANNING -- awaiting approval
+
+### Basic Grammar (Milestone 3.2)
+- Plan: .project/features/BasicGrammar.md
+- Notes: .project/features/BasicGrammar_Notes.md
+- Status: PLANNING -- awaiting approval
+
 ## Next Up
-Developer device testing across all three features, then deploy
+Developer approval of Symbol Library and Basic Grammar plans, then implement
 
 ## Completed Features
 (none yet -- awaiting validation)
@@ -33,3 +43,4 @@ Developer device testing across all three features, then deploy
   - Phase 0: Tab bar navigation (Talk/Schedule/Rewards), app-wide parent mode (3-tap lock)
   - Phase 2: Reward tracker with stepping stone path, celebration, timer, multi-track
   - Phase 3: Visual schedules with 29 default activities, template system, step-by-step completion
+- 2026-03-07: Created planning docs for Symbol Library and Basic Grammar
