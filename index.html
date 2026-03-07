@@ -271,6 +271,96 @@ body {
 .cell[data-color="gray"]   { background: linear-gradient(145deg, #E0E0E0, #9E9E9E); }
 .cell[data-color="rainbow"]{ background: linear-gradient(145deg, #EF5350, #FFA726, #FFEE58, #66BB6A, #42A5F5, #AB47BC); }
 
+/* ── Prediction Bar ── */
+#prediction-bar {
+  display: none;
+  gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+#prediction-bar::-webkit-scrollbar { display: none; }
+#prediction-bar.visible {
+  display: flex;
+  animation: slideDown 0.15s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.prediction-chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid rgba(0,0,0,0.08);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.1s;
+  white-space: nowrap;
+}
+.prediction-chip:active { transform: scale(0.93); }
+.prediction-chip[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.prediction-chip[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.prediction-chip[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.prediction-chip[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.prediction-chip[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.prediction-chip[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+.prediction-chip[data-color="purple"] { background: linear-gradient(145deg, #E1BEE7, #AB47BC); }
+
+/* ── Core Word Strip ── */
+#core-word-strip {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #F5F5F5, #EEEEEE);
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  justify-content: center;
+}
+.core-strip-btn {
+  flex: 1;
+  max-width: 120px;
+  min-width: 0;
+  padding: 10px 6px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.12);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.1;
+}
+.core-strip-btn:active { transform: scale(0.93); }
+.core-strip-btn .core-icon { font-size: 1.3em; }
+.core-strip-btn .core-label { font-size: 0.8em; }
+.core-strip-btn[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.core-strip-btn[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.core-strip-btn[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.core-strip-btn[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+
+/* Search result cells reuse same color system */
+.search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.search-result-cell[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.search-result-cell[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.search-result-cell[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.search-result-cell[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.search-result-cell[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+
 /* (bottom-bar replaced by #tab-bar -- see Tab Bar section below) */
 
 /* ── Settings Modal ── */
@@ -443,6 +533,109 @@ body {
   font-family: inherit;
 }
 
+/* ── Search Overlay ── */
+#search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+#search-overlay.open { display: flex; }
+
+#search-panel {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 95%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lifted), 0 0 0 1px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+#search-header {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+#search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  outline: none;
+}
+#search-input:focus { border-color: #42A5F5; }
+
+#btn-close-search {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #bbb;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#search-results {
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+#search-results:empty::after {
+  content: 'Type to search all words...';
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #aaa;
+  padding: 32px 0;
+  font-size: 0.95rem;
+}
+
+#search-results .search-result-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 70px;
+  text-align: center;
+  transition: transform 0.1s;
+}
+#search-results .search-result-cell:active {
+  transform: scale(0.92);
+}
+#search-results .search-result-cell .search-icon {
+  font-size: 1.6rem;
+  margin-bottom: 2px;
+}
+#search-results .search-result-cell .search-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #333;
+}
+#search-results .search-result-cell .search-folder {
+  font-size: 0.65rem;
+  color: #888;
+  margin-top: 1px;
+}
+
 /* ── Toast ── */
 #toast {
   position: fixed;
@@ -500,14 +693,36 @@ body {
   border: none;
   font-size: 1.3rem;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 50%;
   line-height: 1;
   min-width: 44px;
   min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#btn-lock .lock-progress-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 44px; height: 44px;
+  pointer-events: none;
+}
+#btn-lock .lock-progress-ring circle {
+  fill: none;
+  stroke: #FFA726;
+  stroke-width: 3;
+  stroke-dasharray: 126; /* ~2*pi*20 */
+  stroke-dashoffset: 126;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: none;
+}
+#btn-lock.holding .lock-progress-ring circle {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.5s linear;
 }
 
 #btn-lock:active { background: #eee; }
@@ -532,6 +747,27 @@ body {
 }
 
 #btn-parent-settings:active { background: #eee; }
+
+/* ── Back Button (inline in message bar) ── */
+#btn-back-nav {
+  background: linear-gradient(135deg, #FF6F00, #FFA000);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  min-width: 44px;
+  font-weight: 800;
+}
+#btn-back-nav:active {
+  background: linear-gradient(135deg, #E65100, #FF8F00);
+  transform: scale(0.95);
+}
+#btn-back-nav.visible { display: flex; }
+#btn-back-nav svg {
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* ── Views ── */
 .view {
@@ -688,8 +924,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 16px;
+  justify-content: flex-start;
+  padding: 12px 16px;
   overflow-y: auto;
   position: relative;
 }
@@ -714,69 +950,216 @@ body {
   font-size: 0.9rem;
 }
 
-.path-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  max-width: 360px;
-  padding: 20px 0;
+/* ── Daily-login reward grid ── */
+.rewards-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 8px 0;
 }
 
-.stone {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 3px solid #ccc;
+.rewards-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.rewards-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.rewards-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.rewards-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+.task-tile {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: 3px solid #e0e0e0;
   background: #f5f5f5;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #ccc;
-  transition: all 0.3s ease;
+  gap: 4px;
   position: relative;
+  transition: all 0.25s ease;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
 }
 
-.stone.filled {
-  border-color: #FFB300;
-  background: #FFF8E1;
-  color: #FFB300;
-  box-shadow: 0 0 8px rgba(255, 179, 0, 0.3);
+.task-tile-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #bbb;
+  line-height: 1;
+  transition: all 0.25s ease;
 }
 
-.stone.filled::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #FFB300;
-  border-radius: 50%;
-  opacity: 0.7;
+/* Completed tile */
+.task-tile.completed {
+  border-color: #43A047;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
 }
 
-.stone.animate-fill {
-  animation: stoneFill 0.4s ease;
+.task-tile.completed .task-tile-number {
+  font-size: 0.75rem;
+  color: #81C784;
 }
 
-@keyframes stoneFill {
+.task-tile-check {
+  display: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: #43A047;
+}
+
+.task-tile.completed .task-tile-check {
+  display: block;
+}
+
+/* Active / next tile — tappable */
+.task-tile.active {
+  border-color: var(--bar-bg);
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
+  animation: tileGlow 2s ease-in-out infinite;
+}
+
+.task-tile.active .task-tile-number {
+  color: var(--bar-bg);
+}
+
+.task-tile-tap {
+  display: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--bar-bg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.task-tile.active .task-tile-tap {
+  display: block;
+}
+
+.task-tile.active:active {
+  transform: scale(0.92);
+}
+
+@keyframes tileGlow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(124, 77, 255, 0.25); }
+}
+
+/* Locked tile */
+.task-tile.locked {
+  opacity: 0.45;
+}
+
+/* Fill animation */
+.task-tile.animate-fill {
+  animation: tilePop 0.45s ease;
+}
+
+@keyframes tilePop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
+  40% { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 
-.path-connector {
-  width: 20px;
-  height: 3px;
-  background: #ddd;
-  border-radius: 2px;
+/* ── Reward card (below grid) ── */
+.reward-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  margin: 6px auto 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 3px dashed #e0e0e0;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.reward-card.unlocked {
+  border-style: solid;
+  border-color: var(--bar-bg);
+  background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
+  box-shadow: 0 4px 20px rgba(124, 77, 255, 0.25);
+  cursor: pointer;
+  animation: rewardCardGlow 2s ease-in-out infinite;
+}
+
+.reward-card.unlocked:active {
+  transform: scale(0.97);
+}
+
+@keyframes rewardCardGlow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(124, 77, 255, 0.25); }
+  50% { box-shadow: 0 6px 28px rgba(124, 77, 255, 0.4); }
+}
+
+.reward-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #fff;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.reward-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.reward-card.locked .reward-card-icon {
+  filter: grayscale(0.7) opacity(0.5);
+}
+
+.reward-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.reward-card-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reward-card.locked .reward-card-label {
+  color: #999;
+}
+
+.reward-card-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #999;
+}
+
+.reward-card.unlocked .reward-card-status {
+  color: var(--bar-bg);
+}
+
+.reward-card-lock {
+  font-size: 1.3rem;
+  opacity: 0.4;
   flex-shrink: 0;
 }
 
-.path-connector.filled {
-  background: #FFB300;
+.reward-card.unlocked .reward-card-lock {
+  display: none;
 }
 
 .reward-icon {
@@ -813,14 +1196,27 @@ body {
   50% { box-shadow: 0 6px 24px rgba(108, 99, 255, 0.45); }
 }
 
+#rewards-task-header {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 8px;
+}
+
+#rewards-task-header.visible {
+  display: flex;
+}
+
 #rewards-task-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   display: none;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: #f0f0f0;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -836,46 +1232,27 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 12px;
+}
+
+#rewards-task-header-text {
+  flex: 1;
+  min-width: 0;
 }
 
 #rewards-task-label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #555;
-  text-align: center;
-  margin-top: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
 }
 
 #rewards-progress-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #888;
-  text-align: center;
-  margin-top: 4px;
+  margin-top: 1px;
 }
 
-#btn-did-it {
-  display: block;
-  width: calc(100% - 32px);
-  margin: 0 16px 12px;
-  padding: 18px;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #66BB6A, #43A047);
-  color: #fff;
-  font-size: 1.4rem;
-  font-weight: 800;
-  cursor: pointer;
-  font-family: inherit;
-  flex-shrink: 0;
-  min-height: 64px;
-  transition: opacity 0.2s, transform 0.08s;
-  box-shadow: 0 4px 16px rgba(67, 160, 71, 0.3);
-  letter-spacing: 0.02em;
-}
-
-#btn-did-it:active { transform: scale(0.96); }
-#btn-did-it.cooldown { opacity: 0.5; pointer-events: none; }
+/* btn-did-it removed — tapping tiles directly replaces it */
 
 /* Reward-active / timer state */
 #reward-active-screen {
@@ -1003,7 +1380,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stone.animate-fill { animation: none; }
+  .task-tile.animate-fill { animation: none; }
+  .task-tile.active { animation: none; }
+  .reward-card.unlocked { animation: none; }
   @keyframes rewardPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3); } }
   @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
   .confetti-piece { animation: none; display: none; }
@@ -1899,6 +2278,74 @@ body {
   font-family: inherit;
   margin-top: 8px;
 }
+
+/* ── Mobile Responsive ── */
+
+/* Small phones (< 360px) */
+@media (max-width: 359px) {
+  #app-header { height: 40px; padding: 0 8px; }
+  #app-header-title { font-size: 0.9rem; }
+  #message-bar { padding: 6px 6px; gap: 4px; min-height: 48px; }
+  .bar-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+  #message-words { padding: 4px 6px; font-size: 1rem; min-height: 32px; max-height: 60px; gap: 4px; }
+  #grid-container { padding: 6px; }
+  #grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .cell { padding: 6px 4px; border-radius: 14px; }
+  .cell .cell-label { font-size: clamp(0.6rem, 2.5vw, 0.85rem); }
+  .cell .cell-big-text { font-size: clamp(1.2rem, 5vw, 2rem); }
+  #tab-bar { padding: 2px 4px; gap: 2px; }
+  .tab-btn { padding: 4px 0; }
+  .tab-label { font-size: 0.65rem; }
+  .rewards-grid { gap: 8px; }
+  .task-tile { border-radius: 12px; }
+  .task-tile-number { font-size: 1.1rem; }
+  .task-tile-check { font-size: 1.5rem; }
+  .reward-card { padding: 10px 14px; gap: 10px; }
+  .reward-card-icon { width: 44px; height: 44px; font-size: 1.1rem; }
+}
+
+/* Standard phones (360-479px) */
+@media (min-width: 360px) and (max-width: 479px) {
+  #app-header { height: 44px; }
+  #message-bar { padding: 8px 8px; gap: 6px; min-height: 52px; }
+  .bar-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+  #message-words { padding: 4px 8px; font-size: 1.1rem; min-height: 36px; max-height: 68px; }
+  #grid-container { padding: 8px; }
+  #grid { gap: 8px; }
+  .cell { padding: 6px 4px; }
+}
+
+/* Larger phones & small tablets (480-767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  #grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+}
+
+/* Tablets (768px+) */
+@media (min-width: 768px) {
+  #grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  #grid-container { padding: 14px; }
+  .rewards-grid { max-width: 500px; gap: 14px; }
+  .task-tile { border-radius: 20px; }
+  .task-tile-number { font-size: 1.6rem; }
+  .task-tile-check { font-size: 2.4rem; }
+  .reward-card { max-width: 500px; padding: 18px 22px; }
+  .reward-card-icon { width: 64px; height: 64px; font-size: 1.6rem; }
+  .reward-card-label { font-size: 1.15rem; }
+}
+
+/* Safe area support for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #app-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  #tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
 </style>
 </head>
 <body>
@@ -1910,6 +2357,7 @@ body {
   </button>
   <span id="app-header-title">Talk</span>
   <button id="btn-lock" aria-label="Unlock parent mode">
+    <svg class="lock-progress-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg>
     <svg id="lock-icon-locked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     <svg id="lock-icon-unlocked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
   </button>
@@ -1918,11 +2366,17 @@ body {
 <!-- Talk View (AAC Board) -->
 <div id="view-talk" class="view active" role="tabpanel" aria-labelledby="tab-talk">
   <div id="message-bar">
+    <button class="bar-btn" id="btn-back-nav" aria-label="Go back" style="display:none;">
+      <svg viewBox="0 0 24 24" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
     <div id="message-words"></div>
     <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
+    <button class="bar-btn" id="btn-search" aria-label="Search words">🔍</button>
     <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
     <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
   </div>
+  <div id="prediction-bar"></div>
+  <div id="core-word-strip"></div>
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="grid"></div>
@@ -1966,10 +2420,15 @@ body {
         <div id="rewards-empty-text">No reward tracks yet</div>
         <div id="rewards-empty-sub">Unlock parent mode to create one</div>
       </div>
-      <div id="rewards-task-image" role="img" aria-label=""></div>
-      <div id="rewards-task-label"></div>
+      <div id="rewards-task-header">
+        <div id="rewards-task-image" role="img" aria-label=""></div>
+        <div id="rewards-task-header-text">
+          <div id="rewards-task-label"></div>
+          <div id="rewards-progress-text" aria-live="polite"></div>
+        </div>
+      </div>
       <div id="rewards-path" style="display:none"></div>
-      <div id="rewards-progress-text" aria-live="polite"></div>
+      <div id="rewards-reward-card" style="display:none"></div>
     </div>
     <div id="reward-active-screen">
       <div id="reward-active-icon" class="reward-icon earned"></div>
@@ -1982,7 +2441,6 @@ body {
       <button class="rewards-parent-btn" id="btn-edit-track">Configure</button>
       <button class="rewards-parent-btn" id="btn-reset-track">Reset</button>
     </div>
-    <button id="btn-did-it" aria-label="Mark task complete">I did it!</button>
   </div>
 </div>
 
@@ -2009,6 +2467,8 @@ body {
     <div class="settings-section">
       <h3>Buttons</h3>
       <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+      <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
+      <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
       <p style="font-size:0.85rem;color:#888;margin-top:4px;">Tap any button on the board to edit it while parent mode is active.</p>
     </div>
     <div class="settings-section">
@@ -2018,6 +2478,10 @@ body {
       <button class="settings-btn" id="btn-voice-slower">Slower voice</button>
       <button class="settings-btn" id="btn-voice-faster">Faster voice</button>
       <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
+      <button class="settings-btn" id="btn-voice-lower">Lower pitch</button>
+      <button class="settings-btn" id="btn-voice-higher">Higher pitch</button>
+      <div id="voice-pitch-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Pitch: normal</div>
+      <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -2046,14 +2510,27 @@ body {
     <img id="edit-image-preview" alt="preview">
     <div id="edit-image-btns">
       <button id="btn-edit-upload">Upload Image</button>
+      <button id="btn-edit-camera">Take Photo</button>
       <button id="btn-edit-clear-img">Remove Image</button>
     </div>
     <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+    <input type="file" id="edit-camera-input" accept="image/*" capture="environment" style="display:none">
     <div class="edit-btn-row">
       <button id="btn-edit-cancel">Cancel</button>
       <button id="btn-edit-remove">Delete</button>
       <button id="btn-edit-save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Search Overlay -->
+<div id="search-overlay">
+  <div id="search-panel">
+    <div id="search-header">
+      <input type="text" id="search-input" placeholder="Search words..." autocomplete="off">
+      <button id="btn-close-search">Close</button>
+    </div>
+    <div id="search-results"></div>
   </div>
 </div>
 
@@ -2198,27 +2675,39 @@ body {
 <div id="toast"></div>
 
 <script>
+// ── Core Word Definitions (single source of truth) ──
+// These live in a dedicated strip above the grid, not in the grid itself
+const CORE_WORD_DEFS = [
+  { id: 'core-i',          label: 'I',          color: 'yellow', type: 'core', folderId: null, position: 0 },
+  { id: 'core-want',       label: 'want',       color: 'green',  type: 'core', folderId: null, position: 1 },
+  { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
+  { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 3 },
+  { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 4 },
+];
+
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
-  // ── Home Grid (16 Category Folders, 4x4) ──
-  { id: 'folder-general',   label: 'General',   color: 'orange', type: 'folder', folderId: null, position: 0 },
+  ...CORE_WORD_DEFS,
+
+  // ── Home Grid (16 Category Folders) ──
+  { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 0 },
   { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
   { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
-  { id: 'folder-people',    label: 'People',    color: 'orange', type: 'folder', folderId: null, position: 3 },
-  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 4 },
-  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 5 },
-  { id: 'folder-feelings',  label: 'Feelings',  color: 'orange', type: 'folder', folderId: null, position: 6 },
-  { id: 'folder-actions',   label: 'Actions',   color: 'orange', type: 'folder', folderId: null, position: 7 },
-  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 8 },
-  { id: 'folder-places',    label: 'Places',    color: 'orange', type: 'folder', folderId: null, position: 9 },
-  { id: 'folder-colors',    label: 'Colors',    color: 'orange', type: 'folder', folderId: null, position: 10 },
-  { id: 'folder-shapes',    label: 'Shapes',    color: 'orange', type: 'folder', folderId: null, position: 11 },
-  { id: 'folder-123',       label: '123',       color: 'orange', type: 'folder', folderId: null, position: 12 },
-  { id: 'folder-abc',       label: 'ABC',       color: 'orange', type: 'folder', folderId: null, position: 13 },
-  { id: 'folder-questions', label: 'Questions', color: 'orange', type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-people',    label: 'People',    color: 'yellow', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'blue',   type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-things',    label: 'Things',    color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-questions', label: 'Questions', color: 'purple', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-clothes',   label: 'Clothes',   color: 'orange', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-colors',    label: 'Colors',    color: 'blue',   type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-shapes',    label: 'Shapes',    color: 'blue',   type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-123',       label: '123',       color: 'purple', type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-abc',       label: 'ABC',       color: 'purple', type: 'folder', folderId: null, position: 15 },
 
-  // ── General (Core Phrases) ──
+  // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
   { id: 'gen-want',       label: 'want',       color: 'green',  type: 'fringe', folderId: 'general', position: 1 },
   { id: 'gen-dont-want',  label: "don't want", color: 'red',    type: 'fringe', folderId: 'general', position: 2 },
@@ -2243,6 +2732,22 @@ const DEFAULT_BUTTONS = [
   { id: 'gen-my-turn',    label: 'my turn',    color: 'yellow', type: 'fringe', folderId: 'general', position: 21 },
   { id: 'gen-sorry',      label: 'sorry',      color: 'pink',   type: 'fringe', folderId: 'general', position: 22 },
   { id: 'gen-excuse-me',  label: 'excuse me',  color: 'pink',   type: 'fringe', folderId: 'general', position: 23 },
+  { id: 'gen-hello',      label: 'hello',      color: 'pink',   type: 'fringe', folderId: 'general', position: 24 },
+  { id: 'gen-good-morning',label:'good morning',color: 'pink',   type: 'fringe', folderId: 'general', position: 25 },
+  { id: 'gen-goodnight',  label: 'goodnight',  color: 'pink',   type: 'fringe', folderId: 'general', position: 26 },
+  { id: 'gen-see-you',    label: 'see you later',color:'pink',   type: 'fringe', folderId: 'general', position: 27 },
+  { id: 'gen-yr-welcome', label: "you're welcome",color:'pink',  type: 'fringe', folderId: 'general', position: 28 },
+  { id: 'gen-no-thank-you',label:'no thank you',color: 'red',    type: 'fringe', folderId: 'general', position: 29 },
+  { id: 'gen-cool',       label: 'cool',       color: 'pink',   type: 'fringe', folderId: 'general', position: 30 },
+  { id: 'gen-awesome',    label: 'awesome',    color: 'pink',   type: 'fringe', folderId: 'general', position: 31 },
+  { id: 'gen-thats-funny',label: "that's funny",color:'pink',   type: 'fringe', folderId: 'general', position: 32 },
+  { id: 'gen-me-too',     label: 'me too',     color: 'pink',   type: 'fringe', folderId: 'general', position: 33 },
+  { id: 'gen-wow',        label: 'wow',        color: 'pink',   type: 'fringe', folderId: 'general', position: 34 },
+  { id: 'gen-i-did-it',   label: 'I did it',   color: 'pink',   type: 'fringe', folderId: 'general', position: 35 },
+  { id: 'gen-i-like-it',  label: 'I like it',  color: 'green',  type: 'fringe', folderId: 'general', position: 36 },
+  { id: 'gen-want-play',  label: 'want to play?',color:'green',  type: 'fringe', folderId: 'general', position: 37 },
+  { id: 'gen-your-turn',  label: 'your turn',  color: 'yellow', type: 'fringe', folderId: 'general', position: 38 },
+  { id: 'gen-tell-me',    label: 'tell me more',color:'green',   type: 'fringe', folderId: 'general', position: 39 },
 
   // ── Food (child-friendly) ──
   { id: 'food-apple',     label: 'apple',          color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
@@ -2503,13 +3008,13 @@ let parentMode = false;
 let editingButtonId = null;
 let messageWords = [];
 let speechRate = 0.85;
+let speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
 let activeTab = 'talk';
 
 // ── Parent Mode ──
-let lockTaps = [];
 let parentAutoLockTimer = null;
-const PARENT_LOCK_TAP_COUNT = 3;
-const PARENT_LOCK_TAP_WINDOW = 2000;
+let lockHoldTimer = null;
+const PARENT_HOLD_MS = 1500;
 const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
 const DB_VERSION = 3;
@@ -2824,7 +3329,29 @@ async function init() {
     if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
     if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
   });
+
+  // Migrate: add core words for existing users who don't have them yet
+  const hasCoreWords = buttons.some(b => b.type === 'core');
+  if (!hasCoreWords) {
+    buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
+    migrated = true;
+  }
+
+  // Migrate: remove old core words that moved to strip (keep only 5)
+  const validCoreIds = new Set(CORE_WORD_DEFS.map(d => d.id));
+  const removedCores = buttons.filter(b => b.type === 'core' && !validCoreIds.has(b.id));
+  if (removedCores.length > 0) {
+    buttons = buttons.filter(b => !(b.type === 'core' && !validCoreIds.has(b.id)));
+    // Reset home grid positions to start at 0 (core words no longer in grid)
+    buttons.filter(b => b.folderId === null && b.type !== 'core')
+      .sort((a, b) => a.position - b.position)
+      .forEach((b, i) => { b.position = i; });
+    migrated = true;
+  }
+
   if (migrated) saveButtons();
+  rebuildCoreWordsCache();
+  buildIconLookup();
   renderGrid();
   updateSpeedDisplay();
   initSpeech();
@@ -2844,8 +3371,42 @@ function initSpeech() {
   speechSynthesis.onvoiceschanged = load;
 }
 
+// Novelty/joke voices that should never appear in an AAC board
+const NOVELTY_VOICES = /\b(bells|jester|bad news|good news|whisper|zarvox|trinoids|organ|cellos|boing|bahh|albert|bubbles|superstar|wobble|junior|kathy|princess|ralph|fred)\b/i;
+
+// Known good human-sounding voice names across platforms
+const GOOD_VOICE_NAMES = /\b(samantha|alex|allison|ava|susan|tom|kate|daniel|karen|fiona|moira|tessa|google|zira|david|jenny|aria|guy|mark|cortana|siri|eloquence)\b/i;
+
 function getUSVoices() {
   return voices.filter(v => v.lang === 'en-US');
+}
+
+function isNoveltyVoice(v) {
+  return NOVELTY_VOICES.test(v.name);
+}
+
+function isHighQualityVoice(v) {
+  return /enhanced|premium|natural|neural|wavenet/i.test(v.name);
+}
+
+function getUsableVoices(usVoices) {
+  // Filter out novelty voices first
+  const real = usVoices.filter(v => !isNoveltyVoice(v));
+
+  // Score and rank: higher = better
+  const scored = real.map(v => {
+    let score = 0;
+    if (isHighQualityVoice(v)) score += 20;
+    if (GOOD_VOICE_NAMES.test(v.name)) score += 10;
+    // Prefer non-compact voices (localService tends to be better on mobile)
+    if (/compact/i.test(v.name)) score -= 5;
+    return { voice: v, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+
+  // Return top 5, or all if 5 or fewer
+  return scored.slice(0, 5).map(s => s.voice);
 }
 
 function populateVoiceSelect() {
@@ -2858,16 +3419,27 @@ function populateVoiceSelect() {
     select.appendChild(opt);
     return;
   }
-  usVoices.forEach(v => {
+
+  const usable = getUsableVoices(usVoices);
+  // Fallback: if aggressive filtering removed everything, show first 5 non-novelty
+  const displayVoices = usable.length > 0 ? usable : usVoices.filter(v => !isNoveltyVoice(v)).slice(0, 5);
+  // Last resort: if still nothing (all novelty?), just show first 3 raw
+  const finalVoices = displayVoices.length > 0 ? displayVoices : usVoices.slice(0, 3);
+
+  finalVoices.forEach(v => {
     const opt = document.createElement('option');
     opt.value = v.name;
-    opt.textContent = v.name;
+    // Show a cleaner display name
+    let display = v.name;
+    if (isHighQualityVoice(v)) display += ' *';
+    opt.textContent = display;
     if (v.name === selectedVoiceName) opt.selected = true;
     select.appendChild(opt);
   });
-  // If no saved selection, auto-select the best default
-  if (!selectedVoiceName || !usVoices.find(v => v.name === selectedVoiceName)) {
-    const best = pickDefaultVoice(usVoices);
+
+  // If no saved selection or saved voice isn't in the list, auto-select best
+  if (!selectedVoiceName || !finalVoices.find(v => v.name === selectedVoiceName)) {
+    const best = pickDefaultVoice(finalVoices);
     if (best) {
       select.value = best.name;
       selectedVoiceName = best.name;
@@ -2876,20 +3448,18 @@ function populateVoiceSelect() {
   }
 }
 
-function pickDefaultVoice(usVoices) {
-  // Prefer an adult female US English voice
+function pickDefaultVoice(voiceList) {
   const prefs = [
     v => /samantha\s*\(enhanced\)|samantha\s*\(premium\)/i.test(v.name),
+    v => isHighQualityVoice(v),
     v => /google.*us.*female/i.test(v.name),
-    v => /zira|jenny/i.test(v.name),
-    v => /samantha/i.test(v.name),
-    v => /female/i.test(v.name),
+    v => /jenny|zira|aria|samantha|ava|allison/i.test(v.name),
   ];
   for (const test of prefs) {
-    const found = usVoices.find(test);
+    const found = voiceList.find(test);
     if (found) return found;
   }
-  return usVoices[0] || null;
+  return voiceList[0] || null;
 }
 
 document.getElementById('voice-select').addEventListener('change', e => {
@@ -2907,78 +3477,66 @@ function getVoice() {
   return pickDefaultVoice(usVoices) || voices[0] || null;
 }
 
+// Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
+const SPEAK_OVERRIDES = { 'I': 'eye' };
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
+  // Apply overrides for single-word utterances
+  const spoken = SPEAK_OVERRIDES[text] || text;
+  const utter = new SpeechSynthesisUtterance(spoken);
   const voice = getVoice();
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
-  utter.pitch = 1.0;
+  utter.pitch = speechPitch;
   speechSynthesis.speak(utter);
 }
 
 // Quick-access action buttons injected at the top of most folder grids
-const QUICK_ACCESS_BUTTONS = [
-  { label: 'I want',        color: 'green',  icon: '👉' },
-  { label: "I don't want",  color: 'red',    icon: '🚫' },
-  { label: 'I need help',   color: 'green',  icon: '🆘' },
-  { label: 'thank you',     color: 'pink',   icon: '💕' },
-  { label: 'please',        color: 'pink',   icon: '🙏' },
-];
-const QUICK_ACCESS_EXCLUDED = new Set(['shapes', '123', 'abc', 'questions', 'body', 'feelings']);
-
 // ── Render Grid ──
+function renderCoreStrip() {
+  const strip = document.getElementById('core-word-strip');
+  strip.innerHTML = '';
+  coreWordsCache.forEach(btn => {
+    const el = document.createElement('button');
+    el.className = 'core-strip-btn';
+    el.setAttribute('data-color', btn.color);
+    el.setAttribute('data-id', btn.id);
+    const icon = BUTTON_ICONS[btn.id];
+    el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') +
+                   `<span class="core-label">${btn.label}</span>`;
+    el.addEventListener('click', () => {
+      speak(btn.label);
+      addWordToMessage(btn.label);
+      renderPredictions(btn.id);
+    });
+    strip.appendChild(el);
+  });
+}
+
 function renderGrid() {
   const grid = document.getElementById('grid');
   const folderLabel = document.getElementById('folder-label');
   grid.innerHTML = '';
 
-  let items;
+  // Core words are rendered in the dedicated strip above
+  renderCoreStrip();
+
   if (currentFolder) {
-    items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
-    // Use the folder button's label for display (handles multi-word names like "My Body")
+    const items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
     const folderButton = buttons.find(b => b.id === `folder-${currentFolder}`);
     folderLabel.textContent = folderButton ? folderButton.label : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
     folderLabel.style.display = 'block';
-    // Add Home button at end
-    const homeBtn = document.createElement('button');
-    homeBtn.className = 'cell';
-    homeBtn.setAttribute('data-color', 'home');
-    homeBtn.innerHTML = '<span class="cell-big-text">⬅</span><span class="cell-label">Home</span>';
-    homeBtn.addEventListener('click', () => {
-      currentFolder = null;
-      renderGrid();
-    });
-
-    grid.appendChild(homeBtn);
-
-    // Inject quick-access action buttons for eligible folders
-    let offset = 1; // 1 because Home is already in the grid
-    if (!QUICK_ACCESS_EXCLUDED.has(currentFolder)) {
-      QUICK_ACCESS_BUTTONS.forEach(qa => {
-        const qaBtn = document.createElement('button');
-        qaBtn.className = 'cell';
-        qaBtn.setAttribute('data-color', qa.color);
-        qaBtn.innerHTML = `<span class="cell-big-text">${qa.icon}</span><span class="cell-label">${qa.label}</span>`;
-        qaBtn.style.animationDelay = `${offset * 25}ms`;
-        qaBtn.addEventListener('click', () => {
-          if (parentMode) return;
-          speak(qa.label);
-          addWordToMessage(qa.label);
-        });
-        grid.appendChild(qaBtn);
-        offset++;
-      });
-    }
 
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${(i + offset) * 25}ms`;
+      c.style.animationDelay = `${i * 25}ms`;
       grid.appendChild(c);
     });
   } else {
-    items = buttons.filter(b => b.folderId === null).sort((a, b) => a.position - b.position);
+    // Home grid: folders only (core words in strip above)
+    const items = buttons.filter(b => b.folderId === null && b.type !== 'core').sort((a, b) => a.position - b.position);
     folderLabel.style.display = 'none';
     items.forEach((btn, i) => {
       const c = createCell(btn);
@@ -3001,7 +3559,7 @@ function renderGrid() {
 
 // Category emoji icons for folder buttons
 const FOLDER_ICONS = {
-  'general': '💬', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
+  'general': '🗣️', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
   'clothes': '👕', 'body': '🩺', 'feelings': '😊', 'actions': '🏃',
   'toys': '🧸', 'places': '🏠', 'colors': '🌈', 'shapes': '🔷',
   '123': '🔢', 'abc': '🔤', 'questions': '❓', 'things': '🎒'
@@ -3009,6 +3567,9 @@ const FOLDER_ICONS = {
 
 // Emoji icons for individual buttons (keyed by button id)
 const BUTTON_ICONS = {
+  // Core words
+  'core-i': '🙋', 'core-want': '👉', 'core-dont-want': '🚫', 'core-help': '🆘',
+  'core-more': '➕',
   // General
   'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
   'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
@@ -3016,6 +3577,10 @@ const BUTTON_ICONS = {
   'gen-hi': '👋', 'gen-bye': '👋', 'gen-more': '➕', 'gen-stop': '🛑',
   'gen-go': '▶️', 'gen-like': '❤️', 'gen-all-done': '✅', 'gen-wait': '⏳',
   'gen-look': '👀', 'gen-my-turn': '🙋', 'gen-sorry': '💙', 'gen-excuse-me': '🙋',
+  'gen-hello': '👋', 'gen-good-morning': '🌅', 'gen-goodnight': '🌙', 'gen-see-you': '👋',
+  'gen-yr-welcome': '😊', 'gen-no-thank-you': '🙅', 'gen-cool': '😎', 'gen-awesome': '🌟',
+  'gen-thats-funny': '😄', 'gen-me-too': '🤝', 'gen-wow': '😮', 'gen-i-did-it': '🎉',
+  'gen-i-like-it': '👍', 'gen-want-play': '🎮', 'gen-your-turn': '👉', 'gen-tell-me': '👂',
   // Food
   'food-apple': '🍎', 'food-banana': '🍌', 'food-cookie': '🍪', 'food-crackers': '🍘',
   'food-pizza': '🍕', 'food-nuggets': '🍗', 'food-pasta': '🍝', 'food-sandwich': '🥪',
@@ -3088,6 +3653,109 @@ const BUTTON_ICONS = {
   'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀'
 };
 
+// ── Predictive Next-Word ──
+// Default noun IDs for prediction suggestions (common requests)
+const DEFAULT_NOUN_IDS = [
+  'drink-water', 'food-cookie', 'drink-milk', 'drink-apple-juice',
+  'food-crackers', 'food-apple', 'food-banana', 'food-yogurt'
+];
+
+// Prediction map keyed by button ID for robustness against renames/i18n
+const PREDICTIONS = {
+  'core-i':          ['core-want', 'core-dont-want', 'core-help', 'core-more'],
+  'core-want':       ['core-more', 'core-help', '__NOUNS__'],
+  'core-dont-want':  ['gen-stop', '__NOUNS__'],
+  'core-help':       ['core-more', 'gen-please'],
+  'core-more':       ['gen-please', '__NOUNS__'],
+};
+
+// Icon lookup map built at init for O(1) access
+let iconByLabel = {};
+function buildIconLookup() {
+  iconByLabel = {};
+  for (const [id, icon] of Object.entries(BUTTON_ICONS)) {
+    const btn = buttons.find(b => b.id === id);
+    if (btn) iconByLabel[btn.label] = icon;
+  }
+}
+
+// Cached core words array rebuilt after button mutations
+let coreWordsCache = [];
+function rebuildCoreWordsCache() {
+  coreWordsCache = buttons.filter(b => b.type === 'core').sort((a, b) => a.position - b.position);
+}
+
+function getTopNounIds() {
+  // Start with recently-added fringe nouns (newest first), then fill with defaults
+  const recentFringe = buttons
+    .filter(b => b.type === 'fringe' && b.folderId && ['food', 'drinks'].includes(b.folderId))
+    .slice(-8)
+    .reverse()
+    .map(b => b.id);
+  const combined = [...new Set([...recentFringe, ...DEFAULT_NOUN_IDS])];
+  return combined.slice(0, 10);
+}
+
+function resolvePredictions(btnId) {
+  const raw = PREDICTIONS[btnId];
+  if (!raw) return null;
+  const result = [];
+  for (const item of raw) {
+    if (item === '__NOUNS__') {
+      const nounIds = getTopNounIds();
+      nounIds.forEach(id => {
+        const btn = buttons.find(b => b.id === id);
+        if (btn) result.push({ id, label: btn.label, color: btn.color });
+      });
+    } else {
+      const btn = buttons.find(b => b.id === item);
+      if (btn) result.push({ id: item, label: btn.label, color: btn.color });
+    }
+  }
+  return result;
+}
+
+let predictionDebounce = false;
+
+function renderPredictions(btnId) {
+  const bar = document.getElementById('prediction-bar');
+  const predictions = resolvePredictions(btnId);
+  if (!predictions || predictions.length === 0) {
+    bar.innerHTML = '';
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.innerHTML = '';
+  predictions.forEach(pred => {
+    const chip = document.createElement('button');
+    chip.className = 'prediction-chip';
+    chip.setAttribute('data-color', pred.color);
+    const icon = iconByLabel[pred.label] || BUTTON_ICONS[pred.id] || '';
+    chip.textContent = (icon ? icon + ' ' : '') + pred.label;
+    chip.addEventListener('click', () => {
+      if (predictionDebounce) return;
+      predictionDebounce = true;
+      setTimeout(() => { predictionDebounce = false; }, 200);
+
+      addWordToMessage(pred.label);
+      speak(pred.label);
+      if (PREDICTIONS[pred.id]) {
+        renderPredictions(pred.id);
+      } else {
+        renderPredictions(null);
+      }
+    });
+    bar.appendChild(chip);
+  });
+  bar.classList.add('visible');
+}
+
+function clearPredictions() {
+  const bar = document.getElementById('prediction-bar');
+  bar.innerHTML = '';
+  bar.classList.remove('visible');
+}
+
 function createCell(btn) {
   const cell = document.createElement('button');
   cell.className = 'cell';
@@ -3096,6 +3764,7 @@ function createCell(btn) {
     cell.setAttribute('data-folder', btn.id.replace('folder-', ''));
   }
   cell.setAttribute('data-color', btn.color);
+  cell.setAttribute('data-type', btn.type);
   cell.setAttribute('data-id', btn.id);
 
   // Async load image
@@ -3135,12 +3804,13 @@ function createCell(btn) {
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
       currentFolder = folderId;
+      clearPredictions();
       renderGrid();
       return;
     }
-    // Speak word and add to message bar
-    speak(btn.label);
+    // All words speak on tap
     addWordToMessage(btn.label);
+    speak(btn.label);
   });
 
   return cell;
@@ -3155,27 +3825,109 @@ function addWordToMessage(word) {
 function renderMessage() {
   const container = document.getElementById('message-words');
   container.innerHTML = '';
-  messageWords.forEach(w => {
+  messageWords.forEach((w, i) => {
     const chip = document.createElement('span');
     chip.className = 'word-chip';
     chip.textContent = w;
+    chip.addEventListener('click', () => speak(w));
     container.appendChild(chip);
   });
+  // Auto-scroll to show latest word
+  container.scrollLeft = container.scrollWidth;
 }
 
 document.getElementById('btn-speak').addEventListener('click', () => {
   if (messageWords.length === 0) return;
   speak(messageWords.join(' '));
+  clearPredictions();
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
   messageWords = [];
   renderMessage();
+  clearPredictions();
 });
 
 document.getElementById('btn-backspace').addEventListener('click', () => {
   messageWords.pop();
   renderMessage();
+  // Show predictions for the new last word, or clear if empty
+  if (messageWords.length > 0) {
+    const lastWord = messageWords[messageWords.length - 1];
+    const lastBtn = buttons.find(b => b.label === lastWord && b.type === 'core');
+    if (lastBtn) renderPredictions(lastBtn.id);
+    else clearPredictions();
+  } else {
+    clearPredictions();
+  }
+});
+
+// ── Word Search ──
+document.getElementById('btn-search').addEventListener('click', () => {
+  document.getElementById('search-overlay').classList.add('open');
+  const input = document.getElementById('search-input');
+  input.value = '';
+  document.getElementById('search-results').innerHTML = '';
+  setTimeout(() => input.focus(), 100);
+});
+
+document.getElementById('btn-close-search').addEventListener('click', () => {
+  document.getElementById('search-overlay').classList.remove('open');
+});
+
+document.getElementById('search-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('search-overlay').classList.remove('open');
+  }
+});
+
+document.getElementById('search-input').addEventListener('input', e => {
+  const query = e.target.value.trim().toLowerCase();
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+  if (query.length === 0) return;
+
+  const matches = buttons.filter(b =>
+    b.type === 'fringe' && b.label.toLowerCase().includes(query)
+  ).slice(0, 30);
+
+  // Build a map of folderId -> folder label
+  const folderLabels = {};
+  buttons.filter(b => b.type === 'folder').forEach(b => {
+    folderLabels[b.id.replace('folder-', '')] = b.label;
+  });
+
+  matches.forEach(btn => {
+    const cell = document.createElement('button');
+    cell.className = 'search-result-cell';
+    cell.setAttribute('data-color', btn.color);
+
+    const icon = document.createElement('span');
+    icon.className = 'search-icon';
+    icon.textContent = BUTTON_ICONS[btn.id] || '💬';
+    cell.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.className = 'search-label';
+    label.textContent = btn.label;
+    cell.appendChild(label);
+
+    const folder = document.createElement('span');
+    folder.className = 'search-folder';
+    folder.textContent = folderLabels[btn.folderId] || btn.folderId || '';
+    cell.appendChild(folder);
+
+    cell.addEventListener('click', () => {
+      speak(btn.label);
+      addWordToMessage(btn.label);
+      document.getElementById('search-overlay').classList.remove('open');
+    });
+    resultsEl.appendChild(cell);
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">No matches found</div>';
+  }
 });
 
 // ── View Switching ──
@@ -3208,6 +3960,43 @@ function switchTab(tabId) {
 document.querySelectorAll('.tab-btn').forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.id));
 });
+
+// ── Back Button (inline in message bar) ──
+const backNavBtn = document.getElementById('btn-back-nav');
+
+function updateBackButton() {
+  // Show back button when inside a folder (Talk tab only)
+  const shouldShow = (activeTab === 'talk' && currentFolder !== null);
+  backNavBtn.style.display = shouldShow ? 'flex' : 'none';
+  backNavBtn.classList.toggle('visible', shouldShow);
+}
+
+backNavBtn.addEventListener('click', () => {
+  if (activeTab !== 'talk') {
+    // On Schedule or Rewards → go back to Talk
+    switchTab('tab-talk');
+  } else if (currentFolder !== null) {
+    // Inside a folder → go back to home grid
+    currentFolder = null;
+    renderGrid();
+  }
+  updateBackButton();
+});
+
+// Patch switchTab and renderGrid to keep back button in sync
+const _origSwitchTab = switchTab;
+switchTab = function(tabId) {
+  _origSwitchTab(tabId);
+  updateBackButton();
+};
+
+const _origRenderGrid = renderGrid;
+renderGrid = function() {
+  _origRenderGrid();
+  updateBackButton();
+};
+
+updateBackButton();
 
 // ── Parent Mode ──
 function setParentMode(enabled) {
@@ -3251,19 +4040,40 @@ function resetParentAutoLock() {
 document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
 document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
 
-document.getElementById('btn-lock').addEventListener('click', () => {
-  if (parentMode) {
-    setParentMode(false);
-    return;
+// Long-press to unlock parent mode
+(function() {
+  const lockBtn = document.getElementById('btn-lock');
+
+  function startHold(e) {
+    if (parentMode) return;               // single tap to lock is handled by click
+    e.preventDefault();
+    lockBtn.classList.add('holding');
+    lockHoldTimer = setTimeout(() => {
+      lockBtn.classList.remove('holding');
+      lockHoldTimer = null;
+      setParentMode(true);
+    }, PARENT_HOLD_MS);
   }
-  const now = Date.now();
-  lockTaps.push(now);
-  lockTaps = lockTaps.filter(t => now - t < PARENT_LOCK_TAP_WINDOW);
-  if (lockTaps.length >= PARENT_LOCK_TAP_COUNT) {
-    lockTaps = [];
-    setParentMode(true);
+
+  function cancelHold() {
+    if (lockHoldTimer) {
+      clearTimeout(lockHoldTimer);
+      lockHoldTimer = null;
+    }
+    lockBtn.classList.remove('holding');
   }
-});
+
+  lockBtn.addEventListener('touchstart', startHold, { passive: false });
+  lockBtn.addEventListener('mousedown', startHold);
+  lockBtn.addEventListener('touchend', cancelHold);
+  lockBtn.addEventListener('touchcancel', cancelHold);
+  lockBtn.addEventListener('mouseup', cancelHold);
+  lockBtn.addEventListener('mouseleave', cancelHold);
+
+  lockBtn.addEventListener('click', () => {
+    if (parentMode) setParentMode(false);  // single tap to re-lock
+  });
+})();
 
 function updateParentModeUI() {
   const settingsBtn = document.getElementById('btn-parent-settings');
@@ -3331,6 +4141,33 @@ function updateSpeedDisplay() {
   else display.textContent = 'Speed: very fast';
 }
 
+document.getElementById('btn-voice-lower').addEventListener('click', () => {
+  speechPitch = Math.max(0.5, speechPitch - 0.2);
+  localStorage.setItem('aac-pitch', speechPitch);
+  updatePitchDisplay();
+  speak('This is how I sound');
+});
+
+document.getElementById('btn-voice-higher').addEventListener('click', () => {
+  speechPitch = Math.min(2.0, speechPitch + 0.2);
+  localStorage.setItem('aac-pitch', speechPitch);
+  updatePitchDisplay();
+  speak('This is how I sound');
+});
+
+function updatePitchDisplay() {
+  const display = document.getElementById('voice-pitch-display');
+  if (speechPitch < 0.7) display.textContent = 'Pitch: very low';
+  else if (speechPitch < 0.95) display.textContent = 'Pitch: low';
+  else if (speechPitch < 1.15) display.textContent = 'Pitch: normal';
+  else if (speechPitch < 1.5) display.textContent = 'Pitch: high';
+  else display.textContent = 'Pitch: very high';
+}
+
+document.getElementById('btn-voice-test').addEventListener('click', () => {
+  speak('Hi! This is how I sound when I talk.');
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
@@ -3357,6 +4194,12 @@ function openEditModal(buttonId) {
       preview.style.display = 'block';
     }
   });
+
+  // Protect core words from deletion (motor planning consistency)
+  const isCoreWord = btn.type === 'core';
+  document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
+  document.getElementById('edit-label').readOnly = isCoreWord;
+  document.getElementById('edit-color').disabled = isCoreWord;
 
   document.getElementById('edit-overlay').classList.add('open');
 }
@@ -3418,6 +4261,50 @@ document.getElementById('btn-edit-clear-img').addEventListener('click', async ()
   preview.src = '';
   renderGrid();
   showToast('Image removed');
+});
+
+// Camera capture in edit modal
+document.getElementById('btn-edit-camera').addEventListener('click', () => {
+  document.getElementById('edit-camera-input').click();
+});
+
+document.getElementById('edit-camera-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await saveImage(editingButtonId, file);
+  const preview = document.getElementById('edit-image-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  e.target.value = '';
+});
+
+// Quick add with photo
+document.getElementById('btn-quick-photo').addEventListener('click', () => {
+  document.getElementById('quick-photo-input').click();
+});
+
+document.getElementById('quick-photo-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const folder = currentFolder;
+  const existing = buttons.filter(b => b.folderId === folder);
+  const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
+  const newId = 'btn-' + Date.now();
+  const newBtn = {
+    id: newId,
+    label: 'new',
+    color: 'orange',
+    type: 'fringe',
+    folderId: folder,
+    position: nextPos,
+  };
+  buttons.push(newBtn);
+  await saveButton(newBtn);
+  await saveImage(newId, file);
+  renderGrid();
+  document.getElementById('settings-overlay').classList.remove('open');
+  openEditModal(newId);
+  e.target.value = '';
 });
 
 // ── Toast ──
@@ -4087,13 +4974,14 @@ function renderRewards() {
   const pathEl = document.getElementById('rewards-path');
   const taskLabel = document.getElementById('rewards-task-label');
   const progressText = document.getElementById('rewards-progress-text');
-  const didItBtn = document.getElementById('btn-did-it');
   const activeScreen = document.getElementById('reward-active-screen');
   const pathArea = document.getElementById('rewards-path-area');
   const newBtn = document.getElementById('btn-new-track');
   const editBtn = document.getElementById('btn-edit-track');
   const resetBtn = document.getElementById('btn-reset-track');
   const taskImgEl = document.getElementById('rewards-task-image');
+  const taskHeader = document.getElementById('rewards-task-header');
+  const rewardCard = document.getElementById('rewards-reward-card');
 
   renderTrackTabs();
   clearRewardTimer();
@@ -4101,9 +4989,10 @@ function renderRewards() {
   if (!track) {
     emptyEl.style.display = 'flex';
     pathEl.style.display = 'none';
+    rewardCard.style.display = 'none';
+    taskHeader.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
-    didItBtn.style.display = 'none';
     activeScreen.classList.remove('visible');
     pathArea.style.display = 'flex';
     editBtn.style.display = 'none';
@@ -4122,9 +5011,10 @@ function renderRewards() {
   if (isRewardState) {
     emptyEl.style.display = 'none';
     pathEl.style.display = 'none';
+    rewardCard.style.display = 'none';
+    taskHeader.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
-    didItBtn.style.display = 'none';
     pathArea.style.display = 'none';
     activeScreen.classList.add('visible');
     resetBtn.style.display = '';
@@ -4138,55 +5028,140 @@ function renderRewards() {
   pathEl.style.display = '';
   pathArea.style.display = 'flex';
   activeScreen.classList.remove('visible');
-  didItBtn.style.display = 'block';
   resetBtn.style.display = track.currentCount > 0 ? '' : 'none';
 
   pathArea.setAttribute('aria-valuenow', track.currentCount);
   pathArea.setAttribute('aria-valuemax', track.targetCount);
 
   renderTaskImage(track);
+  taskHeader.classList.add('visible');
   taskLabel.textContent = track.taskLabel;
   progressText.textContent = track.currentCount + ' of ' + track.targetCount;
 
   renderPath(track);
 }
 
+function getGridCols(count) {
+  if (count <= 2) return 2;
+  if (count <= 3) return 3;
+  if (count <= 4) return 2;
+  if (count <= 6) return 3;
+  if (count <= 8) return 4;
+  return 5;
+}
+
+function handleTileTap(track) {
+  if (!track || track.status !== 'active') return;
+  if (track._cooldown) return;
+  track._cooldown = true;
+  setTimeout(() => { track._cooldown = false; }, 1500);
+
+  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
+  saveTrack(track);
+
+  playDing();
+  speak(track.currentCount + ' out of ' + track.targetCount);
+
+  renderRewards();
+
+  // Animate the just-filled tile
+  const tiles = document.querySelectorAll('#rewards-path .task-tile.completed');
+  const lastTile = tiles[tiles.length - 1];
+  if (lastTile) {
+    lastTile.classList.add('animate-fill');
+    setTimeout(() => lastTile.classList.remove('animate-fill'), 450);
+  }
+
+  if (track.currentCount >= track.targetCount) {
+    setTimeout(() => triggerCelebration(track), 500);
+  }
+}
+
 function renderPath(track) {
   const pathEl = document.getElementById('rewards-path');
   pathEl.innerHTML = '';
-  pathEl.className = 'path-container';
+  const cols = getGridCols(track.targetCount);
+  pathEl.className = 'rewards-grid cols-' + cols;
 
   for (let i = 0; i < track.targetCount; i++) {
-    if (i > 0) {
-      const conn = document.createElement('div');
-      conn.className = 'path-connector' + (i <= track.currentCount ? ' filled' : '');
-      pathEl.appendChild(conn);
+    const tile = document.createElement('div');
+    tile.className = 'task-tile';
+
+    const num = document.createElement('div');
+    num.className = 'task-tile-number';
+    num.textContent = i + 1;
+
+    const check = document.createElement('div');
+    check.className = 'task-tile-check';
+    check.textContent = '\u2713';
+
+    const tap = document.createElement('div');
+    tap.className = 'task-tile-tap';
+    tap.textContent = 'Tap!';
+
+    if (i < track.currentCount) {
+      tile.classList.add('completed');
+    } else if (i === track.currentCount) {
+      tile.classList.add('active');
+      tile.addEventListener('click', () => handleTileTap(track));
+    } else {
+      tile.classList.add('locked');
     }
-    const stone = document.createElement('div');
-    stone.className = 'stone' + (i < track.currentCount ? ' filled' : '');
-    stone.textContent = i + 1;
-    pathEl.appendChild(stone);
+
+    tile.appendChild(num);
+    tile.appendChild(check);
+    tile.appendChild(tap);
+    pathEl.appendChild(tile);
   }
 
-  const conn = document.createElement('div');
-  conn.className = 'path-connector' + (track.currentCount >= track.targetCount ? ' filled' : '');
-  pathEl.appendChild(conn);
+  // Render the reward card below
+  renderRewardCard(track);
+}
 
-  const reward = document.createElement('div');
-  reward.className = 'reward-icon';
+function renderRewardCard(track) {
+  const cardEl = document.getElementById('rewards-reward-card');
+  cardEl.innerHTML = '';
+  cardEl.style.display = '';
+  const allDone = track.currentCount >= track.targetCount;
+  cardEl.className = 'reward-card' + (allDone ? ' unlocked' : ' locked');
+
+  // Icon
+  const icon = document.createElement('div');
+  icon.className = 'reward-card-icon';
   if (track.rewardImageKey) {
     loadImage(track.rewardImageKey).then(blob => {
       if (blob) {
         const img = document.createElement('img');
         img.src = URL.createObjectURL(blob);
         img.alt = track.rewardLabel;
-        reward.textContent = '';
-        reward.appendChild(img);
+        icon.textContent = '';
+        icon.appendChild(img);
       }
     });
   }
-  reward.textContent = track.rewardLabel ? track.rewardLabel.charAt(0).toUpperCase() : '?';
-  pathEl.appendChild(reward);
+  icon.textContent = track.rewardLabel ? track.rewardLabel.charAt(0).toUpperCase() : '?';
+
+  // Info
+  const info = document.createElement('div');
+  info.className = 'reward-card-info';
+  const label = document.createElement('div');
+  label.className = 'reward-card-label';
+  label.textContent = track.rewardLabel;
+  const status = document.createElement('div');
+  status.className = 'reward-card-status';
+  const remaining = track.targetCount - track.currentCount;
+  status.textContent = allDone ? 'Reward unlocked!' : remaining + ' more to go';
+  info.appendChild(label);
+  info.appendChild(status);
+
+  // Lock icon
+  const lock = document.createElement('div');
+  lock.className = 'reward-card-lock';
+  lock.textContent = '\uD83D\uDD12';
+
+  cardEl.appendChild(icon);
+  cardEl.appendChild(info);
+  cardEl.appendChild(lock);
 }
 
 function renderTrackTabs() {
@@ -4296,36 +5271,7 @@ function clearRewardTimer() {
   }
 }
 
-// "I did it!" handler
-document.getElementById('btn-did-it').addEventListener('click', async () => {
-  const track = getActiveTrack();
-  if (!track || track.status !== 'active') return;
-
-  const btn = document.getElementById('btn-did-it');
-  if (btn.classList.contains('cooldown')) return;
-  btn.classList.add('cooldown');
-  setTimeout(() => btn.classList.remove('cooldown'), 1500);
-
-  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
-  await saveTrack(track);
-
-  playDing();
-  speak(track.currentCount + ' out of ' + track.targetCount);
-
-  renderRewards();
-
-  // Animate the just-filled stone
-  const stones = document.querySelectorAll('#rewards-path .stone.filled');
-  const lastStone = stones[stones.length - 1];
-  if (lastStone) {
-    lastStone.classList.add('animate-fill');
-    setTimeout(() => lastStone.classList.remove('animate-fill'), 400);
-  }
-
-  if (track.currentCount >= track.targetCount) {
-    setTimeout(() => triggerCelebration(track), 500);
-  }
-});
+// Tile tap handler is now inline in renderPath() via handleTileTap()
 
 function triggerCelebration(track) {
   const overlay = document.getElementById('celebration-overlay');
