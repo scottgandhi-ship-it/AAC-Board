@@ -947,49 +947,6 @@ html.lang-es #search-results:empty::after {
   letter-spacing: 0.03em;
 }
 
-#btn-lock {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  cursor: pointer;
-  padding: 0;
-  border-radius: 50%;
-  line-height: 1;
-  min-width: 44px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#btn-lock .lock-progress-ring {
-  position: absolute;
-  top: 0; left: 0;
-  width: 44px; height: 44px;
-  pointer-events: none;
-}
-#btn-lock .lock-progress-ring circle {
-  fill: none;
-  stroke: #FFA726;
-  stroke-width: 3;
-  stroke-dasharray: 126; /* ~2*pi*20 */
-  stroke-dashoffset: 126;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  transition: none;
-}
-#btn-lock.holding .lock-progress-ring circle {
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1.5s linear;
-}
-
-#btn-lock:active { background: #eee; }
-
 #btn-parent-settings {
   position: absolute;
   left: 8px;
@@ -1004,9 +961,13 @@ html.lang-es #search-results:empty::after {
   line-height: 1;
   min-width: 44px;
   min-height: 44px;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.2s;
+}
+#btn-parent-settings.parent-active svg {
+  stroke: #FF8F00;
 }
 
 #btn-parent-settings:active { background: #eee; }
@@ -2916,11 +2877,6 @@ body.sensory-high-contrast .task-tile {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
   <span id="app-header-title">Talk</span>
-  <button id="btn-lock" aria-label="Unlock parent mode">
-    <svg class="lock-progress-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg>
-    <svg id="lock-icon-locked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <svg id="lock-icon-unlocked" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-  </button>
 </div>
 
 <!-- Talk View (AAC Board) -->
@@ -3047,6 +3003,11 @@ body.sensory-high-contrast .task-tile {
 <div id="settings-overlay">
   <div id="settings-panel">
     <h2>Settings</h2>
+    <div class="settings-section">
+      <h3>Parent Mode</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
+      <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+    </div>
     <div class="settings-section">
       <h3>Buttons</h3>
       <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
@@ -4169,8 +4130,6 @@ let activeTab = 'talk';
 
 // ── Parent Mode ──
 let parentAutoLockTimer = null;
-let lockHoldTimer = null;
-const PARENT_HOLD_MS = 1500;
 const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
 const DB_VERSION = 3;
@@ -5828,7 +5787,6 @@ function switchTab(tabId) {
   activeTab = tabId.replace('tab-', '');
 
   if (activeTab === 'insights') renderInsights();
-  updateParentModeUI();
 }
 
 document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -5876,31 +5834,36 @@ updateBackButton();
 function setParentMode(enabled) {
   parentMode = enabled;
   const header = document.getElementById('app-header');
-  const lockBtn = document.getElementById('btn-lock');
-  const lockedIcon = document.getElementById('lock-icon-locked');
-  const unlockedIcon = document.getElementById('lock-icon-unlocked');
+  const settingsBtn = document.getElementById('btn-parent-settings');
+  const toggleBtn = document.getElementById('btn-toggle-parent-mode');
 
   if (enabled) {
     header.classList.add('parent-active');
     document.body.classList.add('parent-mode');
-    lockedIcon.style.display = 'none';
-    unlockedIcon.style.display = '';
-    lockBtn.setAttribute('aria-label', 'Lock parent mode');
+    settingsBtn.classList.add('parent-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Disable Parent Mode';
+      toggleBtn.style.background = '#ffccbc';
+      toggleBtn.style.color = '#BF360C';
+    }
     showToast('Parent mode unlocked');
     resetParentAutoLock();
   } else {
     header.classList.remove('parent-active');
     document.body.classList.remove('parent-mode');
-    lockedIcon.style.display = '';
-    unlockedIcon.style.display = 'none';
-    lockBtn.setAttribute('aria-label', 'Unlock parent mode');
+    settingsBtn.classList.remove('parent-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Enable Parent Mode';
+      toggleBtn.style.background = '#fff3e0';
+      toggleBtn.style.color = '#E65100';
+    }
     if (parentAutoLockTimer) {
       clearTimeout(parentAutoLockTimer);
       parentAutoLockTimer = null;
     }
     if (activeTab === 'insights') switchTab('tab-talk');
+    document.getElementById('settings-overlay').classList.remove('open');
   }
-  updateParentModeUI();
 }
 
 function resetParentAutoLock() {
@@ -5915,53 +5878,12 @@ function resetParentAutoLock() {
 document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
 document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
 
-// Long-press to unlock parent mode
-(function() {
-  const lockBtn = document.getElementById('btn-lock');
-
-  function startHold(e) {
-    if (parentMode) return;               // single tap to lock is handled by click
-    e.preventDefault();
-    lockBtn.classList.add('holding');
-    lockHoldTimer = setTimeout(() => {
-      lockBtn.classList.remove('holding');
-      lockHoldTimer = null;
-      setParentMode(true);
-    }, PARENT_HOLD_MS);
-  }
-
-  function cancelHold() {
-    if (lockHoldTimer) {
-      clearTimeout(lockHoldTimer);
-      lockHoldTimer = null;
-    }
-    lockBtn.classList.remove('holding');
-  }
-
-  lockBtn.addEventListener('touchstart', startHold, { passive: false });
-  lockBtn.addEventListener('mousedown', startHold);
-  lockBtn.addEventListener('touchend', cancelHold);
-  lockBtn.addEventListener('touchcancel', cancelHold);
-  lockBtn.addEventListener('mouseup', cancelHold);
-  lockBtn.addEventListener('mouseleave', cancelHold);
-
-  lockBtn.addEventListener('click', () => {
-    if (parentMode) setParentMode(false);  // single tap to re-lock
-  });
-})();
-
-function updateParentModeUI() {
-  const settingsBtn = document.getElementById('btn-parent-settings');
-  if (parentMode && activeTab === 'talk') {
-    settingsBtn.style.display = 'flex';
-  } else {
-    settingsBtn.style.display = 'none';
-  }
-}
+document.getElementById('btn-toggle-parent-mode').addEventListener('click', () => {
+  setParentMode(!parentMode);
+});
 
 // ── Settings ──
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
-  if (!parentMode) return;
   document.getElementById('settings-overlay').classList.add('open');
   updateGridSizeButtons();
 });
