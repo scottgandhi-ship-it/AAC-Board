@@ -33,7 +33,7 @@ Planning Data & Usage Tracking feature (Milestone 4.2)
 ### Data & Usage Tracking (Milestone 4.2)
 - Plan: .project/features/DataUsageTracking.md
 - Notes: .project/features/DataUsageTracking_Notes.md
-- Status: PLANNING -- awaiting approval
+- Status: IMPLEMENTED -- awaiting device testing
 
 ## Next Up
 Developer approval of Data & Usage Tracking plan, then implement

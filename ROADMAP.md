@@ -95,13 +95,14 @@
 - [ ] Guided modeling prompts: "Try showing your child how to say 'I want more'"
 - [ ] Research reference: modeling is the #1 teaching strategy for AAC
 
-### 4.2 Data/Usage Tracking
-- [ ] Track which words the child uses most (frequency counts)
-- [ ] Track communication frequency over time (sessions per day, words per session)
-- [ ] Simple dashboard: top 10 words, daily/weekly usage chart
-- [ ] Distinguish independent use vs. modeled use
-- [ ] All data stored locally (privacy-first)
-- [ ] Optional: export data as CSV for SLPs
+### 4.2 Data/Usage Tracking -- DONE
+- [x] Track which words the child uses most (frequency counts, pre-computed summary)
+- [x] Track communication frequency over time (daily word counts, streak tracking)
+- [x] Simple dashboard: top 10 words with Fitzgerald Key colors, 7-day activity chart
+- [x] Source field ready for independent vs. modeled (Modeling Mode pending)
+- [x] All data stored locally (privacy-first, 90-day + 15K cap)
+- [x] Export data as CSV for SLPs (human-readable word labels)
+- [x] Insights tab visible only in parent mode
 
 ### 4.3 Guided Setup & Teaching Tutorial
 - [ ] First-launch onboarding flow: walk parents through what AAC is and how to start
@@ -146,7 +147,7 @@
 | **P2** | Basic grammar | DONE - Plurals, conjugation, articles |
 | **P2** | Modeling mode | Not started |
 | **P2** | Guided setup & teaching tutorial | Not started |
-| **P2** | Data/usage tracking | Not started |
+| **P2** | Data/usage tracking | DONE - Insights tab, CSV export |
 | **P3** | Spanish language support | Not started |
 | **P3** | Export/share boards | Not started |
 | **P4** | iOS app + distribution | Not started |

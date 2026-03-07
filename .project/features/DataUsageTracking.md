@@ -21,13 +21,24 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 
 **Event log** stored in localStorage as `aac-usage-log`:
 
-    { btnId: string, ts: number, source: "independent"|"modeled" }
+    { v: 1, btnId: string, ts: number, source: "independent"|"modeled" }
 
-- Capped at 10,000 events (rolling window, oldest trimmed on write)
-- Batched writes: accumulate in memory, flush every 2 seconds
+- `v` field enables painless schema evolution when Modeling Mode or other features ship
+- Hybrid cap: events older than 90 days trimmed on write, plus 15K hard cap as safety valve
+- Batched writes: accumulate in memory, flush every 2 seconds (same debounce pattern as bigrams)
 - Source field: "independent" by default, "modeled" reserved for future Modeling Mode feature
+- Realistic size: ~100 bytes/event with JSON property names, ~1.5MB at 15K cap (well within 5MB localStorage limit)
 
-**Aggregated stats** computed on-demand from the event log (no separate store needed at this scale).
+**Pre-computed aggregates** stored in localStorage as `aac-usage-summary`:
+
+    { dailyCounts: { "2026-03-07": 42, ... }, wordCounts: { "food-apple": 15, ... }, totalCount: 500 }
+
+- Updated incrementally on each recordUsageEvent() call (O(1) per tap)
+- Rebuilt from raw log only on init or after data import
+- Makes tab-switch rendering instant regardless of log size
+- Streak computed from dailyCounts keys (no iteration over raw events)
+
+**parentMode guard**: Check inside recordUsageEvent() itself, not in each caller
 
 ### UI Placement
 
@@ -45,7 +56,7 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 
 **2. Top Words (main section)**
 - Top 10 most-used words as a horizontal bar chart
-- Each bar shows word label, count, and Fitzgerald Key color
+- Each bar shows word label (human-readable, resolved from button), count, and Fitzgerald Key color
 - Tapping a bar does nothing (read-only)
 
 **3. 7-Day Activity (sparkline)**
@@ -55,13 +66,14 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 
 **4. Export & Reset (bottom)**
 - "Export CSV" button -- downloads usage log as CSV file
+- CSV columns: word (human-readable label), button_id, timestamp (ISO), source
 - "Clear usage data" button -- confirmation dialog, then wipe
 
 ### What NOT to Build (Keep It Simple)
 
 - No cloud sync, no accounts, no server
 - No real-time charts or animation (static render on tab switch)
-- No separate IndexedDB store (localStorage is fine for 10K events at ~40 bytes each = ~400KB)
+- No separate IndexedDB store (localStorage is fine at this scale)
 - No modeling vs independent distinction yet (field exists but all events are "independent" until Modeling Mode ships)
 - No hourly breakdowns, no word categories chart, no comparison periods
 
@@ -71,19 +83,21 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 
 **Task 2A.1: Usage event recording**
 - Create `usageLog` array in memory, loaded from localStorage on init
-- `recordUsageEvent(btnId, source)` function
-- Called from: grid cell click handler, core strip click handler, prediction chip click handler
+- Create `usageSummary` object in memory, loaded from localStorage on init
+- `recordUsageEvent(btnId, source)` function with parentMode guard inside
 - Debounced save to localStorage every 2 seconds (same pattern as bigrams)
-- Cap at 10,000 events; trim oldest when exceeded
+- Hybrid cap: trim events older than 90 days, then enforce 15K hard limit
+- On each event: increment usageSummary.wordCounts[btnId], usageSummary.dailyCounts[dateKey], usageSummary.totalCount
 - Dependencies: None
-- Acceptance: Tapping buttons stores events; page reload preserves them
+- Acceptance: Tapping buttons stores events; page reload preserves them; parent mode taps ignored
 
 **Task 2A.2: Aggregation helpers**
-- `getWordFrequencies()` -> Map of btnId to count, sorted descending
-- `getDailyWordCounts(days)` -> Array of { date, count } for last N days
-- `getTodayCount()` -> number
-- `getStreak()` -> number of consecutive days with usage
-- `getTotalCount()` -> number
+- `getWordFrequencies()` -> sorted array from usageSummary.wordCounts
+- `getDailyWordCounts(days)` -> array of { date, count } from usageSummary.dailyCounts
+- `getTodayCount()` -> usageSummary.dailyCounts[todayKey] or 0
+- `getStreak()` -> walk backwards through dailyCounts keys
+- `getTotalCount()` -> usageSummary.totalCount
+- `rebuildSummaryFromLog()` -> full recompute from raw events (used on init)
 - Dependencies: Task 2A.1
 - Acceptance: Correct counts verified against manual tap sequences
 
@@ -102,7 +116,7 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 - Three cards in a flex row: Total Words, Words Today, Day Streak
 - Large number + label below
 - Styled consistently with existing reward cards
-- Rendered on tab switch (not live-updating)
+- Rendered on tab switch (reads from pre-computed summary -- instant)
 - Dependencies: Task 2A.2
 - Acceptance: Numbers update correctly after tapping words and switching to Insights
 
@@ -110,6 +124,7 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 - Section with heading "Most Used Words"
 - Horizontal bars: colored by Fitzgerald Key, width proportional to max count
 - Each bar shows: icon + label on left, count on right
+- Each bar has aria-label with word name and count
 - Cap at top 10
 - Empty state: "No usage data yet. Start talking!"
 - Dependencies: Task 2A.2
@@ -126,8 +141,8 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 
 **Task 2B.5: Export and reset**
 - "Export as CSV" button -> generates and downloads file
-- CSV columns: word, button_id, timestamp (ISO), source
-- "Clear all usage data" button -> confirm -> wipe log
+- CSV columns: word (resolved human-readable label), button_id, timestamp (ISO), source
+- "Clear all usage data" button -> confirm -> wipe log + summary
 - Both in a settings-section style container at bottom
 - Dependencies: Task 2A.1
 - Acceptance: CSV downloads with correct data; clear empties dashboard
@@ -138,13 +153,13 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 - Grid cell click: recordUsageEvent(btn.id, 'independent')
 - Core strip click: recordUsageEvent(btn.id, 'independent')
 - Prediction chip click: recordUsageEvent(pred.id, 'independent')
-- Do NOT record in parent mode (editing, not communicating)
+- parentMode guard is inside recordUsageEvent -- callers don't need to check
 - Dependencies: Task 2A.1
 - Acceptance: All three tap paths produce events; parent mode taps do not
 
 **Task 2C.2: Dashboard refresh on tab switch**
 - When switching to insights tab, call renderInsights()
-- Rebuild all sections fresh (no caching needed at this scale)
+- Reads from pre-computed summary (instant, no iteration over raw log)
 - Dependencies: Phase 2B complete
 - Acceptance: Dashboard reflects latest data after each tab switch
 
@@ -159,7 +174,7 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 - Acceptance: Visually consistent with rest of app
 
 **Task 2D.2: Reset integration**
-- "Reset all to defaults" in settings should also clear usage log
+- "Reset all to defaults" in settings should also clear usage log + summary
 - Dependencies: Task 2B.5
 - Acceptance: Full reset clears everything including usage data
 
@@ -168,11 +183,11 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 - **Tab bar HTML**: New tab button
 - **TAB_VIEW_MAP**: New entry
 - **setParentMode()**: Show/hide insights tab
-- **Grid cell click handler**: Record event
-- **Core strip click handler**: Record event
-- **Prediction chip click handler**: Record event
-- **init()**: Load usage log from localStorage
-- **Reset all to defaults**: Clear usage log
+- **Grid cell click handler**: recordUsageEvent call
+- **Core strip click handler**: recordUsageEvent call
+- **Prediction chip click handler**: recordUsageEvent call
+- **init()**: Load usage log and summary from localStorage, rebuild summary if needed
+- **Reset all to defaults**: Clear usage log + summary
 
 ## Accessibility Considerations
 
@@ -192,13 +207,23 @@ Add a lightweight analytics dashboard (parent-mode only) that tracks which words
 ## Acceptance Criteria
 
 1. Tapping any word button records a timestamped event
-2. Parent mode taps are NOT recorded
+2. Parent mode taps are NOT recorded (guard inside recordUsageEvent)
 3. Insights tab visible only in parent mode
-4. Summary cards show correct totals
+4. Summary cards show correct totals (read from pre-computed summary)
 5. Top 10 chart shows most-used words with Fitzgerald Key colors
 6. 7-day chart shows daily activity with today highlighted
-7. CSV export downloads correct data
+7. CSV export downloads correct data with human-readable word labels
 8. Clear data wipes everything and dashboard shows empty state
 9. Data persists across page reloads
-10. 10,000 event cap prevents unbounded storage growth
+10. 90-day time cap + 15K hard cap prevents unbounded storage growth
 11. "Reset all to defaults" also clears usage data
+12. Event schema includes v:1 for future evolution
+
+## Review Feedback Incorporated
+
+- Robert: Hybrid 90-day + 15K cap instead of flat 10K (consistent time windows)
+- Robert: Pre-computed aggregates instead of on-demand iteration (instant tab switch)
+- Robert: Schema version field v:1 for evolution
+- Robert: parentMode guard inside recordUsageEvent, not in callers
+- Steve: CSV resolves human-readable word labels, not just btnIds
+- Steve: Realistic ~100 bytes/event size estimate

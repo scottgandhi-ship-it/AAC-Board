@@ -2579,6 +2579,183 @@ body.sensory-high-contrast .task-tile {
   border: 2px solid rgba(0,0,0,0.3) !important;
 }
 
+/* ── Insights Tab ── */
+#tab-insights { display: none; }
+.parent-mode #tab-insights { display: flex; }
+
+#view-insights {
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.insights-cards {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.insight-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border: 1px solid #e8e8e8;
+}
+
+.insight-card-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #333;
+  line-height: 1.1;
+}
+
+.insight-card-label {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.insights-section {
+  margin-bottom: 20px;
+}
+
+.insights-section h3 {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.insights-empty {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.95rem;
+  padding: 32px 16px;
+}
+
+.top-word-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.top-word-label {
+  width: 90px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-word-bar-wrap {
+  flex: 1;
+  background: #f0f0f0;
+  border-radius: 6px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.top-word-bar {
+  height: 100%;
+  border-radius: 6px;
+  min-width: 2px;
+  transition: width 0.2s ease;
+}
+
+.top-word-count {
+  width: 36px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #666;
+  text-align: left;
+}
+
+.weekly-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 120px;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.weekly-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.weekly-bar {
+  width: 100%;
+  background: #ddd;
+  border-radius: 4px 4px 0 0;
+  min-height: 2px;
+  transition: height 0.2s ease;
+}
+
+.weekly-bar.today {
+  background: #4CAF50;
+}
+
+.weekly-bar-label {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.weekly-bar-count {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.insights-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.insights-actions button {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.insights-actions button:active {
+  background: #f5f5f5;
+}
+
+.insights-actions .danger {
+  color: #e53935;
+  border-color: #ffcdd2;
+}
+
+@media (max-width: 359px) {
+  .insights-cards { flex-direction: column; }
+}
+
 </style>
 </head>
 <body>
@@ -2677,6 +2854,25 @@ body.sensory-high-contrast .task-tile {
   </div>
 </div>
 
+<!-- Insights View (parent-mode only) -->
+<div id="view-insights" class="view" role="tabpanel" aria-labelledby="tab-insights">
+  <div id="insights-content">
+    <div class="insights-cards" id="insights-cards"></div>
+    <div class="insights-section" id="insights-top-words">
+      <h3>Most Used Words</h3>
+      <div id="insights-top-words-chart"></div>
+    </div>
+    <div class="insights-section" id="insights-weekly">
+      <h3>This Week</h3>
+      <div class="weekly-chart" id="insights-weekly-chart"></div>
+    </div>
+    <div class="insights-actions">
+      <button id="btn-export-csv">Export CSV</button>
+      <button id="btn-clear-usage" class="danger">Clear Data</button>
+    </div>
+  </div>
+</div>
+
 <!-- Tab Bar -->
 <nav id="tab-bar" role="tablist" aria-label="App navigation">
   <button class="tab-btn active" id="tab-talk" role="tab" aria-selected="true" aria-controls="view-talk">
@@ -2690,6 +2886,10 @@ body.sensory-high-contrast .task-tile {
   <button class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
     <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     <span class="tab-label">Rewards</span>
+  </button>
+  <button class="tab-btn" id="tab-insights" role="tab" aria-selected="false" aria-controls="view-insights">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="tab-label">Insights</span>
   </button>
 </nav>
 
@@ -3812,6 +4012,8 @@ async function init() {
   applySensoryPreferences();
   loadBigrams();
   loadAutoSpeak();
+  loadUsageData();
+  trimUsageLog();
   document.getElementById('setting-auto-speak').checked = autoSpeakEnabled;
   updateSpeedDisplay();
   initSpeech();
@@ -4050,7 +4252,6 @@ const VERB_FORMS = {
 };
 
 const THIRD_PERSON_PRONOUNS = new Set(['he', 'she', 'it']);
-const FIRST_SECOND_PRONOUNS = new Set(['i', 'you', 'we', 'they']);
 const UNCOUNTABLE_NOUNS = new Set([
   'water', 'milk', 'juice', 'rice', 'bread', 'cheese', 'soup', 'cereal',
   'yogurt', 'pasta', 'medicine', 'soap', 'paper', 'ice cream',
@@ -4059,7 +4260,8 @@ const UNCOUNTABLE_NOUNS = new Set([
 ]);
 
 function applyGrammar(words, btnIds) {
-  if (!words || words.length < 2) return words.join(' ');
+  if (!words || words.length === 0) return '';
+  if (words.length < 2) return words.join(' ');
   const result = [...words];
 
   for (let i = 0; i < result.length; i++) {
@@ -4132,6 +4334,7 @@ function renderCoreStrip() {
       speak(btn.label);
       addWordToMessage(btn.label, btn.id);
       renderPredictions(btn.id);
+      recordUsageEvent(btn.id, 'independent');
     });
     strip.appendChild(el);
   });
@@ -4379,6 +4582,221 @@ function saveAutoSpeak(enabled) {
   localStorage.setItem('aac-auto-speak', String(enabled));
 }
 
+// ── Usage Tracking ──
+let usageLog = [];
+let usageSummary = { dailyCounts: {}, wordCounts: {}, totalCount: 0 };
+let usageSavePending = false;
+const USAGE_MAX_AGE_DAYS = 90;
+const USAGE_HARD_CAP = 15000;
+
+function getDateKey(ts) {
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function todayKey() { return getDateKey(Date.now()); }
+
+function loadUsageData() {
+  try {
+    const raw = localStorage.getItem('aac-usage-log');
+    usageLog = raw ? JSON.parse(raw) : [];
+  } catch (e) { usageLog = []; }
+  rebuildSummaryFromLog();
+}
+
+function rebuildSummaryFromLog() {
+  const daily = {};
+  const words = {};
+  let total = 0;
+  for (const evt of usageLog) {
+    const dk = getDateKey(evt.ts);
+    daily[dk] = (daily[dk] || 0) + 1;
+    words[evt.btnId] = (words[evt.btnId] || 0) + 1;
+    total++;
+  }
+  usageSummary = { dailyCounts: daily, wordCounts: words, totalCount: total };
+  localStorage.setItem('aac-usage-summary', JSON.stringify(usageSummary));
+}
+
+function trimUsageLog() {
+  const cutoff = Date.now() - (USAGE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+  const before = usageLog.length;
+  usageLog = usageLog.filter(e => e.ts >= cutoff);
+  if (usageLog.length > USAGE_HARD_CAP) {
+    usageLog = usageLog.slice(usageLog.length - USAGE_HARD_CAP);
+  }
+  if (usageLog.length !== before) rebuildSummaryFromLog();
+}
+
+function saveUsageData() {
+  if (usageSavePending) return;
+  usageSavePending = true;
+  setTimeout(() => {
+    localStorage.setItem('aac-usage-log', JSON.stringify(usageLog));
+    localStorage.setItem('aac-usage-summary', JSON.stringify(usageSummary));
+    usageSavePending = false;
+  }, 2000);
+}
+
+function recordUsageEvent(btnId, source) {
+  if (parentMode) return;
+  if (!btnId) return;
+  const evt = { v: 1, btnId, ts: Date.now(), source: source || 'independent' };
+  usageLog.push(evt);
+
+  const dk = todayKey();
+  usageSummary.dailyCounts[dk] = (usageSummary.dailyCounts[dk] || 0) + 1;
+  usageSummary.wordCounts[btnId] = (usageSummary.wordCounts[btnId] || 0) + 1;
+  usageSummary.totalCount++;
+
+  if (usageLog.length > USAGE_HARD_CAP + 500) trimUsageLog();
+  saveUsageData();
+}
+
+function clearUsageData() {
+  usageLog = [];
+  usageSummary = { dailyCounts: {}, wordCounts: {}, totalCount: 0 };
+  localStorage.removeItem('aac-usage-log');
+  localStorage.removeItem('aac-usage-summary');
+}
+
+function getWordFrequencies() {
+  return Object.entries(usageSummary.wordCounts)
+    .map(([btnId, count]) => ({ btnId, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function getDailyWordCounts(days) {
+  const result = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dk = getDateKey(d.getTime());
+    result.push({
+      date: dk,
+      count: usageSummary.dailyCounts[dk] || 0,
+      dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      isToday: i === 0
+    });
+  }
+  return result;
+}
+
+function getTodayCount() {
+  return usageSummary.dailyCounts[todayKey()] || 0;
+}
+
+function getStreak() {
+  let streak = 0;
+  const now = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dk = getDateKey(d.getTime());
+    if (usageSummary.dailyCounts[dk] && usageSummary.dailyCounts[dk] > 0) {
+      streak++;
+    } else {
+      if (i === 0) continue;
+      break;
+    }
+  }
+  return streak;
+}
+
+function getTotalCount() {
+  return usageSummary.totalCount;
+}
+
+// ── Insights Rendering ──
+const FITZ_BAR_COLORS = {
+  yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
+  blue: '#42A5F5', pink: '#EC407A', purple: '#AB47BC', red: '#EF5350'
+};
+
+function renderInsights() {
+  const cardsEl = document.getElementById('insights-cards');
+  const total = getTotalCount();
+  const today = getTodayCount();
+  const streak = getStreak();
+
+  cardsEl.innerHTML =
+    '<div class="insight-card"><div class="insight-card-number">' + total + '</div><div class="insight-card-label">Total Words</div></div>' +
+    '<div class="insight-card"><div class="insight-card-number">' + today + '</div><div class="insight-card-label">Today</div></div>' +
+    '<div class="insight-card"><div class="insight-card-number">' + streak + '</div><div class="insight-card-label">Day Streak</div></div>';
+
+  const chartEl = document.getElementById('insights-top-words-chart');
+  const freqs = getWordFrequencies().slice(0, 10);
+  if (freqs.length === 0) {
+    chartEl.innerHTML = '<div class="insights-empty">No usage data yet. Start talking!</div>';
+  } else {
+    const maxCount = freqs[0].count;
+    chartEl.innerHTML = '';
+    for (const { btnId, count } of freqs) {
+      const btn = buttons.find(b => b.id === btnId);
+      const label = btn ? btn.label : btnId;
+      const color = btn ? (FITZ_BAR_COLORS[btn.color] || '#90A4AE') : '#90A4AE';
+      const pct = Math.round((count / maxCount) * 100);
+      const icon = BUTTON_ICONS[btnId] || '';
+
+      const row = document.createElement('div');
+      row.className = 'top-word-row';
+      row.setAttribute('aria-label', label + ': ' + count + ' times');
+
+      row.innerHTML =
+        '<div class="top-word-label">' + (icon ? icon + ' ' : '') + escapeHtml(label) + '</div>' +
+        '<div class="top-word-bar-wrap"><div class="top-word-bar" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
+        '<div class="top-word-count">' + count + '</div>';
+      chartEl.appendChild(row);
+    }
+  }
+
+  const weekEl = document.getElementById('insights-weekly-chart');
+  const days = getDailyWordCounts(7);
+  const maxDay = Math.max(...days.map(d => d.count), 1);
+  weekEl.innerHTML = '';
+  for (const day of days) {
+    const heightPct = Math.max((day.count / maxDay) * 100, 2);
+    const col = document.createElement('div');
+    col.className = 'weekly-bar-col';
+    col.innerHTML =
+      '<div class="weekly-bar-count">' + (day.count > 0 ? day.count : '') + '</div>' +
+      '<div class="weekly-bar' + (day.isToday ? ' today' : '') + '" style="height:' + heightPct + '%;"></div>' +
+      '<div class="weekly-bar-label">' + day.dayName + '</div>';
+    weekEl.appendChild(col);
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function exportUsageCSV() {
+  if (usageLog.length === 0) {
+    showToast('No data to export');
+    return;
+  }
+  const rows = ['word,button_id,timestamp,source'];
+  for (const evt of usageLog) {
+    const btn = buttons.find(b => b.id === evt.btnId);
+    const label = btn ? btn.label : evt.btnId;
+    const ts = new Date(evt.ts).toISOString();
+    rows.push('"' + label.replace(/"/g, '""') + '","' + evt.btnId + '","' + ts + '","' + (evt.source || 'independent') + '"');
+  }
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'aac-usage-' + todayKey() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV exported');
+}
+
 // ── Blended Prediction Ranking ──
 const COLD_START_BONUS = 3;
 const MAX_PREDICTIONS = 8;
@@ -4466,6 +4884,7 @@ function renderPredictions(btnId) {
 
       const isCoreWord = !!PREDICTIONS[pred.id];
       addWordToMessage(pred.label, pred.id);
+      recordUsageEvent(pred.id, 'independent');
 
       if (isCoreWord) {
         speak(pred.label);
@@ -4545,6 +4964,7 @@ function createCell(btn) {
     // All words speak on tap
     addWordToMessage(btn.label, btn.id);
     speak(btn.label);
+    recordUsageEvent(btn.id, 'independent');
   });
 
   return cell;
@@ -4679,6 +5099,7 @@ document.getElementById('search-input').addEventListener('input', e => {
     cell.addEventListener('click', () => {
       speak(btn.label);
       addWordToMessage(btn.label, btn.id);
+      recordUsageEvent(btn.id, 'independent');
       document.getElementById('search-overlay').classList.remove('open');
     });
     resultsEl.appendChild(cell);
@@ -4694,6 +5115,7 @@ const TAB_VIEW_MAP = {
   'tab-talk': { view: 'view-talk', title: 'Talk' },
   'tab-schedule': { view: 'view-schedule', title: 'Schedule' },
   'tab-rewards': { view: 'view-rewards', title: 'Rewards' },
+  'tab-insights': { view: 'view-insights', title: 'Insights' },
 };
 
 function switchTab(tabId) {
@@ -4713,6 +5135,7 @@ function switchTab(tabId) {
   document.getElementById('app-header-title').textContent = tabInfo.title;
   activeTab = tabId.replace('tab-', '');
 
+  if (activeTab === 'insights') renderInsights();
   updateParentModeUI();
 }
 
@@ -4783,6 +5206,7 @@ function setParentMode(enabled) {
       clearTimeout(parentAutoLockTimer);
       parentAutoLockTimer = null;
     }
+    if (activeTab === 'insights') switchTab('tab-talk');
   }
   updateParentModeUI();
 }
@@ -4976,11 +5400,21 @@ document.getElementById('btn-reset-predictions').addEventListener('click', () =>
   showToast('Predictions reset');
 });
 
+document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
+
+document.getElementById('btn-clear-usage').addEventListener('click', () => {
+  if (!confirm('Clear all usage data? This cannot be undone.')) return;
+  clearUsageData();
+  if (activeTab === 'insights') renderInsights();
+  showToast('Usage data cleared');
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
   resetLearnedPredictions();
   clearPredictions();
+  clearUsageData();
   buttons = getTemplate(getGridSize());
   await saveButtons();
   currentFolder = null;
