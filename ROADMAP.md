@@ -6,22 +6,22 @@
 
 ## Milestone 1: Core Communication (MVP+)
 **Goal**: Make the home screen actually useful for communication, not just navigation.
-**Status**: Not Started
+**Status**: In Progress
 
-### 1.1 Core Words on Home Screen
-- [ ] Design home grid layout mixing core words + folder icons
-- [ ] Place core vocabulary: I, want, go, help, more, stop, yes, no, like, don't want
-- [ ] Ensure core words use Fitzgerald Key colors (pronouns=yellow, verbs=green, social=pink)
-- [ ] Core words trigger speech output immediately (single tap)
-- [ ] Folders remain for expanded vocabulary categories
-- [ ] Test: common requests achievable in 2 taps max
+### 1.1 Core Words on Home Screen -- DONE
+- [x] Dedicated persistent core word strip above grid (I, Want, Don't Want, More, Help)
+- [x] Fitzgerald Key colors (pronouns=yellow, verbs=green, descriptors=blue, negation=red)
+- [x] Core words trigger speech output immediately (single tap)
+- [x] Folders remain for expanded vocabulary categories with full grid space
+- [x] Common requests achievable in 2 taps via prediction bar
+- [x] Reduced from 10 to 5 core words per Marci's clinical recommendation
 
-### 1.2 Consistent Motor Planning
-- [ ] Define fixed grid positions for core words (these positions are permanent)
-- [ ] Core words appear in the same position on EVERY screen/folder view
-- [ ] Document the grid position contract (which cells are reserved, which are available)
-- [ ] Add position-lock mechanism so editing cannot move core words
-- [ ] Test: navigate 5 different folders, verify core words don't shift
+### 1.2 Consistent Motor Planning -- DONE
+- [x] Core words in dedicated strip with fixed positions (never move)
+- [x] Core word strip visible on EVERY screen (home + all folders)
+- [x] Core word labels are read-only, colors disabled, delete hidden in edit modal
+- [x] Position-lock: core words separated from grid so folder edits cannot affect them
+- [x] Verified: navigating folders does not shift core word positions
 
 ### 1.3 Grid Templates by Communication Level
 - [ ] Beginner grid: 3x3 (9 buttons) — early communicators, youngest users
@@ -55,14 +55,16 @@
 
 ## Milestone 3: Language Intelligence
 **Goal**: Help users communicate faster and build language skills.
-**Status**: Not Started
+**Status**: In Progress
 
-### 3.1 Word Prediction
-- [ ] After "I want..." suggest contextually likely words: "more", "help", "food", "play"
-- [ ] Prediction bar appears above message bar
-- [ ] Predictions based on frequency data (most common AAC sequences)
-- [ ] Predictions update as message builds
-- [ ] Tap prediction to add to message
+### 3.1 Word Prediction -- DONE
+- [x] Predictive next-word bar for two-tap phrase building
+- [x] Prediction bar appears between message bar and core word strip
+- [x] Predictions keyed by button ID (not label) for i18n robustness
+- [x] Predictions chain: tap core word -> see predictions -> tap prediction -> see next predictions
+- [x] Tap prediction to speak, add to sentence, and show next predictions
+- [x] __NOUNS__ placeholder resolves to top noun IDs dynamically
+- [x] iOS TTS fix: "I" no longer reads as "capital I" (SPEAK_OVERRIDES)
 
 ### 3.2 Basic Grammar
 - [ ] Auto-plurals: tap noun twice or use "more" + noun → plural form spoken
@@ -130,21 +132,21 @@
 
 ## Priority Order
 
-| Priority | Item | Why |
-|----------|------|-----|
-| **P0** | Core words on home screen | Biggest usability gap. Cuts common requests from 4+ taps to 2. |
-| **P0** | Consistent motor planning | Without this, adding features makes the app harder to use. |
-| **P1** | Grid templates | Different users need different density. Unlocks age-appropriate presets. |
-| **P1** | Sensory-friendly options | Accessibility is not optional for this population. |
-| **P1** | Symbol/image library | Most AAC users rely on symbols, not text. |
-| **P2** | Word prediction | Speeds up communication significantly. |
-| **P2** | Basic grammar | Makes output sound natural. |
-| **P2** | Modeling mode | Research-backed #1 teaching strategy. |
-| **P2** | Guided setup & teaching tutorial | Parents need hand-holding at first launch. Differentiator vs. Proloquo2Go. |
-| **P2** | Data/usage tracking | Parents and SLPs need visibility into progress. |
-| **P3** | Spanish language support | Largest non-English US population. |
-| **P3** | Export/share boards | Enables SLP-to-family workflow. |
-| **P4** | iOS app + distribution | After web version is solid. |
+| Priority | Item | Status |
+|----------|------|--------|
+| **P0** | Core words on home screen | DONE - Persistent strip with 5 words |
+| **P0** | Consistent motor planning | DONE - Fixed strip, position-locked |
+| **P1** | Grid templates | Not started |
+| **P1** | Sensory-friendly options | Not started |
+| **P1** | Symbol/image library | Not started |
+| **P2** | Word prediction | DONE - Two-tap prediction chains |
+| **P2** | Basic grammar | Not started |
+| **P2** | Modeling mode | Not started |
+| **P2** | Guided setup & teaching tutorial | Not started |
+| **P2** | Data/usage tracking | Not started |
+| **P3** | Spanish language support | Not started |
+| **P3** | Export/share boards | Not started |
+| **P4** | iOS app + distribution | Not started |
 
 ---
 
@@ -154,3 +156,9 @@
 |------|--------|
 | 2026-03-06 | Roadmap created with 5 milestones and 11 deliverables |
 | 2026-03-06 | Added 4.3 Guided Setup & Teaching Tutorial (P2) |
+| 2026-03-06 | Completed 1.1 Core Words - dedicated persistent strip with 5 words |
+| 2026-03-06 | Completed 1.2 Motor Planning - fixed positions, position-locked strip |
+| 2026-03-06 | Completed 3.1 Word Prediction - two-tap prediction chains, iOS TTS fix |
+| 2026-03-06 | Fitzgerald Key color coding applied to all folders and words |
+| 2026-03-06 | Back button styled as orange standout, Home button removed from folder grids |
+| 2026-03-06 | Robert architecture review completed and all findings addressed |
