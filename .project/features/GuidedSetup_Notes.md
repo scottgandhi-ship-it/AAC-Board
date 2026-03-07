@@ -1,7 +1,7 @@
 # 4.3 Guided Setup -- Notes
 
 ## Current Status
-Phase 1: Planning -- awaiting developer approval
+Phase 2: Implementing -- all tasks complete, ready for testing
 
 ## Agent Review Summary
 - Pat: Simplified demo to static coach marks, phased scope down, approved v2
@@ -21,19 +21,30 @@ Phase 1: Planning -- awaiting developer approval
 - ADDED: "Done" button delayed until parent taps a word
 
 ## Prerequisite
-Parent Mode Refactor must be completed first. See ParentModeRefactor.md.
+Parent Mode Refactor -- DONE
 
 ## Implementation Checklist
 
 ### Phase A: Onboarding Flow
-- [ ] A1: Onboarding module scaffold (module object, localStorage key, init integration)
-- [ ] A2: Welcome screen HTML/CSS (headline, multimodal sentence, Get Started)
-- [ ] A3: Grid picker integration into onboarding flow
-- [ ] A4: Coach marks demo (3 callouts on real board, delayed Done button)
-- [ ] A5: Interruption handling (resume from current step, stale step validation)
+- [x] A1: Onboarding module scaffold (module object, localStorage key, init integration)
+- [x] A2: Welcome screen HTML/CSS (headline, multimodal sentence, Get Started)
+- [x] A3: Grid picker integration into onboarding flow
+- [x] A4: Coach marks demo (3 callouts on real board, delayed Done button)
+- [x] A5: Interruption handling (resume from current step, stale step validation)
+
+## Architecture Notes
+- Onboarding module (const Onboarding = {}) with init/showStep/showCoachMarks/complete/dismiss
+- Consolidated localStorage key: aac-onboarding (version, complete, currentStep, date)
+- Grid picker reused for step 2 with onboarding-mode extras (reassurance text, dots)
+- finalizeInit() extracted from init() so grid picker path also runs full setup
+- showGridPicker accepts onComplete callback, stores via _gridPickerCallback
+- Defensive rendering: grid renders first, onboarding overlays on top
+- Coach marks use pointer-events:none overlay with pass-through taps to real board
+- Child-grab escape: tap outside overlay content dismisses and completes onboarding
 
 ## Issues and Resolutions
-(none yet)
+- Grid picker had duplicate heading with onboarding step 2 -- resolved by hiding onboarding overlay during step 2 and adding reassurance/dots directly to grid picker overlay
+- showGridPicker once-bound handlers did not re-register callback on resume -- resolved by storing callback in _gridPickerCallback variable
 
 ## Validation Progress
-(pending implementation)
+(pending testing)
