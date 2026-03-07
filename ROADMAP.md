@@ -75,12 +75,12 @@
 - [x] Double-tap noun to pluralize (800ms window)
 - [x] Independent settings toggles for each grammar rule
 
-### 3.3 Spanish Language Support
-- [ ] Dual-language vocabulary (English + Spanish labels)
-- [ ] Spanish speech output (Web Speech API `es-ES` / `es-MX`)
-- [ ] Language toggle in settings
-- [ ] Bilingual mode: show both languages on buttons
-- [ ] Spanish grammar rules for verb forms and plurals
+### 3.3 Spanish Language Support -- DONE
+- [x] Dual-language vocabulary (English + Spanish labels)
+- [x] Spanish speech output (Web Speech API `es-ES` / `es-MX`)
+- [x] Language toggle in settings
+- [x] Bilingual mode: show both languages on buttons
+- [x] Spanish grammar rules for verb forms and plurals
 
 ---
 
@@ -88,12 +88,8 @@
 **Goal**: Help parents and SLPs support language development.
 **Status**: Not Started
 
-### 4.1 Modeling Mode
-- [ ] Toggle for parent/SLP to demonstrate AAC use
-- [ ] Visual indicator that modeling mode is active (e.g., border color, badge)
-- [ ] Modeling taps are tracked separately from child's independent communication
-- [ ] Guided modeling prompts: "Try showing your child how to say 'I want more'"
-- [ ] Research reference: modeling is the #1 teaching strategy for AAC
+### ~~4.1 Modeling Mode~~ -- REMOVED
+> Folded into 4.3 Guided Setup & Teaching Tutorial. Modeling guidance will be part of the interactive tutorial instead of a separate mode.
 
 ### 4.2 Data/Usage Tracking -- DONE
 - [x] Track which words the child uses most (frequency counts, pre-computed summary)
@@ -108,6 +104,8 @@
 - [ ] First-launch onboarding flow: walk parents through what AAC is and how to start
 - [ ] Guided setup wizard: pick grid size, child's age, communication level
 - [ ] Interactive modeling tutorial: step-by-step "try tapping 'I want more'" with the parent
+- [ ] Modeling guidance built-in: teach parents HOW to model AAC use during daily routines
+- [ ] Visual modeling prompts: "Try showing your child how to say 'I want more'"
 - [ ] Teaching tips surfaced contextually (e.g., "Tip: model 'help' when your child is struggling")
 - [ ] Progress-gated vocabulary unlocks: tutorial suggests when to reveal new words
 - [ ] "How to use AAC" reference section accessible from settings at any time
@@ -145,10 +143,10 @@
 | **P1** | Symbol/image library | DONE - ARASAAC integration |
 | **P2** | Word prediction | DONE - Two-tap prediction chains |
 | **P2** | Basic grammar | DONE - Plurals, conjugation, articles |
-| **P2** | Modeling mode | Not started |
+| **P2** | ~~Modeling mode~~ | REMOVED - folded into 4.3 |
 | **P2** | Guided setup & teaching tutorial | Not started |
 | **P2** | Data/usage tracking | DONE - Insights tab, CSV export |
-| **P3** | Spanish language support | Not started |
+| **P3** | Spanish language support | DONE |
 | **P3** | Export/share boards | Not started |
 | **P4** | iOS app + distribution | Not started |
 
@@ -169,3 +167,5 @@
 | 2026-03-07 | Completed 1.3 Grid Templates - 3x3/4x4/6x6 with settings UI |
 | 2026-03-07 | Completed 2.2 Symbol Library - ARASAAC integration with auto-download |
 | 2026-03-07 | Completed 3.2 Basic Grammar - plurals, verb conjugation, article insertion |
+| 2026-03-07 | Completed 3.3 Spanish Language Support - dual-language vocab, bilingual mode |
+| 2026-03-07 | Removed 4.1 Modeling Mode - folded modeling guidance into 4.3 Guided Setup & Teaching Tutorial |

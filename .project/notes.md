@@ -1,15 +1,25 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-All implemented features validated. Ready for next roadmap milestone.
+Parent Mode Refactor (prerequisite for Guided Setup 4.3)
 
 ## Active Features
-(none -- all current features validated)
+
+### Parent Mode Refactor
+- Plan: .project/features/ParentModeRefactor.md
+- Notes: .project/features/ParentModeRefactor_Notes.md
+- Status: APPROVED -- implementing
+
+### Guided Setup (Milestone 4.3)
+- Plan: .project/features/GuidedSetup.md
+- Notes: .project/features/GuidedSetup_Notes.md
+- Status: APPROVED -- blocked on Parent Mode Refactor
+
+### Marketing Website
+- Plan: .project/features/MarketingWebsite.md
+- Status: PLANNING -- awaiting approval
 
 ## Next Up
-- Milestone 3.3: Spanish Language Support
-- Milestone 4.1: Modeling Mode
-- Milestone 4.3: Guided Setup & Teaching Tutorial
 - Milestone 4.4: Export/Share Boards
 - Milestone 5: iOS App + Distribution
 
@@ -43,6 +53,9 @@ All implemented features validated. Ready for next roadmap milestone.
 - Plan: .project/features/BasicGrammar.md
 - Status: DONE
 
+### Spanish Language Support (Milestone 3.3)
+- Status: DONE -- 2026-03-07
+
 ### Data & Usage Tracking (Milestone 4.2)
 - Plan: .project/features/DataUsageTracking.md
 - Status: DONE -- device tested 2026-03-07
@@ -50,6 +63,10 @@ All implemented features validated. Ready for next roadmap milestone.
 ### UX Design Pass
 - Plan: .project/features/UXDesignPass.md
 - Status: DONE -- merged via PR #25
+
+### Competitive Analysis
+- Plan: .project/features/CompetitiveAnalysis.md
+- Status: COMPLETE -- research delivered 2026-03-07
 
 ## Session History
 - 2026-02-28: Initialized .project workflow structure
@@ -61,3 +78,4 @@ All implemented features validated. Ready for next roadmap milestone.
 - 2026-03-07: Created planning docs for Symbol Library and Basic Grammar
 - 2026-03-07: Marked 2.1 Sensory-Friendly as DONE in roadmap
 - 2026-03-07: Created planning docs for Data & Usage Tracking (4.2)
+- 2026-03-07: Completed competitive analysis -- AssistiveWare deep dive, full market landscape, pricing intelligence, gap analysis
