@@ -3013,7 +3013,7 @@ body.sensory-high-contrast .task-tile {
       <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
       <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
       <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
-      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Tap any button on the board to edit it while parent mode is active.</p>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
     </div>
     <div class="settings-section">
       <h3>Voice</h3>
@@ -5594,11 +5594,35 @@ function createCell(btn) {
   }
   cell.appendChild(label);
 
-  cell.addEventListener('click', () => {
-    if (parentMode) {
+  let holdTimer = null;
+  let didLongPress = false;
+
+  function startHold(e) {
+    if (!parentMode) return;
+    didLongPress = false;
+    holdTimer = setTimeout(() => {
+      didLongPress = true;
+      holdTimer = null;
       openEditModal(btn.id);
-      return;
+    }, 600);
+  }
+
+  function cancelHold() {
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = null;
     }
+  }
+
+  cell.addEventListener('touchstart', startHold, { passive: true });
+  cell.addEventListener('touchend', cancelHold);
+  cell.addEventListener('touchcancel', cancelHold);
+  cell.addEventListener('mousedown', startHold);
+  cell.addEventListener('mouseup', cancelHold);
+  cell.addEventListener('mouseleave', cancelHold);
+
+  cell.addEventListener('click', () => {
+    if (didLongPress) { didLongPress = false; return; }
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
       currentFolder = folderId;
