@@ -727,6 +727,89 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   margin-top: 1px;
 }
 
+/* ── Symbol Search Overlay ── */
+#symbol-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 250;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+#symbol-overlay.open { display: flex; }
+
+#symbol-panel {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 95%;
+  max-width: 500px;
+  max-height: 80vh;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lifted), 0 0 0 1px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+#symbol-panel h2 { margin-bottom: 10px; font-size: 1.1rem; }
+
+#symbol-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+#symbol-search-input:focus { border-color: #42A5F5; }
+
+#symbol-results {
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+#symbol-results .symbol-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 80px;
+  border: 2px solid #eee;
+  background: #fafafa;
+  transition: transform 0.1s, border-color 0.15s;
+}
+#symbol-results .symbol-cell:active { transform: scale(0.92); }
+#symbol-results .symbol-cell:hover { border-color: #42A5F5; }
+
+#symbol-results .symbol-cell img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+#symbol-results .symbol-cell span {
+  font-size: 0.7rem;
+  color: #555;
+  margin-top: 2px;
+  text-align: center;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Toast ── */
 #toast {
   position: fixed;
@@ -2584,6 +2667,24 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
       <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
     </div>
     <div class="settings-section">
+      <h3>Grammar Assistance</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="grammar-plurals" style="width:20px;height:20px;"> Auto-plurals (more cookie -> more cookies)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="grammar-verbs" style="width:20px;height:20px;"> Verb forms (he want -> he wants)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="grammar-articles" style="width:20px;height:20px;"> Add articles (I want cookie -> I want a cookie)
+      </label>
+    </div>
+    <div class="settings-section">
+      <h3>Symbols</h3>
+      <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
+    </div>
+    <div class="settings-section">
       <h3>Data</h3>
       <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
     </div>
@@ -2611,6 +2712,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
     <div id="edit-image-btns">
       <button id="btn-edit-upload">Upload Image</button>
       <button id="btn-edit-camera">Take Photo</button>
+      <button id="btn-edit-symbols" style="background:#e3f2fd;color:#1565C0;">Browse Symbols</button>
       <button id="btn-edit-clear-img">Remove Image</button>
     </div>
     <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
@@ -2620,6 +2722,17 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
       <button id="btn-edit-remove">Delete</button>
       <button id="btn-edit-save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Symbol Search Overlay -->
+<div id="symbol-overlay">
+  <div id="symbol-panel">
+    <h2>Browse Symbols</h2>
+    <input type="text" id="symbol-search-input" autocomplete="off" aria-label="Search symbols">
+    <div id="symbol-results"></div>
+    <div id="symbol-status" style="text-align:center;color:#888;padding:16px;font-size:0.9rem;"></div>
+    <button id="btn-symbol-close" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:8px;font-size:1rem;background:#f5f5f5;cursor:pointer;">Cancel</button>
   </div>
 </div>
 
@@ -3189,6 +3302,9 @@ let currentFolder = null;  // null = home grid
 let parentMode = false;
 let editingButtonId = null;
 let messageWords = [];
+let messageButtonIds = [];
+let lastTapId = null;
+let lastTapTime = 0;
 let speechRate = 0.85;
 let speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
 let activeTab = 'talk';
@@ -3612,6 +3728,9 @@ async function init() {
 
   updateSpeedDisplay();
   initSpeech();
+
+  // Auto-download ARASAAC symbols in background on first online load
+  setTimeout(() => downloadSymbolsForButtons().catch(() => {}), 2000);
 }
 
 // ── Speech ──
@@ -3734,6 +3853,131 @@ function getVoice() {
   return pickDefaultVoice(usVoices) || voices[0] || null;
 }
 
+// ── Grammar Engine ──
+// Settings stored in localStorage (on by default except articles)
+function grammarEnabled(key) {
+  const val = localStorage.getItem('aac-grammar-' + key);
+  if (val === null) return key !== 'articles'; // articles off by default
+  return val === '1';
+}
+
+function getWordCategory(buttonId) {
+  if (!buttonId) return 'unknown';
+  const btn = buttons.find(b => b.id === buttonId);
+  if (!btn) return 'unknown';
+  const colorMap = {
+    yellow: 'pronoun', green: 'verb', orange: 'noun', blue: 'descriptor',
+    pink: 'social', purple: 'preposition', red: 'negation'
+  };
+  return colorMap[btn.color] || 'unknown';
+}
+
+const PLURAL_OVERRIDES = {
+  'child': 'children', 'foot': 'feet', 'tooth': 'teeth', 'mouse': 'mice',
+  'fish': 'fish', 'sheep': 'sheep', 'man': 'men', 'woman': 'women',
+  'person': 'people', 'goose': 'geese', 'dice': 'dice', 'scissors': 'scissors',
+  'pants': 'pants', 'shorts': 'shorts', 'pajamas': 'pajamas', 'glasses': 'glasses'
+};
+
+function pluralize(word) {
+  const lower = word.toLowerCase();
+  if (PLURAL_OVERRIDES[lower]) return PLURAL_OVERRIDES[lower];
+  // Already plural-looking
+  if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us')) return word;
+  if (lower.endsWith('sh') || lower.endsWith('ch') || lower.endsWith('x') || lower.endsWith('z') || lower.endsWith('ss')) return word + 'es';
+  if (lower.endsWith('y') && !['a','e','i','o','u'].includes(lower[lower.length - 2])) return word.slice(0, -1) + 'ies';
+  if (lower.endsWith('f')) return word.slice(0, -1) + 'ves';
+  if (lower.endsWith('fe')) return word.slice(0, -2) + 'ves';
+  return word + 's';
+}
+
+const VERB_FORMS = {
+  'want':   { third: 'wants',   past: 'wanted' },
+  'need':   { third: 'needs',   past: 'needed' },
+  'help':   { third: 'helps',   past: 'helped' },
+  'like':   { third: 'likes',   past: 'liked' },
+  'eat':    { third: 'eats',    past: 'ate' },
+  'drink':  { third: 'drinks',  past: 'drank' },
+  'play':   { third: 'plays',   past: 'played' },
+  'read':   { third: 'reads',   past: 'read' },
+  'run':    { third: 'runs',    past: 'ran' },
+  'jump':   { third: 'jumps',   past: 'jumped' },
+  'sit':    { third: 'sits',    past: 'sat' },
+  'stand':  { third: 'stands',  past: 'stood' },
+  'walk':   { third: 'walks',   past: 'walked' },
+  'sleep':  { third: 'sleeps',  past: 'slept' },
+  'wash':   { third: 'washes',  past: 'washed' },
+  'open':   { third: 'opens',   past: 'opened' },
+  'close':  { third: 'closes',  past: 'closed' },
+  'push':   { third: 'pushes',  past: 'pushed' },
+  'pull':   { third: 'pulls',   past: 'pulled' },
+  'give':   { third: 'gives',   past: 'gave' },
+  'listen': { third: 'listens', past: 'listened' },
+  'draw':   { third: 'draws',   past: 'drew' },
+  'sing':   { third: 'sings',   past: 'sang' },
+  'dance':  { third: 'dances',  past: 'danced' },
+  'hug':    { third: 'hugs',    past: 'hugged' },
+  'throw':  { third: 'throws',  past: 'threw' },
+  'share':  { third: 'shares',  past: 'shared' },
+  'build':  { third: 'builds',  past: 'built' },
+  'go':     { third: 'goes',    past: 'went' },
+  'stop':   { third: 'stops',   past: 'stopped' },
+  'wait':   { third: 'waits',   past: 'waited' },
+  'look':   { third: 'looks',   past: 'looked' },
+  'is':     { third: 'is',      past: 'was' },
+  'have':   { third: 'has',     past: 'had' },
+};
+
+const THIRD_PERSON_PRONOUNS = new Set(['he', 'she', 'it']);
+const FIRST_SECOND_PRONOUNS = new Set(['i', 'you', 'we', 'they']);
+const UNCOUNTABLE_NOUNS = new Set([
+  'water', 'milk', 'juice', 'rice', 'bread', 'cheese', 'soup', 'cereal',
+  'yogurt', 'pasta', 'medicine', 'soap', 'paper', 'ice cream',
+  'chocolate milk', 'apple juice', 'orange juice', 'hot chocolate',
+  'lemonade', 'play-doh'
+]);
+
+function applyGrammar(words, btnIds) {
+  if (!words || words.length < 2) return words.join(' ');
+  const result = [...words];
+
+  for (let i = 0; i < result.length; i++) {
+    const id = btnIds[i];
+    const cat = getWordCategory(id);
+    const lower = result[i].toLowerCase();
+
+    // Verb conjugation: check preceding word for pronoun context
+    if (grammarEnabled('verbs') && cat === 'verb' && i > 0) {
+      const prevLower = result[i - 1].toLowerCase();
+      const verbEntry = VERB_FORMS[lower];
+      if (verbEntry && THIRD_PERSON_PRONOUNS.has(prevLower)) {
+        result[i] = verbEntry.third;
+      }
+    }
+
+    // Auto-plurals: "more" + noun -> plural
+    if (grammarEnabled('plurals') && cat === 'noun' && i > 0) {
+      const prevLower = result[i - 1].toLowerCase();
+      if (prevLower === 'more' && !UNCOUNTABLE_NOUNS.has(lower)) {
+        result[i] = pluralize(result[i]);
+      }
+    }
+
+    // Article insertion: add "a"/"an" before singular countable nouns
+    if (grammarEnabled('articles') && cat === 'noun') {
+      if (i === 0 || (getWordCategory(btnIds[i - 1]) !== 'noun' &&
+          !['more', 'my', 'your', 'the', 'a', 'an', 'some'].includes(result[i - 1].toLowerCase()))) {
+        if (!UNCOUNTABLE_NOUNS.has(lower) && !result[i].endsWith('s')) {
+          const article = ['a','e','i','o','u'].includes(lower[0]) ? 'an' : 'a';
+          result[i] = article + ' ' + result[i];
+        }
+      }
+    }
+  }
+
+  return result.join(' ');
+}
+
 // Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
 const SPEAK_OVERRIDES = { 'I': 'eye' };
 
@@ -3765,7 +4009,7 @@ function renderCoreStrip() {
                    `<span class="core-label">${btn.label}</span>`;
     el.addEventListener('click', () => {
       speak(btn.label);
-      addWordToMessage(btn.label);
+      addWordToMessage(btn.label, btn.id);
       renderPredictions(btn.id);
     });
     strip.appendChild(el);
@@ -4001,7 +4245,7 @@ function renderPredictions(btnId) {
       predictionDebounce = true;
       setTimeout(() => { predictionDebounce = false; }, 200);
 
-      addWordToMessage(pred.label);
+      addWordToMessage(pred.label, pred.id);
       speak(pred.label);
       if (PREDICTIONS[pred.id]) {
         renderPredictions(pred.id);
@@ -4073,7 +4317,7 @@ function createCell(btn) {
       return;
     }
     // All words speak on tap
-    addWordToMessage(btn.label);
+    addWordToMessage(btn.label, btn.id);
     speak(btn.label);
   });
 
@@ -4081,8 +4325,24 @@ function createCell(btn) {
 }
 
 // ── Message Bar ──
-function addWordToMessage(word) {
+function addWordToMessage(word, btnId) {
+  // Double-tap detection: same noun tapped within 800ms -> pluralize
+  const now = Date.now();
+  if (btnId && btnId === lastTapId && (now - lastTapTime) < 800) {
+    const btn = buttons.find(b => b.id === btnId);
+    if (btn && getWordCategory(btnId) === 'noun') {
+      messageWords[messageWords.length - 1] = pluralize(word);
+      messageButtonIds[messageButtonIds.length - 1] = btnId;
+      lastTapId = null;
+      lastTapTime = 0;
+      renderMessage();
+      return;
+    }
+  }
+  lastTapId = btnId || null;
+  lastTapTime = now;
   messageWords.push(word);
+  messageButtonIds.push(btnId || null);
   renderMessage();
 }
 
@@ -4102,18 +4362,20 @@ function renderMessage() {
 
 document.getElementById('btn-speak').addEventListener('click', () => {
   if (messageWords.length === 0) return;
-  speak(messageWords.join(' '));
+  speak(applyGrammar(messageWords, messageButtonIds));
   clearPredictions();
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
   messageWords = [];
+  messageButtonIds = [];
   renderMessage();
   clearPredictions();
 });
 
 document.getElementById('btn-backspace').addEventListener('click', () => {
   messageWords.pop();
+  messageButtonIds.pop();
   renderMessage();
   // Show predictions for the new last word, or clear if empty
   if (messageWords.length > 0) {
@@ -4183,7 +4445,7 @@ document.getElementById('search-input').addEventListener('input', e => {
 
     cell.addEventListener('click', () => {
       speak(btn.label);
-      addWordToMessage(btn.label);
+      addWordToMessage(btn.label, btn.id);
       document.getElementById('search-overlay').classList.remove('open');
     });
     resultsEl.appendChild(cell);
@@ -4382,6 +4644,15 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
   });
 });
 
+// ── Grammar Settings ──
+['plurals', 'verbs', 'articles'].forEach(key => {
+  const el = document.getElementById('grammar-' + key);
+  el.checked = grammarEnabled(key);
+  el.addEventListener('change', () => {
+    localStorage.setItem('aac-grammar-' + key, el.checked ? '1' : '0');
+  });
+});
+
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
 });
@@ -4543,6 +4814,7 @@ document.getElementById('edit-image-input').addEventListener('change', async e =
   const file = e.target.files[0];
   if (!file) return;
   await saveImage(editingButtonId, file);
+  markAsCustomImage(editingButtonId);
   const preview = document.getElementById('edit-image-preview');
   preview.src = URL.createObjectURL(file);
   preview.style.display = 'block';
@@ -4567,10 +4839,244 @@ document.getElementById('edit-camera-input').addEventListener('change', async e 
   const file = e.target.files[0];
   if (!file) return;
   await saveImage(editingButtonId, file);
+  markAsCustomImage(editingButtonId);
   const preview = document.getElementById('edit-image-preview');
   preview.src = URL.createObjectURL(file);
   preview.style.display = 'block';
   e.target.value = '';
+});
+
+// ── Symbol Library (ARASAAC) ──
+const SYMBOL_KEYWORDS = {
+  // Core words
+  'core-i': 'I', 'core-want': 'want', 'core-dont-want': 'don\'t want', 'core-help': 'help', 'core-more': 'more',
+  // 6x6 extras
+  't-yes': 'yes', 't-no': 'no', 't-stop': 'stop', 't-go': 'go', 't-like': 'like', 't-need': 'need',
+  't-you': 'you', 't-my': 'my', 't-it': 'it', 't-is': 'is', 't-please': 'please', 't-hi': 'hello',
+  't-bye': 'goodbye', 't-big': 'big', 't-little': 'small', 't-dont': 'don\'t', 't-eat': 'eat',
+  't-drink': 'drink', 't-play': 'play', 't-open': 'open',
+  // Social
+  'gen-i': 'I', 'gen-want': 'want', 'gen-dont-want': 'don\'t want', 'gen-need': 'need', 'gen-help': 'help',
+  'gen-dont-know': 'don\'t know', 'gen-yes': 'yes', 'gen-no': 'no', 'gen-ok': 'ok', 'gen-im-fine': 'fine',
+  'gen-please': 'please', 'gen-thank-you': 'thank you', 'gen-hi': 'hello', 'gen-bye': 'goodbye',
+  'gen-more': 'more', 'gen-stop': 'stop', 'gen-go': 'go', 'gen-like': 'like', 'gen-all-done': 'finished',
+  'gen-wait': 'wait', 'gen-look': 'look', 'gen-my-turn': 'my turn', 'gen-sorry': 'sorry',
+  'gen-excuse-me': 'excuse me', 'gen-hello': 'hello', 'gen-good-morning': 'good morning',
+  'gen-goodnight': 'goodnight', 'gen-see-you': 'see you later', 'gen-yr-welcome': 'you\'re welcome',
+  'gen-no-thank-you': 'no thank you', 'gen-cool': 'cool', 'gen-awesome': 'awesome',
+  'gen-thats-funny': 'funny', 'gen-me-too': 'me too', 'gen-wow': 'surprise',
+  'gen-i-did-it': 'proud', 'gen-i-like-it': 'like', 'gen-want-play': 'play',
+  'gen-your-turn': 'your turn', 'gen-tell-me': 'tell me',
+  // Food
+  'food-apple': 'apple', 'food-banana': 'banana', 'food-cookie': 'cookie', 'food-crackers': 'crackers',
+  'food-pizza': 'pizza', 'food-nuggets': 'chicken nuggets', 'food-pasta': 'pasta', 'food-sandwich': 'sandwich',
+  'food-rice': 'rice', 'food-fries': 'french fries', 'food-grilled-ch': 'grilled cheese',
+  'food-pancakes': 'pancakes', 'food-yogurt': 'yogurt', 'food-fruit-snk': 'fruit snack',
+  'food-ice-cream': 'ice cream', 'food-cereal': 'cereal', 'food-soup': 'soup', 'food-bread': 'bread',
+  'food-cheese': 'cheese', 'food-strawberry': 'strawberry', 'food-grapes': 'grapes', 'food-eggs': 'egg',
+  'food-cake': 'cake', 'food-hungry': 'hungry', 'food-yummy': 'delicious',
+  // Drinks
+  'drink-water': 'water', 'drink-milk': 'milk', 'drink-choc-milk': 'chocolate milk',
+  'drink-apple-juice': 'apple juice', 'drink-orange-juice': 'orange juice', 'drink-lemonade': 'lemonade',
+  'drink-hot-choc': 'hot chocolate', 'drink-smoothie': 'smoothie', 'drink-thirsty': 'thirsty',
+  // People
+  'ppl-mom': 'mother', 'ppl-dad': 'father', 'ppl-sister': 'sister', 'ppl-brother': 'brother',
+  'ppl-grandma': 'grandmother', 'ppl-grandpa': 'grandfather', 'ppl-teacher': 'teacher',
+  'ppl-friend': 'friend', 'ppl-baby': 'baby', 'ppl-dog': 'dog', 'ppl-cat': 'cat',
+  'ppl-doctor': 'doctor', 'ppl-me': 'me', 'ppl-you': 'you',
+  // Clothes
+  'clo-shirt': 'shirt', 'clo-pants': 'pants', 'clo-shoes': 'shoes', 'clo-socks': 'socks',
+  'clo-underwear': 'underwear', 'clo-jacket': 'jacket', 'clo-hat': 'hat', 'clo-pajamas': 'pajamas',
+  'clo-dress': 'dress', 'clo-shorts': 'shorts', 'clo-boots': 'boots', 'clo-gloves': 'gloves',
+  'clo-coat': 'coat', 'clo-swimsuit': 'swimsuit', 'clo-diaper': 'diaper', 'clo-scarf': 'scarf',
+  // Body
+  'body-head': 'head', 'body-tummy': 'stomach', 'body-arm': 'arm', 'body-leg': 'leg',
+  'body-hand': 'hand', 'body-foot': 'foot', 'body-eyes': 'eye', 'body-ears': 'ear',
+  'body-mouth': 'mouth', 'body-nose': 'nose', 'body-teeth': 'tooth', 'body-back': 'back',
+  'body-hurts': 'pain', 'body-sick': 'sick', 'body-fever': 'fever', 'body-medicine': 'medicine',
+  'body-bathroom': 'bathroom', 'body-itchy': 'itchy', 'body-dizzy': 'dizzy',
+  'body-too-loud': 'loud', 'body-too-bright': 'bright', 'body-allergic': 'allergy',
+  // Feelings
+  'feel-happy': 'happy', 'feel-sad': 'sad', 'feel-angry': 'angry', 'feel-scared': 'scared',
+  'feel-tired': 'tired', 'feel-excited': 'excited', 'feel-frustrated': 'frustrated', 'feel-calm': 'calm',
+  'feel-nervous': 'nervous', 'feel-silly': 'silly', 'feel-proud': 'proud', 'feel-bored': 'bored',
+  'feel-confused': 'confused', 'feel-love': 'love', 'feel-worried': 'worried',
+  'feel-overwhelmed': 'overwhelmed', 'feel-lonely': 'lonely', 'feel-shy': 'shy',
+  'feel-safe': 'safe', 'feel-need-break': 'break',
+  // Actions
+  'act-eat': 'eat', 'act-drink': 'drink', 'act-play': 'play', 'act-read': 'read',
+  'act-run': 'run', 'act-jump': 'jump', 'act-sit': 'sit', 'act-stand': 'stand',
+  'act-walk': 'walk', 'act-sleep': 'sleep', 'act-wash': 'wash', 'act-open': 'open',
+  'act-close': 'close', 'act-push': 'push', 'act-pull': 'pull', 'act-give': 'give',
+  'act-listen': 'listen', 'act-draw': 'draw', 'act-sing': 'sing', 'act-dance': 'dance',
+  'act-hug': 'hug', 'act-throw': 'throw', 'act-share': 'share', 'act-build': 'build',
+  // Toys
+  'toy-ball': 'ball', 'toy-blocks': 'blocks', 'toy-doll': 'doll', 'toy-car': 'car',
+  'toy-train': 'train', 'toy-puzzle': 'puzzle', 'toy-bubbles': 'bubbles', 'toy-crayons': 'crayons',
+  'toy-book': 'book', 'toy-tablet': 'tablet', 'toy-swing': 'swing', 'toy-slide': 'slide',
+  'toy-bike': 'bicycle', 'toy-teddy': 'teddy bear', 'toy-playdoh': 'clay', 'toy-stickers': 'sticker',
+  'toy-lego': 'construction', 'toy-game': 'game', 'toy-balloon': 'balloon', 'toy-trampoline': 'trampoline',
+  // Places
+  'plc-home': 'house', 'plc-school': 'school', 'plc-bathroom': 'bathroom', 'plc-park': 'park',
+  'plc-outside': 'outside', 'plc-inside': 'inside', 'plc-store': 'store', 'plc-car': 'car',
+  'plc-bedroom': 'bedroom', 'plc-kitchen': 'kitchen', 'plc-playground': 'playground',
+  'plc-hospital': 'hospital', 'plc-library': 'library', 'plc-pool': 'swimming pool',
+  // Things
+  'thg-cup': 'cup', 'thg-plate': 'plate', 'thg-spoon': 'spoon', 'thg-fork': 'fork',
+  'thg-napkin': 'napkin', 'thg-blanket': 'blanket', 'thg-pillow': 'pillow', 'thg-toothbrush': 'toothbrush',
+  'thg-towel': 'towel', 'thg-backpack': 'backpack', 'thg-scissors': 'scissors', 'thg-phone': 'phone',
+  'thg-tv': 'television', 'thg-headphones': 'headphones', 'thg-tissue': 'tissue', 'thg-soap': 'soap',
+  'thg-pencil': 'pencil', 'thg-paper': 'paper', 'thg-light': 'light', 'thg-fan': 'fan',
+};
+
+const ARASAAC_API = 'https://api.arasaac.org/v1';
+
+async function searchArasaac(keyword) {
+  const url = `${ARASAAC_API}/pictograms/en/search/${encodeURIComponent(keyword)}`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data.slice(0, 20) : [];
+}
+
+function getArasaacImageUrl(pictoId, resolution) {
+  return `${ARASAAC_API}/pictograms/${pictoId}?resolution=${resolution || 300}&download=false`;
+}
+
+async function fetchSymbolBlob(pictoId) {
+  const res = await fetch(getArasaacImageUrl(pictoId, 300));
+  if (!res.ok) return null;
+  return await res.blob();
+}
+
+// Track which images are user-uploaded vs library-fetched
+function markAsCustomImage(buttonId) {
+  const custom = JSON.parse(localStorage.getItem('aac-custom-images') || '{}');
+  custom[buttonId] = true;
+  localStorage.setItem('aac-custom-images', JSON.stringify(custom));
+}
+
+function isCustomImage(buttonId) {
+  const custom = JSON.parse(localStorage.getItem('aac-custom-images') || '{}');
+  return !!custom[buttonId];
+}
+
+async function downloadSymbolsForButtons() {
+  if (localStorage.getItem('aac-symbols-cached') === '1') return;
+  if (!navigator.onLine) return;
+
+  const entries = Object.entries(SYMBOL_KEYWORDS);
+  let completed = 0;
+  const total = entries.length;
+  const statusEl = document.getElementById('symbol-status');
+
+  // Show progress via toast
+  showToast(`Downloading symbols... 0/${total}`);
+
+  const batchSize = 5;
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+    await Promise.allSettled(batch.map(async ([btnId, keyword]) => {
+      if (isCustomImage(btnId)) { completed++; return; }
+      const existing = await loadImage(btnId);
+      if (existing) { completed++; return; }
+      try {
+        const results = await searchArasaac(keyword);
+        if (results.length > 0) {
+          const blob = await fetchSymbolBlob(results[0]._id);
+          if (blob) await saveImage(btnId, blob);
+        }
+      } catch (e) { /* skip failed symbols */ }
+      completed++;
+    }));
+    // Update progress
+    if (completed < total) {
+      showToast(`Downloading symbols... ${completed}/${total}`);
+    }
+  }
+
+  localStorage.setItem('aac-symbols-cached', '1');
+  showToast('Symbols ready!');
+  renderGrid();
+}
+
+// Symbol picker in edit modal
+document.getElementById('btn-edit-symbols').addEventListener('click', () => {
+  document.getElementById('symbol-overlay').classList.add('open');
+  const input = document.getElementById('symbol-search-input');
+  input.value = '';
+  document.getElementById('symbol-results').innerHTML = '';
+  document.getElementById('symbol-status').textContent = 'Search for a symbol by name';
+  input.focus();
+});
+
+document.getElementById('btn-symbol-close').addEventListener('click', () => {
+  document.getElementById('symbol-overlay').classList.remove('open');
+});
+
+document.getElementById('symbol-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('symbol-overlay').classList.remove('open');
+  }
+});
+
+let symbolSearchTimer = null;
+document.getElementById('symbol-search-input').addEventListener('input', e => {
+  clearTimeout(symbolSearchTimer);
+  const query = e.target.value.trim();
+  if (!query) {
+    document.getElementById('symbol-results').innerHTML = '';
+    document.getElementById('symbol-status').textContent = 'Search for a symbol by name';
+    return;
+  }
+  document.getElementById('symbol-status').textContent = 'Searching...';
+  symbolSearchTimer = setTimeout(async () => {
+    try {
+      const results = await searchArasaac(query);
+      const container = document.getElementById('symbol-results');
+      container.innerHTML = '';
+      if (results.length === 0) {
+        document.getElementById('symbol-status').textContent = 'No symbols found';
+        return;
+      }
+      document.getElementById('symbol-status').textContent = '';
+      results.forEach(picto => {
+        const cell = document.createElement('button');
+        cell.className = 'symbol-cell';
+        const img = document.createElement('img');
+        img.src = getArasaacImageUrl(picto._id, 100);
+        img.alt = picto.keywords ? picto.keywords.map(k => k.keyword).join(', ') : query;
+        img.loading = 'lazy';
+        cell.appendChild(img);
+        const label = document.createElement('span');
+        label.textContent = picto.keywords && picto.keywords[0] ? picto.keywords[0].keyword : '';
+        cell.appendChild(label);
+        cell.addEventListener('click', async () => {
+          document.getElementById('symbol-status').textContent = 'Saving...';
+          const blob = await fetchSymbolBlob(picto._id);
+          if (blob && editingButtonId) {
+            await saveImage(editingButtonId, blob);
+            const preview = document.getElementById('edit-image-preview');
+            preview.src = URL.createObjectURL(blob);
+            preview.style.display = 'block';
+          }
+          document.getElementById('symbol-overlay').classList.remove('open');
+          showToast('Symbol saved');
+        });
+        container.appendChild(cell);
+      });
+    } catch (err) {
+      document.getElementById('symbol-status').textContent = 'Search failed. Check your internet connection.';
+    }
+  }, 400);
+});
+
+// Add "Re-download Symbols" to settings
+// Settings section for symbol management
+document.getElementById('btn-redownload-symbols').addEventListener('click', async () => {
+  localStorage.removeItem('aac-symbols-cached');
+  showToast('Re-downloading symbols...');
+  await downloadSymbolsForButtons();
 });
 
 // Quick add with photo
