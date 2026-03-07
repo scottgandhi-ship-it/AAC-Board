@@ -37,12 +37,12 @@
 **Goal**: Make the app usable for kids with sensory and motor differences.
 **Status**: Not Started
 
-### 2.1 Sensory-Friendly Options
-- [ ] Reduced animations toggle (respects `prefers-reduced-motion` + manual toggle)
-- [ ] High contrast mode
-- [ ] Quieter UI option (softer tap sounds, no transition sounds)
-- [ ] Settings panel for sensory preferences
-- [ ] Persist preferences across sessions
+### 2.1 Sensory-Friendly Options -- DONE
+- [x] Reduced animations toggle (respects `prefers-reduced-motion` + manual toggle)
+- [x] High contrast mode (boosted Fitzgerald Key colors, bold borders, AAA focus indicators)
+- [x] Quiet mode (mutes celebration sounds and confetti, speech unaffected)
+- [x] Settings panel for sensory preferences (3 independent toggles)
+- [x] Persist preferences across sessions (localStorage + OS media query defaults)
 
 ### 2.2 Symbol/Image Library -- DONE
 - [x] Integrate open-source symbol set (ARASAAC -- 15,000+ AAC pictograms)
@@ -140,7 +140,7 @@
 | **P0** | Core words on home screen | DONE - Persistent strip with 5 words |
 | **P0** | Consistent motor planning | DONE - Fixed strip, position-locked |
 | **P1** | Grid templates | DONE - 3x3/4x4/6x6 with settings UI |
-| **P1** | Sensory-friendly options | Not started |
+| **P1** | Sensory-friendly options | DONE - 3 toggles, OS-aware defaults |
 | **P1** | Symbol/image library | DONE - ARASAAC integration |
 | **P2** | Word prediction | DONE - Two-tap prediction chains |
 | **P2** | Basic grammar | DONE - Plurals, conjugation, articles |

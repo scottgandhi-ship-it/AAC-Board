@@ -1,7 +1,7 @@
 # Sensory-Friendly Options - Implementation Notes
 
 ## Current Status
-IMPLEMENTED -- awaiting validation (Phase 3)
+DONE -- validated and shipped
 
 ## Implementation Checklist
 
