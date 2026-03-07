@@ -2520,6 +2520,65 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
     padding-right: env(safe-area-inset-right);
   }
 }
+
+/* ── Sensory-Friendly: Reduced Motion ── */
+body.sensory-reduced-motion *,
+body.sensory-reduced-motion *::before,
+body.sensory-reduced-motion *::after {
+  animation-duration: 0.01s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.05s !important;
+}
+body.sensory-reduced-motion .confetti-piece {
+  display: none !important;
+}
+body.sensory-reduced-motion .grid-cell:active {
+  transform: none !important;
+}
+body.sensory-reduced-motion .core-word-btn:active {
+  transform: none !important;
+}
+
+/* ── Sensory-Friendly: High Contrast ── */
+body.sensory-high-contrast {
+  --color-yellow: #F9A825;
+  --color-green: #2E7D32;
+  --color-red: #C62828;
+  --color-blue: #1565C0;
+  --color-pink: #AD1457;
+  --color-orange: #E65100;
+  --color-home: #90A4AE;
+}
+body.sensory-high-contrast .grid-cell {
+  border: 2px solid rgba(0,0,0,0.3) !important;
+  box-shadow: none !important;
+  font-weight: 700;
+}
+body.sensory-high-contrast .grid-cell .cell-label {
+  color: #111;
+}
+body.sensory-high-contrast .core-word-btn {
+  border: 2px solid rgba(0,0,0,0.3) !important;
+  font-weight: 700;
+}
+body.sensory-high-contrast #message-display {
+  color: #111;
+}
+body.sensory-high-contrast *:focus {
+  outline: 3px solid #1565C0 !important;
+  outline-offset: 2px;
+}
+body.sensory-high-contrast .settings-btn {
+  border: 2px solid rgba(0,0,0,0.2);
+}
+body.sensory-high-contrast .reward-card {
+  border: 2px solid rgba(0,0,0,0.3) !important;
+  box-shadow: none !important;
+}
+body.sensory-high-contrast .task-tile {
+  border: 2px solid rgba(0,0,0,0.3) !important;
+}
+
 </style>
 </head>
 <body>
@@ -2683,6 +2742,21 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
       <h3>Symbols</h3>
       <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
       <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
+    </div>
+    <div class="settings-section">
+      <h3>Sensory Preferences</h3>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-reduced-motion" style="width:20px;height:20px;"> Reduce motion
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-high-contrast" style="width:20px;height:20px;"> High contrast
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-quiet" style="width:20px;height:20px;"> Quiet mode
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects. Speech is not affected.</p>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -3726,12 +3800,47 @@ async function init() {
     renderGrid();
   }
 
+  applySensoryPreferences();
   updateSpeedDisplay();
   initSpeech();
 
   // Auto-download ARASAAC symbols in background on first online load
   setTimeout(() => downloadSymbolsForButtons().catch(() => {}), 2000);
 }
+
+// ── Sensory Preferences ──
+const SENSORY_KEYS = [
+  { id: 'sensory-reduced-motion', storageKey: 'aac-sensory-reduced-motion', bodyClass: 'sensory-reduced-motion' },
+  { id: 'sensory-high-contrast', storageKey: 'aac-sensory-high-contrast', bodyClass: 'sensory-high-contrast' },
+  { id: 'sensory-quiet', storageKey: 'aac-sensory-quiet', bodyClass: 'sensory-quiet' }
+];
+
+function applySensoryPreferences() {
+  SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
+    const stored = localStorage.getItem(storageKey);
+    let enabled;
+    if (stored !== null) {
+      enabled = stored === 'true';
+    } else if (id === 'sensory-reduced-motion') {
+      enabled = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } else if (id === 'sensory-high-contrast') {
+      enabled = window.matchMedia('(prefers-contrast: more)').matches;
+    } else {
+      enabled = false;
+    }
+    document.body.classList.toggle(bodyClass, enabled);
+    const checkbox = document.getElementById(id);
+    if (checkbox) checkbox.checked = enabled;
+  });
+}
+
+SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
+  document.getElementById(id).addEventListener('change', (e) => {
+    const on = e.target.checked;
+    document.body.classList.toggle(bodyClass, on);
+    localStorage.setItem(storageKey, String(on));
+  });
+});
 
 // ── Speech ──
 let voices = [];
@@ -5700,6 +5809,7 @@ function getAudioCtx() {
 }
 
 function playDing() {
+  if (document.body.classList.contains('sensory-quiet')) return;
   try {
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
@@ -5717,6 +5827,7 @@ function playDing() {
 }
 
 function playTaDa() {
+  if (document.body.classList.contains('sensory-quiet')) return;
   try {
     const ctx = getAudioCtx();
     const notes = [523, 659, 784];
@@ -6125,10 +6236,11 @@ function triggerCelebration(track) {
     track.status = 'reward-earned';
     await saveTrack(track);
     renderRewards();
-  }, 3500);
+  }, document.body.classList.contains('sensory-quiet') ? 2000 : 3500);
 }
 
 function spawnConfetti() {
+  if (document.body.classList.contains('sensory-quiet')) return;
   const colors = ['#FF6B6B', '#FFE066', '#7BC67E', '#64B5F6', '#F48FB1', '#FFB74D', '#7C4DFF'];
   for (let i = 0; i < 30; i++) {
     const piece = document.createElement('div');
