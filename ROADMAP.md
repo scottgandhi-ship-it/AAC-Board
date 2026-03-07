@@ -75,12 +75,12 @@
 - [x] Double-tap noun to pluralize (800ms window)
 - [x] Independent settings toggles for each grammar rule
 
-### 3.3 Spanish Language Support
-- [ ] Dual-language vocabulary (English + Spanish labels)
-- [ ] Spanish speech output (Web Speech API `es-ES` / `es-MX`)
-- [ ] Language toggle in settings
-- [ ] Bilingual mode: show both languages on buttons
-- [ ] Spanish grammar rules for verb forms and plurals
+### 3.3 Spanish Language Support -- DONE
+- [x] Dual-language vocabulary (English + Spanish labels)
+- [x] Spanish speech output (Web Speech API `es-ES` / `es-MX`)
+- [x] Language toggle in settings
+- [x] Bilingual mode: show both languages on buttons
+- [x] Spanish grammar rules for verb forms and plurals
 
 ---
 
@@ -148,7 +148,7 @@
 | **P2** | Modeling mode | Not started |
 | **P2** | Guided setup & teaching tutorial | Not started |
 | **P2** | Data/usage tracking | DONE - Insights tab, CSV export |
-| **P3** | Spanish language support | Not started |
+| **P3** | Spanish language support | DONE |
 | **P3** | Export/share boards | Not started |
 | **P4** | iOS app + distribution | Not started |
 
@@ -169,3 +169,4 @@
 | 2026-03-07 | Completed 1.3 Grid Templates - 3x3/4x4/6x6 with settings UI |
 | 2026-03-07 | Completed 2.2 Symbol Library - ARASAAC integration with auto-download |
 | 2026-03-07 | Completed 3.2 Basic Grammar - plurals, verb conjugation, article insertion |
+| 2026-03-07 | Completed 3.3 Spanish Language Support - dual-language vocab, bilingual mode |

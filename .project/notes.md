@@ -7,7 +7,6 @@ All implemented features validated. Ready for next roadmap milestone.
 (none -- all current features validated)
 
 ## Next Up
-- Milestone 3.3: Spanish Language Support
 - Milestone 4.1: Modeling Mode
 - Milestone 4.3: Guided Setup & Teaching Tutorial
 - Milestone 4.4: Export/Share Boards
@@ -42,6 +41,9 @@ All implemented features validated. Ready for next roadmap milestone.
 ### Basic Grammar (Milestone 3.2)
 - Plan: .project/features/BasicGrammar.md
 - Status: DONE
+
+### Spanish Language Support (Milestone 3.3)
+- Status: DONE -- 2026-03-07
 
 ### Data & Usage Tracking (Milestone 4.2)
 - Plan: .project/features/DataUsageTracking.md
