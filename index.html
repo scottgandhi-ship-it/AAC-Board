@@ -1165,6 +1165,43 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   transition: all 0.25s ease;
 }
 
+.task-tile-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 13px;
+}
+
+.task-tile.has-image .task-tile-number,
+.task-tile.has-image .task-tile-tap {
+  display: none;
+}
+
+.task-tile.has-image .task-tile-check {
+  position: absolute;
+  z-index: 2;
+  font-size: 2.4rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  color: #fff;
+  background: rgba(67, 160, 71, 0.75);
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+}
+
+.task-tile.has-image.completed .task-tile-check {
+  display: flex;
+}
+
+.task-tile.has-image.locked {
+  opacity: 0.35;
+}
+
 /* Completed tile */
 .task-tile.completed {
   border-color: #43A047;
@@ -1272,14 +1309,14 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .reward-card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
   background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: #fff;
   font-weight: 800;
   flex-shrink: 0;
@@ -1290,7 +1327,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: 16px;
 }
 
 .reward-card.locked .reward-card-icon {
@@ -6604,6 +6641,8 @@ function renderPath(track) {
   const cols = getGridCols(track.targetCount);
   pathEl.className = 'rewards-grid cols-' + cols;
 
+  const imageType = track.taskImageType || 'none';
+
   for (let i = 0; i < track.targetCount; i++) {
     const tile = document.createElement('div');
     tile.className = 'task-tile';
@@ -6632,6 +6671,34 @@ function renderPath(track) {
     tile.appendChild(num);
     tile.appendChild(check);
     tile.appendChild(tap);
+
+    // Fill tile with task image if available
+    if (imageType === 'uploaded' && track.taskImageKey) {
+      tile.classList.add('has-image');
+      loadImage(track.taskImageKey).then(blob => {
+        if (blob) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(blob);
+          img.alt = track.taskLabel;
+          img.className = 'task-tile-image';
+          tile.insertBefore(img, tile.firstChild);
+        }
+      });
+    } else if (imageType === 'default' && track.taskDefaultImageKey) {
+      const act = DEFAULT_TASK_IMAGES.find(a => a.key === track.taskDefaultImageKey);
+      if (act) {
+        tile.classList.add('has-image');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'task-tile-image';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'center';
+        wrapper.style.background = '#f0f0f0';
+        wrapper.innerHTML = act.svg;
+        tile.insertBefore(wrapper, tile.firstChild);
+      }
+    }
+
     pathEl.appendChild(tile);
   }
 
@@ -6683,6 +6750,16 @@ function renderRewardCard(track) {
   cardEl.appendChild(icon);
   cardEl.appendChild(info);
   cardEl.appendChild(lock);
+
+  if (!allDone) {
+    cardEl.style.cursor = 'pointer';
+    cardEl.addEventListener('click', () => {
+      const done = track.currentCount;
+      const total = track.targetCount;
+      const remaining = total - done;
+      speak(track.rewardLabel + ', but first you need to complete ' + remaining + ' more out of ' + total + ' activities.');
+    });
+  }
 }
 
 function renderTrackTabs() {
