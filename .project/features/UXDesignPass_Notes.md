@@ -21,15 +21,15 @@ IMPLEMENTING -- Subphases A and B complete, awaiting device testing
 - [x] B.6: Done schedule step opacity 0.45 -> 0.6 with green tint (#F1F8E9)
 
 ### Subphase C: Tablet and Polish (P2)
-- [ ] C.1: Tablet layout improvements (wider grids, larger modals, better spacing)
-- [ ] C.2: Folder/word cell visual consistency (unified press affordance)
-- [ ] C.3: Core strip visual weight (warmer background, inner shadow)
-- [ ] C.4: Folder label visibility (larger, colored underline)
-- [ ] C.5: Top words label width increase
-- [ ] C.6: Weekly chart today bar -> brand purple
-- [ ] C.7: Border radius normalization
-- [ ] C.8: 6x6 label minimum font size bump
-- [ ] C.9: Core strip min-width + overflow scroll
+- [ ] C.1: Tablet layout improvements (wider grids, larger modals, better spacing) -- DEFERRED
+- [x] C.2: Folder/word cell visual consistency (matched 3px border, same shadow/active as word cells)
+- [x] C.3: Core strip visual weight (purple-tinted background, inner shadow, border tint)
+- [x] C.4: Folder label visibility (1.15rem, #333, purple underline bar, fit-content width)
+- [x] C.5: Top words label width (90px -> 110px, 130px on tablets)
+- [x] C.6: Weekly chart today bar -> var(--bar-bg) brand purple
+- [x] C.7: Border radius normalization (16px -> --radius-lg, 12px -> --radius-md)
+- [x] C.8: 6x6 label minimum font size (0.55rem -> 0.6rem)
+- [x] C.9: Core strip min-width 56px + overflow-x auto with hidden scrollbar
 
 ### Subphase D: Nice to Have (P3)
 - [ ] D.1: Loading skeleton for symbol download

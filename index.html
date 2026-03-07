@@ -129,12 +129,17 @@ body {
 
 #folder-label {
   text-align: center;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #555;
-  padding: 2px 0 8px;
+  color: #333;
+  padding: 4px 0 8px;
   display: none;
   letter-spacing: 0.02em;
+  border-bottom: 3px solid var(--bar-bg);
+  margin: 0 auto 4px;
+  width: fit-content;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 #grid {
@@ -209,16 +214,17 @@ body {
 .cell.folder-btn {
   background: #fff !important;
   border: 2px solid #eee;
-  border-bottom: 4px solid rgba(0,0,0,0.08);
+  border-bottom: 3px solid rgba(0,0,0,0.1);
   box-shadow:
-    0 4px 0 rgba(0,0,0,0.04),
-    0 8px 24px rgba(0,0,0,0.08);
-  border-radius: 24px;
+    0 3px 0 rgba(0,0,0,0.1),
+    0 6px 16px rgba(0,0,0,0.08);
+  border-radius: var(--radius-lg);
 }
 
 .cell.folder-btn:active {
-  border-bottom-width: 2px;
-  transform: scale(0.95) translateY(2px);
+  border-bottom-width: 1px;
+  transform: scale(0.92) translateY(2px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .cell.folder-btn .cell-big-text {
@@ -325,15 +331,20 @@ body {
   display: flex;
   gap: 6px;
   padding: 6px 10px;
-  background: linear-gradient(135deg, #F5F5F5, #EEEEEE);
-  border-bottom: 2px solid rgba(0,0,0,0.08);
+  background: linear-gradient(135deg, #F3F0FF, #EDE7F6);
+  border-bottom: 2px solid rgba(108,99,255,0.12);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
   flex-shrink: 0;
   justify-content: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+#core-word-strip::-webkit-scrollbar { display: none; }
 .core-strip-btn {
   flex: 1;
   max-width: 120px;
-  min-width: 0;
+  min-width: 56px;
   padding: 10px 6px;
   border-radius: 14px;
   border: 2px solid rgba(0,0,0,0.12);
@@ -361,7 +372,7 @@ body {
 
 /* Grid size adjustments for 6x6 */
 body.grid-6 .cell { padding: 4px 3px; gap: 2px; }
-body.grid-6 .cell .cell-label { font-size: clamp(0.55rem, 1.8vw, 0.8rem); }
+body.grid-6 .cell .cell-label { font-size: clamp(0.6rem, 1.8vw, 0.8rem); }
 body.grid-6 .cell .cell-big-text { font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
 body.grid-6 .cell.folder-btn .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
 body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); }
@@ -763,7 +774,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   align-items: center;
   justify-content: center;
   padding: 10px 6px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   min-height: 70px;
   text-align: center;
@@ -1203,7 +1214,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 .task-tile {
   aspect-ratio: 1;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 3px solid #e0e0e0;
   background: #f5f5f5;
   display: flex;
@@ -1346,7 +1357,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   max-width: 420px;
   margin: 6px auto 0;
   padding: 14px 18px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 3px dashed #e0e0e0;
   background: #fafafa;
   transition: all 0.3s ease;
@@ -1373,7 +1384,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 .reward-card-icon {
   width: 80px;
   height: 80px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
   display: flex;
   align-items: center;
@@ -1389,7 +1400,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 
 .reward-card.locked .reward-card-icon {
@@ -1485,7 +1496,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 #rewards-task-image {
   width: 52px;
   height: 52px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1505,7 +1516,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 #rewards-task-header-text {
@@ -1909,7 +1920,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 #task-image-picker-panel {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 92%;
   max-width: 420px;
   max-height: 85vh;
@@ -1998,7 +2009,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   gap: 12px;
   padding: 12px;
   margin-bottom: 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   transition: opacity 0.3s, transform 0.2s;
@@ -2166,7 +2177,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 #tmpl-editor-panel {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 92%;
   max-width: 420px;
   max-height: 90vh;
@@ -2314,7 +2325,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 #activity-picker-panel {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 92%;
   max-width: 420px;
   max-height: 85vh;
@@ -2488,7 +2499,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 #tmpl-list-panel {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 92%;
   max-width: 400px;
   max-height: 80vh;
@@ -2570,7 +2581,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   .tab-btn { padding: 4px 0; }
   .tab-label { font-size: 0.65rem; }
   .rewards-grid { gap: 8px; }
-  .task-tile { border-radius: 12px; }
+  .task-tile { border-radius: var(--radius-md); }
   .task-tile-number { font-size: 1.1rem; }
   .task-tile-check { font-size: 1.5rem; }
   .reward-card { padding: 10px 14px; gap: 10px; }
@@ -2604,6 +2615,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   .reward-card { max-width: 500px; padding: 18px 22px; }
   .reward-card-icon { width: 64px; height: 64px; font-size: 1.6rem; }
   .reward-card-label { font-size: 1.15rem; }
+  .top-word-label { width: 130px; }
 }
 
 /* Landscape on phones -- reclaim vertical space */
@@ -2718,7 +2730,7 @@ body.sensory-high-contrast .task-tile {
 .insight-card {
   flex: 1;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 14px 10px;
   text-align: center;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
@@ -2767,7 +2779,7 @@ body.sensory-high-contrast .task-tile {
 }
 
 .top-word-label {
-  width: 90px;
+  width: 110px;
   font-size: 0.85rem;
   font-weight: 600;
   color: #444;
@@ -2828,7 +2840,7 @@ body.sensory-high-contrast .task-tile {
 }
 
 .weekly-bar.today {
-  background: #4CAF50;
+  background: var(--bar-bg);
 }
 
 .weekly-bar-label {
