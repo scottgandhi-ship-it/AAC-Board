@@ -1,7 +1,7 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-Planning Symbol Library and Basic Grammar features
+Planning Data & Usage Tracking feature (Milestone 4.2)
 
 ## Active Features
 
@@ -30,8 +30,13 @@ Planning Symbol Library and Basic Grammar features
 - Notes: .project/features/BasicGrammar_Notes.md
 - Status: PLANNING -- awaiting approval
 
+### Data & Usage Tracking (Milestone 4.2)
+- Plan: .project/features/DataUsageTracking.md
+- Notes: .project/features/DataUsageTracking_Notes.md
+- Status: IMPLEMENTED -- awaiting device testing
+
 ## Next Up
-Developer approval of Symbol Library and Basic Grammar plans, then implement
+Developer approval of Data & Usage Tracking plan, then implement
 
 ## Completed Features
 (none yet -- awaiting validation)
@@ -44,3 +49,5 @@ Developer approval of Symbol Library and Basic Grammar plans, then implement
   - Phase 2: Reward tracker with stepping stone path, celebration, timer, multi-track
   - Phase 3: Visual schedules with 29 default activities, template system, step-by-step completion
 - 2026-03-07: Created planning docs for Symbol Library and Basic Grammar
+- 2026-03-07: Marked 2.1 Sensory-Friendly as DONE in roadmap
+- 2026-03-07: Created planning docs for Data & Usage Tracking (4.2)
