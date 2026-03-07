@@ -262,6 +262,12 @@ body {
 .cell.folder-btn[data-folder="abc"]       { background: linear-gradient(145deg, #FBE9E7, #FFCCBC) !important; border-color: #FF8A65; }
 .cell.folder-btn[data-folder="questions"] { background: linear-gradient(145deg, #F9FBE7, #F0F4C3) !important; border-color: #DCE775; }
 .cell.folder-btn[data-folder="things"]    { background: linear-gradient(145deg, #E0F2F1, #B2DFDB) !important; border-color: #80CBC4; }
+.cell.folder-btn[data-folder="animals"]   { background: linear-gradient(145deg, #FFF3E0, #FFE0B2) !important; border-color: #FFAB40; }
+.cell.folder-btn[data-folder="descriptors"]{ background: linear-gradient(145deg, #E3F2FD, #BBDEFB) !important; border-color: #64B5F6; }
+.cell.folder-btn[data-folder="time"]      { background: linear-gradient(145deg, #F3E5F5, #E1BEE7) !important; border-color: #BA68C8; }
+.cell.folder-btn[data-folder="where"]     { background: linear-gradient(145deg, #EDE7F6, #D1C4E9) !important; border-color: #9575CD; }
+.cell.folder-btn[data-folder="nature"]    { background: linear-gradient(145deg, #E8F5E9, #C8E6C9) !important; border-color: #81C784; }
+.cell.folder-btn[data-folder="school"]    { background: linear-gradient(145deg, #FFF8E1, #FFECB3) !important; border-color: #FFB74D; }
 
 /* Fitzgerald Key colors with vivid gradients */
 .cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
@@ -380,6 +386,158 @@ body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7re
 /* Grid size adjustments for 3x3 */
 body.grid-3 .cell .cell-label { font-size: clamp(1rem, 3.5vw, 1.4rem); }
 body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
+
+/* Onboarding Overlay */
+#onboarding-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#onboarding-overlay.visible { display: flex; }
+
+.onboarding-step {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.onboarding-step.active {
+  display: flex;
+}
+
+.onboarding-content {
+  max-width: 400px;
+}
+
+.onboarding-headline {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #333;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+.onboarding-subhead {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #FF8F00;
+  margin: 0 0 24px;
+}
+.onboarding-body {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 32px;
+}
+.onboarding-step-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #333;
+  margin: 0 0 8px;
+}
+.onboarding-step-desc {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 4px;
+}
+.onboarding-reassure {
+  font-size: 0.85rem;
+  color: #999;
+  font-style: italic;
+  margin: 0 0 16px;
+}
+.onboarding-btn {
+  display: inline-block;
+  padding: 16px 48px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, #FF6F00, #FFA000);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+.onboarding-btn:active { opacity: 0.85; }
+
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  position: absolute;
+  bottom: 32px;
+  left: 0;
+  right: 0;
+}
+.onboarding-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ddd;
+}
+.onboarding-dots .dot.active {
+  background: #FF8F00;
+}
+
+/* Coach Marks Overlay (onboarding step 3) */
+#coach-marks-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  pointer-events: none;
+}
+#coach-marks-overlay.visible { display: block; }
+
+.coach-marks-message {
+  position: fixed;
+  bottom: 60px;
+  left: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+  padding: 14px 20px;
+  text-align: center;
+  pointer-events: auto;
+  z-index: 351;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.coach-marks-headline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px;
+}
+.coach-marks-body {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+.coach-marks-message .onboarding-dots {
+  position: static;
+  margin-top: 12px;
+}
+
+.coach-marks-counter {
+  font-size: 0.85rem;
+  color: #FF8F00;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+
 
 /* Grid Size Picker (first-run) */
 #grid-picker-overlay {
@@ -3278,9 +3436,41 @@ body.sensory-high-contrast .task-tile {
 </div>
 
 <!-- Grid Size Picker (first-run) -->
+<!-- Onboarding Overlay -->
+<div id="onboarding-overlay" role="dialog" aria-label="Welcome">
+  <div id="onboarding-step-1" class="onboarding-step active">
+    <div class="onboarding-content">
+      <h1 class="onboarding-headline">Your child has something to say.</h1>
+      <p class="onboarding-subhead">Let's give them a voice.</p>
+      <p class="onboarding-body">AAC works alongside gestures, sounds, and expressions &mdash; it adds to how your child already communicates.</p>
+      <button class="onboarding-btn" id="btn-onboarding-start">Get Started</button>
+    </div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+  <div id="onboarding-step-2" class="onboarding-step">
+    <div class="onboarding-content">
+      <h2 class="onboarding-step-title">Choose a starting layout</h2>
+      <p class="onboarding-step-desc">Pick the grid size that matches your child's communication level.</p>
+      <p class="onboarding-reassure">You can change this anytime.</p>
+    </div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+  </div>
+</div>
+
+<!-- Coach Marks Overlay (onboarding step 3) -->
+<div id="coach-marks-overlay">
+  <div class="coach-marks-message">
+    <p class="coach-marks-headline">Your child learns by watching <strong>YOU</strong> do it.</p>
+    <p class="coach-marks-body">Tap a few words to build a sentence. Try it now!</p>
+    <p class="coach-marks-counter" id="coach-tap-counter"></p>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+  </div>
+</div>
+
 <div id="grid-picker-overlay" role="dialog" aria-label="Choose communication level">
   <h2>Choose a starting layout</h2>
   <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
+  <p class="onboarding-reassure" style="display:none;">You can change this anytime.</p>
   <div id="grid-picker-lang" style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
     <button class="settings-btn picker-lang-opt active" data-lang="en" style="flex:0 1 120px;padding:10px;">English</button>
     <button class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
@@ -3318,6 +3508,7 @@ body.sensory-high-contrast .task-tile {
       <span class="picker-desc">Combining words fluently</span>
     </button>
   </div>
+  <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
 </div>
 
 <!-- Toast -->
@@ -3759,7 +3950,7 @@ const HOME_GRID_3X3_FOLDERS = [
   { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 5 },
   { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 6 },
   { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 7 },
-  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 8 }
+  { id: 'folder-animals',   label: 'Animals',   color: 'orange', type: 'folder', folderId: null, position: 8 }
 ];
 
 // 6x6 Talker: 16 folders + 20 extra standalone words on home grid for fast access
@@ -3788,7 +3979,7 @@ const HOME_GRID_6X6_EXTRAS = [
 
 const THREE_BY_THREE_FOLDERS = new Set([
   'general', 'food', 'drinks', 'people', 'feelings',
-  'actions', 'toys', 'body', 'places'
+  'actions', 'toys', 'body', 'animals'
 ]);
 
 // ── Default Vocabulary ──
@@ -3812,6 +4003,12 @@ const DEFAULT_BUTTONS = [
   { id: 'folder-shapes',    label: 'Shapes',    color: 'blue',   type: 'folder', folderId: null, position: 13 },
   { id: 'folder-123',       label: '123',       color: 'purple', type: 'folder', folderId: null, position: 14 },
   { id: 'folder-abc',       label: 'ABC',       color: 'purple', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-animals',   label: 'Animals',   color: 'orange', type: 'folder', folderId: null, position: 16 },
+  { id: 'folder-descriptors',label:'Descriptors',color: 'blue',   type: 'folder', folderId: null, position: 17 },
+  { id: 'folder-time',      label: 'Time',      color: 'purple', type: 'folder', folderId: null, position: 18 },
+  { id: 'folder-where',     label: 'Where',     color: 'purple', type: 'folder', folderId: null, position: 19 },
+  { id: 'folder-nature',    label: 'Nature',    color: 'orange', type: 'folder', folderId: null, position: 20 },
+  { id: 'folder-school',    label: 'School',    color: 'orange', type: 'folder', folderId: null, position: 21 },
 
   // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
@@ -4217,9 +4414,15 @@ function getTemplate(size) {
   return JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
 }
 
-function showGridPicker() {
+let _gridPickerCallback = null;
+
+function showGridPicker(onComplete) {
+  _gridPickerCallback = onComplete || null;
   const overlay = document.getElementById('grid-picker-overlay');
-  if (overlay.dataset.bound) return;
+  if (overlay.dataset.bound) {
+    overlay.classList.add('visible');
+    return;
+  }
   overlay.dataset.bound = 'true';
   overlay.classList.add('visible');
   overlay.querySelectorAll('.grid-picker-card').forEach(card => {
@@ -4232,11 +4435,125 @@ function showGridPicker() {
       rebuildCoreWordsCache();
       buildIconLookup();
       renderGrid();
-      updateSpeedDisplay();
-      initSpeech();
-    }, { once: true });
+      finalizeInit();
+      if (_gridPickerCallback) { _gridPickerCallback(); _gridPickerCallback = null; }
+    });
   });
 }
+
+// ── Onboarding ──
+const Onboarding = {
+  KEY: 'aac-onboarding',
+
+  getState() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  },
+
+  setState(updates) {
+    const state = this.getState() || { version: 1, complete: false, currentStep: 1, date: null };
+    Object.assign(state, updates);
+    localStorage.setItem(this.KEY, JSON.stringify(state));
+  },
+
+  isComplete() {
+    const state = this.getState();
+    return state && state.complete === true;
+  },
+
+  init() {
+    if (this.isComplete()) return;
+    const state = this.getState();
+    const step = (state && state.currentStep >= 1 && state.currentStep <= 3) ? state.currentStep : 1;
+    if (step === 3) {
+      this.showCoachMarks();
+    } else {
+      this.showStep(step);
+    }
+  },
+
+  showStep(step) {
+    const overlay = document.getElementById('onboarding-overlay');
+    overlay.classList.add('visible');
+    overlay.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
+    const stepEl = document.getElementById('onboarding-step-' + step);
+    if (stepEl) stepEl.classList.add('active');
+    this.setState({ currentStep: step, date: this.getState()?.date || Date.now() });
+
+    if (step === 2) {
+      overlay.classList.remove('visible');
+      const pickerOverlay = document.getElementById('grid-picker-overlay');
+      pickerOverlay.querySelector('.onboarding-reassure').style.display = '';
+      pickerOverlay.querySelector('.grid-picker-dots').style.display = '';
+      showGridPicker(() => {
+        pickerOverlay.querySelector('.onboarding-reassure').style.display = 'none';
+        pickerOverlay.querySelector('.grid-picker-dots').style.display = 'none';
+        this.setState({ currentStep: 3 });
+        this.showCoachMarks();
+      });
+    }
+  },
+
+  showCoachMarks() {
+    const overlay = document.getElementById('coach-marks-overlay');
+    overlay.classList.add('visible');
+    this.setState({ currentStep: 3 });
+    this._tapCount = 0;
+    const TAPS_NEEDED = 3;
+    const counter = document.getElementById('coach-tap-counter');
+    counter.textContent = '';
+
+    const handleTap = (e) => {
+      if (e.target.closest('.folder-btn')) return;
+      this._tapCount++;
+      if (this._tapCount < TAPS_NEEDED) {
+        counter.textContent = this._tapCount + ' of ' + TAPS_NEEDED;
+      } else {
+        if (grid) grid.removeEventListener('click', handleTap);
+        if (coreStrip) coreStrip.removeEventListener('click', handleTap);
+        this.complete();
+      }
+    };
+
+    const grid = document.getElementById('grid');
+    if (grid) grid.addEventListener('click', handleTap);
+
+    const coreStrip = document.getElementById('core-word-strip');
+    if (coreStrip) coreStrip.addEventListener('click', handleTap);
+  },
+
+  complete() {
+    this.setState({ complete: true });
+    document.getElementById('onboarding-overlay').classList.remove('visible');
+    document.getElementById('coach-marks-overlay').classList.remove('visible');
+  },
+
+  dismiss() {
+    this.complete();
+  }
+};
+
+// Wire onboarding buttons
+document.getElementById('btn-onboarding-start').addEventListener('click', () => {
+  Onboarding.showStep(2);
+});
+
+// Child-grab escape: tap outside coach marks message dismisses onboarding
+document.getElementById('coach-marks-overlay').addEventListener('click', (e) => {
+  if (!e.target.closest('.coach-marks-message')) {
+    Onboarding.dismiss();
+  }
+});
+
+// Tap outside onboarding overlay steps dismisses onboarding
+document.getElementById('onboarding-overlay').addEventListener('click', (e) => {
+  if (!e.target.closest('.onboarding-content') && !e.target.closest('.onboarding-btn') && !e.target.closest('.grid-picker-card') && !e.target.closest('#grid-picker-overlay')) {
+    Onboarding.dismiss();
+  }
+});
 
 async function deleteButton(id) {
   const db = await openDB();
@@ -4523,7 +4840,22 @@ async function init() {
     rebuildCoreWordsCache();
     buildIconLookup();
     renderGrid();
+
+    // Returning user interrupted at coach marks — show step 3 on top of rendered grid
+    try {
+      if (!Onboarding.isComplete()) {
+        const state = Onboarding.getState();
+        if (state && state.currentStep === 3) Onboarding.showCoachMarks();
+      }
+    } catch {}
   } else if (!hasStoredSize) {
+    // First-time user: show onboarding if not complete, otherwise show grid picker
+    try {
+      if (!Onboarding.isComplete()) {
+        Onboarding.init();
+        return;
+      }
+    } catch {}
     showGridPicker();
     return;
   } else {
@@ -4535,8 +4867,11 @@ async function init() {
     renderGrid();
   }
 
+  finalizeInit();
+}
+
+function finalizeInit() {
   applySensoryPreferences();
-  // Apply saved language
   const savedLang = localStorage.getItem('aac-language') || 'en';
   currentLang = savedLang;
   document.documentElement.lang = (savedLang === 'es') ? 'es' : 'en';
@@ -4551,7 +4886,6 @@ async function init() {
   updateSpeedDisplay();
   initSpeech();
 
-  // Auto-download ARASAAC symbols in background on first online load
   setTimeout(() => downloadSymbolsForButtons().catch(e => {
     showToast(t('toast.symbolFailed', 'Symbol download failed. Try again from Settings.'));
   }), 2000);
@@ -5051,11 +5385,11 @@ const BUTTON_ICONS = {
   'clo-dress': '👗', 'clo-shorts': '🩳', 'clo-boots': '🥾', 'clo-gloves': '🧤',
   'clo-coat': '🧥', 'clo-swimsuit': '🩱', 'clo-diaper': '👶', 'clo-scarf': '🧣',
   // My Body
-  'body-head': '🗣️', 'body-tummy': '🫃', 'body-arm': '💪', 'body-leg': '🦵',
+  'body-head': '🗣️', 'body-tummy': '🤢', 'body-arm': '💪', 'body-leg': '🦵',
   'body-hand': '✋', 'body-foot': '🦶', 'body-eyes': '👀', 'body-ears': '👂',
   'body-mouth': '👄', 'body-nose': '👃', 'body-teeth': '🦷', 'body-back': '🔙',
   'body-hurts': '🤕', 'body-sick': '🤢', 'body-fever': '🤒', 'body-medicine': '💊',
-  'body-bathroom': '🚽', 'body-itchy': '😣', 'body-dizzy': '😵', 'body-too-loud': '🔊',
+  'body-bathroom': '🚽', 'body-itchy': '😣', 'body-dizzy': '😵‍💫', 'body-too-loud': '🔊',
   'body-too-bright': '☀️', 'body-allergic': '🤧',
   // Feelings
   'feel-happy': '😊', 'feel-sad': '😢', 'feel-angry': '😠', 'feel-scared': '😨',
