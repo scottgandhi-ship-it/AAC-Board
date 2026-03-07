@@ -691,6 +691,63 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 .settings-btn:active { background: #f0f0f0; }
 
+/* ── Getting Started Guide Accordion ── */
+.guide-item { border-bottom: 1px solid #eee; }
+.guide-item:last-child { border-bottom: none; }
+
+.guide-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  gap: 8px;
+}
+.guide-title-text {
+  flex: 1;
+}
+.guide-title-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 700;
+}
+.guide-title-text span {
+  display: block;
+  font-size: 0.82rem;
+  color: #999;
+  margin-top: 2px;
+}
+.guide-chevron {
+  font-size: 0.8rem;
+  color: #bbb;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.guide-item.open .guide-chevron {
+  transform: rotate(90deg);
+}
+.guide-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.guide-item.open .guide-content {
+  max-height: 200px;
+}
+.guide-content p {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.5;
+  padding: 0 0 14px;
+  margin: 0;
+}
+
 .settings-checkbox {
   width: 24px;
   height: 24px;
@@ -3157,6 +3214,105 @@ body.sensory-high-contrast .task-tile {
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
       <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
       <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
+    </div>
+    <div class="settings-section" id="getting-started-section">
+      <h3>Getting Started</h3>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-1-content">
+          <div class="guide-title-text">
+            <strong>You are their voice right now</strong>
+            <span>Your child learns by watching you use the board.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-1-content" role="region">
+          <p>Tap words on the board while you talk out loud. Say "I want juice" while tapping each word. This is called modeling, and it's the single most powerful thing you can do. Your child is watching and learning even when it doesn't look like it.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-2-content">
+          <div class="guide-title-text">
+            <strong>Keep it natural</strong>
+            <span>Use the board during everyday moments, not as a quiz.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-2-content" role="region">
+          <p>Never say "show me where juice is" or "use your words." That turns communication into a test. Instead, just tap words during meals, bath time, play, and bedtime. The more natural it feels, the faster your child connects with it.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-3-content">
+          <div class="guide-title-text">
+            <strong>Every sound, point, and gesture counts</strong>
+            <span>AAC adds to how your child already communicates.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-3-content" role="region">
+          <p>If they pull your hand, grunt, point, or tap just one word -- that's communication. Celebrate it. The board doesn't replace what they're already doing. It gives them another way to be heard.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-4-content">
+          <div class="guide-title-text">
+            <strong>Stay one word ahead</strong>
+            <span>Match your child's level, then add just one word.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-4-content" role="region">
+          <p>If your child isn't using the board yet, you model single words: "want." "more." "help." If they're tapping one word, you model two: "want juice." Always just one step ahead. Never three.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-5-content">
+          <div class="guide-title-text">
+            <strong>The small words matter most</strong>
+            <span>Words like "more," "want," "stop," and "help" are the foundation.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-5-content" role="region">
+          <p>These core words get used dozens of times every day in every situation. They matter way more than specific nouns. Your child will build everything on top of these.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-6-content">
+          <div class="guide-title-text">
+            <strong>Give them time</strong>
+            <span>After you model, wait. Count to 10 in your head.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-6-content" role="region">
+          <p>Processing takes time, especially for young communicators. Most of us jump in after 2 seconds -- that's not enough. Pause, wait, and trust that something is happening even in the silence.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-7-content">
+          <div class="guide-title-text">
+            <strong>Use it everywhere</strong>
+            <span>The board works at the table, in the car, at the park, and at bedtime.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-7-content" role="region">
+          <p>The more places your child sees the board being used, the faster it becomes part of their world. Keep it nearby and pull it into as many moments as you can throughout the day.</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <button class="guide-title" aria-expanded="false" aria-controls="guide-8-content">
+          <div class="guide-title-text">
+            <strong>This takes time, and you're doing great</strong>
+            <span>Most children need weeks or months before using the board on their own.</span>
+          </div>
+          <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+        </button>
+        <div class="guide-content" id="guide-8-content" role="region">
+          <p>That is completely normal. You are not failing. Every time you model a word, you're planting a seed. Some days it will feel like nothing is happening. Keep going. You are giving your child a voice, and that is extraordinary.</p>
+        </div>
+      </div>
     </div>
     <div class="settings-section">
       <h3>Buttons</h3>
@@ -6302,6 +6458,22 @@ document.querySelectorAll('.picker-lang-opt').forEach(btn => {
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
+});
+
+// ── Getting Started Guide Accordion ──
+document.getElementById('getting-started-section').addEventListener('click', e => {
+  const title = e.target.closest('.guide-title');
+  if (!title) return;
+  const item = title.closest('.guide-item');
+  const wasOpen = item.classList.contains('open');
+  item.parentElement.querySelectorAll('.guide-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.guide-title').setAttribute('aria-expanded', 'false');
+  });
+  if (!wasOpen) {
+    item.classList.add('open');
+    title.setAttribute('aria-expanded', 'true');
+  }
 });
 
 document.getElementById('settings-overlay').addEventListener('click', e => {
