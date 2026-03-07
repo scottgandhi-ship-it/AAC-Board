@@ -2759,6 +2759,15 @@ body.sensory-high-contrast .task-tile {
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects. Speech is not affected.</p>
     </div>
     <div class="settings-section">
+      <h3>Predictions</h3>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="setting-auto-speak" style="width:20px;height:20px;" checked> Auto-speak sentences
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
+      <button class="settings-btn" id="btn-reset-predictions" style="color:#e53935;">Reset learned predictions</button>
+      <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
+    </div>
+    <div class="settings-section">
       <h3>Data</h3>
       <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
     </div>
@@ -3801,6 +3810,9 @@ async function init() {
   }
 
   applySensoryPreferences();
+  loadBigrams();
+  loadAutoSpeak();
+  document.getElementById('setting-auto-speak').checked = autoSpeakEnabled;
   updateSpeedDisplay();
   initSpeech();
 
@@ -4303,7 +4315,6 @@ function rebuildCoreWordsCache() {
 }
 
 function getTopNounIds() {
-  // Start with recently-added fringe nouns (newest first), then fill with defaults
   const recentFringe = buttons
     .filter(b => b.type === 'fringe' && b.folderId && ['food', 'drinks'].includes(b.folderId))
     .slice(-8)
@@ -4313,23 +4324,122 @@ function getTopNounIds() {
   return combined.slice(0, 10);
 }
 
+// ── Bigram Frequency Model ──
+let bigramCounts = {};
+let bigramSavePending = false;
+
+function loadBigrams() {
+  try {
+    const raw = localStorage.getItem('aac-bigram-counts');
+    bigramCounts = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    bigramCounts = {};
+  }
+}
+
+function saveBigrams() {
+  if (bigramSavePending) return;
+  bigramSavePending = true;
+  setTimeout(() => {
+    localStorage.setItem('aac-bigram-counts', JSON.stringify(bigramCounts));
+    bigramSavePending = false;
+  }, 500);
+}
+
+function recordBigram(prevBtnId, currentBtnId) {
+  if (!prevBtnId || !currentBtnId) return;
+  if (!bigramCounts[prevBtnId]) bigramCounts[prevBtnId] = {};
+  bigramCounts[prevBtnId][currentBtnId] = (bigramCounts[prevBtnId][currentBtnId] || 0) + 1;
+  saveBigrams();
+}
+
+function getLearnedPredictions(btnId) {
+  const counts = bigramCounts[btnId];
+  if (!counts) return [];
+  return Object.entries(counts)
+    .map(([id, count]) => ({ id, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function resetLearnedPredictions() {
+  bigramCounts = {};
+  localStorage.removeItem('aac-bigram-counts');
+}
+
+// ── Auto-Speak Setting ──
+let autoSpeakEnabled = true;
+
+function loadAutoSpeak() {
+  const stored = localStorage.getItem('aac-auto-speak');
+  autoSpeakEnabled = stored === null ? true : stored === 'true';
+}
+
+function saveAutoSpeak(enabled) {
+  autoSpeakEnabled = enabled;
+  localStorage.setItem('aac-auto-speak', String(enabled));
+}
+
+// ── Blended Prediction Ranking ──
+const COLD_START_BONUS = 3;
+const MAX_PREDICTIONS = 8;
+const THERAPEUTIC_SLOTS = 2;
+
 function resolvePredictions(btnId) {
+  if (!btnId) return null;
+
+  // Get curated defaults
   const raw = PREDICTIONS[btnId];
-  if (!raw) return null;
-  const result = [];
-  for (const item of raw) {
-    if (item === '__NOUNS__') {
-      const nounIds = getTopNounIds();
-      nounIds.forEach(id => {
-        const btn = buttons.find(b => b.id === id);
-        if (btn) result.push({ id, label: btn.label, color: btn.color });
-      });
-    } else {
-      const btn = buttons.find(b => b.id === item);
-      if (btn) result.push({ id: item, label: btn.label, color: btn.color });
+  const curatedIds = [];
+  if (raw) {
+    for (const item of raw) {
+      if (item === '__NOUNS__') {
+        getTopNounIds().forEach(id => curatedIds.push(id));
+      } else {
+        curatedIds.push(item);
+      }
     }
   }
-  return result;
+  const curatedSet = new Set(curatedIds);
+
+  // Get learned bigrams
+  const learned = getLearnedPredictions(btnId);
+
+  // Merge into scored candidates
+  const scores = new Map();
+  for (const { id, count } of learned) {
+    scores.set(id, (scores.get(id) || 0) + count);
+  }
+  for (const id of curatedIds) {
+    scores.set(id, (scores.get(id) || 0) + COLD_START_BONUS);
+  }
+
+  // Filter to buttons that actually exist
+  const candidates = [];
+  for (const [id, score] of scores) {
+    const btn = buttons.find(b => b.id === id);
+    if (btn) candidates.push({ id, label: btn.label, color: btn.color, score, isCurated: curatedSet.has(id) });
+  }
+
+  // Sort by score descending
+  candidates.sort((a, b) => b.score - a.score);
+
+  // Reserve therapeutic slots: ensure 1-2 curated words that aren't already
+  // in the top results get appended at the end for vocabulary expansion
+  const mainSlots = MAX_PREDICTIONS - THERAPEUTIC_SLOTS;
+  const topResults = candidates.slice(0, mainSlots);
+  const topIds = new Set(topResults.map(c => c.id));
+
+  const therapeuticCandidates = curatedIds
+    .filter(id => !topIds.has(id))
+    .slice(0, THERAPEUTIC_SLOTS)
+    .map(id => {
+      const btn = buttons.find(b => b.id === id);
+      return btn ? { id, label: btn.label, color: btn.color, score: 0, isCurated: true } : null;
+    })
+    .filter(Boolean);
+
+  const result = [...topResults, ...therapeuticCandidates];
+  return result.length > 0 ? result : null;
 }
 
 let predictionDebounce = false;
@@ -4354,11 +4464,18 @@ function renderPredictions(btnId) {
       predictionDebounce = true;
       setTimeout(() => { predictionDebounce = false; }, 200);
 
+      const isCoreWord = !!PREDICTIONS[pred.id];
       addWordToMessage(pred.label, pred.id);
-      speak(pred.label);
-      if (PREDICTIONS[pred.id]) {
+
+      if (isCoreWord) {
+        speak(pred.label);
         renderPredictions(pred.id);
+      } else if (autoSpeakEnabled) {
+        // Auto-speak ON: speak the full sentence and clear
+        speak(applyGrammar(messageWords, messageButtonIds));
+        clearPredictions();
       } else {
+        // Auto-speak OFF: don't speak, let child keep building
         renderPredictions(null);
       }
     });
@@ -4448,10 +4565,13 @@ function addWordToMessage(word, btnId) {
       return;
     }
   }
+  // Record bigram: previous word -> current word
+  const prevBtnId = messageButtonIds.length > 0 ? messageButtonIds[messageButtonIds.length - 1] : null;
   lastTapId = btnId || null;
   lastTapTime = now;
   messageWords.push(word);
   messageButtonIds.push(btnId || null);
+  if (prevBtnId && btnId) recordBigram(prevBtnId, btnId);
   renderMessage();
 }
 
@@ -4844,9 +4964,23 @@ document.getElementById('btn-voice-test').addEventListener('click', () => {
   speak('Hi! This is how I sound when I talk.');
 });
 
+// ── Prediction Settings ──
+document.getElementById('setting-auto-speak').addEventListener('change', (e) => {
+  saveAutoSpeak(e.target.checked);
+});
+
+document.getElementById('btn-reset-predictions').addEventListener('click', () => {
+  if (!confirm('Reset all learned word predictions? This cannot be undone.')) return;
+  resetLearnedPredictions();
+  clearPredictions();
+  showToast('Predictions reset');
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
+  resetLearnedPredictions();
+  clearPredictions();
   buttons = getTemplate(getGridSize());
   await saveButtons();
   currentFolder = null;
