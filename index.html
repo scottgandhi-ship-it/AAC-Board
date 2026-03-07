@@ -666,7 +666,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   font-family: inherit;
   outline: none;
 }
-#search-input:focus { border-color: #42A5F5; }
+#search-input:focus { border-color: #42A5F5; box-shadow: 0 0 0 3px rgba(66,165,245,0.3); }
 
 #btn-close-search {
   padding: 10px 16px;
@@ -767,7 +767,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   box-sizing: border-box;
   margin-bottom: 8px;
 }
-#symbol-search-input:focus { border-color: #42A5F5; }
+#symbol-search-input:focus { border-color: #42A5F5; box-shadow: 0 0 0 3px rgba(66,165,245,0.3); }
 
 #symbol-results {
   overflow-y: auto;
@@ -4019,7 +4019,9 @@ async function init() {
   initSpeech();
 
   // Auto-download ARASAAC symbols in background on first online load
-  setTimeout(() => downloadSymbolsForButtons().catch(() => {}), 2000);
+  setTimeout(() => downloadSymbolsForButtons().catch(e => {
+    showToast('Symbol download failed. Try again from Settings.');
+  }), 2000);
 }
 
 // ── Sensory Preferences ──
@@ -4288,7 +4290,8 @@ function applyGrammar(words, btnIds) {
 
     // Article insertion: add "a"/"an" before singular countable nouns
     if (grammarEnabled('articles') && cat === 'noun') {
-      if (i === 0 || (getWordCategory(btnIds[i - 1]) !== 'noun' &&
+      const prevCat = i > 0 ? getWordCategory(btnIds[i - 1]) : 'unknown';
+      if (i === 0 || (prevCat !== 'noun' && prevCat !== 'descriptor' &&
           !['more', 'my', 'your', 'the', 'a', 'an', 'some'].includes(result[i - 1].toLowerCase()))) {
         if (!UNCOUNTABLE_NOUNS.has(lower) && !result[i].endsWith('s')) {
           const article = ['a','e','i','o','u'].includes(lower[0]) ? 'an' : 'a';
@@ -4549,10 +4552,22 @@ function saveBigrams() {
   }, 500);
 }
 
+const BIGRAM_MAX_PER_KEY = 20;
+
 function recordBigram(prevBtnId, currentBtnId) {
   if (!prevBtnId || !currentBtnId) return;
   if (!bigramCounts[prevBtnId]) bigramCounts[prevBtnId] = {};
   bigramCounts[prevBtnId][currentBtnId] = (bigramCounts[prevBtnId][currentBtnId] || 0) + 1;
+
+  const followers = bigramCounts[prevBtnId];
+  const keys = Object.keys(followers);
+  if (keys.length > BIGRAM_MAX_PER_KEY + 10) {
+    const sorted = keys.sort((a, b) => followers[b] - followers[a]);
+    const keep = new Set(sorted.slice(0, BIGRAM_MAX_PER_KEY));
+    for (const k of keys) {
+      if (!keep.has(k)) delete followers[k];
+    }
+  }
   saveBigrams();
 }
 
@@ -4977,7 +4992,7 @@ function addWordToMessage(word, btnId) {
   if (btnId && btnId === lastTapId && (now - lastTapTime) < 800) {
     const btn = buttons.find(b => b.id === btnId);
     if (btn && getWordCategory(btnId) === 'noun') {
-      messageWords[messageWords.length - 1] = pluralize(word);
+      messageWords[messageWords.length - 1] = pluralize(messageWords[messageWords.length - 1]);
       messageButtonIds[messageButtonIds.length - 1] = btnId;
       lastTapId = null;
       lastTapTime = 0;
@@ -5631,15 +5646,25 @@ async function fetchSymbolBlob(pictoId) {
 }
 
 // Track which images are user-uploaded vs library-fetched
+let customImageCache = null;
+
+function loadCustomImageCache() {
+  try {
+    customImageCache = JSON.parse(localStorage.getItem('aac-custom-images') || '{}');
+  } catch (e) {
+    customImageCache = {};
+  }
+}
+
 function markAsCustomImage(buttonId) {
-  const custom = JSON.parse(localStorage.getItem('aac-custom-images') || '{}');
-  custom[buttonId] = true;
-  localStorage.setItem('aac-custom-images', JSON.stringify(custom));
+  if (!customImageCache) loadCustomImageCache();
+  customImageCache[buttonId] = true;
+  localStorage.setItem('aac-custom-images', JSON.stringify(customImageCache));
 }
 
 function isCustomImage(buttonId) {
-  const custom = JSON.parse(localStorage.getItem('aac-custom-images') || '{}');
-  return !!custom[buttonId];
+  if (!customImageCache) loadCustomImageCache();
+  return !!customImageCache[buttonId];
 }
 
 async function downloadSymbolsForButtons() {
