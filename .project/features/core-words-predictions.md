@@ -67,8 +67,9 @@ At prediction time, `renderPredictions(lastWord)` does:
 5. `coldStartBonus` = a small fixed value (e.g., 3) so defaults show up initially but are quickly overtaken by real usage
 6. Sort by score descending, take top N (6-8 chips max, fits the strip)
 7. Filter: only show words that exist as actual buttons in the current vocabulary
+8. **Reserve therapeutic slots**: Always keep 1-2 slots at the end of the strip for curated/default words, even when learned data dominates. This ensures the child is exposed to vocabulary they haven't used yet -- a core principle in speech therapy (aided language stimulation). Without this, the system would only reinforce existing vocabulary and never expand it.
 
-Result: "chocolate milk" after "want" 47 times = it's always the first chip. New users still get sensible defaults.
+Result: "chocolate milk" after "want" 47 times = it's always the first chip. New users still get sensible defaults. And even power users see a curated word or two they might not have tried yet.
 
 ### How Two-Tap Works
 
@@ -86,7 +87,9 @@ After a week of use, the child's most-requested items float to the top automatic
 
 1. Predictions appear after tapping a **core word** (grid or prediction chip)
 2. Tapping a **prediction chip** adds that word to the message bar
-3. If the predicted word is a **non-core word** (noun like "cookie"), it speaks the full sentence automatically and clears predictions
+3. If the predicted word is a **non-core word** (noun like "cookie"), behavior depends on the **Auto-Speak** setting (see Step 9):
+   - **Auto-Speak ON (default)**: speaks the full sentence automatically and clears predictions
+   - **Auto-Speak OFF**: adds the word to the message bar, shows a "speak" chip as the first prediction plus follow-up predictions (e.g., "please", descriptors), and lets the child decide when the sentence is done
 4. If the predicted word is a **core word** (like "want"), it chains -- shows next predictions silently
 5. Predictions **clear** when: sentence is cleared, backspace removes the triggering word, or user taps a folder
 6. Prediction chips inherit Fitzgerald Key colors matching the word type
@@ -138,6 +141,19 @@ Add `<div id="prediction-bar"></div>` between `#message-bar` and `#grid-containe
 - Clears `aac-bigram-counts` from localStorage
 - Useful if device is shared between children or usage patterns change significantly
 
+### Step 9: Parent mode -- Auto-Speak toggle
+- Add an "Auto-speak sentences" toggle in parent mode settings
+- **Default: ON** -- tapping a non-core word (noun) auto-speaks the full sentence and clears predictions (fewest taps for early communicators)
+- **OFF** -- tapping a non-core word adds it to the message bar without speaking, shows a "speak" chip as the first prediction plus follow-up words like "please" or descriptors, letting the child build longer utterances before choosing to speak
+- Stored in localStorage key `aac-auto-speak` (boolean)
+- Clinical rationale: Auto-speak is great for early communicators who need immediate reinforcement, but as a child progresses, therapists want to encourage longer sentences. This toggle lets parents/SLPs graduate the child without changing the app
+
+### Step 10: Parent mode -- Usage insights (future)
+- Display bigram frequency data in a simple, readable format in parent mode
+- Example: "Top phrases this week: 'I want chocolate milk' (47x), 'I want cookie' (12x), 'help please' (8x)"
+- Clinical rationale: This is essentially free data collection -- therapists spend significant time tracking word usage manually. Surfacing this data helps caregivers and SLPs see progress and identify patterns
+- **NOTE**: This is a future enhancement, not part of the initial implementation. Tracked here so we don't lose the idea
+
 ## Acceptance Criteria
 
 - [ ] Prediction strip appears after tapping any core word
@@ -147,6 +163,10 @@ Add `<div id="prediction-bar"></div>` between `#message-bar` and `#grid-containe
 - [ ] Dynamic nouns: adding a new button in parent mode makes it available as a prediction
 - [ ] Bigram data persists across sessions in localStorage
 - [ ] "Reset word predictions" option exists in parent mode
+- [ ] "Auto-speak sentences" toggle exists in parent mode (default ON)
+- [ ] With auto-speak OFF, nouns add to message bar and show "speak" chip + follow-up predictions
+- [ ] With auto-speak ON, nouns trigger speak and clear (original behavior)
+- [ ] 1-2 prediction slots always reserved for curated/therapeutic words even with heavy usage data
 - [ ] Grid positions never change -- predictions are a separate layer
 - [ ] Minimum 44x44px touch targets on prediction chips
 - [ ] Strip scrolls horizontally if more predictions than screen width
