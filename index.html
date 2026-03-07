@@ -178,10 +178,12 @@ body {
 }
 
 .cell img {
-  max-width: 70%;
-  max-height: 55%;
+  width: 70%;
+  max-height: 60%;
+  min-height: 24px;
   object-fit: contain;
   border-radius: 8px;
+  aspect-ratio: 1;
 }
 
 .cell .cell-label {
@@ -284,6 +286,10 @@ body {
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 #prediction-bar::-webkit-scrollbar { display: none; }
+#prediction-bar.visible {
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
 #prediction-bar.visible {
   display: flex;
   animation: slideDown 0.15s ease-out;
@@ -515,6 +521,17 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .settings-btn:active { background: #f0f0f0; }
+
+.settings-checkbox {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  accent-color: var(--bar-bg);
+}
+
+.settings-section label[style*="display:flex"] {
+  min-height: 44px;
+}
 .settings-btn.active { border-color: var(--bar-bg); background: rgba(108,99,255,0.06); }
 
 #btn-close-settings {
@@ -604,24 +621,67 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   font-family: inherit;
 }
 
+.color-swatches {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.1s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.color-swatch:active { transform: scale(0.9); }
+
+.color-swatch.selected {
+  border-color: #333;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #333;
+}
+
+.color-swatch[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
+.color-swatch[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
+.color-swatch[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
+.color-swatch[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+.color-swatch[data-color="pink"]   { background: linear-gradient(145deg, #F8BBD0, #EC407A); }
+.color-swatch[data-color="orange"] { background: linear-gradient(145deg, #FFE0B2, #FFA726); }
+
+.color-swatch-label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 2px;
+  color: #888;
+}
+
 #btn-edit-save { background: linear-gradient(135deg, #66BB6A, #43A047); color: #fff; }
 #btn-edit-cancel { background: #bbb; color: #fff; }
 #btn-edit-remove { background: linear-gradient(135deg, #EF5350, #D32F2F); color: #fff; }
 
 #edit-image-btns {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 4px;
 }
 
 #edit-image-btns button {
-  padding: 8px 12px;
+  padding: 12px 14px;
   border: 2px solid #ddd;
   border-radius: 8px;
   background: #fafafa;
   cursor: pointer;
   font-size: 0.85rem;
   font-family: inherit;
+  min-height: 44px;
 }
 
 /* ── Search Overlay ── */
@@ -1073,7 +1133,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .track-tab {
-  padding: 6px 14px;
+  padding: 10px 16px;
   border: 2px solid #ddd;
   border-radius: 20px;
   background: #fafafa;
@@ -1084,7 +1144,9 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   white-space: nowrap;
   flex-shrink: 0;
   font-family: inherit;
-  min-height: 36px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .track-tab.active {
@@ -1331,7 +1393,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .reward-card.locked .reward-card-icon {
-  filter: grayscale(0.7) opacity(0.5);
+  filter: grayscale(0.4) opacity(0.7);
 }
 
 .reward-card-info {
@@ -1350,7 +1412,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .reward-card.locked .reward-card-label {
-  color: #999;
+  color: #666;
 }
 
 .reward-card-status {
@@ -1952,8 +2014,8 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .sched-step.done {
-  opacity: 0.45;
-  background: #f5f5f5;
+  opacity: 0.6;
+  background: #F1F8E9;
 }
 
 .sched-step.done .sched-step-check {
@@ -2179,10 +2241,10 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 
 .tmpl-step-btn {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: 1px solid #ddd;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
   display: flex;
@@ -2191,8 +2253,8 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   font-size: 0.9rem;
   flex-shrink: 0;
   padding: 0;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .tmpl-step-btn:active { background: #eee; }
@@ -2497,7 +2559,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   #app-header { height: 40px; padding: 0 8px; }
   #app-header-title { font-size: 0.9rem; }
   #message-bar { padding: 6px 6px; gap: 4px; min-height: 48px; }
-  .bar-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+  .bar-btn { width: 44px; height: 44px; font-size: 1.1rem; }
   #message-words { padding: 4px 6px; font-size: 1rem; min-height: 32px; max-height: 60px; gap: 4px; }
   #grid-container { padding: 6px; }
   #grid { grid-template-columns: repeat(var(--grid-cols, 3), 1fr); gap: 6px; }
@@ -2542,6 +2604,27 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   .reward-card { max-width: 500px; padding: 18px 22px; }
   .reward-card-icon { width: 64px; height: 64px; font-size: 1.6rem; }
   .reward-card-label { font-size: 1.15rem; }
+}
+
+/* Landscape on phones -- reclaim vertical space */
+@media (orientation: landscape) and (max-height: 500px) {
+  #app-header { height: 36px; }
+  #app-header-title { font-size: 0.85rem; }
+  #message-bar { min-height: 44px; padding: 4px 8px; gap: 6px; }
+  .bar-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+  #message-words { min-height: 28px; max-height: 48px; padding: 3px 8px; font-size: 1rem; }
+  #prediction-bar { padding: 4px 10px; }
+  .prediction-chip { padding: 5px 12px; font-size: 0.9rem; }
+  #core-word-strip { padding: 4px 8px; gap: 4px; }
+  .core-strip-btn { padding: 6px 4px; font-size: 0.85rem; }
+  .core-strip-btn .core-icon { font-size: 1.1em; }
+  #grid-container { padding: 6px; }
+  #grid { gap: 6px; }
+  .cell { padding: 4px 3px; gap: 2px; }
+  #tab-bar { padding: 2px 4px; }
+  .tab-btn { min-height: 40px; padding: 2px 0; }
+  .tab-btn svg { width: 20px; height: 20px; }
+  .tab-label { font-size: 0.6rem; }
 }
 
 /* Safe area support for notched devices */
@@ -2966,13 +3049,13 @@ body.sensory-high-contrast .task-tile {
       <h3>Grammar Assistance</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-plurals" style="width:20px;height:20px;"> Auto-plurals (more cookie -> more cookies)
+        <input type="checkbox" id="grammar-plurals" class="settings-checkbox"> Auto-plurals (more cookie -> more cookies)
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-verbs" style="width:20px;height:20px;"> Verb forms (he want -> he wants)
+        <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms (he want -> he wants)
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-articles" style="width:20px;height:20px;"> Add articles (I want cookie -> I want a cookie)
+        <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles (I want cookie -> I want a cookie)
       </label>
     </div>
     <div class="settings-section">
@@ -2983,22 +3066,22 @@ body.sensory-high-contrast .task-tile {
     <div class="settings-section">
       <h3>Sensory Preferences</h3>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-reduced-motion" style="width:20px;height:20px;"> Reduce motion
+        <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
       </label>
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-high-contrast" style="width:20px;height:20px;"> High contrast
+        <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
       </label>
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-quiet" style="width:20px;height:20px;"> Quiet mode
+        <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
       </label>
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects. Speech is not affected.</p>
     </div>
     <div class="settings-section">
       <h3>Predictions</h3>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="setting-auto-speak" style="width:20px;height:20px;" checked> Auto-speak sentences
+        <input type="checkbox" id="setting-auto-speak" class="settings-checkbox" checked> Auto-speak sentences
       </label>
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
       <button class="settings-btn" id="btn-reset-predictions" style="color:#e53935;">Reset learned predictions</button>
@@ -3018,15 +3101,9 @@ body.sensory-high-contrast .task-tile {
     <h2>Edit Button</h2>
     <label for="edit-label">Word / Label</label>
     <input type="text" id="edit-label">
-    <label for="edit-color">Color Category</label>
-    <select id="edit-color">
-      <option value="yellow">Yellow — Pronouns</option>
-      <option value="green">Green — Verbs</option>
-      <option value="red">Red — Negation/Stop</option>
-      <option value="blue">Blue — Descriptors</option>
-      <option value="pink">Pink — Social</option>
-      <option value="orange">Orange — Nouns</option>
-    </select>
+    <label>Color Category</label>
+    <div id="edit-color-swatches" class="color-swatches"></div>
+    <input type="hidden" id="edit-color" value="yellow">
     <label>Image</label>
     <img id="edit-image-preview" alt="preview">
     <div id="edit-image-btns">
@@ -5477,6 +5554,43 @@ document.getElementById('btn-reset-defaults').addEventListener('click', async ()
 });
 
 // ── Edit Modal ──
+const COLOR_SWATCH_OPTIONS = [
+  { value: 'yellow', label: 'Pronoun' },
+  { value: 'green', label: 'Verb' },
+  { value: 'red', label: 'Negation' },
+  { value: 'blue', label: 'Describe' },
+  { value: 'pink', label: 'Social' },
+  { value: 'orange', label: 'Noun' },
+];
+
+function renderColorSwatches(selectedColor, disabled) {
+  const container = document.getElementById('edit-color-swatches');
+  container.innerHTML = '';
+  COLOR_SWATCH_OPTIONS.forEach(opt => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.className = 'color-swatch' + (opt.value === selectedColor ? ' selected' : '');
+    swatch.dataset.color = opt.value;
+    swatch.setAttribute('aria-label', opt.label);
+    swatch.disabled = disabled;
+    if (disabled) swatch.style.opacity = '0.4';
+    swatch.addEventListener('click', () => {
+      if (disabled) return;
+      document.getElementById('edit-color').value = opt.value;
+      container.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      swatch.classList.add('selected');
+    });
+    const label = document.createElement('span');
+    label.className = 'color-swatch-label';
+    label.textContent = opt.label;
+    wrapper.appendChild(swatch);
+    wrapper.appendChild(label);
+    container.appendChild(wrapper);
+  });
+}
+
 function openEditModal(buttonId) {
   editingButtonId = buttonId;
   const btn = buttons.find(b => b.id === buttonId);
@@ -5484,6 +5598,10 @@ function openEditModal(buttonId) {
 
   document.getElementById('edit-label').value = btn.label;
   document.getElementById('edit-color').value = btn.color;
+
+  // Protect core words from deletion (motor planning consistency)
+  const isCoreWord = btn.type === 'core';
+  renderColorSwatches(btn.color, isCoreWord);
 
   const preview = document.getElementById('edit-image-preview');
   preview.style.display = 'none';
@@ -5494,11 +5612,8 @@ function openEditModal(buttonId) {
     }
   });
 
-  // Protect core words from deletion (motor planning consistency)
-  const isCoreWord = btn.type === 'core';
   document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
   document.getElementById('edit-label').readOnly = isCoreWord;
-  document.getElementById('edit-color').disabled = isCoreWord;
 
   document.getElementById('edit-overlay').classList.add('open');
 }
@@ -6754,10 +6869,8 @@ function renderRewardCard(track) {
   if (!allDone) {
     cardEl.style.cursor = 'pointer';
     cardEl.addEventListener('click', () => {
-      const done = track.currentCount;
-      const total = track.targetCount;
-      const remaining = total - done;
-      speak(track.rewardLabel + ', but first you need to complete ' + remaining + ' more out of ' + total + ' activities.');
+      const remaining = track.targetCount - track.currentCount;
+      speak(track.rewardLabel + ', but first you have to do ' + track.taskLabel + ' ' + remaining + ' more ' + (remaining === 1 ? 'time' : 'times') + '.');
     });
   }
 }
