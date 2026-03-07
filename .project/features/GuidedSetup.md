@@ -11,7 +11,7 @@ Fast, friction-free onboarding that gets parents communicating with their child 
 ### Quick Onboard (first launch -- target: under 60 seconds)
 
 1. **Welcome screen** (step 1 of 3)
-   - Warm, simple welcome: "This app helps your child communicate"
+   - Warm, emotional welcome: "Your child has something to say. Let's help them say it."
    - One-sentence explanation of what AAC is
    - Single "Get Started" button
    - No jargon, no lengthy paragraphs
@@ -23,10 +23,12 @@ Fast, friction-free onboarding that gets parents communicating with their child 
    - No changes needed here beyond visual integration with the flow
 
 3. **Quick demo** (step 3 of 3)
-   - Animated hand/highlight showing: tap a core word -> tap a prediction -> sentence speaks
+   - Frame as modeling, not just mechanics: "This is how YOU show your child. Tap 'I' then 'want' -- they learn by watching you."
+   - Animated highlight showing: tap a core word -> tap a prediction -> sentence speaks
    - "Try it yourself!" prompt -- user taps along on the real board
    - "Done" / "Skip" button to exit
    - Max 10 seconds of passive content before user is interactive
+   - Reduced motion users: static numbered steps with descriptions instead of animation
 
 4. **Done -- land on the board**
    - Toast: "Tip: Long-press the lock to access settings and more help"
@@ -39,19 +41,24 @@ Fast, friction-free onboarding that gets parents communicating with their child 
    - Expandable/collapsible topics (accordion style)
    - Topics:
      - "What is AAC?" -- 2-3 sentence explanation
-     - "How to Model" -- teach parents to demonstrate AAC use during routines
+     - "How to Model" -- teach parents to demonstrate AAC use during routines, frame as "show, don't test"
      - "Core Words Matter" -- why the top strip is important
      - "Building Sentences" -- how prediction chains and grammar work
-     - "Tips by Activity" -- mealtime, playtime, bath, bedtime modeling ideas
-     - "When to Add New Words" -- guidance on progressive vocabulary
+     - "Tips by Activity" -- mealtime, playtime, bath, bedtime modeling ideas with specific example phrases per activity
+     - "When to Add New Words" -- 80% rule: when child uses 80% of current vocab consistently, add more
+     - "Common Mistakes to Avoid" -- don't test ("what's this?"), don't withhold until child uses device, don't remove as punishment. Frame positively: "Instead of asking 'what do you want,' try modeling 'I want juice' yourself."
    - Each topic: short paragraph + actionable tip
    - "Replay Quick Tour" button to re-run the step 3 demo
 
-6. **Contextual tips** (lightweight, non-blocking)
-   - After first 5 uses: toast "Tip: Try modeling -- tap words yourself while your child watches"
-   - After first folder visit: toast "Tip: Core words at the top work on every screen"
-   - Tips tracked in localStorage, each shows once
+6. **Contextual tips** (lightweight, non-blocking, day-based first week)
+   - Day 1: "Just explore! Tap buttons yourself to get comfortable"
+   - Day 3: "Try modeling during one meal today -- tap 'I want more' while your child watches"
+   - Day 5: "Your child might not tap yet -- that's normal. Keep modeling!"
+   - Day 7: "You're doing great. Check your Insights tab to see progress"
+   - After first folder visit: "Core words at the top work on every screen"
+   - Tips tracked in localStorage with timestamps, each shows once
    - Tips only appear in parent mode (never interrupt the child)
+   - Day-based tips use first-launch date as anchor
 
 ## Architecture Overview
 
@@ -73,9 +80,9 @@ Fast, friction-free onboarding that gets parents communicating with their child 
 ### localStorage Keys (new)
 
 - aac-onboarding-complete -- boolean flag
-- aac-tip-modeling-shown -- tip tracking
-- aac-tip-core-words-shown -- tip tracking
-- aac-use-count -- increment on each speak action (for tip triggers)
+- aac-onboarding-date -- timestamp of first launch (anchor for day-based tips)
+- aac-tip-{tipId}-shown -- tip tracking (day1, day3, day5, day7, core-words)
+- aac-use-count -- increment on each speak action
 
 ### Integration Points
 
@@ -132,9 +139,10 @@ Fast, friction-free onboarding that gets parents communicating with their child 
 - Only fires in parent mode
 
 **C2: Tip Triggers**
-- After 5th speak action: modeling tip
+- Day-based tips: check days since aac-onboarding-date on app open
+- Day 1/3/5/7 tips fire on first app open on or after that day
 - After first folder navigation: core words tip
-- Wire into speak() and folder nav handlers
+- Wire into init() (day checks) and folder nav handlers
 
 ## Accessibility Considerations
 
@@ -170,7 +178,17 @@ Fast, friction-free onboarding that gets parents communicating with their child 
 - [ ] Screen reader can navigate all guide content
 
 ### Phase C
-- [ ] Modeling tip appears after 5th use (parent mode only)
+- [ ] Day 1/3/5/7 tips appear on correct days (parent mode only)
 - [ ] Core words tip appears after first folder visit (parent mode only)
 - [ ] Each tip shows exactly once
 - [ ] Tips do not appear outside parent mode
+- [ ] Tips use first-launch date as anchor
+
+## Marci's Clinical Review (incorporated)
+- Welcome copy: warm, emotional, hope-oriented (not product description)
+- Demo framed as modeling ("this is how YOU show your child"), not just mechanics
+- Tips by Activity: each has specific example phrase to model
+- When to Add Words: uses 80% rule (evidence-based benchmark)
+- Added "Common Mistakes to Avoid" topic (framed positively)
+- Tips changed from count-based to day-based first-week sequence (matches therapy home carryover)
+- Reduced motion: static numbered steps instead of just skipping
