@@ -140,7 +140,7 @@ body {
 #grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--grid-cols, 4), 1fr);
   gap: 10px;
 }
 
@@ -352,6 +352,97 @@ body {
 .core-strip-btn[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
 .core-strip-btn[data-color="red"]    { background: linear-gradient(145deg, #FFCDD2, #EF5350); }
 .core-strip-btn[data-color="blue"]   { background: linear-gradient(145deg, #BBDEFB, #42A5F5); }
+
+/* Grid size adjustments for 6x6 */
+body.grid-6 .cell { padding: 4px 3px; gap: 2px; }
+body.grid-6 .cell .cell-label { font-size: clamp(0.55rem, 1.8vw, 0.8rem); }
+body.grid-6 .cell .cell-big-text { font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
+body.grid-6 .cell.folder-btn .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
+body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); }
+
+/* Grid size adjustments for 3x3 */
+body.grid-3 .cell .cell-label { font-size: clamp(1rem, 3.5vw, 1.4rem); }
+body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
+
+/* Grid Size Picker (first-run) */
+#grid-picker-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 16px;
+}
+#grid-picker-overlay.visible { display: flex; }
+#grid-picker-overlay h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #333;
+  text-align: center;
+  margin: 0;
+}
+#grid-picker-overlay p {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin: 0 0 8px;
+}
+.grid-picker-options {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.grid-picker-card {
+  flex: 1;
+  min-width: 140px;
+  max-width: 180px;
+  border: 3px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.grid-picker-card:active { transform: scale(0.96); }
+.grid-picker-card:hover, .grid-picker-card:focus-visible {
+  border-color: var(--bar-bg);
+  box-shadow: 0 4px 20px rgba(108,99,255,0.2);
+}
+.grid-picker-card .picker-grid-preview {
+  display: grid;
+  gap: 4px;
+  width: 80px;
+  height: 80px;
+}
+.grid-picker-card .picker-grid-preview span {
+  background: var(--bar-bg);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+.grid-picker-card .picker-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #333;
+}
+.grid-picker-card .picker-desc {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+  line-height: 1.3;
+}
 
 /* Search result cells reuse same color system */
 .search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
@@ -2289,7 +2380,7 @@ body {
   .bar-btn { width: 40px; height: 40px; font-size: 1.1rem; }
   #message-words { padding: 4px 6px; font-size: 1rem; min-height: 32px; max-height: 60px; gap: 4px; }
   #grid-container { padding: 6px; }
-  #grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  #grid { grid-template-columns: repeat(var(--grid-cols, 3), 1fr); gap: 6px; }
   .cell { padding: 6px 4px; border-radius: 14px; }
   .cell .cell-label { font-size: clamp(0.6rem, 2.5vw, 0.85rem); }
   .cell .cell-big-text { font-size: clamp(1.2rem, 5vw, 2rem); }
@@ -2317,12 +2408,12 @@ body {
 
 /* Larger phones & small tablets (480-767px) */
 @media (min-width: 480px) and (max-width: 767px) {
-  #grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  #grid { grid-template-columns: repeat(var(--grid-cols, 4), 1fr); gap: 10px; }
 }
 
 /* Tablets (768px+) */
 @media (min-width: 768px) {
-  #grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  #grid { grid-template-columns: repeat(var(--grid-cols, 5), 1fr); gap: 12px; }
   #grid-container { padding: 14px; }
   .rewards-grid { max-width: 500px; gap: 14px; }
   .task-tile { border-radius: 20px; }
@@ -2482,6 +2573,15 @@ body {
       <button class="settings-btn" id="btn-voice-higher">Higher pitch</button>
       <div id="voice-pitch-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Pitch: normal</div>
       <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+    </div>
+    <div class="settings-section">
+      <h3>Grid Size</h3>
+      <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
+        <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
+        <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
+        <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
+      </div>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -2671,6 +2771,45 @@ body {
   <div id="celebration-text"></div>
 </div>
 
+<!-- Grid Size Picker (first-run) -->
+<div id="grid-picker-overlay" role="dialog" aria-label="Choose communication level">
+  <h2>Choose a starting layout</h2>
+  <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
+  <div class="grid-picker-options">
+    <button class="grid-picker-card" data-size="3" aria-label="3 by 3 Starter grid, 9 buttons, best for learning to request">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">3x3 Starter</span>
+      <span class="picker-desc">Learning to request</span>
+    </button>
+    <button class="grid-picker-card" data-size="4" aria-label="4 by 4 Growing grid, 16 buttons, best for building sentences">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">4x4 Growing</span>
+      <span class="picker-desc">Building sentences</span>
+    </button>
+    <button class="grid-picker-card" data-size="6" aria-label="6 by 6 Talker grid, 36 buttons, best for combining words fluently">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">6x6 Talker</span>
+      <span class="picker-desc">Combining words fluently</span>
+    </button>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -2684,6 +2823,49 @@ const CORE_WORD_DEFS = [
   { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 3 },
   { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 4 },
 ];
+
+// ── Grid Templates (Composition Pattern) ──
+// 3x3 Starter: 9 most essential folders (no academic categories)
+const HOME_GRID_3X3_FOLDERS = [
+  { id: 'folder-general',   label: 'Social',    color: 'pink',   type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-food',      label: 'Food',      color: 'orange', type: 'folder', folderId: null, position: 1 },
+  { id: 'folder-drinks',    label: 'Drinks',    color: 'orange', type: 'folder', folderId: null, position: 2 },
+  { id: 'folder-people',    label: 'People',    color: 'yellow', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-feelings',  label: 'Feelings',  color: 'blue',   type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-places',    label: 'Places',    color: 'purple', type: 'folder', folderId: null, position: 8 }
+];
+
+// 6x6 Talker: 16 folders + 20 extra standalone words on home grid for fast access
+const HOME_GRID_6X6_EXTRAS = [
+  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 16 },
+  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 17 },
+  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 18 },
+  { id: 't-go',     label: 'go',     color: 'green',  type: 'core', folderId: null, position: 19 },
+  { id: 't-like',   label: 'like',   color: 'green',  type: 'core', folderId: null, position: 20 },
+  { id: 't-need',   label: 'need',   color: 'green',  type: 'core', folderId: null, position: 21 },
+  { id: 't-you',    label: 'you',    color: 'yellow', type: 'core', folderId: null, position: 22 },
+  { id: 't-my',     label: 'my',     color: 'yellow', type: 'core', folderId: null, position: 23 },
+  { id: 't-it',     label: 'it',     color: 'yellow', type: 'core', folderId: null, position: 24 },
+  { id: 't-is',     label: 'is',     color: 'green',  type: 'core', folderId: null, position: 25 },
+  { id: 't-please', label: 'please', color: 'pink',   type: 'core', folderId: null, position: 26 },
+  { id: 't-hi',     label: 'hi',     color: 'pink',   type: 'core', folderId: null, position: 27 },
+  { id: 't-bye',    label: 'bye',    color: 'pink',   type: 'core', folderId: null, position: 28 },
+  { id: 't-big',    label: 'big',    color: 'blue',   type: 'core', folderId: null, position: 29 },
+  { id: 't-little', label: 'little', color: 'blue',   type: 'core', folderId: null, position: 30 },
+  { id: 't-dont',   label: "don't",  color: 'red',    type: 'core', folderId: null, position: 31 },
+  { id: 't-eat',    label: 'eat',    color: 'green',  type: 'core', folderId: null, position: 32 },
+  { id: 't-drink',  label: 'drink',  color: 'green',  type: 'core', folderId: null, position: 33 },
+  { id: 't-play',   label: 'play',   color: 'green',  type: 'core', folderId: null, position: 34 },
+  { id: 't-open',   label: 'open',   color: 'green',  type: 'core', folderId: null, position: 35 }
+];
+
+const THREE_BY_THREE_FOLDERS = new Set([
+  'general', 'food', 'drinks', 'people', 'feelings',
+  'actions', 'toys', 'body', 'places'
+]);
 
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
@@ -3072,6 +3254,65 @@ async function saveButton(btn) {
   });
 }
 
+async function saveButtons() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readwrite');
+    const store = tx.objectStore(STORE_BUTTONS);
+    store.clear();
+    buttons.forEach(b => store.put(b));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function getGridSize() {
+  const stored = localStorage.getItem('aac-grid-size');
+  if (stored === '3' || stored === '6') return parseInt(stored);
+  return 4;
+}
+
+function setGridSize(size) {
+  localStorage.setItem('aac-grid-size', String(size));
+  document.documentElement.style.setProperty('--grid-cols', size);
+  document.body.classList.remove('grid-3', 'grid-4', 'grid-6');
+  document.body.classList.add(`grid-${size}`);
+}
+
+function getTemplate(size) {
+  const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
+  if (size === 3) {
+    const filtered = folderContents.filter(b => THREE_BY_THREE_FOLDERS.has(b.folderId));
+    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_3X3_FOLDERS, ...filtered]));
+  }
+  if (size === 6) {
+    const homeFolders = DEFAULT_BUTTONS.filter(b => b.folderId === null && b.type !== 'core');
+    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...homeFolders, ...HOME_GRID_6X6_EXTRAS, ...folderContents]));
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+}
+
+function showGridPicker() {
+  const overlay = document.getElementById('grid-picker-overlay');
+  if (overlay.dataset.bound) return;
+  overlay.dataset.bound = 'true';
+  overlay.classList.add('visible');
+  overlay.querySelectorAll('.grid-picker-card').forEach(card => {
+    card.addEventListener('click', async () => {
+      const size = parseInt(card.dataset.size);
+      setGridSize(size);
+      buttons = getTemplate(size);
+      await saveButtons();
+      overlay.classList.remove('visible');
+      rebuildCoreWordsCache();
+      buildIconLookup();
+      renderGrid();
+      updateSpeedDisplay();
+      initSpeech();
+    }, { once: true });
+  });
+}
+
 async function deleteButton(id) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -3317,42 +3558,58 @@ async function clearActiveSchedule() {
 
 // ── Init ──
 async function init() {
+  const gridSize = getGridSize();
+  const hasStoredSize = localStorage.getItem('aac-grid-size') !== null;
+
+  let saved = [];
   try {
-    const saved = await loadButtons();
-    buttons = saved.length > 0 ? saved : JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
-  } catch {
-    buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
-  }
-  // Migrate 'colours' -> 'colors' for existing users
-  let migrated = false;
-  buttons.forEach(b => {
-    if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
-    if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
-  });
+    saved = await loadButtons();
+  } catch { /* fall through to seeding */ }
 
-  // Migrate: add core words for existing users who don't have them yet
-  const hasCoreWords = buttons.some(b => b.type === 'core');
-  if (!hasCoreWords) {
-    buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
-    migrated = true;
+  if (saved.length > 0) {
+    buttons = saved;
+    // Migrate 'colours' -> 'colors' for existing users
+    let migrated = false;
+    buttons.forEach(b => {
+      if (b.id === 'folder-colours') { b.id = 'folder-colors'; b.label = 'Colors'; migrated = true; }
+      if (b.folderId === 'colours') { b.folderId = 'colors'; migrated = true; }
+    });
+
+    // Migrate: add core words for existing users who don't have them yet
+    const hasCoreWords = buttons.some(b => b.type === 'core');
+    if (!hasCoreWords) {
+      buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
+      migrated = true;
+    }
+
+    // Migrate: remove old core words that moved to strip (keep only 5)
+    const validCoreIds = new Set(CORE_WORD_DEFS.map(d => d.id));
+    const removedCores = buttons.filter(b => b.type === 'core' && !validCoreIds.has(b.id));
+    if (removedCores.length > 0) {
+      buttons = buttons.filter(b => !(b.type === 'core' && !validCoreIds.has(b.id)));
+      buttons.filter(b => b.folderId === null && b.type !== 'core')
+        .sort((a, b) => a.position - b.position)
+        .forEach((b, i) => { b.position = i; });
+      migrated = true;
+    }
+
+    if (migrated) saveButtons();
+    setGridSize(gridSize);
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
+  } else if (!hasStoredSize) {
+    showGridPicker();
+    return;
+  } else {
+    buttons = getTemplate(gridSize);
+    await saveButtons();
+    setGridSize(gridSize);
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
   }
 
-  // Migrate: remove old core words that moved to strip (keep only 5)
-  const validCoreIds = new Set(CORE_WORD_DEFS.map(d => d.id));
-  const removedCores = buttons.filter(b => b.type === 'core' && !validCoreIds.has(b.id));
-  if (removedCores.length > 0) {
-    buttons = buttons.filter(b => !(b.type === 'core' && !validCoreIds.has(b.id)));
-    // Reset home grid positions to start at 0 (core words no longer in grid)
-    buttons.filter(b => b.folderId === null && b.type !== 'core')
-      .sort((a, b) => a.position - b.position)
-      .forEach((b, i) => { b.position = i; });
-    migrated = true;
-  }
-
-  if (migrated) saveButtons();
-  rebuildCoreWordsCache();
-  buildIconLookup();
-  renderGrid();
   updateSpeedDisplay();
   initSpeech();
 }
@@ -3547,7 +3804,8 @@ function renderGrid() {
 
   // Set grid rows dynamically — use scrollable fixed-height rows for large folders
   const totalCells = grid.children.length;
-  const rows = Math.ceil(totalCells / 4);
+  const cols = getGridSize();
+  const rows = Math.ceil(totalCells / cols);
   if (rows > 6) {
     grid.style.gridTemplateRows = `repeat(${rows}, minmax(70px, 80px))`;
     grid.style.flex = '0 0 auto';
@@ -3570,6 +3828,12 @@ const BUTTON_ICONS = {
   // Core words
   'core-i': '🙋', 'core-want': '👉', 'core-dont-want': '🚫', 'core-help': '🆘',
   'core-more': '➕',
+  // 6x6 Talker extra words
+  't-yes': '👍', 't-no': '👎', 't-stop': '🛑', 't-go': '▶️',
+  't-like': '❤️', 't-need': '🙏', 't-you': '👉', 't-my': '🙋',
+  't-it': '👆', 't-is': '🔵', 't-please': '🙏', 't-hi': '👋',
+  't-bye': '👋', 't-big': '⬆️', 't-little': '⬇️', 't-dont': '🚫',
+  't-eat': '🍽️', 't-drink': '🥤', 't-play': '🎮', 't-open': '📂',
   // General
   'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
   'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
@@ -4088,6 +4352,34 @@ function updateParentModeUI() {
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
   if (!parentMode) return;
   document.getElementById('settings-overlay').classList.add('open');
+  updateGridSizeButtons();
+});
+
+// ── Grid Size Settings ──
+function updateGridSizeButtons() {
+  const current = getGridSize();
+  document.querySelectorAll('.grid-size-opt').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.size) === current);
+  });
+}
+
+document.querySelectorAll('.grid-size-opt').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const newSize = parseInt(btn.dataset.size);
+    if (newSize === getGridSize()) return;
+    const names = { 3: '3x3 Starter', 4: '4x4 Growing', 6: '6x6 Talker' };
+    if (!confirm(`Switch to ${names[newSize]}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.`)) return;
+    await clearAllData();
+    setGridSize(newSize);
+    buttons = getTemplate(newSize);
+    await saveButtons();
+    currentFolder = null;
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
+    updateGridSizeButtons();
+    showToast(`Switched to ${names[newSize]}`);
+  });
 });
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
@@ -4171,8 +4463,11 @@ document.getElementById('btn-voice-test').addEventListener('click', () => {
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
   await clearAllData();
-  buttons = JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  buttons = getTemplate(getGridSize());
+  await saveButtons();
   currentFolder = null;
+  rebuildCoreWordsCache();
+  buildIconLookup();
   renderGrid();
   showToast('Reset to defaults');
 });
