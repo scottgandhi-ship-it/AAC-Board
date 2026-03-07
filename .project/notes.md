@@ -7,8 +7,7 @@ All implemented features validated. Ready for next roadmap milestone.
 (none -- all current features validated)
 
 ## Next Up
-- Milestone 4.1: Modeling Mode
-- Milestone 4.3: Guided Setup & Teaching Tutorial
+- Milestone 4.3: Guided Setup & Teaching Tutorial (now includes modeling guidance from removed 4.1)
 - Milestone 4.4: Export/Share Boards
 - Milestone 5: iOS App + Distribution
 
