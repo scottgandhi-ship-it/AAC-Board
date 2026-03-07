@@ -4203,9 +4203,9 @@ const PLURAL_OVERRIDES = {
 };
 
 function pluralize(word) {
+  if (!word || word.length < 2) return word + 's';
   const lower = word.toLowerCase();
   if (PLURAL_OVERRIDES[lower]) return PLURAL_OVERRIDES[lower];
-  // Already plural-looking
   if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us')) return word;
   if (lower.endsWith('sh') || lower.endsWith('ch') || lower.endsWith('x') || lower.endsWith('z') || lower.endsWith('ss')) return word + 'es';
   if (lower.endsWith('y') && !['a','e','i','o','u'].includes(lower[lower.length - 2])) return word.slice(0, -1) + 'ies';
