@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aac-board-v18';
+const CACHE_NAME = 'aac-board-v19';
 const ASSETS = [
   './',
   './index.html',
