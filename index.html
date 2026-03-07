@@ -3886,8 +3886,8 @@ function pluralize(word) {
   if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us')) return word;
   if (lower.endsWith('sh') || lower.endsWith('ch') || lower.endsWith('x') || lower.endsWith('z') || lower.endsWith('ss')) return word + 'es';
   if (lower.endsWith('y') && !['a','e','i','o','u'].includes(lower[lower.length - 2])) return word.slice(0, -1) + 'ies';
-  if (lower.endsWith('f')) return word.slice(0, -1) + 'ves';
   if (lower.endsWith('fe')) return word.slice(0, -2) + 'ves';
+  if (lower.endsWith('f')) return word.slice(0, -1) + 'ves';
   return word + 's';
 }
 
@@ -4369,6 +4369,8 @@ document.getElementById('btn-speak').addEventListener('click', () => {
 document.getElementById('btn-clear').addEventListener('click', () => {
   messageWords = [];
   messageButtonIds = [];
+  lastTapId = null;
+  lastTapTime = 0;
   renderMessage();
   clearPredictions();
 });
@@ -4376,6 +4378,8 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 document.getElementById('btn-backspace').addEventListener('click', () => {
   messageWords.pop();
   messageButtonIds.pop();
+  lastTapId = null;
+  lastTapTime = 0;
   renderMessage();
   // Show predictions for the new last word, or clear if empty
   if (messageWords.length > 0) {
@@ -4968,8 +4972,6 @@ async function downloadSymbolsForButtons() {
   const entries = Object.entries(SYMBOL_KEYWORDS);
   let completed = 0;
   const total = entries.length;
-  const statusEl = document.getElementById('symbol-status');
-
   // Show progress via toast
   showToast(`Downloading symbols... 0/${total}`);
 
@@ -5020,6 +5022,12 @@ document.getElementById('symbol-overlay').addEventListener('click', e => {
   }
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('symbol-overlay').classList.contains('open')) {
+    document.getElementById('symbol-overlay').classList.remove('open');
+  }
+});
+
 let symbolSearchTimer = null;
 document.getElementById('symbol-search-input').addEventListener('input', e => {
   clearTimeout(symbolSearchTimer);
@@ -5051,17 +5059,25 @@ document.getElementById('symbol-search-input').addEventListener('input', e => {
         const label = document.createElement('span');
         label.textContent = picto.keywords && picto.keywords[0] ? picto.keywords[0].keyword : '';
         cell.appendChild(label);
+        const symbolLabel = picto.keywords && picto.keywords[0] ? picto.keywords[0].keyword : 'symbol';
+        cell.setAttribute('aria-label', `Select ${symbolLabel} symbol`);
         cell.addEventListener('click', async () => {
           document.getElementById('symbol-status').textContent = 'Saving...';
-          const blob = await fetchSymbolBlob(picto._id);
-          if (blob && editingButtonId) {
-            await saveImage(editingButtonId, blob);
-            const preview = document.getElementById('edit-image-preview');
-            preview.src = URL.createObjectURL(blob);
-            preview.style.display = 'block';
+          try {
+            const blob = await fetchSymbolBlob(picto._id);
+            if (blob && editingButtonId) {
+              await saveImage(editingButtonId, blob);
+              const preview = document.getElementById('edit-image-preview');
+              preview.src = URL.createObjectURL(blob);
+              preview.style.display = 'block';
+              document.getElementById('symbol-overlay').classList.remove('open');
+              showToast('Symbol saved');
+            } else {
+              document.getElementById('symbol-status').textContent = 'Failed to load symbol. Try another.';
+            }
+          } catch (err) {
+            document.getElementById('symbol-status').textContent = 'Save failed. Check your connection.';
           }
-          document.getElementById('symbol-overlay').classList.remove('open');
-          showToast('Symbol saved');
         });
         container.appendChild(cell);
       });

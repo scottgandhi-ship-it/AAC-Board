@@ -23,14 +23,13 @@
 - [x] Position-lock: core words separated from grid so folder edits cannot affect them
 - [x] Verified: navigating folders does not shift core word positions
 
-### 1.3 Grid Templates by Communication Level
-- [ ] Beginner grid: 3x3 (9 buttons) — early communicators, youngest users
-- [ ] Intermediate grid: 4x4 (16 buttons)
-- [ ] Advanced grid: 6x6+ (36+ buttons)
-- [ ] Age-appropriate presets (toddler, school-age, teen/adult)
-- [ ] Settings UI to switch between grid sizes
-- [ ] Grid size persists across sessions (localStorage)
-- [ ] Core word positions remain consistent across all grid sizes
+### 1.3 Grid Templates by Communication Level -- DONE
+- [x] Beginner grid: 3x3 (9 buttons) -- early communicators, youngest users
+- [x] Intermediate grid: 4x4 (16 buttons)
+- [x] Advanced grid: 6x6+ (36+ buttons)
+- [x] Settings UI to switch between grid sizes
+- [x] Grid size persists across sessions (localStorage)
+- [x] Core word positions remain consistent across all grid sizes
 
 ---
 
@@ -45,11 +44,13 @@
 - [ ] Settings panel for sensory preferences
 - [ ] Persist preferences across sessions
 
-### 2.2 Symbol/Image Library
-- [ ] Integrate open-source symbol set (e.g., Mulberry, ARASAAC, OpenMoji)
-- [ ] Map symbols to vocabulary items
-- [ ] Support personal photo uploads (swap symbol for photo of child's actual objects/people)
-- [ ] Offline symbol availability (bundled or cached)
+### 2.2 Symbol/Image Library -- DONE
+- [x] Integrate open-source symbol set (ARASAAC -- 15,000+ AAC pictograms)
+- [x] Map symbols to vocabulary items (~150 default buttons mapped)
+- [x] Support personal photo uploads (swap symbol for photo of child's actual objects/people)
+- [x] Offline symbol availability (cached in IndexedDB after first download)
+- [x] Browse Symbols picker in edit modal with ARASAAC search
+- [x] Custom photo protection (user uploads never overwritten by auto-download)
 
 ---
 
@@ -66,11 +67,13 @@
 - [x] __NOUNS__ placeholder resolves to top noun IDs dynamically
 - [x] iOS TTS fix: "I" no longer reads as "capital I" (SPEAK_OVERRIDES)
 
-### 3.2 Basic Grammar
-- [ ] Auto-plurals: tap noun twice or use "more" + noun → plural form spoken
-- [ ] Simple verb forms: want/wants/wanted based on pronoun context
-- [ ] Article insertion: optional "a", "the" auto-insertion
-- [ ] Grammar applied at speech output time (don't change button labels)
+### 3.2 Basic Grammar -- DONE
+- [x] Auto-plurals: tap noun twice or use "more" + noun -> plural form spoken
+- [x] Simple verb forms: want/wants/wanted based on pronoun context (30+ verbs)
+- [x] Article insertion: optional "a"/"an" auto-insertion (off by default)
+- [x] Grammar applied at speech output time (button labels never change)
+- [x] Double-tap noun to pluralize (800ms window)
+- [x] Independent settings toggles for each grammar rule
 
 ### 3.3 Spanish Language Support
 - [ ] Dual-language vocabulary (English + Spanish labels)
@@ -136,11 +139,11 @@
 |----------|------|--------|
 | **P0** | Core words on home screen | DONE - Persistent strip with 5 words |
 | **P0** | Consistent motor planning | DONE - Fixed strip, position-locked |
-| **P1** | Grid templates | Not started |
+| **P1** | Grid templates | DONE - 3x3/4x4/6x6 with settings UI |
 | **P1** | Sensory-friendly options | Not started |
-| **P1** | Symbol/image library | Not started |
+| **P1** | Symbol/image library | DONE - ARASAAC integration |
 | **P2** | Word prediction | DONE - Two-tap prediction chains |
-| **P2** | Basic grammar | Not started |
+| **P2** | Basic grammar | DONE - Plurals, conjugation, articles |
 | **P2** | Modeling mode | Not started |
 | **P2** | Guided setup & teaching tutorial | Not started |
 | **P2** | Data/usage tracking | Not started |
@@ -162,3 +165,6 @@
 | 2026-03-06 | Fitzgerald Key color coding applied to all folders and words |
 | 2026-03-06 | Back button styled as orange standout, Home button removed from folder grids |
 | 2026-03-06 | Robert architecture review completed and all findings addressed |
+| 2026-03-07 | Completed 1.3 Grid Templates - 3x3/4x4/6x6 with settings UI |
+| 2026-03-07 | Completed 2.2 Symbol Library - ARASAAC integration with auto-download |
+| 2026-03-07 | Completed 3.2 Basic Grammar - plurals, verb conjugation, article insertion |
