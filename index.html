@@ -767,6 +767,24 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   padding: 32px 0;
   font-size: 0.95rem;
 }
+html.lang-es #search-results:empty::after {
+  content: 'Escribe para buscar palabras...';
+}
+
+/* Bilingual button label layout */
+.cell-label-secondary {
+  display: block;
+  font-size: 0.65em;
+  opacity: 0.7;
+  line-height: 1.1;
+  margin-top: 1px;
+}
+.core-label-secondary {
+  display: block;
+  font-size: 0.6em;
+  opacity: 0.65;
+  line-height: 1;
+}
 
 #search-results .search-result-cell {
   display: flex;
@@ -3058,6 +3076,15 @@ body.sensory-high-contrast .task-tile {
       <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
     </div>
     <div class="settings-section">
+      <h3 data-t="settings.language">Language</h3>
+      <div id="language-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
+        <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
+        <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
+        <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+      </div>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;" data-t="settings.languageHint">Switch the board language. "Both" shows English and Spanish on every button.</p>
+    </div>
+    <div class="settings-section">
       <h3>Grammar Assistance</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
       <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
@@ -3113,6 +3140,10 @@ body.sensory-high-contrast .task-tile {
     <h2>Edit Button</h2>
     <label for="edit-label">Word / Label</label>
     <input type="text" id="edit-label">
+    <div id="edit-es-row" style="display:none;">
+      <label for="edit-label-es">Spanish label</label>
+      <input type="text" id="edit-label-es">
+    </div>
     <label>Color Category</label>
     <div id="edit-color-swatches" class="color-swatches"></div>
     <input type="hidden" id="edit-color" value="yellow">
@@ -3297,6 +3328,10 @@ body.sensory-high-contrast .task-tile {
 <div id="grid-picker-overlay" role="dialog" aria-label="Choose communication level">
   <h2>Choose a starting layout</h2>
   <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
+  <div id="grid-picker-lang" style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
+    <button class="settings-btn picker-lang-opt active" data-lang="en" style="flex:0 1 120px;padding:10px;">English</button>
+    <button class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
+  </div>
   <div class="grid-picker-options">
     <button class="grid-picker-card" data-size="3" aria-label="3 by 3 Starter grid, 9 buttons, best for learning to request">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);">
@@ -3336,6 +3371,420 @@ body.sensory-high-contrast .task-tile {
 <div id="toast"></div>
 
 <script>
+// ── Language Support ──
+let currentLang = localStorage.getItem('aac-language') || 'en';
+
+const LANG_ES = {
+  labels: {
+    // Core words
+    'core-i': 'yo', 'core-want': 'quiero', 'core-dont-want': 'no quiero',
+    'core-more': 'mas', 'core-help': 'ayuda',
+    // 6x6 extras
+    't-yes': 'si', 't-no': 'no', 't-stop': 'para', 't-go': 'ir',
+    't-like': 'me gusta', 't-need': 'necesito', 't-you': 'tu', 't-my': 'mi',
+    't-it': 'eso', 't-is': 'es', 't-please': 'por favor', 't-hi': 'hola',
+    't-bye': 'adios', 't-big': 'grande', 't-little': 'pequeno',
+    't-dont': 'no', 't-eat': 'comer', 't-drink': 'beber',
+    't-play': 'jugar', 't-open': 'abrir',
+    // Folders
+    'folder-general': 'Social', 'folder-food': 'Comida', 'folder-drinks': 'Bebidas',
+    'folder-people': 'Personas', 'folder-feelings': 'Sentimientos', 'folder-actions': 'Acciones',
+    'folder-toys': 'Juguetes', 'folder-body': 'Mi Cuerpo', 'folder-places': 'Lugares',
+    'folder-things': 'Cosas', 'folder-questions': 'Preguntas', 'folder-clothes': 'Ropa',
+    'folder-colors': 'Colores', 'folder-shapes': 'Formas', 'folder-123': '123', 'folder-abc': 'ABC',
+    // Social
+    'gen-i': 'yo', 'gen-want': 'quiero', 'gen-dont-want': 'no quiero',
+    'gen-need': 'necesito', 'gen-help': 'ayuda', 'gen-dont-know': 'no se',
+    'gen-yes': 'si', 'gen-no': 'no', 'gen-ok': 'OK', 'gen-im-fine': 'estoy bien',
+    'gen-please': 'por favor', 'gen-thank-you': 'gracias', 'gen-hi': 'hola', 'gen-bye': 'adios',
+    'gen-more': 'mas', 'gen-stop': 'para', 'gen-go': 'ir', 'gen-like': 'me gusta',
+    'gen-all-done': 'termine', 'gen-wait': 'espera', 'gen-look': 'mira',
+    'gen-my-turn': 'mi turno', 'gen-sorry': 'lo siento', 'gen-excuse-me': 'con permiso',
+    'gen-hello': 'hola', 'gen-good-morning': 'buenos dias', 'gen-goodnight': 'buenas noches',
+    'gen-see-you': 'nos vemos', 'gen-yr-welcome': 'de nada',
+    'gen-no-thank-you': 'no gracias', 'gen-cool': 'genial', 'gen-awesome': 'increible',
+    'gen-thats-funny': 'que chistoso', 'gen-me-too': 'yo tambien', 'gen-wow': 'guau',
+    'gen-i-did-it': 'lo logre', 'gen-i-like-it': 'me gusta',
+    'gen-want-play': 'quieres jugar?', 'gen-your-turn': 'tu turno',
+    'gen-tell-me': 'dime mas',
+    // Food
+    'food-apple': 'manzana', 'food-banana': 'platano', 'food-cookie': 'galleta',
+    'food-crackers': 'galletas saladas', 'food-pizza': 'pizza',
+    'food-nuggets': 'nuggets de pollo', 'food-pasta': 'pasta', 'food-sandwich': 'sandwich',
+    'food-rice': 'arroz', 'food-fries': 'papas fritas', 'food-grilled-ch': 'queso a la plancha',
+    'food-pancakes': 'panqueques', 'food-yogurt': 'yogur', 'food-fruit-snk': 'frutas',
+    'food-ice-cream': 'helado', 'food-cereal': 'cereal', 'food-soup': 'sopa',
+    'food-bread': 'pan', 'food-cheese': 'queso', 'food-strawberry': 'fresa',
+    'food-grapes': 'uvas', 'food-eggs': 'huevos', 'food-cake': 'pastel',
+    'food-hungry': 'hambre', 'food-yummy': 'rico',
+    // Drinks
+    'drink-water': 'agua', 'drink-milk': 'leche', 'drink-choc-milk': 'leche con chocolate',
+    'drink-apple-juice': 'jugo de manzana', 'drink-orange-juice': 'jugo de naranja',
+    'drink-lemonade': 'limonada', 'drink-hot-choc': 'chocolate caliente',
+    'drink-smoothie': 'licuado', 'drink-thirsty': 'sed',
+    // People
+    'ppl-mom': 'mama', 'ppl-dad': 'papa', 'ppl-sister': 'hermana', 'ppl-brother': 'hermano',
+    'ppl-grandma': 'abuela', 'ppl-grandpa': 'abuelo', 'ppl-teacher': 'maestra',
+    'ppl-friend': 'amigo', 'ppl-baby': 'bebe', 'ppl-dog': 'perro', 'ppl-cat': 'gato',
+    'ppl-doctor': 'doctor', 'ppl-me': 'yo', 'ppl-you': 'tu',
+    // Clothes
+    'clo-shirt': 'camisa', 'clo-pants': 'pantalones', 'clo-shoes': 'zapatos',
+    'clo-socks': 'calcetines', 'clo-underwear': 'ropa interior', 'clo-jacket': 'chaqueta',
+    'clo-hat': 'sombrero', 'clo-pajamas': 'pijama', 'clo-dress': 'vestido',
+    'clo-shorts': 'shorts', 'clo-boots': 'botas', 'clo-gloves': 'guantes',
+    'clo-coat': 'abrigo', 'clo-swimsuit': 'traje de bano', 'clo-diaper': 'panal',
+    'clo-scarf': 'bufanda',
+    // Body
+    'body-head': 'cabeza', 'body-tummy': 'barriga', 'body-arm': 'brazo', 'body-leg': 'pierna',
+    'body-hand': 'mano', 'body-foot': 'pie', 'body-eyes': 'ojos', 'body-ears': 'orejas',
+    'body-mouth': 'boca', 'body-nose': 'nariz', 'body-teeth': 'dientes', 'body-back': 'espalda',
+    'body-hurts': 'duele', 'body-sick': 'enfermo', 'body-fever': 'fiebre',
+    'body-medicine': 'medicina', 'body-bathroom': 'bano', 'body-itchy': 'pica',
+    'body-dizzy': 'mareado', 'body-too-loud': 'muy fuerte', 'body-too-bright': 'muy brillante',
+    'body-allergic': 'alergico',
+    // Feelings
+    'feel-happy': 'feliz', 'feel-sad': 'triste', 'feel-angry': 'enojado',
+    'feel-scared': 'asustado', 'feel-tired': 'cansado', 'feel-excited': 'emocionado',
+    'feel-frustrated': 'frustrado', 'feel-calm': 'tranquilo', 'feel-nervous': 'nervioso',
+    'feel-silly': 'tonto', 'feel-proud': 'orgulloso', 'feel-bored': 'aburrido',
+    'feel-confused': 'confundido', 'feel-love': 'amor', 'feel-worried': 'preocupado',
+    'feel-overwhelmed': 'abrumado', 'feel-lonely': 'solo', 'feel-shy': 'timido',
+    'feel-safe': 'seguro', 'feel-need-break': 'necesito un descanso',
+    // Actions
+    'act-eat': 'comer', 'act-drink': 'beber', 'act-play': 'jugar', 'act-read': 'leer',
+    'act-run': 'correr', 'act-jump': 'saltar', 'act-sit': 'sentarse', 'act-stand': 'pararse',
+    'act-walk': 'caminar', 'act-sleep': 'dormir', 'act-wash': 'lavar', 'act-open': 'abrir',
+    'act-close': 'cerrar', 'act-push': 'empujar', 'act-pull': 'jalar', 'act-give': 'dar',
+    'act-listen': 'escuchar', 'act-draw': 'dibujar', 'act-sing': 'cantar',
+    'act-dance': 'bailar', 'act-hug': 'abrazar', 'act-throw': 'tirar',
+    'act-share': 'compartir', 'act-build': 'construir',
+    // Toys
+    'toy-ball': 'pelota', 'toy-blocks': 'bloques', 'toy-doll': 'muneca', 'toy-car': 'carro',
+    'toy-train': 'tren', 'toy-puzzle': 'rompecabezas', 'toy-bubbles': 'burbujas',
+    'toy-crayons': 'crayones', 'toy-book': 'libro', 'toy-tablet': 'tableta',
+    'toy-swing': 'columpio', 'toy-slide': 'resbaladilla', 'toy-bike': 'bicicleta',
+    'toy-teddy': 'osito', 'toy-playdoh': 'plastilina', 'toy-stickers': 'estampas',
+    'toy-lego': 'Lego', 'toy-game': 'juego', 'toy-balloon': 'globo',
+    'toy-trampoline': 'trampolin',
+    // Places
+    'plc-home': 'casa', 'plc-school': 'escuela', 'plc-bathroom': 'bano', 'plc-park': 'parque',
+    'plc-outside': 'afuera', 'plc-inside': 'adentro', 'plc-store': 'tienda', 'plc-car': 'carro',
+    'plc-bedroom': 'cuarto', 'plc-kitchen': 'cocina', 'plc-playground': 'patio de juegos',
+    'plc-hospital': 'hospital', 'plc-library': 'biblioteca', 'plc-pool': 'piscina',
+    // Colors
+    'clr-red': 'rojo', 'clr-blue': 'azul', 'clr-yellow': 'amarillo', 'clr-green': 'verde',
+    'clr-orange': 'naranja', 'clr-purple': 'morado', 'clr-pink': 'rosa',
+    'clr-black': 'negro', 'clr-white': 'blanco', 'clr-brown': 'cafe',
+    'clr-gray': 'gris', 'clr-rainbow': 'arcoiris',
+    // Shapes
+    'shp-circle': 'circulo', 'shp-square': 'cuadrado', 'shp-triangle': 'triangulo',
+    'shp-rectangle': 'rectangulo', 'shp-star': 'estrella', 'shp-heart': 'corazon',
+    'shp-diamond': 'diamante', 'shp-oval': 'ovalo',
+    // Questions
+    'q-what': 'que', 'q-where': 'donde', 'q-when': 'cuando', 'q-who': 'quien',
+    'q-why': 'por que', 'q-how': 'como', 'q-can-i': 'puedo', 'q-is-it': 'es',
+    'q-do-you': 'tu', 'q-which': 'cual',
+    // Things
+    'thg-cup': 'vaso', 'thg-plate': 'plato', 'thg-spoon': 'cuchara', 'thg-fork': 'tenedor',
+    'thg-napkin': 'servilleta', 'thg-blanket': 'cobija', 'thg-pillow': 'almohada',
+    'thg-toothbrush': 'cepillo de dientes', 'thg-towel': 'toalla', 'thg-backpack': 'mochila',
+    'thg-scissors': 'tijeras', 'thg-phone': 'telefono', 'thg-tv': 'TV',
+    'thg-headphones': 'audifonos', 'thg-tissue': 'panuelo', 'thg-soap': 'jabon',
+    'thg-pencil': 'lapiz', 'thg-paper': 'papel', 'thg-light': 'luz', 'thg-fan': 'ventilador',
+  },
+  speakOverrides: {},
+  symbolKeywords: {
+    'core-i': 'yo', 'core-want': 'querer', 'core-dont-want': 'no querer',
+    'core-more': 'mas', 'core-help': 'ayuda',
+    'food-apple': 'manzana', 'food-banana': 'platano', 'food-cookie': 'galleta',
+    'food-crackers': 'galleta salada', 'food-pizza': 'pizza', 'food-nuggets': 'pollo',
+    'food-pasta': 'pasta', 'food-sandwich': 'sandwich', 'food-rice': 'arroz',
+    'food-fries': 'patatas fritas', 'food-grilled-ch': 'queso', 'food-pancakes': 'panqueque',
+    'food-yogurt': 'yogur', 'food-fruit-snk': 'fruta', 'food-ice-cream': 'helado',
+    'food-cereal': 'cereal', 'food-soup': 'sopa', 'food-bread': 'pan',
+    'food-cheese': 'queso', 'food-strawberry': 'fresa', 'food-grapes': 'uva',
+    'food-eggs': 'huevo', 'food-cake': 'pastel', 'food-hungry': 'hambre',
+    'food-yummy': 'delicioso',
+    'drink-water': 'agua', 'drink-milk': 'leche', 'drink-choc-milk': 'chocolate',
+    'drink-apple-juice': 'jugo', 'drink-orange-juice': 'naranja', 'drink-lemonade': 'limonada',
+    'drink-hot-choc': 'chocolate', 'drink-smoothie': 'licuado', 'drink-thirsty': 'sed',
+    'ppl-mom': 'mama', 'ppl-dad': 'papa', 'ppl-sister': 'hermana', 'ppl-brother': 'hermano',
+    'ppl-grandma': 'abuela', 'ppl-grandpa': 'abuelo', 'ppl-teacher': 'profesora',
+    'ppl-friend': 'amigo', 'ppl-baby': 'bebe', 'ppl-dog': 'perro', 'ppl-cat': 'gato',
+    'ppl-doctor': 'doctor', 'ppl-me': 'yo', 'ppl-you': 'tu',
+    'toy-ball': 'pelota', 'toy-blocks': 'bloques', 'toy-doll': 'muneca', 'toy-car': 'coche',
+    'toy-train': 'tren', 'toy-puzzle': 'rompecabezas', 'toy-bubbles': 'burbujas',
+    'toy-crayons': 'crayones', 'toy-book': 'libro', 'toy-tablet': 'tableta',
+    'toy-swing': 'columpio', 'toy-slide': 'tobogan', 'toy-bike': 'bicicleta',
+    'toy-teddy': 'oso de peluche', 'toy-playdoh': 'plastilina', 'toy-stickers': 'pegatina',
+    'toy-lego': 'lego', 'toy-game': 'juego', 'toy-balloon': 'globo',
+    'toy-trampoline': 'trampolin',
+  },
+  nounGender: {
+    'food-apple': 'f', 'food-banana': 'm', 'food-cookie': 'f', 'food-crackers': 'f',
+    'food-pizza': 'f', 'food-pasta': 'f', 'food-sandwich': 'm', 'food-rice': 'm',
+    'food-soup': 'f', 'food-bread': 'm', 'food-cheese': 'm', 'food-strawberry': 'f',
+    'food-grapes': 'f', 'food-eggs': 'm', 'food-cake': 'm', 'food-cereal': 'm',
+    'food-yogurt': 'm', 'food-ice-cream': 'm', 'food-pancakes': 'm',
+    'drink-water': 'f', 'drink-milk': 'f', 'drink-lemonade': 'f',
+    'toy-ball': 'f', 'toy-doll': 'f', 'toy-car': 'm', 'toy-train': 'm',
+    'toy-book': 'm', 'toy-bike': 'f', 'toy-balloon': 'm',
+    'thg-cup': 'm', 'thg-plate': 'm', 'thg-spoon': 'f', 'thg-fork': 'm',
+    'thg-blanket': 'f', 'thg-pillow': 'f', 'thg-towel': 'f', 'thg-backpack': 'f',
+    'thg-phone': 'm', 'thg-pencil': 'm', 'thg-paper': 'm', 'thg-light': 'f',
+  },
+  verbForms: {
+    'querer':    { yo: 'quiero',    third: 'quiere',     past: 'quiso' },
+    'necesitar': { yo: 'necesito',  third: 'necesita',   past: 'necesito' },
+    'comer':     { yo: 'como',      third: 'come',       past: 'comio' },
+    'beber':     { yo: 'bebo',      third: 'bebe',       past: 'bebio' },
+    'jugar':     { yo: 'juego',     third: 'juega',      past: 'jugo' },
+    'leer':      { yo: 'leo',       third: 'lee',        past: 'leyo' },
+    'correr':    { yo: 'corro',     third: 'corre',      past: 'corrio' },
+    'saltar':    { yo: 'salto',     third: 'salta',      past: 'salto' },
+    'sentarse':  { yo: 'me siento', third: 'se sienta',  past: 'se sento' },
+    'pararse':   { yo: 'me paro',   third: 'se para',    past: 'se paro' },
+    'caminar':   { yo: 'camino',    third: 'camina',     past: 'camino' },
+    'dormir':    { yo: 'duermo',    third: 'duerme',     past: 'durmio' },
+    'lavar':     { yo: 'lavo',      third: 'lava',       past: 'lavo' },
+    'abrir':     { yo: 'abro',      third: 'abre',       past: 'abrio' },
+    'cerrar':    { yo: 'cierro',    third: 'cierra',     past: 'cerro' },
+    'empujar':   { yo: 'empujo',    third: 'empuja',     past: 'empujo' },
+    'jalar':     { yo: 'jalo',      third: 'jala',       past: 'jalo' },
+    'dar':       { yo: 'doy',       third: 'da',         past: 'dio' },
+    'escuchar':  { yo: 'escucho',   third: 'escucha',    past: 'escucho' },
+    'dibujar':   { yo: 'dibujo',    third: 'dibuja',     past: 'dibujo' },
+    'cantar':    { yo: 'canto',     third: 'canta',      past: 'canto' },
+    'bailar':    { yo: 'bailo',     third: 'baila',      past: 'bailo' },
+    'abrazar':   { yo: 'abrazo',    third: 'abraza',     past: 'abrazo' },
+    'tirar':     { yo: 'tiro',      third: 'tira',       past: 'tiro' },
+    'compartir': { yo: 'comparto',  third: 'comparte',   past: 'compartio' },
+    'construir': { yo: 'construyo', third: 'construye',  past: 'construyo' },
+    'ir':        { yo: 'voy',       third: 'va',         past: 'fue' },
+    'parar':     { yo: 'paro',      third: 'para',       past: 'paro' },
+    'esperar':   { yo: 'espero',    third: 'espera',     past: 'espero' },
+    'mirar':     { yo: 'miro',      third: 'mira',       past: 'miro' },
+  },
+  pluralOverrides: {
+    'lapiz': 'lapices', 'pez': 'peces', 'luz': 'luces', 'vez': 'veces',
+  },
+  uncountable: new Set([
+    'agua', 'leche', 'arroz', 'pan', 'queso', 'sopa', 'cereal',
+    'yogur', 'pasta', 'medicina', 'jabon', 'papel', 'helado',
+    'leche con chocolate', 'jugo de manzana', 'jugo de naranja',
+    'chocolate caliente', 'limonada', 'plastilina', 'sed', 'hambre'
+  ]),
+  uiStrings: {
+    'tab.talk': 'Hablar', 'tab.schedule': 'Horario', 'tab.rewards': 'Premios',
+    'tab.insights': 'Datos',
+    'settings.title': 'Ajustes',
+    'settings.buttons': 'Botones', 'settings.addButton': 'Agregar un boton a la vista actual',
+    'settings.quickPhoto': 'Agregar rapido con foto',
+    'settings.editHint': 'Toca cualquier boton del tablero para editarlo mientras el modo padre esta activo.',
+    'settings.voice': 'Voz', 'settings.chooseVoice': 'Elegir voz',
+    'settings.slowerVoice': 'Voz mas lenta', 'settings.fasterVoice': 'Voz mas rapida',
+    'settings.lowerPitch': 'Tono mas bajo', 'settings.higherPitch': 'Tono mas alto',
+    'settings.testVoice': 'Probar voz',
+    'settings.gridSize': 'Tamano de cuadricula',
+    'settings.language': 'Idioma',
+    'settings.languageHint': 'Cambia el idioma del tablero. "Both" muestra ingles y espanol en cada boton.',
+    'settings.grammar': 'Asistencia gramatical',
+    'settings.grammarHint': 'La gramatica solo afecta la voz. Las etiquetas de botones no cambian.',
+    'settings.plurals': 'Auto-plurales',
+    'settings.verbs': 'Formas verbales',
+    'settings.articles': 'Agregar articulos',
+    'settings.symbols': 'Simbolos',
+    'settings.redownload': 'Re-descargar simbolos de ARASAAC',
+    'settings.symbolsHint': 'Descarga simbolos pictograficos AAC para todos los botones. Requiere internet.',
+    'settings.sensory': 'Preferencias sensoriales',
+    'settings.reducedMotion': 'Reducir movimiento',
+    'settings.reducedMotionHint': 'Minimiza animaciones y movimiento en la app.',
+    'settings.highContrast': 'Alto contraste',
+    'settings.highContrastHint': 'Colores mas fuertes y bordes para legibilidad.',
+    'settings.quietMode': 'Modo silencioso',
+    'settings.quietModeHint': 'Silencia sonidos y efectos. La voz no se afecta.',
+    'settings.predictions': 'Predicciones',
+    'settings.autoSpeak': 'Auto-hablar oraciones',
+    'settings.autoSpeakHint': 'Cuando esta activo, tocar un sustantivo en predicciones habla la oracion completa.',
+    'settings.resetPredictions': 'Reiniciar predicciones aprendidas',
+    'settings.resetPredictionsHint': 'Borra datos de prediccion. Util cuando cambias de usuario.',
+    'settings.data': 'Datos',
+    'settings.resetDefaults': 'Reiniciar todo a valores predeterminados',
+    'settings.done': 'Listo',
+    'edit.title': 'Editar Boton', 'edit.label': 'Palabra / Etiqueta',
+    'edit.labelEs': 'Etiqueta en espanol',
+    'edit.color': 'Color', 'edit.image': 'Imagen',
+    'edit.upload': 'Subir Imagen', 'edit.camera': 'Tomar Foto',
+    'edit.symbols': 'Buscar Simbolos', 'edit.removeImage': 'Quitar Imagen',
+    'edit.cancel': 'Cancelar', 'edit.delete': 'Eliminar', 'edit.save': 'Guardar',
+    'symbol.title': 'Buscar Simbolos', 'symbol.cancel': 'Cancelar',
+    'symbol.searchHint': 'Busca un simbolo por nombre',
+    'toast.buttonSaved': 'Boton guardado', 'toast.buttonDeleted': 'Boton eliminado',
+    'toast.imageRemoved': 'Imagen eliminada', 'toast.predictionsReset': 'Predicciones reiniciadas',
+    'toast.usageCleared': 'Datos de uso borrados', 'toast.resetDefaults': 'Reiniciado a valores predeterminados',
+    'toast.symbolsReady': 'Simbolos listos!', 'toast.symbolFailed': 'Error al descargar simbolos. Intenta desde Ajustes.',
+    'toast.csvExported': 'CSV exportado', 'toast.noData': 'No hay datos para exportar',
+    'toast.downloading': 'Descargando simbolos...',
+    'confirm.gridSwitch': 'Cambiar a {name}? Esto reiniciara tus botones a los predeterminados. Los botones personalizados se perderan.',
+    'confirm.resetPredictions': 'Reiniciar todas las predicciones aprendidas? Esto no se puede deshacer.',
+    'confirm.clearUsage': 'Borrar todos los datos de uso? Esto no se puede deshacer.',
+    'confirm.resetDefaults': 'Reiniciar todos los botones a valores predeterminados? Tus imagenes y ediciones se perderan.',
+    'confirm.deleteButton': 'Eliminar este boton?',
+    'parentMode.unlock': 'Desbloquear modo padre', 'parentMode.lock': 'Bloquear modo padre',
+    'parentMode.unlocked': 'Modo padre desbloqueado', 'parentMode.locked': 'Modo padre bloqueado (tiempo)',
+    'search.noMatches': 'No se encontraron coincidencias',
+    'noVoices': 'No se encontraron voces en espanol',
+    'speed.slow': 'Velocidad: lenta', 'speed.normal': 'Velocidad: normal',
+    'speed.fast': 'Velocidad: rapida', 'speed.veryFast': 'Velocidad: muy rapida',
+    'pitch.veryLow': 'Tono: muy bajo', 'pitch.low': 'Tono: bajo',
+    'pitch.normal': 'Tono: normal', 'pitch.high': 'Tono: alto', 'pitch.veryHigh': 'Tono: muy alto',
+    'grid.3x3': '3x3 Inicio', 'grid.4x4': '4x4 Creciendo', 'grid.6x6': '6x6 Hablador',
+    'schedule.noSchedule': 'No hay horario para hoy',
+    'schedule.unlockHint': 'Desbloquea el modo padre para empezar uno',
+    'schedule.allDone': 'Todo Listo!',
+    'rewards.noTracks': 'Aun no hay premios',
+    'rewards.unlockHint': 'Desbloquea el modo padre para crear uno',
+  },
+  scheduleActivities: {
+    'wake-up': 'Despertar', 'go-potty': 'Ir al bano', 'brush-teeth': 'Cepillar dientes',
+    'get-dressed': 'Vestirse', 'eat-breakfast': 'Desayunar', 'take-medicine': 'Tomar medicina',
+    'go-to-school': 'Ir a la escuela', 'circle-time': 'Tiempo en circulo',
+    'work-time': 'Tiempo de trabajo', 'school-snack': 'Merienda', 'recess': 'Recreo',
+    'lunch': 'Almuerzo', 'speech-therapy': 'Terapia de lenguaje',
+    'ot': 'Terapia ocupacional', 'doctor': 'Visita al doctor',
+    'waiting-room': 'Sala de espera', 'come-home': 'Llegar a casa',
+    'afternoon-snack': 'Merienda', 'play-inside': 'Jugar adentro',
+    'play-outside': 'Jugar afuera', 'screen-time': 'Tiempo de pantalla',
+    'clean-up': 'Recoger', 'dinner': 'Cena', 'bath-time': 'Hora del bano',
+    'brush-teeth-pm': 'Cepillar dientes', 'pajamas': 'Ponerse pijama',
+    'story-time': 'Hora del cuento', 'go-to-bed': 'Ir a la cama', 'goodnight': 'Buenas noches',
+  },
+  scheduleCategories: {
+    'Morning Routine': 'Rutina de la manana', 'School / Learning': 'Escuela / Aprendizaje',
+    'Therapy / Appointments': 'Terapia / Citas', 'Afternoon / Home': 'Tarde / Casa',
+    'Evening Routine': 'Rutina de la noche', 'Bedtime': 'Hora de dormir',
+  },
+  taskImages: {
+    'potty': 'Ir al bano', 'wash-hands': 'Lavar manos', 'brush-teeth': 'Cepillar dientes',
+    'take-bath': 'Banarse', 'get-dressed': 'Vestirse', 'put-on-shoes': 'Ponerse zapatos',
+    'put-on-coat': 'Ponerse abrigo', 'eat-food': 'Comer', 'drink-water': 'Tomar agua',
+    'clean-up': 'Recoger', 'take-medicine': 'Tomar medicina', 'be-gentle': 'Ser amable',
+    'use-words': 'Usar palabras', 'wait-nicely': 'Esperar bien', 'share': 'Compartir',
+    'go-to-bed': 'Ir a la cama', 'put-on-pajamas': 'Ponerse pijama',
+  },
+  taskCategories: {
+    'Bathroom': 'Bano', 'Self-Care': 'Cuidado personal', 'Daily Tasks': 'Tareas diarias',
+    'Behavior': 'Comportamiento', 'Bedtime': 'Hora de dormir',
+  },
+};
+
+function t(key, fallback) {
+  if (currentLang === 'en') return fallback;
+  return LANG_ES.uiStrings[key] || fallback;
+}
+
+function getDisplayLabel(btn) {
+  const esLabel = LANG_ES.labels[btn.id];
+  if (currentLang === 'en') return btn.label;
+  // Check for custom Spanish label
+  const customEs = getCustomEsLabels();
+  if (customEs[btn.id]) {
+    if (currentLang === 'es') return customEs[btn.id];
+    if (currentLang === 'both') return btn.label + '\n' + customEs[btn.id];
+  }
+  if (currentLang === 'es') return esLabel || btn.label;
+  if (currentLang === 'both') return esLabel ? btn.label + '\n' + esLabel : btn.label;
+  return btn.label;
+}
+
+function getSpeakLabel(btn) {
+  if (currentLang === 'en') return btn.label;
+  const customEs = getCustomEsLabels();
+  if (customEs[btn.id]) return customEs[btn.id];
+  return LANG_ES.labels[btn.id] || btn.label;
+}
+
+function getPrimaryLabel(btn) {
+  if (currentLang === 'en') return btn.label;
+  return LANG_ES.labels[btn.id] || btn.label;
+}
+
+function getSecondaryLabel(btn) {
+  if (currentLang !== 'both') return null;
+  return LANG_ES.labels[btn.id] || null;
+}
+
+function getCustomEsLabels() {
+  try { return JSON.parse(localStorage.getItem('aac-custom-es-labels') || '{}'); }
+  catch { return {}; }
+}
+
+function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('aac-language', lang);
+  document.documentElement.lang = (lang === 'es') ? 'es' : 'en';
+  document.documentElement.classList.toggle('lang-es', lang === 'es' || lang === 'both');
+  messageWords = [];
+  messageButtonIds = [];
+  renderMessage();
+  renderGrid();
+  updateUIStrings();
+  updateLanguageButtons();
+  initSpeech();
+}
+
+function updateLanguageButtons() {
+  document.querySelectorAll('.lang-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+}
+
+function updateUIStrings() {
+  // Tab titles
+  const tabTitles = {
+    'tab-talk': t('tab.talk', 'Talk'), 'tab-schedule': t('tab.schedule', 'Schedule'),
+    'tab-rewards': t('tab.rewards', 'Rewards'), 'tab-insights': t('tab.insights', 'Insights'),
+  };
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const label = btn.querySelector('.tab-label');
+    if (label && tabTitles[btn.id]) label.textContent = tabTitles[btn.id];
+  });
+  // Update active header title
+  const activeTabId = 'tab-' + activeTab;
+  if (tabTitles[activeTabId]) {
+    document.getElementById('app-header-title').textContent = tabTitles[activeTabId];
+  }
+  // Settings text - only update elements with data-t attributes
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    const original = el.getAttribute('data-t-original');
+    if (!original) el.setAttribute('data-t-original', el.textContent);
+    el.textContent = t(key, el.getAttribute('data-t-original'));
+  });
+  // Static HTML empty states
+  const esScheduleNone = t('schedule.noSchedule', 'No schedule for today');
+  const esScheduleHint = t('schedule.unlockHint', 'Unlock parent mode to start one');
+  const esAllDone = t('schedule.allDone', 'All Done!');
+  const esRewardsNone = t('rewards.noTracks', 'No reward tracks yet');
+  const esRewardsHint = t('rewards.unlockHint', 'Unlock parent mode to create one');
+  const schedNone = document.querySelector('#schedule-none-message');
+  if (schedNone) {
+    const p1 = schedNone.querySelector('p:first-child');
+    const p2 = schedNone.querySelector('p:last-child');
+    if (p1) p1.textContent = esScheduleNone;
+    if (p2) p2.textContent = esScheduleHint;
+  }
+  const allDoneEl = document.getElementById('schedule-done-text');
+  if (allDoneEl) allDoneEl.textContent = esAllDone;
+  const rewardsNone = document.querySelector('#rewards-none-message');
+  if (rewardsNone) {
+    const p1 = rewardsNone.querySelector('p:first-child');
+    const p2 = rewardsNone.querySelector('p:last-child');
+    if (p1) p1.textContent = esRewardsNone;
+    if (p2) p2.textContent = esRewardsHint;
+  }
+}
+
 // ── Core Word Definitions (single source of truth) ──
 // These live in a dedicated strip above the grid, not in the grid itself
 const CORE_WORD_DEFS = [
@@ -4136,6 +4585,13 @@ async function init() {
   }
 
   applySensoryPreferences();
+  // Apply saved language
+  const savedLang = localStorage.getItem('aac-language') || 'en';
+  currentLang = savedLang;
+  document.documentElement.lang = (savedLang === 'es') ? 'es' : 'en';
+  document.documentElement.classList.toggle('lang-es', savedLang === 'es' || savedLang === 'both');
+  updateLanguageButtons();
+  updateUIStrings();
   loadBigrams();
   loadAutoSpeak();
   loadUsageData();
@@ -4146,7 +4602,7 @@ async function init() {
 
   // Auto-download ARASAAC symbols in background on first online load
   setTimeout(() => downloadSymbolsForButtons().catch(e => {
-    showToast('Symbol download failed. Try again from Settings.');
+    showToast(t('toast.symbolFailed', 'Symbol download failed. Try again from Settings.'));
   }), 2000);
 }
 
@@ -4208,6 +4664,15 @@ function getUSVoices() {
   return voices.filter(v => v.lang === 'en-US');
 }
 
+function getESVoices() {
+  return voices.filter(v => /^es[-_]/.test(v.lang));
+}
+
+function getActiveVoices() {
+  if (currentLang === 'en') return getUSVoices();
+  return getESVoices();
+}
+
 function isNoveltyVoice(v) {
   return NOVELTY_VOICES.test(v.name);
 }
@@ -4238,20 +4703,20 @@ function getUsableVoices(usVoices) {
 
 function populateVoiceSelect() {
   const select = document.getElementById('voice-select');
-  const usVoices = getUSVoices();
+  const langVoices = getActiveVoices();
   select.innerHTML = '';
-  if (usVoices.length === 0) {
+  if (langVoices.length === 0) {
     const opt = document.createElement('option');
-    opt.textContent = 'No US English voices found';
+    opt.textContent = currentLang !== 'en' ? t('noVoices', 'No Spanish voices found') : 'No US English voices found';
     select.appendChild(opt);
     return;
   }
 
-  const usable = getUsableVoices(usVoices);
+  const usable = getUsableVoices(langVoices);
   // Fallback: if aggressive filtering removed everything, show first 5 non-novelty
-  const displayVoices = usable.length > 0 ? usable : usVoices.filter(v => !isNoveltyVoice(v)).slice(0, 5);
+  const displayVoices = usable.length > 0 ? usable : langVoices.filter(v => !isNoveltyVoice(v)).slice(0, 5);
   // Last resort: if still nothing (all novelty?), just show first 3 raw
-  const finalVoices = displayVoices.length > 0 ? displayVoices : usVoices.slice(0, 3);
+  const finalVoices = displayVoices.length > 0 ? displayVoices : langVoices.slice(0, 3);
 
   finalVoices.forEach(v => {
     const opt = document.createElement('option');
@@ -4292,7 +4757,7 @@ function pickDefaultVoice(voiceList) {
 document.getElementById('voice-select').addEventListener('change', e => {
   selectedVoiceName = e.target.value;
   localStorage.setItem('aac-voice', selectedVoiceName);
-  speak('This is how I sound');
+  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 function getVoice() {
@@ -4300,8 +4765,8 @@ function getVoice() {
     const match = voices.find(v => v.name === selectedVoiceName);
     if (match) return match;
   }
-  const usVoices = getUSVoices();
-  return pickDefaultVoice(usVoices) || voices[0] || null;
+  const langVoices = getActiveVoices();
+  return pickDefaultVoice(langVoices) || langVoices[0] || voices[0] || null;
 }
 
 // ── Grammar Engine ──
@@ -4387,57 +4852,124 @@ const UNCOUNTABLE_NOUNS = new Set([
   'lemonade', 'play-doh'
 ]);
 
-function applyGrammar(words, btnIds) {
-  if (!words || words.length === 0) return '';
-  if (words.length < 2) return words.join(' ');
-  const result = [...words];
-
-  for (let i = 0; i < result.length; i++) {
-    const id = btnIds[i];
-    const cat = getWordCategory(id);
-    const lower = result[i].toLowerCase();
-
-    // Verb conjugation: check preceding word for pronoun context
-    if (grammarEnabled('verbs') && cat === 'verb' && i > 0) {
-      const prevLower = result[i - 1].toLowerCase();
-      const verbEntry = VERB_FORMS[lower];
-      if (verbEntry && THIRD_PERSON_PRONOUNS.has(prevLower)) {
-        result[i] = verbEntry.third;
+// Grammar engine strategy pattern
+const GRAMMAR_EN = {
+  pluralize: pluralize,
+  thirdPersonPronouns: THIRD_PERSON_PRONOUNS,
+  uncountable: UNCOUNTABLE_NOUNS,
+  verbForms: VERB_FORMS,
+  moreWord: 'more',
+  apply(words, btnIds) {
+    if (!words || words.length === 0) return '';
+    if (words.length < 2) return words.join(' ');
+    const result = [...words];
+    for (let i = 0; i < result.length; i++) {
+      const id = btnIds[i];
+      const cat = getWordCategory(id);
+      const lower = result[i].toLowerCase();
+      if (grammarEnabled('verbs') && cat === 'verb' && i > 0) {
+        const prevLower = result[i - 1].toLowerCase();
+        const verbEntry = this.verbForms[lower];
+        if (verbEntry && this.thirdPersonPronouns.has(prevLower)) {
+          result[i] = verbEntry.third;
+        }
       }
-    }
-
-    // Auto-plurals: "more" + noun -> plural
-    if (grammarEnabled('plurals') && cat === 'noun' && i > 0) {
-      const prevLower = result[i - 1].toLowerCase();
-      if (prevLower === 'more' && !UNCOUNTABLE_NOUNS.has(lower)) {
-        result[i] = pluralize(result[i]);
+      if (grammarEnabled('plurals') && cat === 'noun' && i > 0) {
+        const prevLower = result[i - 1].toLowerCase();
+        if (prevLower === this.moreWord && !this.uncountable.has(lower)) {
+          result[i] = this.pluralize(result[i]);
+        }
       }
-    }
-
-    // Article insertion: add "a"/"an" before singular countable nouns
-    if (grammarEnabled('articles') && cat === 'noun') {
-      const prevCat = i > 0 ? getWordCategory(btnIds[i - 1]) : 'unknown';
-      if (i === 0 || (prevCat !== 'noun' && prevCat !== 'descriptor' &&
-          !['more', 'my', 'your', 'the', 'a', 'an', 'some'].includes(result[i - 1].toLowerCase()))) {
-        if (!UNCOUNTABLE_NOUNS.has(lower) && !result[i].endsWith('s')) {
-          const article = ['a','e','i','o','u'].includes(lower[0]) ? 'an' : 'a';
-          result[i] = article + ' ' + result[i];
+      if (grammarEnabled('articles') && cat === 'noun') {
+        const prevCat = i > 0 ? getWordCategory(btnIds[i - 1]) : 'unknown';
+        if (i === 0 || (prevCat !== 'noun' && prevCat !== 'descriptor' &&
+            !['more', 'my', 'your', 'the', 'a', 'an', 'some'].includes(result[i - 1].toLowerCase()))) {
+          if (!this.uncountable.has(lower) && !result[i].endsWith('s')) {
+            const article = ['a','e','i','o','u'].includes(lower[0]) ? 'an' : 'a';
+            result[i] = article + ' ' + result[i];
+          }
         }
       }
     }
+    return result.join(' ');
   }
+};
 
-  return result.join(' ');
+function spanishPluralize(word) {
+  if (!word || word.length < 2) return word + 's';
+  const lower = word.toLowerCase();
+  if (LANG_ES.pluralOverrides[lower]) return LANG_ES.pluralOverrides[lower];
+  if (lower.endsWith('z')) return word.slice(0, -1) + 'ces';
+  if (/[aeiou]$/.test(lower)) return word + 's';
+  if (/[ln]$/.test(lower) || /[rsdfghjkp]$/.test(lower)) return word + 'es';
+  return word + 's';
+}
+
+const GRAMMAR_ES = {
+  pluralize: spanishPluralize,
+  thirdPersonPronouns: new Set(['el', 'ella']),
+  uncountable: LANG_ES.uncountable,
+  verbForms: LANG_ES.verbForms,
+  moreWord: 'mas',
+  apply(words, btnIds) {
+    if (!words || words.length === 0) return '';
+    if (words.length < 2) return words.join(' ');
+    const result = [...words];
+    for (let i = 0; i < result.length; i++) {
+      const id = btnIds[i];
+      const cat = getWordCategory(id);
+      const lower = result[i].toLowerCase();
+      if (grammarEnabled('verbs') && cat === 'verb' && i > 0) {
+        const prevLower = result[i - 1].toLowerCase();
+        const verbEntry = this.verbForms[lower];
+        if (verbEntry && this.thirdPersonPronouns.has(prevLower)) {
+          result[i] = verbEntry.third;
+        }
+      }
+      if (grammarEnabled('plurals') && cat === 'noun' && i > 0) {
+        const prevLower = result[i - 1].toLowerCase();
+        if (prevLower === this.moreWord && !this.uncountable.has(lower)) {
+          result[i] = this.pluralize(result[i]);
+        }
+      }
+      if (grammarEnabled('articles') && cat === 'noun') {
+        const prevCat = i > 0 ? getWordCategory(btnIds[i - 1]) : 'unknown';
+        if (i === 0 || (prevCat !== 'noun' && prevCat !== 'descriptor' &&
+            !['mas', 'mi', 'tu', 'el', 'la', 'un', 'una', 'unos', 'unas'].includes(result[i - 1].toLowerCase()))) {
+          if (!this.uncountable.has(lower)) {
+            const gender = LANG_ES.nounGender[id] || 'm';
+            const article = gender === 'f' ? 'una' : 'un';
+            result[i] = article + ' ' + result[i];
+          }
+        }
+      }
+    }
+    return result.join(' ');
+  }
+};
+
+function getGrammarEngine() {
+  return currentLang === 'en' ? GRAMMAR_EN : GRAMMAR_ES;
+}
+
+function applyGrammar(words, btnIds) {
+  return getGrammarEngine().apply(words, btnIds);
 }
 
 // Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
 const SPEAK_OVERRIDES = { 'I': 'eye' };
 
+function getSpeakOverrides() {
+  if (currentLang === 'en') return SPEAK_OVERRIDES;
+  return LANG_ES.speakOverrides;
+}
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   // Apply overrides for single-word utterances
-  const spoken = SPEAK_OVERRIDES[text] || text;
+  const overrides = getSpeakOverrides();
+  const spoken = overrides[text] || text;
   const utter = new SpeechSynthesisUtterance(spoken);
   const voice = getVoice();
   if (voice) utter.voice = voice;
@@ -4457,11 +4989,14 @@ function renderCoreStrip() {
     el.setAttribute('data-color', btn.color);
     el.setAttribute('data-id', btn.id);
     const icon = BUTTON_ICONS[btn.id];
-    el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') +
-                   `<span class="core-label">${btn.label}</span>`;
+    const coreLabel = getPrimaryLabel(btn);
+    const coreSecondary = getSecondaryLabel(btn);
+    let labelHtml = `<span class="core-label">${coreLabel}${coreSecondary ? '<span class="core-label-secondary">' + coreSecondary + '</span>' : ''}</span>`;
+    el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') + labelHtml;
     el.addEventListener('click', () => {
-      speak(btn.label);
-      addWordToMessage(btn.label, btn.id);
+      const speakText = getSpeakLabel(btn);
+      speak(speakText);
+      addWordToMessage(speakText, btn.id);
       renderPredictions(btn.id);
       recordUsageEvent(btn.id, 'independent');
     });
@@ -4480,7 +5015,7 @@ function renderGrid() {
   if (currentFolder) {
     const items = buttons.filter(b => b.folderId === currentFolder).sort((a, b) => a.position - b.position);
     const folderButton = buttons.find(b => b.id === `folder-${currentFolder}`);
-    folderLabel.textContent = folderButton ? folderButton.label : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
+    folderLabel.textContent = folderButton ? getPrimaryLabel(folderButton) : currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
     folderLabel.style.display = 'block';
 
     items.forEach((btn, i) => {
@@ -5016,19 +5551,21 @@ function renderPredictions(btnId) {
     const chip = document.createElement('button');
     chip.className = 'prediction-chip';
     chip.setAttribute('data-color', pred.color);
+    const predLabel = getPrimaryLabel(pred);
     const icon = iconByLabel[pred.label] || BUTTON_ICONS[pred.id] || '';
-    chip.textContent = (icon ? icon + ' ' : '') + pred.label;
+    chip.textContent = (icon ? icon + ' ' : '') + predLabel;
     chip.addEventListener('click', () => {
       if (predictionDebounce) return;
       predictionDebounce = true;
       setTimeout(() => { predictionDebounce = false; }, 200);
 
+      const speakText = getSpeakLabel(pred);
       const isCoreWord = !!PREDICTIONS[pred.id];
-      addWordToMessage(pred.label, pred.id);
+      addWordToMessage(speakText, pred.id);
       recordUsageEvent(pred.id, 'independent');
 
       if (isCoreWord) {
-        speak(pred.label);
+        speak(speakText);
         renderPredictions(pred.id);
       } else if (autoSpeakEnabled) {
         // Auto-speak ON: speak the full sentence and clear
@@ -5087,7 +5624,15 @@ function createCell(btn) {
 
   const label = document.createElement('span');
   label.className = 'cell-label';
-  label.textContent = btn.label;
+  const primaryText = getPrimaryLabel(btn);
+  const secondaryText = getSecondaryLabel(btn);
+  label.textContent = primaryText;
+  if (secondaryText) {
+    const sec = document.createElement('span');
+    sec.className = 'cell-label-secondary';
+    sec.textContent = secondaryText;
+    label.appendChild(sec);
+  }
   cell.appendChild(label);
 
   cell.addEventListener('click', () => {
@@ -5102,9 +5647,9 @@ function createCell(btn) {
       renderGrid();
       return;
     }
-    // All words speak on tap
-    addWordToMessage(btn.label, btn.id);
-    speak(btn.label);
+    const speakText = getSpeakLabel(btn);
+    addWordToMessage(speakText, btn.id);
+    speak(speakText);
     recordUsageEvent(btn.id, 'independent');
   });
 
@@ -5118,7 +5663,7 @@ function addWordToMessage(word, btnId) {
   if (btnId && btnId === lastTapId && (now - lastTapTime) < 800) {
     const btn = buttons.find(b => b.id === btnId);
     if (btn && getWordCategory(btnId) === 'noun') {
-      messageWords[messageWords.length - 1] = pluralize(messageWords[messageWords.length - 1]);
+      messageWords[messageWords.length - 1] = getGrammarEngine().pluralize(messageWords[messageWords.length - 1]);
       messageButtonIds[messageButtonIds.length - 1] = btnId;
       lastTapId = null;
       lastTapTime = 0;
@@ -5207,14 +5752,17 @@ document.getElementById('search-input').addEventListener('input', e => {
   resultsEl.innerHTML = '';
   if (query.length === 0) return;
 
-  const matches = buttons.filter(b =>
-    b.type === 'fringe' && b.label.toLowerCase().includes(query)
-  ).slice(0, 30);
+  const matches = buttons.filter(b => {
+    if (b.type !== 'fringe') return false;
+    const primary = getPrimaryLabel(b).toLowerCase();
+    const english = b.label.toLowerCase();
+    return primary.includes(query) || english.includes(query);
+  }).slice(0, 30);
 
   // Build a map of folderId -> folder label
   const folderLabels = {};
   buttons.filter(b => b.type === 'folder').forEach(b => {
-    folderLabels[b.id.replace('folder-', '')] = b.label;
+    folderLabels[b.id.replace('folder-', '')] = getPrimaryLabel(b);
   });
 
   matches.forEach(btn => {
@@ -5229,7 +5777,7 @@ document.getElementById('search-input').addEventListener('input', e => {
 
     const label = document.createElement('span');
     label.className = 'search-label';
-    label.textContent = btn.label;
+    label.textContent = getPrimaryLabel(btn);
     cell.appendChild(label);
 
     const folder = document.createElement('span');
@@ -5238,8 +5786,9 @@ document.getElementById('search-input').addEventListener('input', e => {
     cell.appendChild(folder);
 
     cell.addEventListener('click', () => {
-      speak(btn.label);
-      addWordToMessage(btn.label, btn.id);
+      const speakText = getSpeakLabel(btn);
+      speak(speakText);
+      addWordToMessage(speakText, btn.id);
       recordUsageEvent(btn.id, 'independent');
       document.getElementById('search-overlay').classList.remove('open');
     });
@@ -5247,20 +5796,22 @@ document.getElementById('search-input').addEventListener('input', e => {
   });
 
   if (matches.length === 0) {
-    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">No matches found</div>';
+    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">' + t('search.noMatches', 'No matches found') + '</div>';
   }
 });
 
 // ── View Switching ──
-const TAB_VIEW_MAP = {
-  'tab-talk': { view: 'view-talk', title: 'Talk' },
-  'tab-schedule': { view: 'view-schedule', title: 'Schedule' },
-  'tab-rewards': { view: 'view-rewards', title: 'Rewards' },
-  'tab-insights': { view: 'view-insights', title: 'Insights' },
-};
+function getTabViewMap() {
+  return {
+    'tab-talk': { view: 'view-talk', title: t('tab.talk', 'Talk') },
+    'tab-schedule': { view: 'view-schedule', title: t('tab.schedule', 'Schedule') },
+    'tab-rewards': { view: 'view-rewards', title: t('tab.rewards', 'Rewards') },
+    'tab-insights': { view: 'view-insights', title: t('tab.insights', 'Insights') },
+  };
+}
 
 function switchTab(tabId) {
-  const tabInfo = TAB_VIEW_MAP[tabId];
+  const tabInfo = getTabViewMap()[tabId];
   if (!tabInfo) return;
 
   document.querySelectorAll('.tab-btn').forEach(t => {
@@ -5427,8 +5978,9 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
   btn.addEventListener('click', async () => {
     const newSize = parseInt(btn.dataset.size);
     if (newSize === getGridSize()) return;
-    const names = { 3: '3x3 Starter', 4: '4x4 Growing', 6: '6x6 Talker' };
-    if (!confirm(`Switch to ${names[newSize]}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.`)) return;
+    const names = { 3: t('grid.3x3', '3x3 Starter'), 4: t('grid.4x4', '4x4 Growing'), 6: t('grid.6x6', '6x6 Talker') };
+    const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
+    if (!confirm(confirmMsg)) return;
     await clearAllData();
     setGridSize(newSize);
     buttons = getTemplate(newSize);
@@ -5438,7 +5990,7 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
     buildIconLookup();
     renderGrid();
     updateGridSizeButtons();
-    showToast(`Switched to ${names[newSize]}`);
+    showToast(names[newSize]);
   });
 });
 
@@ -5448,6 +6000,22 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
   el.checked = grammarEnabled(key);
   el.addEventListener('change', () => {
     localStorage.setItem('aac-grammar-' + key, el.checked ? '1' : '0');
+  });
+});
+
+// ── Language Settings ──
+document.querySelectorAll('.lang-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setLanguage(btn.dataset.lang);
+  });
+});
+
+document.querySelectorAll('.picker-lang-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.picker-lang-opt').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.dataset.lang;
+    localStorage.setItem('aac-language', currentLang);
   });
 });
 
@@ -5485,13 +6053,13 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
 document.getElementById('btn-voice-slower').addEventListener('click', () => {
   speechRate = Math.max(0.3, speechRate - 0.15);
   updateSpeedDisplay();
-  speak('This is how I sound');
+  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 document.getElementById('btn-voice-faster').addEventListener('click', () => {
   speechRate = Math.min(1.5, speechRate + 0.15);
   updateSpeedDisplay();
-  speak('This is how I sound');
+  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 function updateSpeedDisplay() {
@@ -5506,14 +6074,14 @@ document.getElementById('btn-voice-lower').addEventListener('click', () => {
   speechPitch = Math.max(0.5, speechPitch - 0.2);
   localStorage.setItem('aac-pitch', speechPitch);
   updatePitchDisplay();
-  speak('This is how I sound');
+  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 document.getElementById('btn-voice-higher').addEventListener('click', () => {
   speechPitch = Math.min(2.0, speechPitch + 0.2);
   localStorage.setItem('aac-pitch', speechPitch);
   updatePitchDisplay();
-  speak('This is how I sound');
+  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 function updatePitchDisplay() {
@@ -5526,7 +6094,7 @@ function updatePitchDisplay() {
 }
 
 document.getElementById('btn-voice-test').addEventListener('click', () => {
-  speak('Hi! This is how I sound when I talk.');
+  speak(currentLang !== 'en' ? 'Hola! Asi es como sueno cuando hablo.' : 'Hi! This is how I sound when I talk.');
 });
 
 // ── Prediction Settings ──
@@ -5535,23 +6103,23 @@ document.getElementById('setting-auto-speak').addEventListener('change', (e) => 
 });
 
 document.getElementById('btn-reset-predictions').addEventListener('click', () => {
-  if (!confirm('Reset all learned word predictions? This cannot be undone.')) return;
+  if (!confirm(t('confirm.resetPredictions', 'Reset all learned word predictions? This cannot be undone.'))) return;
   resetLearnedPredictions();
   clearPredictions();
-  showToast('Predictions reset');
+  showToast(t('toast.predictionsReset', 'Predictions reset'));
 });
 
 document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
 
 document.getElementById('btn-clear-usage').addEventListener('click', () => {
-  if (!confirm('Clear all usage data? This cannot be undone.')) return;
+  if (!confirm(t('confirm.clearUsage', 'Clear all usage data? This cannot be undone.'))) return;
   clearUsageData();
   if (activeTab === 'insights') renderInsights();
-  showToast('Usage data cleared');
+  showToast(t('toast.usageCleared', 'Usage data cleared'));
 });
 
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
-  if (!confirm('Reset all buttons to defaults? Your custom images and edits will be lost.')) return;
+  if (!confirm(t('confirm.resetDefaults', 'Reset all buttons to defaults? Your custom images and edits will be lost.'))) return;
   await clearAllData();
   resetLearnedPredictions();
   clearPredictions();
@@ -5562,7 +6130,7 @@ document.getElementById('btn-reset-defaults').addEventListener('click', async ()
   rebuildCoreWordsCache();
   buildIconLookup();
   renderGrid();
-  showToast('Reset to defaults');
+  showToast(t('toast.resetDefaults', 'Reset to defaults'));
 });
 
 // ── Edit Modal ──
@@ -5611,6 +6179,16 @@ function openEditModal(buttonId) {
   document.getElementById('edit-label').value = btn.label;
   document.getElementById('edit-color').value = btn.color;
 
+  // Show Spanish label field when in es/both mode
+  const esRow = document.getElementById('edit-es-row');
+  if (currentLang !== 'en') {
+    esRow.style.display = '';
+    const customEs = getCustomEsLabels();
+    document.getElementById('edit-label-es').value = customEs[btn.id] || LANG_ES.labels[btn.id] || '';
+  } else {
+    esRow.style.display = 'none';
+  }
+
   // Protect core words from deletion (motor planning consistency)
   const isCoreWord = btn.type === 'core';
   renderColorSwatches(btn.color, isCoreWord);
@@ -5648,22 +6226,32 @@ document.getElementById('btn-edit-save').addEventListener('click', async () => {
   btn.label = document.getElementById('edit-label').value.trim() || btn.label;
   btn.color = document.getElementById('edit-color').value;
 
+  // Save custom Spanish label if visible
+  if (currentLang !== 'en') {
+    const esVal = document.getElementById('edit-label-es').value.trim();
+    if (esVal) {
+      const customEs = getCustomEsLabels();
+      customEs[btn.id] = esVal;
+      localStorage.setItem('aac-custom-es-labels', JSON.stringify(customEs));
+    }
+  }
+
   await saveButton(btn);
   renderGrid();
   document.getElementById('edit-overlay').classList.remove('open');
   editingButtonId = null;
-  showToast('Button saved');
+  showToast(t('toast.buttonSaved', 'Button saved'));
 });
 
 document.getElementById('btn-edit-remove').addEventListener('click', async () => {
-  if (!confirm('Delete this button?')) return;
+  if (!confirm(t('confirm.deleteButton', 'Delete this button?'))) return;
   buttons = buttons.filter(b => b.id !== editingButtonId);
   await deleteButton(editingButtonId);
   await deleteImage(editingButtonId);
   renderGrid();
   document.getElementById('edit-overlay').classList.remove('open');
   editingButtonId = null;
-  showToast('Button deleted');
+  showToast(t('toast.buttonDeleted', 'Button deleted'));
 });
 
 document.getElementById('btn-edit-upload').addEventListener('click', () => {
@@ -5687,7 +6275,7 @@ document.getElementById('btn-edit-clear-img').addEventListener('click', async ()
   preview.style.display = 'none';
   preview.src = '';
   renderGrid();
-  showToast('Image removed');
+  showToast(t('toast.imageRemoved', 'Image removed'));
 });
 
 // Camera capture in edit modal
@@ -5792,7 +6380,8 @@ const SYMBOL_KEYWORDS = {
 const ARASAAC_API = 'https://api.arasaac.org/v1';
 
 async function searchArasaac(keyword) {
-  const url = `${ARASAAC_API}/pictograms/en/search/${encodeURIComponent(keyword)}`;
+  const arasaacLang = currentLang === 'en' ? 'en' : 'es';
+  const url = `${ARASAAC_API}/pictograms/${arasaacLang}/search/${encodeURIComponent(keyword)}`;
   const res = await fetch(url);
   if (!res.ok) return [];
   const data = await res.json();
@@ -5835,11 +6424,12 @@ async function downloadSymbolsForButtons() {
   if (localStorage.getItem('aac-symbols-cached') === '1') return;
   if (!navigator.onLine) return;
 
-  const entries = Object.entries(SYMBOL_KEYWORDS);
+  const kwMap = currentLang !== 'en' ? { ...SYMBOL_KEYWORDS, ...LANG_ES.symbolKeywords } : SYMBOL_KEYWORDS;
+  const entries = Object.entries(kwMap);
   let completed = 0;
   const total = entries.length;
   // Show progress via toast
-  showToast(`Downloading symbols... 0/${total}`);
+  showToast(t('toast.downloading', 'Downloading symbols...') + ` 0/${total}`);
 
   const batchSize = 5;
   for (let i = 0; i < entries.length; i += batchSize) {
@@ -5859,12 +6449,12 @@ async function downloadSymbolsForButtons() {
     }));
     // Update progress
     if (completed < total) {
-      showToast(`Downloading symbols... ${completed}/${total}`);
+      showToast(t('toast.downloading', 'Downloading symbols...') + ` ${completed}/${total}`);
     }
   }
 
   localStorage.setItem('aac-symbols-cached', '1');
-  showToast('Symbols ready!');
+  showToast(t('toast.symbolsReady', 'Symbols ready!'));
   renderGrid();
 }
 
@@ -5874,7 +6464,7 @@ document.getElementById('btn-edit-symbols').addEventListener('click', () => {
   const input = document.getElementById('symbol-search-input');
   input.value = '';
   document.getElementById('symbol-results').innerHTML = '';
-  document.getElementById('symbol-status').textContent = 'Search for a symbol by name';
+  document.getElementById('symbol-status').textContent = t('symbol.searchHint', 'Search for a symbol by name');
   input.focus();
 });
 
@@ -5900,7 +6490,7 @@ document.getElementById('symbol-search-input').addEventListener('input', e => {
   const query = e.target.value.trim();
   if (!query) {
     document.getElementById('symbol-results').innerHTML = '';
-    document.getElementById('symbol-status').textContent = 'Search for a symbol by name';
+    document.getElementById('symbol-status').textContent = t('symbol.searchHint', 'Search for a symbol by name');
     return;
   }
   document.getElementById('symbol-status').textContent = 'Searching...';
@@ -6471,7 +7061,7 @@ function renderDefaultActivities() {
   categories.forEach(cat => {
     const title = document.createElement('div');
     title.className = 'picker-category-title';
-    title.textContent = cat;
+    title.textContent = (currentLang !== 'en' && LANG_ES.scheduleCategories[cat]) ? LANG_ES.scheduleCategories[cat] : cat;
     container.appendChild(title);
 
     const grid = document.createElement('div');
@@ -6480,17 +7070,18 @@ function renderDefaultActivities() {
     DEFAULT_SCHEDULE_ACTIVITIES.filter(a => a.category === cat).forEach(act => {
       const item = document.createElement('button');
       item.className = 'picker-item';
-      item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><span class="picker-item-label">' + act.label + '</span>';
+      const displayLabel = (currentLang !== 'en' && LANG_ES.scheduleActivities[act.key]) ? LANG_ES.scheduleActivities[act.key] : act.label;
+      item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><span class="picker-item-label">' + displayLabel + '</span>';
       item.addEventListener('click', () => {
         editorSteps.push({
           stepId: 'step-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          label: act.label,
+          label: displayLabel,
           imageType: 'default',
           defaultImageKey: act.key,
           customImageKey: null,
         });
         renderEditorSteps();
-        showToast(act.label + ' added');
+        showToast(displayLabel + ' added');
       });
       grid.appendChild(item);
     });
@@ -7303,7 +7894,7 @@ function renderTaskImageDefaults() {
   categories.forEach(cat => {
     const title = document.createElement('div');
     title.className = 'picker-category-title';
-    title.textContent = cat;
+    title.textContent = (currentLang !== 'en' && LANG_ES.taskCategories[cat]) ? LANG_ES.taskCategories[cat] : cat;
     container.appendChild(title);
 
     const grid = document.createElement('div');
@@ -7311,7 +7902,8 @@ function renderTaskImageDefaults() {
     DEFAULT_TASK_IMAGES.filter(a => a.category === cat).forEach(act => {
       const item = document.createElement('button');
       item.className = 'picker-item';
-      item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><div class="picker-item-label">' + act.label + '</div>';
+      const taskLabel = (currentLang !== 'en' && LANG_ES.taskImages[act.key]) ? LANG_ES.taskImages[act.key] : act.label;
+      item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><div class="picker-item-label">' + taskLabel + '</div>';
       item.addEventListener('click', () => {
         configTaskImageType = 'default';
         configTaskDefaultImageKey = act.key;
