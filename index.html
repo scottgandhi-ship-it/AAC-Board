@@ -947,6 +947,9 @@ html.lang-es #search-results:empty::after {
   letter-spacing: 0.03em;
 }
 
+.parent-mode-only { display: none !important; }
+.parent-mode .parent-mode-only { display: block !important; }
+
 #btn-parent-settings.parent-active {
   color: #FF8F00;
 }
@@ -2672,13 +2675,18 @@ body.sensory-high-contrast .task-tile {
   border: 2px solid rgba(0,0,0,0.3) !important;
 }
 
-/* ── Insights Tab ── */
-#tab-insights { display: none; }
-.parent-mode #tab-insights { display: flex; }
-
 #view-insights {
-  padding: 16px;
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #f5f5f5;
   overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+#view-insights.open {
+  display: block;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -2939,8 +2947,12 @@ body.sensory-high-contrast .task-tile {
   </div>
 </div>
 
-<!-- Insights View (parent-mode only) -->
-<div id="view-insights" class="view" role="tabpanel" aria-labelledby="tab-insights">
+<!-- Insights Overlay (parent-mode only, opened from Settings) -->
+<div id="view-insights" role="dialog" aria-label="Insights">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <h2 style="margin:0;font-size:1.3rem;font-weight:800;color:#333;">Insights</h2>
+    <button id="btn-close-insights" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;color:#888;">&#x2715;</button>
+  </div>
   <div id="insights-content">
     <div class="insights-cards" id="insights-cards"></div>
     <div class="insights-section" id="insights-top-words">
@@ -2971,10 +2983,6 @@ body.sensory-high-contrast .task-tile {
   <button class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
     <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     <span class="tab-label">Rewards</span>
-  </button>
-  <button class="tab-btn" id="tab-insights" role="tab" aria-selected="false" aria-controls="view-insights">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span class="tab-label">Insights</span>
   </button>
   <button class="tab-btn" id="btn-parent-settings" aria-label="Settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -3069,6 +3077,11 @@ body.sensory-high-contrast .task-tile {
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
       <button class="settings-btn" id="btn-reset-predictions" style="color:#e53935;">Reset learned predictions</button>
       <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
+    </div>
+    <div class="settings-section parent-mode-only">
+      <h3>Insights</h3>
+      <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;">View Insights &amp; Usage Data</button>
+      <p style="font-size:0.85rem;color:#888;margin-top:4px;">See your child's most used words, weekly activity, and export data.</p>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -3687,7 +3700,7 @@ function updateUIStrings() {
   // Tab titles
   const tabTitles = {
     'tab-talk': t('tab.talk', 'Talk'), 'tab-schedule': t('tab.schedule', 'Schedule'),
-    'tab-rewards': t('tab.rewards', 'Rewards'), 'tab-insights': t('tab.insights', 'Insights'),
+    'tab-rewards': t('tab.rewards', 'Rewards'),
   };
   document.querySelectorAll('.tab-btn').forEach(btn => {
     const label = btn.querySelector('.tab-label');
@@ -5772,7 +5785,6 @@ function getTabViewMap() {
     'tab-talk': { view: 'view-talk', title: t('tab.talk', 'Talk') },
     'tab-schedule': { view: 'view-schedule', title: t('tab.schedule', 'Schedule') },
     'tab-rewards': { view: 'view-rewards', title: t('tab.rewards', 'Rewards') },
-    'tab-insights': { view: 'view-insights', title: t('tab.insights', 'Insights') },
   };
 }
 
@@ -5793,7 +5805,6 @@ function switchTab(tabId) {
   document.getElementById('app-header-title').textContent = tabInfo.title;
   activeTab = tabId.replace('tab-', '');
 
-  if (activeTab === 'insights') renderInsights();
 }
 
 document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -5868,7 +5879,7 @@ function setParentMode(enabled) {
       clearTimeout(parentAutoLockTimer);
       parentAutoLockTimer = null;
     }
-    if (activeTab === 'insights') switchTab('tab-talk');
+    document.getElementById('view-insights').classList.remove('open');
     document.getElementById('settings-overlay').classList.remove('open');
   }
 }
@@ -5893,6 +5904,17 @@ document.getElementById('btn-toggle-parent-mode').addEventListener('click', () =
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.add('open');
   updateGridSizeButtons();
+});
+
+// ── Insights (opened from Settings) ──
+document.getElementById('btn-open-insights').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('view-insights').classList.add('open');
+  renderInsights();
+});
+
+document.getElementById('btn-close-insights').addEventListener('click', () => {
+  document.getElementById('view-insights').classList.remove('open');
 });
 
 // ── Grid Size Settings ──
@@ -6043,7 +6065,7 @@ document.getElementById('btn-export-csv').addEventListener('click', exportUsageC
 document.getElementById('btn-clear-usage').addEventListener('click', () => {
   if (!confirm(t('confirm.clearUsage', 'Clear all usage data? This cannot be undone.'))) return;
   clearUsageData();
-  if (activeTab === 'insights') renderInsights();
+  renderInsights();
   showToast(t('toast.usageCleared', 'Usage data cleared'));
 });
 
