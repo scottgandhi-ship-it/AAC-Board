@@ -832,6 +832,73 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   font-size: 0.9rem;
 }
 
+/* ── PWA Install Banner ── */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  padding: 16px 20px;
+  z-index: 9999;
+  display: none;
+  animation: installSlideUp 0.3s ease-out;
+}
+@keyframes installSlideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.pwa-install-banner-text {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.pwa-install-banner-text strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+.pwa-install-banner-buttons {
+  display: flex;
+  gap: 8px;
+}
+.pwa-install-banner-buttons button {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pwa-install-btn-primary {
+  background: var(--accent, #7C74FF);
+  color: #fff;
+}
+.pwa-install-btn-dismiss {
+  background: #f0f0f0;
+  color: #666;
+}
+.pwa-install-ios-steps {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.pwa-install-ios-steps .ios-share-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
 /* ── Getting Started Guide Accordion ── */
 .guide-item { border-bottom: 1px solid #eee; }
 .guide-item:last-child { border-bottom: none; }
@@ -3832,6 +3899,11 @@ body.sensory-high-contrast .task-tile {
 
     <!-- Category: Data & Privacy -->
     <div class="settings-category-content" id="settings-cat-data">
+      <div class="settings-section" id="settings-install-section" style="display:none;">
+        <h3>App</h3>
+        <button class="settings-btn" id="btn-settings-install" style="background:#e8f5e9;color:#2E7D32;">Install App on Device</button>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="settings-install-hint">Add to your home screen for full-screen access and offline use.</p>
+      </div>
       <div class="settings-section">
         <h3>Data</h3>
         <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
@@ -3848,6 +3920,18 @@ body.sensory-high-contrast .task-tile {
 <!-- Export / Import Overlay -->
 <div id="export-import-overlay" class="export-import-overlay">
   <div id="export-import-panel" class="export-import-panel"></div>
+</div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" class="pwa-install-banner" role="alert" aria-live="polite">
+  <div class="pwa-install-banner-text" id="pwa-install-text">
+    <strong>Use this like an app</strong>
+    Add to your home screen for full-screen, quick access, and offline use.
+  </div>
+  <div class="pwa-install-banner-buttons" id="pwa-install-buttons">
+    <button class="pwa-install-btn-dismiss" id="pwa-install-dismiss">Not now</button>
+    <button class="pwa-install-btn-primary" id="pwa-install-accept">Add to Home Screen</button>
+  </div>
 </div>
 
 <!-- Edit Button Modal -->
@@ -10182,6 +10266,115 @@ window.addEventListener('resize', updateLandscapeGrid);
 if (screen.orientation) {
   screen.orientation.addEventListener('change', updateLandscapeGrid);
 }
+
+// ── PWA Install Prompt ──
+(function() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || navigator.standalone === true;
+  if (isStandalone) return;
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const banner = document.getElementById('pwa-install-banner');
+  const textEl = document.getElementById('pwa-install-text');
+  const buttonsEl = document.getElementById('pwa-install-buttons');
+  const acceptBtn = document.getElementById('pwa-install-accept');
+  const dismissBtn = document.getElementById('pwa-install-dismiss');
+  const settingsSection = document.getElementById('settings-install-section');
+  const settingsBtn = document.getElementById('btn-settings-install');
+  const settingsHint = document.getElementById('settings-install-hint');
+  let deferredPrompt = null;
+
+  const DISMISS_KEY = 'pwa-install-dismissed';
+  const wasDismissed = localStorage.getItem(DISMISS_KEY);
+
+  function showBanner() {
+    banner.style.display = 'block';
+  }
+
+  function hideBanner() {
+    banner.style.display = 'none';
+  }
+
+  function triggerNativeInstall() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        hideBanner();
+        if (settingsSection) settingsSection.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  }
+
+  // Android/Chrome: capture the native install prompt
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Show install option in Settings
+    if (settingsSection) {
+      settingsSection.style.display = '';
+      settingsBtn.addEventListener('click', triggerNativeInstall);
+    }
+
+    // Show banner after a short delay (let parent explore first)
+    if (!wasDismissed) {
+      setTimeout(showBanner, 5000);
+    }
+  });
+
+  // iOS: no beforeinstallprompt, show manual instructions
+  if (isIOS) {
+    textEl.innerHTML =
+      '<strong>Use this like an app</strong>' +
+      'Tap the Share button ' +
+      '<svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>' +
+      '<polyline points="16 6 12 2 8 6"/>' +
+      '<line x1="12" y1="2" x2="12" y2="15"/>' +
+      '</svg>' +
+      ' at the bottom of Safari, then tap <strong style="display:inline;">"Add to Home Screen."</strong>';
+
+    buttonsEl.innerHTML =
+      '<button class="pwa-install-btn-dismiss" id="pwa-install-dismiss-ios">Got it</button>';
+
+    document.getElementById('pwa-install-dismiss-ios').addEventListener('click', function() {
+      hideBanner();
+      localStorage.setItem(DISMISS_KEY, '1');
+    });
+
+    // Show iOS install in Settings too
+    if (settingsSection) {
+      settingsSection.style.display = '';
+      settingsHint.textContent = 'In Safari, tap the Share button then "Add to Home Screen."';
+      settingsBtn.addEventListener('click', function() {
+        showBanner();
+        var settingsOverlay = document.getElementById('settings-overlay');
+        if (settingsOverlay) settingsOverlay.style.display = 'none';
+      });
+    }
+
+    if (!wasDismissed) {
+      setTimeout(showBanner, 5000);
+    }
+  }
+
+  // Dismiss button (Android/Chrome)
+  dismissBtn.addEventListener('click', function() {
+    hideBanner();
+    localStorage.setItem(DISMISS_KEY, '1');
+  });
+
+  // Accept button (Android/Chrome)
+  acceptBtn.addEventListener('click', triggerNativeInstall);
+
+  // Hide banner if app becomes installed
+  window.addEventListener('appinstalled', function() {
+    hideBanner();
+    if (settingsSection) settingsSection.style.display = 'none';
+  });
+})();
 
 // ── Register Service Worker ──
 if ('serviceWorker' in navigator) {
