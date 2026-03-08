@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#5c6bc0">
+<meta name="theme-color" content="#7C74FF">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── Fitzgerald Key Colors (AAC category system -- DO NOT MODIFY) ── */
   --color-yellow: #FFE082;
   --color-green: #81C784;
   --color-red: #EF9A9A;
@@ -21,8 +22,28 @@
   --color-pink: #F48FB1;
   --color-orange: #FFCC80;
   --color-home: #CFD8DC;
-  --bar-bg: #6C63FF;
-  --bar-bg-dark: #5A52D5;
+
+  /* ── App Chrome Colors ── */
+  --chrome-primary: #7C74FF;
+  --chrome-primary-dark: #5A52D5;
+  --chrome-accent: #F5A623;
+  --chrome-bg: #f5f5f5;
+  --chrome-surface: #ffffff;
+  --chrome-surface-alt: #fafafa;
+  --chrome-text: #333333;
+  --chrome-text-secondary: #666666;
+  --chrome-text-muted: #888888;
+  --chrome-border: #e0e0e0;
+  --chrome-border-light: #eeeeee;
+  --chrome-success: #43A047;
+  --chrome-danger: #D32F2F;
+  --chrome-warning: #FB8C00;
+
+  /* Backward-compatible aliases */
+  --bar-bg: var(--chrome-primary);
+  --bar-bg-dark: var(--chrome-primary-dark);
+
+  /* ── Layout Tokens ── */
   --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
   --shadow-lifted: 0 6px 20px rgba(0,0,0,0.12);
   --radius-lg: 20px;
@@ -51,11 +72,12 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: linear-gradient(135deg, var(--bar-bg) 0%, var(--bar-bg-dark) 100%);
-  color: #fff;
+  background: #f8f7ff;
+  color: var(--chrome-text);
   min-height: 60px;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.25);
+  border-bottom: 2px solid rgba(124, 116, 255, 0.25);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 #message-words {
@@ -65,21 +87,22 @@ body {
   gap: 6px;
   min-height: 40px;
   padding: 6px 10px;
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(4px);
+  background: #f3f2ff;
   border-radius: var(--radius-md);
   align-items: center;
   font-size: 1.2rem;
   font-weight: 700;
+  color: var(--chrome-text);
   overflow-y: auto;
   max-height: 80px;
 }
 
 #message-words .word-chip {
-  background: rgba(255,255,255,0.3);
+  background: rgba(108,99,255,0.08);
   padding: 3px 10px;
   border-radius: 8px;
   letter-spacing: 0.02em;
+  color: var(--chrome-text);
 }
 
 .bar-btn {
@@ -114,6 +137,11 @@ body {
 
 #btn-backspace {
   background: linear-gradient(135deg, #FFA726, #FB8C00);
+  color: #fff;
+}
+
+#btn-search {
+  background: linear-gradient(135deg, var(--chrome-primary), var(--chrome-primary-dark));
   color: #fff;
 }
 
@@ -393,7 +421,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   position: fixed;
   inset: 0;
   z-index: 400;
-  background: #fff;
+  background: linear-gradient(160deg, #f5f3ff 0%, #fef1f5 40%, #fffbf0 80%, #f2faf4 100%);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -430,12 +458,12 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 .onboarding-subhead {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #FF8F00;
+  color: var(--chrome-primary);
   margin: 0 0 24px;
 }
 .onboarding-body {
   font-size: 1rem;
-  color: #666;
+  color: #555;
   line-height: 1.5;
   margin: 0 0 32px;
 }
@@ -451,9 +479,8 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   margin: 0 0 4px;
 }
 .onboarding-reassure {
-  font-size: 0.85rem;
-  color: #999;
-  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--chrome-text-secondary);
   margin: 0 0 16px;
 }
 .onboarding-btn {
@@ -463,14 +490,36 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   font-weight: 700;
   font-family: inherit;
   color: #fff;
-  background: linear-gradient(135deg, #FF6F00, #FFA000);
+  background: linear-gradient(135deg, var(--chrome-primary), var(--chrome-primary-dark));
   border: none;
   border-radius: 12px;
   cursor: pointer;
   min-width: 44px;
   min-height: 44px;
+  box-shadow: 0 3px 12px rgba(124, 116, 255, 0.25);
 }
 .onboarding-btn:active { opacity: 0.85; }
+
+.onboarding-skip {
+  display: block;
+  margin: 16px auto 0;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-text-muted);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+.onboarding-skip:active { color: var(--chrome-text-secondary); }
+
+@media (max-width: 400px) {
+  .grid-picker-options { flex-direction: column; align-items: center; }
+  .grid-picker-card { max-width: 100%; width: 100%; }
+}
 
 .onboarding-dots {
   display: flex;
@@ -488,7 +537,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   background: #ddd;
 }
 .onboarding-dots .dot.active {
-  background: #FF8F00;
+  background: var(--chrome-primary);
 }
 
 /* Coach Marks Overlay (onboarding step 3) */
@@ -533,7 +582,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 .coach-marks-counter {
   font-size: 0.85rem;
-  color: #FF8F00;
+  color: var(--chrome-primary);
   font-weight: 600;
   margin: 8px 0 0;
 }
@@ -835,6 +884,106 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 .settings-btn.active { border-color: var(--bar-bg); background: rgba(108,99,255,0.06); }
 
+/* ── Settings Category Nav ── */
+.settings-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 0 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--chrome-border-light);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.settings-nav::-webkit-scrollbar { display: none; }
+
+.settings-category-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 2px solid var(--chrome-border);
+  border-radius: 20px;
+  background: var(--chrome-surface-alt);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--chrome-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.settings-category-btn.active {
+  border-color: var(--chrome-primary);
+  background: rgba(124, 116, 255, 0.08);
+  color: var(--chrome-primary);
+}
+
+.settings-category-content {
+  display: none;
+}
+.settings-category-content.active {
+  display: block;
+}
+
+/* Destructive action buttons */
+.settings-btn.danger {
+  border: 2px solid var(--chrome-danger);
+  background: #FFF5F5;
+  color: var(--chrome-danger);
+}
+.settings-btn.danger:active {
+  background: #FFEBEE;
+}
+
+/* Voice sliders */
+.voice-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.voice-slider-row label {
+  width: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--chrome-text-secondary);
+  flex-shrink: 0;
+}
+.voice-slider-row input[type="range"] {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--chrome-border);
+  border-radius: 3px;
+  outline: none;
+}
+.voice-slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--chrome-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.voice-slider-row input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--chrome-primary);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.voice-slider-value {
+  width: 60px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--chrome-text-muted);
+  flex-shrink: 0;
+}
+
 #btn-close-settings {
   width: 100%;
   padding: 14px;
@@ -847,6 +996,9 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   cursor: pointer;
   margin-top: 8px;
   box-shadow: 0 3px 12px rgba(108,99,255,0.25);
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
 }
 
 /* ── Edit Button Modal ── */
@@ -1557,7 +1709,8 @@ html.lang-es #search-results:empty::after {
   background: #fff;
   cursor: pointer;
   box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
-  animation: tileGlow 2s ease-in-out infinite;
+  animation: tileGlow 2s ease-in-out 3;
+  animation-fill-mode: forwards;
 }
 
 .task-tile.active .task-tile-number {
@@ -1623,7 +1776,8 @@ html.lang-es #search-results:empty::after {
   background: linear-gradient(135deg, #EDE7F6, #E8EAF6);
   box-shadow: 0 4px 20px rgba(124, 77, 255, 0.25);
   cursor: pointer;
-  animation: rewardCardGlow 2s ease-in-out infinite;
+  animation: rewardCardGlow 2s ease-in-out 3;
+  animation-fill-mode: forwards;
 }
 
 .reward-card.unlocked:active {
@@ -2273,9 +2427,11 @@ html.lang-es #search-results:empty::after {
 
 .sched-step.current {
   border-left-color: var(--bar-bg);
-  background: #EDE7F6;
-  min-height: 88px;
-  box-shadow: 0 2px 8px rgba(92,107,192,0.25);
+  border-left-width: 6px;
+  background: #E8E0FF;
+  min-height: 100px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(124, 116, 255, 0.3);
 }
 
 .sched-step.done {
@@ -2349,11 +2505,36 @@ html.lang-es #search-results:empty::after {
 
 .sched-step-tap-hint {
   display: none;
-  font-size: 0.75rem;
-  color: #888;
 }
 
-.sched-step.current .sched-step-tap-hint { display: block; }
+.sched-step-done-btn {
+  display: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--chrome-success);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(67, 160, 71, 0.35);
+  animation: doneBtnPulse 1.5s ease-in-out 3;
+  animation-fill-mode: forwards;
+  font-family: inherit;
+}
+
+.sched-step.current .sched-step-done-btn {
+  display: flex;
+}
+
+@keyframes doneBtnPulse {
+  0%, 100% { box-shadow: 0 3px 10px rgba(67, 160, 71, 0.35); transform: scale(1); }
+  50% { box-shadow: 0 4px 16px rgba(67, 160, 71, 0.5); transform: scale(1.08); }
+}
 
 /* Schedule empty / all-done states */
 #schedule-empty,
@@ -2881,11 +3062,9 @@ html.lang-es #search-results:empty::after {
   #message-words { min-height: 28px; max-height: 48px; padding: 3px 8px; font-size: 1rem; }
   #prediction-bar { padding: 4px 10px; }
   .prediction-chip { padding: 5px 12px; font-size: 0.9rem; }
-  #core-word-strip { padding: 4px 8px; gap: 4px; }
-  .core-strip-btn { padding: 6px 4px; font-size: 0.85rem; }
-  .core-strip-btn .core-icon { font-size: 1.1em; }
+  #core-word-strip { max-height: 0; overflow: hidden; padding: 0; border: none; }
   #grid-container { padding: 6px; }
-  #grid { gap: 6px; }
+  #grid { gap: 4px; }
   .cell { padding: 4px 3px; gap: 2px; }
   #tab-bar { padding: 2px 4px; }
   .tab-btn { min-height: 40px; padding: 2px 0; }
@@ -3163,10 +3342,10 @@ body.sensory-high-contrast .task-tile {
       <svg viewBox="0 0 24 24" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <div id="message-words"></div>
-    <button class="bar-btn" id="btn-backspace" aria-label="Backspace">⌫</button>
-    <button class="bar-btn" id="btn-search" aria-label="Search words">🔍</button>
-    <button class="bar-btn" id="btn-speak" aria-label="Speak sentence">🔊</button>
-    <button class="bar-btn" id="btn-clear" aria-label="Clear sentence">✕</button>
+    <button class="bar-btn" id="btn-backspace" aria-label="Backspace"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+    <button class="bar-btn" id="btn-search" aria-label="Search words"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="bar-btn" id="btn-speak" aria-label="Speak sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+    <button class="bar-btn" id="btn-clear" aria-label="Clear sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div id="prediction-bar"></div>
   <div id="core-word-strip"></div>
@@ -3284,12 +3463,15 @@ body.sensory-high-contrast .task-tile {
 <div id="settings-overlay">
   <div id="settings-panel">
     <h2>Settings</h2>
+
+    <!-- Top-level: always visible -->
     <div class="settings-section">
       <h3>Parent Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
       <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
       <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
     </div>
+
     <div class="settings-section" id="getting-started-section">
       <h3>Getting Started</h3>
       <div class="guide-item">
@@ -3389,92 +3571,121 @@ body.sensory-high-contrast .task-tile {
         </div>
       </div>
     </div>
-    <div class="settings-section">
-      <h3>Buttons</h3>
-      <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
-      <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
-      <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
-      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
+
+    <!-- Category Navigation -->
+    <div class="settings-nav" role="tablist" aria-label="Settings categories">
+      <button class="settings-category-btn active" data-category="communication" role="tab" aria-selected="true">Communication</button>
+      <button class="settings-category-btn" data-category="accessibility" role="tab" aria-selected="false">Accessibility</button>
+      <button class="settings-category-btn" data-category="customize" role="tab" aria-selected="false">Customize</button>
+      <button class="settings-category-btn" data-category="data" role="tab" aria-selected="false">Data &amp; Privacy</button>
     </div>
-    <div class="settings-section">
-      <h3>Voice</h3>
-      <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
-      <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
-      <button class="settings-btn" id="btn-voice-slower">Slower voice</button>
-      <button class="settings-btn" id="btn-voice-faster">Faster voice</button>
-      <div id="voice-speed-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Speed: normal</div>
-      <button class="settings-btn" id="btn-voice-lower">Lower pitch</button>
-      <button class="settings-btn" id="btn-voice-higher">Higher pitch</button>
-      <div id="voice-pitch-display" style="text-align:center;color:#888;font-size:0.85rem;margin-top:4px;">Pitch: normal</div>
-      <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
-    </div>
-    <div class="settings-section">
-      <h3>Grid Size</h3>
-      <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-        <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
-        <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
-        <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
+
+    <!-- Category: Communication -->
+    <div class="settings-category-content active" id="settings-cat-communication">
+      <div class="settings-section">
+        <h3>Grid Size</h3>
+        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
+          <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
+          <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
+          <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
+        </div>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
-      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
-    </div>
-    <div class="settings-section">
-      <h3 data-t="settings.language">Language</h3>
-      <div id="language-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-        <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
-        <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
-        <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+      <div class="settings-section">
+        <h3 data-t="settings.language">Language</h3>
+        <div id="language-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
+          <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
+          <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
+          <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+        </div>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;" data-t="settings.languageHint">Switch the board language. "Both" shows English and Spanish on every button.</p>
       </div>
-      <p style="font-size:0.85rem;color:#888;margin-top:4px;" data-t="settings.languageHint">Switch the board language. "Both" shows English and Spanish on every button.</p>
+      <div class="settings-section">
+        <h3>Voice</h3>
+        <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
+        <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
+        <div class="voice-slider-row">
+          <label for="voice-speed-slider">Speed</label>
+          <input type="range" id="voice-speed-slider" min="0.3" max="1.5" step="0.15" value="0.85">
+          <span class="voice-slider-value" id="voice-speed-display">normal</span>
+        </div>
+        <div class="voice-slider-row">
+          <label for="voice-pitch-slider">Pitch</label>
+          <input type="range" id="voice-pitch-slider" min="0.5" max="2.0" step="0.2" value="1.0">
+          <span class="voice-slider-value" id="voice-pitch-display">normal</span>
+        </div>
+        <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+      </div>
+      <div class="settings-section">
+        <h3>Grammar Assistance</h3>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="grammar-plurals" class="settings-checkbox"> Auto-plurals (more cookie -> more cookies)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms (he want -> he wants)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles (I want cookie -> I want a cookie)
+        </label>
+      </div>
+      <div class="settings-section">
+        <h3>Predictions</h3>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="setting-auto-speak" class="settings-checkbox" checked> Auto-speak sentences
+        </label>
+        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
+        <button class="settings-btn danger" id="btn-reset-predictions">Reset learned predictions</button>
+        <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
+      </div>
     </div>
-    <div class="settings-section">
-      <h3>Grammar Assistance</h3>
-      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-plurals" class="settings-checkbox"> Auto-plurals (more cookie -> more cookies)
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms (he want -> he wants)
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles (I want cookie -> I want a cookie)
-      </label>
+
+    <!-- Category: Accessibility -->
+    <div class="settings-category-content" id="settings-cat-accessibility">
+      <div class="settings-section">
+        <h3>Sensory Preferences</h3>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
+        </label>
+        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
+        </label>
+        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
+        </label>
+        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects. Speech is not affected.</p>
+      </div>
     </div>
-    <div class="settings-section">
-      <h3>Symbols</h3>
-      <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
-      <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
+
+    <!-- Category: Customize -->
+    <div class="settings-category-content" id="settings-cat-customize">
+      <div class="settings-section">
+        <h3>Buttons</h3>
+        <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+        <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
+        <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
+      </div>
+      <div class="settings-section">
+        <h3>Symbols</h3>
+        <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
+      </div>
     </div>
-    <div class="settings-section">
-      <h3>Sensory Preferences</h3>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects. Speech is not affected.</p>
+
+    <!-- Category: Data & Privacy -->
+    <div class="settings-category-content" id="settings-cat-data">
+      <div class="settings-section">
+        <h3>Data</h3>
+        <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
+        <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
+        <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
+        <button class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
+      </div>
     </div>
-    <div class="settings-section">
-      <h3>Predictions</h3>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="setting-auto-speak" class="settings-checkbox" checked> Auto-speak sentences
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
-      <button class="settings-btn" id="btn-reset-predictions" style="color:#e53935;">Reset learned predictions</button>
-      <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
-    </div>
-    <div class="settings-section">
-      <h3>Data</h3>
-      <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
-      <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
-      <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
-      <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
-    </div>
+
     <button id="btn-close-settings">Done</button>
   </div>
 </div>
@@ -3683,6 +3894,7 @@ body.sensory-high-contrast .task-tile {
       <p class="onboarding-subhead">Let's give them a voice.</p>
       <p class="onboarding-body">AAC works alongside gestures, sounds, and expressions &mdash; it adds to how your child already communicates.</p>
       <button class="onboarding-btn" id="btn-onboarding-start">Get Started</button>
+      <button class="onboarding-skip" id="btn-onboarding-skip">Skip</button>
     </div>
     <div class="onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
@@ -5035,6 +5247,12 @@ const Onboarding = {
 // Wire onboarding buttons
 document.getElementById('btn-onboarding-start').addEventListener('click', () => {
   Onboarding.showStep(2);
+});
+
+document.getElementById('btn-onboarding-skip').addEventListener('click', () => {
+  localStorage.setItem('aac-onboarding', JSON.stringify({ complete: true }));
+  document.getElementById('onboarding-overlay').classList.remove('visible');
+  document.getElementById('coach-marks-overlay').classList.remove('visible');
 });
 
 // Child-grab escape: tap outside coach marks message dismisses onboarding
@@ -6928,48 +7146,61 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
   });
 });
 
-document.getElementById('btn-voice-slower').addEventListener('click', () => {
-  speechRate = Math.max(0.3, speechRate - 0.15);
+// Voice speed slider
+const speedSlider = document.getElementById('voice-speed-slider');
+speedSlider.value = speechRate;
+speedSlider.addEventListener('input', () => {
+  speechRate = parseFloat(speedSlider.value);
   updateSpeedDisplay();
-  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
-
-document.getElementById('btn-voice-faster').addEventListener('click', () => {
-  speechRate = Math.min(1.5, speechRate + 0.15);
-  updateSpeedDisplay();
+speedSlider.addEventListener('change', () => {
   speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 function updateSpeedDisplay() {
   const display = document.getElementById('voice-speed-display');
-  if (speechRate < 0.6) display.textContent = 'Speed: slow';
-  else if (speechRate < 0.9) display.textContent = 'Speed: normal';
-  else if (speechRate < 1.2) display.textContent = 'Speed: fast';
-  else display.textContent = 'Speed: very fast';
+  if (speechRate < 0.6) display.textContent = 'slow';
+  else if (speechRate < 0.9) display.textContent = 'normal';
+  else if (speechRate < 1.2) display.textContent = 'fast';
+  else display.textContent = 'very fast';
 }
 
-document.getElementById('btn-voice-lower').addEventListener('click', () => {
-  speechPitch = Math.max(0.5, speechPitch - 0.2);
+// Voice pitch slider
+const pitchSlider = document.getElementById('voice-pitch-slider');
+pitchSlider.value = speechPitch;
+pitchSlider.addEventListener('input', () => {
+  speechPitch = parseFloat(pitchSlider.value);
   localStorage.setItem('aac-pitch', speechPitch);
   updatePitchDisplay();
-  speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
-
-document.getElementById('btn-voice-higher').addEventListener('click', () => {
-  speechPitch = Math.min(2.0, speechPitch + 0.2);
-  localStorage.setItem('aac-pitch', speechPitch);
-  updatePitchDisplay();
+pitchSlider.addEventListener('change', () => {
   speak(currentLang !== 'en' ? 'Asi sueno' : 'This is how I sound');
 });
 
 function updatePitchDisplay() {
   const display = document.getElementById('voice-pitch-display');
-  if (speechPitch < 0.7) display.textContent = 'Pitch: very low';
-  else if (speechPitch < 0.95) display.textContent = 'Pitch: low';
-  else if (speechPitch < 1.15) display.textContent = 'Pitch: normal';
-  else if (speechPitch < 1.5) display.textContent = 'Pitch: high';
-  else display.textContent = 'Pitch: very high';
+  if (speechPitch < 0.7) display.textContent = 'very low';
+  else if (speechPitch < 0.95) display.textContent = 'low';
+  else if (speechPitch < 1.15) display.textContent = 'normal';
+  else if (speechPitch < 1.5) display.textContent = 'high';
+  else display.textContent = 'very high';
 }
+
+// Settings category navigation
+document.querySelectorAll('.settings-category-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.settings-category-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    const cat = btn.dataset.category;
+    document.querySelectorAll('.settings-category-content').forEach(c => c.classList.remove('active'));
+    const target = document.getElementById('settings-cat-' + cat);
+    if (target) target.classList.add('active');
+  });
+});
 
 document.getElementById('btn-voice-test').addEventListener('click', () => {
   speak(currentLang !== 'en' ? 'Hola! Asi es como sueno cuando hablo.' : 'Hi! This is how I sound when I talk.');
@@ -7922,6 +8153,10 @@ async function reloadBoard() {
   speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
   selectedVoiceName = localStorage.getItem('aac-voice') || '';
   initSpeech();
+  const sSlider = document.getElementById('voice-speed-slider');
+  if (sSlider) sSlider.value = speechRate;
+  const pSlider = document.getElementById('voice-pitch-slider');
+  if (pSlider) pSlider.value = speechPitch;
   updateSpeedDisplay();
   updatePitchDisplay();
 
@@ -8112,10 +8347,15 @@ function renderSchedule() {
     }
 
     if (step.status === 'current') {
-      const hint = document.createElement('div');
-      hint.className = 'sched-step-tap-hint';
-      hint.textContent = 'Tap when done';
-      row.appendChild(hint);
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'sched-step-done-btn';
+      doneBtn.textContent = 'Done!';
+      doneBtn.setAttribute('aria-label', 'Mark ' + step.label + ' as done');
+      doneBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        completeCurrentStep(idx);
+      });
+      row.appendChild(doneBtn);
 
       row.style.cursor = 'pointer';
       row.addEventListener('click', () => completeCurrentStep(idx));
@@ -9358,6 +9598,29 @@ document.getElementById('btn-reset-track').addEventListener('click', async () =>
   showToast('Track reset');
 });
 
+// ── Landscape Grid Optimization ──
+let landscapeActive = false;
+const LANDSCAPE_COL_MAP = { 3: 4, 4: 6, 6: 8 };
+
+function updateLandscapeGrid() {
+  const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
+  if (isLandscape && !landscapeActive) {
+    landscapeActive = true;
+    const baseSize = getGridSize();
+    const landscapeCols = LANDSCAPE_COL_MAP[baseSize] || baseSize;
+    document.documentElement.style.setProperty('--grid-cols', landscapeCols);
+  } else if (!isLandscape && landscapeActive) {
+    landscapeActive = false;
+    const baseSize = getGridSize();
+    document.documentElement.style.setProperty('--grid-cols', baseSize);
+  }
+}
+
+window.addEventListener('resize', updateLandscapeGrid);
+if (screen.orientation) {
+  screen.orientation.addEventListener('change', updateLandscapeGrid);
+}
+
 // ── Register Service Worker ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
@@ -9367,6 +9630,7 @@ if ('serviceWorker' in navigator) {
 init();
 initRewards();
 initSchedules();
+updateLandscapeGrid();
 </script>
 </body>
 </html>
