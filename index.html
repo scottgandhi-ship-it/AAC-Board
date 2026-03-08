@@ -3817,11 +3817,11 @@ body.sensory-high-contrast .task-tile {
     <div class="settings-category-content active" id="settings-cat-communication">
       <div class="settings-section">
         <h3>Grid Size</h3>
-        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-          <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">Starter</button>
-          <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">Growing</button>
-          <button class="settings-btn grid-size-opt" data-size="5" style="flex:1;">Confident</button>
-          <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">Talker</button>
+        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <button class="settings-btn grid-size-opt" data-size="3" style="flex:0 0 auto;min-width:72px;">Starter</button>
+          <button class="settings-btn grid-size-opt" data-size="4" style="flex:0 0 auto;min-width:72px;">Growing</button>
+          <button class="settings-btn grid-size-opt" data-size="5" style="flex:0 0 auto;min-width:72px;">Confident</button>
+          <button class="settings-btn grid-size-opt" data-size="6" style="flex:0 0 auto;min-width:72px;">Talker</button>
         </div>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
