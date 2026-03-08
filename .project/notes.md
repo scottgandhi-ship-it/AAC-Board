@@ -1,29 +1,44 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-Parent Mode Refactor (prerequisite for Guided Setup 4.3)
+Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor alignment
 
 ## Active Features
-
-### Parent Mode Refactor
-- Plan: .project/features/ParentModeRefactor.md
-- Notes: .project/features/ParentModeRefactor_Notes.md
-- Status: APPROVED -- implementing
-
-### Guided Setup (Milestone 4.3)
-- Plan: .project/features/GuidedSetup.md
-- Notes: .project/features/GuidedSetup_Notes.md
-- Status: APPROVED -- blocked on Parent Mode Refactor
 
 ### Marketing Website
 - Plan: .project/features/MarketingWebsite.md
 - Status: PLANNING -- awaiting approval
 
+### Investor Deck -> Roadmap Alignment
+- Plan: .project/features/InvestorDeck-RoadmapAlignment.md
+- Status: PLANNING -- gap analysis complete, awaiting approval
+
 ## Next Up
-- Milestone 4.4: Export/Share Boards
-- Milestone 5: iOS App + Distribution
+- Multiple TTS Voices (Phase 2, P1)
+- Milestone 4.4: Export/Share Boards + OBF format
+- Milestone 5: iOS + Android App Store Submissions
 
 ## Completed Features
+
+### Deep Vocabulary Expansion (Phase 2, P0)
+- Plan: .project/features/DeepVocabularyExpansion.md
+- Notes: .project/features/DeepVocabularyExpansion_Notes.md
+- Status: DONE -- merged via PR #34, hotfix pushed
+
+### Parent Mode Refactor
+- Plan: .project/features/ParentModeRefactor.md
+- Notes: .project/features/ParentModeRefactor_Notes.md
+- Status: DONE -- merged via PRs #27-#31
+
+### Guided Setup (Milestone 4.3)
+- Plan: .project/features/GuidedSetup.md
+- Notes: .project/features/GuidedSetup_Notes.md
+- Status: DONE -- merged via PR #32
+
+### Getting Started Guide
+- Plan: .project/features/GettingStartedGuide.md
+- Notes: .project/features/GettingStartedGuide_Notes.md
+- Status: DONE -- merged via PR #33
 
 ### Navigation & Parent Mode
 - Plan: .project/features/NavigationAndParentMode.md
@@ -79,3 +94,8 @@ Parent Mode Refactor (prerequisite for Guided Setup 4.3)
 - 2026-03-07: Marked 2.1 Sensory-Friendly as DONE in roadmap
 - 2026-03-07: Created planning docs for Data & Usage Tracking (4.2)
 - 2026-03-07: Completed competitive analysis -- AssistiveWare deep dive, full market landscape, pricing intelligence, gap analysis
+- 2026-03-07: Parent Mode Refactor -- replaced hidden long-press lock with always-visible settings button
+- 2026-03-07: Guided Setup onboarding -- 3-step flow (welcome, grid picker, coach marks)
+- 2026-03-07: Getting Started Guide -- 8 accordion tips in Settings for parents
+- 2026-03-07: Investor Deck alignment -- gap analysis of 17 features across 4 phases
+- 2026-03-07: Deep Vocabulary Expansion -- 283 to 415 communication words, 6 new folders, 132 new words, Spanish translations, PR #34

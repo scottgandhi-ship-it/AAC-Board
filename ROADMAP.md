@@ -100,16 +100,25 @@
 - [x] Export data as CSV for SLPs (human-readable word labels)
 - [x] Insights tab visible only in parent mode
 
-### 4.3 Guided Setup & Teaching Tutorial
-- [ ] First-launch onboarding flow: walk parents through what AAC is and how to start
-- [ ] Guided setup wizard: pick grid size, child's age, communication level
-- [ ] Interactive modeling tutorial: step-by-step "try tapping 'I want more'" with the parent
-- [ ] Modeling guidance built-in: teach parents HOW to model AAC use during daily routines
-- [ ] Visual modeling prompts: "Try showing your child how to say 'I want more'"
-- [ ] Teaching tips surfaced contextually (e.g., "Tip: model 'help' when your child is struggling")
-- [ ] Progress-gated vocabulary unlocks: tutorial suggests when to reveal new words
-- [ ] "How to use AAC" reference section accessible from settings at any time
-- [ ] Tutorial can be replayed or skipped
+### 4.3 Guided Setup & Teaching Tutorial -- DONE
+- [x] First-launch onboarding flow: welcome screen, grid picker, coach marks
+- [x] Guided setup wizard: pick grid size with visual preview
+- [x] Getting Started guide: 8 accordion tips in Settings for parents
+- [x] "How to use AAC" reference section accessible from settings at any time
+- [x] Tutorial can be replayed or skipped
+
+### 4.5 Deep Vocabulary Expansion (Levels 1-2) -- DONE
+- [x] 6 new folders: Animals, Descriptors, Time, Where, Nature, School
+- [x] 132 new communication words (283 -> 415 total)
+- [x] Expanded existing folders: Actions (+18), My Body (+10), Drinks (+4), People (+5)
+- [x] Dog/cat moved from People to Animals (IDs preserved)
+- [x] Spanish translations for all new words
+- [x] ARASAAC symbol keywords for all new words
+- [x] Expanded prediction chains and default noun IDs
+- [x] Existing-user migration (auto-adds new vocabulary on load)
+- [x] Motor planning preserved: all existing word positions unchanged
+- [x] 3x3 grid updated: Animals replaces Places
+- [x] Fitzgerald Key colors correct for all new content
 
 ### 4.4 Export/Share Boards
 - [ ] Export board configuration as JSON file
@@ -144,8 +153,9 @@
 | **P2** | Word prediction | DONE - Two-tap prediction chains |
 | **P2** | Basic grammar | DONE - Plurals, conjugation, articles |
 | **P2** | ~~Modeling mode~~ | REMOVED - folded into 4.3 |
-| **P2** | Guided setup & teaching tutorial | Not started |
+| **P2** | Guided setup & teaching tutorial | DONE - Onboarding flow, Getting Started guide |
 | **P2** | Data/usage tracking | DONE - Insights tab, CSV export |
+| **P0** | Deep vocabulary expansion (L1-2) | DONE - 283 to 415 words, 6 new folders |
 | **P3** | Spanish language support | DONE |
 | **P3** | Export/share boards | Not started |
 | **P4** | iOS app + distribution | Not started |
@@ -169,3 +179,6 @@
 | 2026-03-07 | Completed 3.2 Basic Grammar - plurals, verb conjugation, article insertion |
 | 2026-03-07 | Completed 3.3 Spanish Language Support - dual-language vocab, bilingual mode |
 | 2026-03-07 | Removed 4.1 Modeling Mode - folded modeling guidance into 4.3 Guided Setup & Teaching Tutorial |
+| 2026-03-07 | Completed 4.3 Guided Setup - onboarding flow, Getting Started guide in Settings |
+| 2026-03-07 | Completed 4.5 Deep Vocabulary Expansion - 132 new words, 6 new folders, 415 total communication words |
+| 2026-03-07 | Investor deck alignment analysis created - 17 gaps identified across 4 phases |
