@@ -66,18 +66,9 @@ body {
   flex-direction: column;
 }
 
-/* ── Message Bar ── */
+/* ── Message Bar (hidden to reclaim vertical space for word grid) ── */
 #message-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: #f8f7ff;
-  color: var(--chrome-text);
-  min-height: 60px;
-  flex-shrink: 0;
-  border-bottom: 2px solid rgba(124, 116, 255, 0.25);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: none;
 }
 
 #message-words {
@@ -1790,16 +1781,7 @@ html.lang-es #search-results:empty::after {
 
 /* ── App Header ── */
 #app-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  height: 48px;
-  background: linear-gradient(135deg, rgba(108,99,255,0.08) 0%, rgba(244,143,177,0.1) 50%, rgba(255,183,77,0.08) 100%);
-  backdrop-filter: blur(8px);
-  border-bottom: 2px solid rgba(108,99,255,0.12);
-  flex-shrink: 0;
-  padding: 0 12px;
+  display: none;
 }
 
 #app-header.parent-active {
