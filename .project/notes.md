@@ -19,6 +19,16 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Plan: .project/features/InvestorDeck-RoadmapAlignment.md
 - Status: PLANNING -- gap analysis complete, awaiting approval
 
+### Sensory/Regulation Words (Phase 2, P0)
+- Plan: .project/features/SensoryRegulationWords.md
+- Notes: .project/features/SensoryRegulationWords_Notes.md
+- Status: PLANNING -- awaiting approval
+
+### Quick Phrases (Phase 2, P0)
+- Plan: .project/features/QuickPhrases.md
+- Notes: .project/features/QuickPhrases_Notes.md
+- Status: PLANNING -- awaiting approval
+
 ## Next Up
 - Milestone 5: iOS + Android App Store Submissions
 
