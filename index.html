@@ -3339,6 +3339,138 @@ body.sensory-high-contrast .task-tile {
   .insights-cards { flex-direction: column; }
 }
 
+/* ── Reorder Folders Overlay ── */
+#reorder-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+#reorder-overlay.open { display: flex; }
+
+#reorder-panel {
+  background: #faf8ff;
+  border-radius: var(--radius-lg);
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.reorder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.reorder-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.reorder-header-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+}
+.reorder-header-btn:active { background: #eee; }
+.reorder-done-btn {
+  color: #1565C0;
+  font-weight: 700;
+}
+
+.reorder-hint {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+#reorder-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reorder-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 4px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.reorder-drag-handle {
+  font-size: 1.2rem;
+  color: #bbb;
+  cursor: grab;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.reorder-item-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.reorder-item-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.reorder-item.dragging {
+  opacity: 0.9;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  transform: scale(1.03);
+  z-index: 10;
+  background: #f3f0ff;
+}
+
+.reorder-drop-indicator {
+  height: 3px;
+  background: #1565C0;
+  border-radius: 2px;
+  margin: 2px 12px;
+  transition: opacity 0.1s;
+}
+
+.reorder-reset-btn {
+  margin: 8px 16px 16px;
+  padding: 10px;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.reorder-reset-btn:active { background: #f5f5f5; }
+
 </style>
 </head>
 <body>
@@ -3683,6 +3815,11 @@ body.sensory-high-contrast .task-tile {
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
       </div>
       <div class="settings-section">
+        <h3>Layout</h3>
+        <button class="settings-btn" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;">Reorder Home Grid</button>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Drag folders to change their order on the home screen.</p>
+      </div>
+      <div class="settings-section">
         <h3>Symbols</h3>
         <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
@@ -3737,6 +3874,20 @@ body.sensory-high-contrast .task-tile {
       <button id="btn-edit-remove">Delete</button>
       <button id="btn-edit-save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Reorder Folders Overlay -->
+<div id="reorder-overlay">
+  <div id="reorder-panel">
+    <div class="reorder-header">
+      <button id="btn-reorder-cancel" class="reorder-header-btn">Cancel</button>
+      <h2>Reorder Folders</h2>
+      <button id="btn-reorder-done" class="reorder-header-btn reorder-done-btn">Done</button>
+    </div>
+    <p class="reorder-hint">Drag folders to change their order on the home screen</p>
+    <div id="reorder-list"></div>
+    <button id="btn-reorder-reset" class="reorder-reset-btn">Reset to Default</button>
   </div>
 </div>
 
@@ -7925,6 +8076,193 @@ document.getElementById('btn-redownload-symbols').addEventListener('click', asyn
   showToast('Re-downloading symbols...');
   await downloadSymbolsForButtons();
 });
+
+// ── Folder Reorder ──
+(function() {
+  const overlay = document.getElementById('reorder-overlay');
+  const list = document.getElementById('reorder-list');
+  let reorderItems = []; // [{id, label, icon}] in current drag order
+
+  function getFolderIcon(folderId) {
+    return FOLDER_ICONS[folderId] || '📁';
+  }
+
+  function getHomeFolders() {
+    return buttons
+      .filter(b => b.folderId === null && b.type === 'folder')
+      .sort((a, b) => a.position - b.position);
+  }
+
+  function openReorderOverlay() {
+    const folders = getHomeFolders();
+    reorderItems = folders.map(f => ({
+      id: f.id,
+      label: (currentLang !== 'en' && LANG_ES.labels[f.id]) ? LANG_ES.labels[f.id] : f.label,
+      icon: getFolderIcon(f.id.replace('folder-', ''))
+    }));
+    renderReorderList();
+    overlay.classList.add('open');
+  }
+
+  function closeReorderOverlay(save) {
+    if (save) {
+      reorderItems.forEach((item, i) => {
+        const btn = buttons.find(b => b.id === item.id);
+        if (btn) btn.position = i;
+      });
+      saveButtons();
+      renderGrid();
+      showToast('Folder order saved');
+    }
+    overlay.classList.remove('open');
+  }
+
+  function resetToDefault() {
+    const template = getTemplate(getGridSize());
+    const templateFolders = template
+      .filter(b => b.folderId === null && b.type === 'folder')
+      .sort((a, b) => a.position - b.position);
+    reorderItems = templateFolders.map(f => ({
+      id: f.id,
+      label: (currentLang !== 'en' && LANG_ES.labels[f.id]) ? LANG_ES.labels[f.id] : f.label,
+      icon: getFolderIcon(f.id.replace('folder-', ''))
+    }));
+    renderReorderList();
+    showToast('Reset to default order');
+  }
+
+  function renderReorderList() {
+    list.innerHTML = '';
+    reorderItems.forEach((item, i) => {
+      const row = document.createElement('div');
+      row.className = 'reorder-item';
+      row.setAttribute('data-index', i);
+      row.innerHTML =
+        '<span class="reorder-drag-handle" aria-label="Drag to reorder">\u2630</span>' +
+        '<span class="reorder-item-icon">' + item.icon + '</span>' +
+        '<span class="reorder-item-label">' + item.label + '</span>';
+      list.appendChild(row);
+    });
+    attachDragListeners();
+  }
+
+  // ── Pointer-based drag-and-drop ──
+  let dragIdx = null;
+  let dragEl = null;
+  let dragClone = null;
+  let startY = 0;
+  let scrollStart = 0;
+
+  function attachDragListeners() {
+    const items = list.querySelectorAll('.reorder-item');
+    items.forEach(item => {
+      item.addEventListener('pointerdown', onPointerDown);
+    });
+  }
+
+  function onPointerDown(e) {
+    if (e.button && e.button !== 0) return;
+    const item = e.currentTarget;
+    dragIdx = parseInt(item.getAttribute('data-index'));
+    dragEl = item;
+    startY = e.clientY;
+    scrollStart = list.scrollTop;
+
+    item.setPointerCapture(e.pointerId);
+    item.addEventListener('pointermove', onPointerMove);
+    item.addEventListener('pointerup', onPointerUp);
+    item.addEventListener('pointercancel', onPointerUp);
+
+    // Delay to distinguish tap from drag
+    dragClone = null;
+  }
+
+  function onPointerMove(e) {
+    const dy = Math.abs(e.clientY - startY);
+    if (!dragClone && dy < 8) return; // Dead zone
+
+    if (!dragClone) {
+      // Create floating clone
+      dragClone = dragEl.cloneNode(true);
+      dragClone.style.position = 'fixed';
+      dragClone.style.width = dragEl.offsetWidth + 'px';
+      dragClone.style.pointerEvents = 'none';
+      dragClone.style.zIndex = '300';
+      dragClone.classList.add('dragging');
+      document.body.appendChild(dragClone);
+      dragEl.style.opacity = '0.3';
+    }
+
+    const rect = dragEl.getBoundingClientRect();
+    dragClone.style.left = rect.left + 'px';
+    dragClone.style.top = e.clientY - rect.height / 2 + 'px';
+
+    // Determine drop target
+    const items = Array.from(list.querySelectorAll('.reorder-item'));
+    let targetIdx = dragIdx;
+    for (let i = 0; i < items.length; i++) {
+      const r = items[i].getBoundingClientRect();
+      const mid = r.top + r.height / 2;
+      if (e.clientY < mid) { targetIdx = i; break; }
+      targetIdx = i + 1;
+    }
+    if (targetIdx > reorderItems.length) targetIdx = reorderItems.length;
+    if (targetIdx < 0) targetIdx = 0;
+
+    // Move item in array and re-render if changed
+    if (targetIdx !== dragIdx && targetIdx !== dragIdx + 1) {
+      const moved = reorderItems.splice(dragIdx, 1)[0];
+      const insertAt = targetIdx > dragIdx ? targetIdx - 1 : targetIdx;
+      reorderItems.splice(insertAt, 0, moved);
+      dragIdx = insertAt;
+      renderReorderList();
+      dragEl = list.querySelectorAll('.reorder-item')[dragIdx];
+      dragEl.style.opacity = '0.3';
+      dragEl.setPointerCapture(e.pointerId);
+      dragEl.addEventListener('pointermove', onPointerMove);
+      dragEl.addEventListener('pointerup', onPointerUp);
+      dragEl.addEventListener('pointercancel', onPointerUp);
+    }
+
+    // Auto-scroll near edges
+    const listRect = list.getBoundingClientRect();
+    const edgeZone = 40;
+    if (e.clientY - listRect.top < edgeZone) {
+      list.scrollTop -= 6;
+    } else if (listRect.bottom - e.clientY < edgeZone) {
+      list.scrollTop += 6;
+    }
+  }
+
+  function onPointerUp(e) {
+    if (dragEl) {
+      dragEl.removeEventListener('pointermove', onPointerMove);
+      dragEl.removeEventListener('pointerup', onPointerUp);
+      dragEl.removeEventListener('pointercancel', onPointerUp);
+      dragEl.style.opacity = '';
+    }
+    if (dragClone) {
+      dragClone.remove();
+      dragClone = null;
+    }
+    dragEl = null;
+    dragIdx = null;
+  }
+
+  // Wire up buttons
+  document.getElementById('btn-reorder-folders').addEventListener('click', () => {
+    document.getElementById('settings-overlay').classList.remove('open');
+    setTimeout(openReorderOverlay, 200);
+  });
+  document.getElementById('btn-reorder-done').addEventListener('click', () => closeReorderOverlay(true));
+  document.getElementById('btn-reorder-cancel').addEventListener('click', () => closeReorderOverlay(false));
+  document.getElementById('btn-reorder-reset').addEventListener('click', resetToDefault);
+
+  // Close on backdrop tap
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeReorderOverlay(false);
+  });
+})();
 
 // Quick add with photo
 document.getElementById('btn-quick-photo').addEventListener('click', () => {
