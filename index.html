@@ -210,6 +210,12 @@ body {
   border-bottom-width: 1px;
 }
 
+.cell.quick-phrase {
+  border-style: dashed;
+  border-width: 2px;
+  border-bottom-width: 3px;
+}
+
 .cell img {
   width: 70%;
   max-height: 60%;
@@ -4008,6 +4014,7 @@ const LANG_ES = {
     'folder-colors': 'Colores', 'folder-shapes': 'Formas', 'folder-123': '123', 'folder-abc': 'ABC',
     'folder-animals': 'Animales', 'folder-descriptors': 'Descriptores', 'folder-time': 'Tiempo',
     'folder-where': 'Donde', 'folder-nature': 'Naturaleza', 'folder-school': 'Escuela',
+    'folder-senses': 'Siento', 'folder-quick': 'Frases Rapidas',
     // Social
     'gen-i': 'yo', 'gen-want': 'quiero', 'gen-dont-want': 'no quiero',
     'gen-need': 'necesito', 'gen-help': 'ayuda', 'gen-dont-know': 'no se',
@@ -4229,6 +4236,21 @@ const LANG_ES = {
     'sch-lunch': 'almuerzo', 'sch-snack': 'merienda', 'sch-paint': 'pintar',
     'sch-glue': 'pegamento', 'sch-marker': 'marcador', 'sch-backpack': 'mochila',
     'sch-paper': 'papel', 'sch-helper': 'ayudante',
+    // I Feel (Sensory/Regulation)
+    'sense-hungry': 'hambre', 'sense-thirsty': 'sed', 'sense-hot': 'caliente',
+    'sense-cold': 'frio', 'sense-tight': 'apretado', 'sense-shaky': 'temblar',
+    'sense-too-fast': 'rapido', 'sense-too-close': 'cerca', 'sense-too-much': 'demasiado',
+    'sense-stinky': 'oler', 'sense-need-squeeze': 'apretar abrazo',
+    'sense-need-quiet': 'silencio', 'sense-need-space': 'espacio solo',
+    'sense-want-hug': 'abrazo', 'sense-want-blanket': 'cobija manta',
+    'sense-cover-ears': 'oidos tapar', 'sense-close-eyes': 'ojos cerrar',
+    'sense-deep-breath': 'respirar profundo',
+    // Quick Phrases
+    'qp-potty': 'bano', 'qp-hurts': 'dolor', 'qp-dont-like': 'no gustar',
+    'qp-stop-it': 'parar', 'qp-scared': 'miedo', 'qp-more-please': 'mas por favor',
+    'qp-help-me': 'ayuda', 'qp-want-that': 'querer', 'qp-all-done': 'terminar',
+    'qp-go-home': 'casa ir', 'qp-thank-you': 'gracias', 'qp-love-you': 'amor querer',
+    'qp-play-with-me': 'jugar amigo', 'qp-need-break': 'descanso', 'qp-too-loud': 'fuerte ruido',
     'act-chase': 'perseguir', 'act-hide': 'esconder', 'act-find': 'encontrar',
     'act-catch': 'atrapar', 'act-tickle': 'cosquillas', 'act-climb': 'trepar',
     'act-dig': 'cavar', 'act-pour': 'verter', 'act-blow': 'soplar',
@@ -4242,6 +4264,25 @@ const LANG_ES = {
     'body-comb-hair': 'peinar', 'body-flush': 'cadena',
     'drink-grape-juice': 'jugo de uva', 'drink-straw-milk': 'leche de fresa',
     'drink-tea': 'te', 'drink-soda': 'refresco',
+    // I Feel (Sensory/Regulation)
+    'sense-hungry': 'hambriento', 'sense-thirsty': 'sediento',
+    'sense-hot': 'calor', 'sense-cold': 'frio',
+    'sense-tight': 'apretado', 'sense-shaky': 'tembloroso',
+    'sense-too-fast': 'muy rapido', 'sense-too-close': 'muy cerca',
+    'sense-too-much': 'demasiado', 'sense-stinky': 'apestoso',
+    'sense-need-squeeze': 'necesito apretar', 'sense-need-quiet': 'necesito silencio',
+    'sense-need-space': 'necesito espacio', 'sense-want-hug': 'quiero abrazo',
+    'sense-want-blanket': 'quiero cobija', 'sense-cover-ears': 'tapar oidos',
+    'sense-close-eyes': 'cerrar ojos', 'sense-deep-breath': 'respirar profundo',
+    // Quick Phrases
+    'qp-potty': 'necesito ir al bano', 'qp-hurts': 'me duele la panza',
+    'qp-dont-like': 'no me gusta eso', 'qp-stop-it': 'para',
+    'qp-scared': 'tengo miedo', 'qp-more-please': 'puedo tener mas',
+    'qp-help-me': 'ayudame por favor', 'qp-want-that': 'quiero eso',
+    'qp-all-done': 'ya termine', 'qp-go-home': 'quiero ir a casa',
+    'qp-thank-you': 'gracias', 'qp-love-you': 'te quiero',
+    'qp-play-with-me': 'juega conmigo',
+    'qp-need-break': 'necesito un descanso', 'qp-too-loud': 'esta muy fuerte',
   },
   nounGender: {
     'food-apple': 'f', 'food-banana': 'm', 'food-cookie': 'f', 'food-crackers': 'f',
@@ -4529,7 +4570,9 @@ const HOME_GRID_3X3_FOLDERS = [
   { id: 'folder-actions',   label: 'Actions',   color: 'green',  type: 'folder', folderId: null, position: 5 },
   { id: 'folder-toys',      label: 'Toys',      color: 'orange', type: 'folder', folderId: null, position: 6 },
   { id: 'folder-body',      label: 'My Body',   color: 'orange', type: 'folder', folderId: null, position: 7 },
-  { id: 'folder-animals',   label: 'Animals',   color: 'orange', type: 'folder', folderId: null, position: 8 }
+  { id: 'folder-animals',   label: 'Animals',   color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-senses',    label: 'I Feel',    color: 'blue',   type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-quick',     label: 'Quick Phrases', color: 'pink', type: 'folder', folderId: null, position: 10 }
 ];
 
 // 6x6 Talker: 16 folders + 20 extra standalone words on home grid for fast access
@@ -4558,7 +4601,7 @@ const HOME_GRID_6X6_EXTRAS = [
 
 const THREE_BY_THREE_FOLDERS = new Set([
   'general', 'food', 'drinks', 'people', 'feelings',
-  'actions', 'toys', 'body', 'animals'
+  'actions', 'toys', 'body', 'animals', 'senses', 'quick'
 ]);
 
 // 4x4 Growing: 16 essential folders (no academic-only categories)
@@ -4578,13 +4621,16 @@ const HOME_GRID_4X4_FOLDERS = [
   { id: 'folder-colors',    label: 'Colors',      color: 'blue',   type: 'folder', folderId: null, position: 12 },
   { id: 'folder-questions', label: 'Questions',    color: 'purple', type: 'folder', folderId: null, position: 13 },
   { id: 'folder-descriptors',label:'Descriptors',  color: 'blue',   type: 'folder', folderId: null, position: 14 },
-  { id: 'folder-school',    label: 'School',       color: 'orange', type: 'folder', folderId: null, position: 15 }
+  { id: 'folder-school',    label: 'School',       color: 'orange', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-senses',    label: 'I Feel',       color: 'blue',   type: 'folder', folderId: null, position: 16 },
+  { id: 'folder-quick',     label: 'Quick Phrases', color: 'pink',  type: 'folder', folderId: null, position: 17 }
 ];
 
 const FOUR_BY_FOUR_FOLDERS = new Set([
   'general', 'food', 'drinks', 'people', 'feelings',
   'actions', 'toys', 'body', 'animals', 'clothes',
-  'places', 'things', 'colors', 'questions', 'descriptors', 'school'
+  'places', 'things', 'colors', 'questions', 'descriptors', 'school',
+  'senses', 'quick'
 ]);
 
 // 5x5 Confident: all 22 folders + 3 high-frequency standalone words
@@ -4611,9 +4657,11 @@ const HOME_GRID_5X5_FOLDERS = [
   { id: 'folder-time',      label: 'Time',         color: 'purple', type: 'folder', folderId: null, position: 19 },
   { id: 'folder-where',     label: 'Where',        color: 'purple', type: 'folder', folderId: null, position: 20 },
   { id: 'folder-nature',    label: 'Nature',       color: 'orange', type: 'folder', folderId: null, position: 21 },
-  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 22 },
-  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 23 },
-  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 24 }
+  { id: 'folder-senses',   label: 'I Feel',       color: 'blue',   type: 'folder', folderId: null, position: 22 },
+  { id: 'folder-quick',    label: 'Quick Phrases', color: 'pink',  type: 'folder', folderId: null, position: 23 },
+  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 24 },
+  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 25 },
+  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 26 }
 ];
 
 // ── Default Vocabulary ──
@@ -4643,6 +4691,8 @@ const DEFAULT_BUTTONS = [
   { id: 'folder-where',     label: 'Where',     color: 'purple', type: 'folder', folderId: null, position: 19 },
   { id: 'folder-nature',    label: 'Nature',    color: 'orange', type: 'folder', folderId: null, position: 20 },
   { id: 'folder-school',    label: 'School',    color: 'orange', type: 'folder', folderId: null, position: 21 },
+  { id: 'folder-senses',    label: 'I Feel',    color: 'blue',   type: 'folder', folderId: null, position: 22 },
+  { id: 'folder-quick',     label: 'Quick Phrases', color: 'pink', type: 'folder', folderId: null, position: 23 },
 
   // ── Social (Core Phrases + Social Vocabulary) ──
   { id: 'gen-i',          label: 'I',          color: 'yellow', type: 'fringe', folderId: 'general', position: 0 },
@@ -5073,6 +5123,49 @@ const DEFAULT_BUTTONS = [
   { id: 'sch-backpack', label: 'backpack', color: 'orange', type: 'fringe', folderId: 'school', position: 11 },
   { id: 'sch-paper',    label: 'paper',    color: 'orange', type: 'fringe', folderId: 'school', position: 12 },
   { id: 'sch-helper',   label: 'helper',   color: 'orange', type: 'fringe', folderId: 'school', position: 13 },
+
+  // ── I Feel (Sensory/Regulation) ──
+  // Body states (blue = descriptors)
+  { id: 'sense-hungry',     label: 'hungry',     color: 'blue',  type: 'fringe', folderId: 'senses', position: 0 },
+  { id: 'sense-thirsty',    label: 'thirsty',    color: 'blue',  type: 'fringe', folderId: 'senses', position: 1 },
+  { id: 'sense-hot',        label: 'hot',        color: 'blue',  type: 'fringe', folderId: 'senses', position: 2 },
+  { id: 'sense-cold',       label: 'cold',       color: 'blue',  type: 'fringe', folderId: 'senses', position: 3 },
+  { id: 'sense-tight',      label: 'tight',      color: 'blue',  type: 'fringe', folderId: 'senses', position: 4 },
+  { id: 'sense-shaky',      label: 'shaky',      color: 'blue',  type: 'fringe', folderId: 'senses', position: 5 },
+  { id: 'sense-too-fast',   label: 'too fast',   color: 'blue',  type: 'fringe', folderId: 'senses', position: 6 },
+  { id: 'sense-too-close',  label: 'too close',  color: 'blue',  type: 'fringe', folderId: 'senses', position: 7 },
+  { id: 'sense-too-much',   label: 'too much',   color: 'red',   type: 'fringe', folderId: 'senses', position: 8 },
+  { id: 'sense-stinky',     label: 'stinky',     color: 'blue',  type: 'fringe', folderId: 'senses', position: 9 },
+  // Coping/regulation requests (green = verbs/actions)
+  { id: 'sense-need-squeeze',label:'need squeeze',color:'green',  type: 'fringe', folderId: 'senses', position: 10 },
+  { id: 'sense-need-quiet', label: 'need quiet', color: 'green',  type: 'fringe', folderId: 'senses', position: 11 },
+  { id: 'sense-need-space', label: 'need space', color: 'green',  type: 'fringe', folderId: 'senses', position: 12 },
+  { id: 'sense-want-hug',   label: 'want hug',   color: 'green',  type: 'fringe', folderId: 'senses', position: 13 },
+  { id: 'sense-want-blanket',label:'want blanket',color:'green',  type: 'fringe', folderId: 'senses', position: 14 },
+  { id: 'sense-cover-ears', label: 'cover ears', color: 'green',  type: 'fringe', folderId: 'senses', position: 15 },
+  { id: 'sense-close-eyes', label: 'close eyes', color: 'green',  type: 'fringe', folderId: 'senses', position: 16 },
+  { id: 'sense-deep-breath',label: 'deep breath',color: 'green',  type: 'fringe', folderId: 'senses', position: 17 },
+
+  // ── Quick Phrases (auto-speak on tap) ──
+  // Urgent/safety (red)
+  { id: 'qp-potty',      label: 'I need to go potty',  color: 'red',   type: 'fringe', folderId: 'quick', position: 0 },
+  { id: 'qp-hurts',      label: 'my tummy hurts',      color: 'red',   type: 'fringe', folderId: 'quick', position: 1 },
+  { id: 'qp-dont-like',  label: "I don't like that",   color: 'red',   type: 'fringe', folderId: 'quick', position: 2 },
+  { id: 'qp-stop-it',    label: 'stop it',             color: 'red',   type: 'fringe', folderId: 'quick', position: 3 },
+  { id: 'qp-scared',     label: "I'm scared",          color: 'red',   type: 'fringe', folderId: 'quick', position: 4 },
+  // Requests (green)
+  { id: 'qp-more-please',label: 'can I have more',     color: 'green', type: 'fringe', folderId: 'quick', position: 5 },
+  { id: 'qp-help-me',    label: 'help me please',      color: 'green', type: 'fringe', folderId: 'quick', position: 6 },
+  { id: 'qp-want-that',  label: 'I want that',         color: 'green', type: 'fringe', folderId: 'quick', position: 7 },
+  { id: 'qp-all-done',   label: "I'm all done",        color: 'green', type: 'fringe', folderId: 'quick', position: 8 },
+  { id: 'qp-go-home',    label: 'I want to go home',   color: 'green', type: 'fringe', folderId: 'quick', position: 9 },
+  // Social (pink)
+  { id: 'qp-thank-you',  label: 'thank you',           color: 'pink',  type: 'fringe', folderId: 'quick', position: 10 },
+  { id: 'qp-love-you',   label: 'I love you',          color: 'pink',  type: 'fringe', folderId: 'quick', position: 11 },
+  { id: 'qp-play-with-me',label:'play with me',        color: 'pink',  type: 'fringe', folderId: 'quick', position: 12 },
+  // Regulation (blue)
+  { id: 'qp-need-break', label: 'I need a break',      color: 'blue',  type: 'fringe', folderId: 'quick', position: 13 },
+  { id: 'qp-too-loud',   label: "it's too loud",       color: 'blue',  type: 'fringe', folderId: 'quick', position: 14 },
 ];
 
 // Generate number buttons 1-100
@@ -6151,7 +6244,8 @@ const FOLDER_ICONS = {
   'toys': '🧸', 'places': '🏠', 'colors': '🌈', 'shapes': '🔷',
   '123': '🔢', 'abc': '🔤', 'questions': '❓', 'things': '🎒',
   'animals': '🐾', 'descriptors': '📏', 'time': '🕐', 'where': '📍',
-  'nature': '🌿', 'school': '🏫'
+  'nature': '🌿', 'school': '🏫',
+  'senses': '🌡️', 'quick': '💬'
 };
 
 // Emoji icons for individual buttons (keyed by button id)
@@ -6292,7 +6386,19 @@ const BUTTON_ICONS = {
   'sch-art': '🎨', 'sch-music': '🎵', 'sch-story': '📖',
   'sch-lunch': '🍱', 'sch-snack': '🍪', 'sch-paint': '🖌️',
   'sch-glue': '📎', 'sch-marker': '🖍️', 'sch-backpack': '🎒',
-  'sch-paper': '📄', 'sch-helper': '🧑‍🏫'
+  'sch-paper': '📄', 'sch-helper': '🧑‍🏫',
+  // I Feel (Sensory/Regulation)
+  'sense-hungry': '🍽️', 'sense-thirsty': '🥤', 'sense-hot': '🥵', 'sense-cold': '🥶',
+  'sense-tight': '😣', 'sense-shaky': '😰', 'sense-too-fast': '⚡', 'sense-too-close': '🫸',
+  'sense-too-much': '😵', 'sense-stinky': '🤢',
+  'sense-need-squeeze': '🤗', 'sense-need-quiet': '🤫', 'sense-need-space': '🙅',
+  'sense-want-hug': '🫂', 'sense-want-blanket': '🛏️', 'sense-cover-ears': '🙉',
+  'sense-close-eyes': '😌', 'sense-deep-breath': '🌬️',
+  // Quick Phrases
+  'qp-potty': '🚽', 'qp-hurts': '🤕', 'qp-dont-like': '👎', 'qp-stop-it': '🛑',
+  'qp-scared': '😨', 'qp-more-please': '🙏', 'qp-help-me': '🆘', 'qp-want-that': '👉',
+  'qp-all-done': '✅', 'qp-go-home': '🏠', 'qp-thank-you': '💕', 'qp-love-you': '❤️',
+  'qp-play-with-me': '🎮', 'qp-need-break': '⏸️', 'qp-too-loud': '🔊'
 };
 
 // ── Predictive Next-Word ──
@@ -6320,6 +6426,12 @@ const PREDICTIONS = {
   'time-then':       ['time-next', 'time-last'],
   'where-in':        ['__NOUNS__'],
   'where-on':        ['__NOUNS__'],
+  'sense-too-much':  ['sense-need-quiet', 'sense-need-space', 'sense-deep-breath'],
+  'sense-hot':       ['sense-need-space', 'drink-water'],
+  'sense-cold':      ['sense-want-blanket', 'sense-want-hug'],
+  'sense-shaky':     ['sense-deep-breath', 'sense-need-squeeze', 'sense-want-hug'],
+  'sense-too-fast':  ['sense-need-quiet', 'sense-deep-breath'],
+  'sense-too-close': ['sense-need-space', 'sense-deep-breath'],
 };
 
 // Icon lookup map built at init for O(1) access
@@ -6751,6 +6863,7 @@ function createCell(btn) {
     cell.classList.add('folder-btn');
     cell.setAttribute('data-folder', btn.id.replace('folder-', ''));
   }
+  if (btn.folderId === 'quick') cell.classList.add('quick-phrase');
   cell.setAttribute('data-color', btn.color);
   cell.setAttribute('data-type', btn.type);
   cell.setAttribute('data-id', btn.id);
@@ -6829,6 +6942,14 @@ function createCell(btn) {
       return;
     }
     const speakText = getSpeakLabel(btn);
+    if (btn.folderId === 'quick') {
+      messageWords = [speakText];
+      messageButtonIds = [btn.id];
+      renderMessage();
+      speak(speakText);
+      recordUsageEvent(btn.id, 'independent');
+      return;
+    }
     addWordToMessage(speakText, btn.id);
     speak(speakText);
     recordUsageEvent(btn.id, 'independent');
@@ -7605,6 +7726,24 @@ const SYMBOL_KEYWORDS = {
   'sch-art': 'art', 'sch-music': 'music', 'sch-story': 'story time', 'sch-lunch': 'lunch',
   'sch-snack': 'snack', 'sch-paint': 'paint', 'sch-glue': 'glue', 'sch-marker': 'marker',
   'sch-backpack': 'backpack', 'sch-paper': 'paper', 'sch-helper': 'helper',
+  // I Feel (Sensory/Regulation)
+  'sense-hungry': 'hungry', 'sense-thirsty': 'thirsty', 'sense-hot': 'hot',
+  'sense-cold': 'cold', 'sense-tight': 'tight', 'sense-shaky': 'shaky',
+  'sense-too-fast': 'fast', 'sense-too-close': 'close', 'sense-too-much': 'too much',
+  'sense-stinky': 'smell', 'sense-need-squeeze': 'squeeze hug',
+  'sense-need-quiet': 'quiet silence', 'sense-need-space': 'space alone',
+  'sense-want-hug': 'hug embrace', 'sense-want-blanket': 'blanket',
+  'sense-cover-ears': 'ears cover', 'sense-close-eyes': 'eyes close',
+  'sense-deep-breath': 'breath breathe',
+  // Quick Phrases
+  'qp-potty': 'bathroom toilet', 'qp-hurts': 'pain hurt stomach',
+  'qp-dont-like': 'dislike', 'qp-stop-it': 'stop',
+  'qp-scared': 'scared afraid fear', 'qp-more-please': 'more please',
+  'qp-help-me': 'help', 'qp-want-that': 'want point',
+  'qp-all-done': 'done finished', 'qp-go-home': 'home go',
+  'qp-thank-you': 'thank you thanks', 'qp-love-you': 'love heart',
+  'qp-play-with-me': 'play friend', 'qp-need-break': 'break rest',
+  'qp-too-loud': 'loud noise volume',
   // Things
   'thg-cup': 'cup', 'thg-plate': 'plate', 'thg-spoon': 'spoon', 'thg-fork': 'fork',
   'thg-napkin': 'napkin', 'thg-blanket': 'blanket', 'thg-pillow': 'pillow', 'thg-toothbrush': 'toothbrush',
