@@ -3702,6 +3702,7 @@ body.sensory-high-contrast .task-tile {
       <h3>Parent Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
       <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+      <button class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
       <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
     </div>
 
@@ -3817,11 +3818,11 @@ body.sensory-high-contrast .task-tile {
     <div class="settings-category-content active" id="settings-cat-communication">
       <div class="settings-section">
         <h3>Grid Size</h3>
-        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-          <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">Starter</button>
-          <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">Growing</button>
-          <button class="settings-btn grid-size-opt" data-size="5" style="flex:1;">Confident</button>
-          <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">Talker</button>
+        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <button class="settings-btn grid-size-opt" data-size="3" style="flex:0 0 auto;min-width:72px;">Starter</button>
+          <button class="settings-btn grid-size-opt" data-size="4" style="flex:0 0 auto;min-width:72px;">Growing</button>
+          <button class="settings-btn grid-size-opt" data-size="5" style="flex:0 0 auto;min-width:72px;">Confident</button>
+          <button class="settings-btn grid-size-opt" data-size="6" style="flex:0 0 auto;min-width:72px;">Talker</button>
         </div>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
@@ -3901,11 +3902,6 @@ body.sensory-high-contrast .task-tile {
         <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
         <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
-      </div>
-      <div class="settings-section">
-        <h3>Layout</h3>
-        <button class="settings-btn" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;">Reorder Home Grid</button>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Drag folders to change their order on the home screen.</p>
       </div>
       <div class="settings-section">
         <h3>Symbols</h3>
