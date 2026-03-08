@@ -411,6 +411,13 @@ body.grid-6 .cell .cell-big-text { font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
 body.grid-6 .cell.folder-btn .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
 body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); }
 
+/* Grid size adjustments for 5x5 */
+body.grid-5 .cell { padding: 5px 4px; gap: 2px; }
+body.grid-5 .cell .cell-label { font-size: clamp(0.7rem, 2vw, 0.9rem); }
+body.grid-5 .cell .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
+body.grid-5 .cell.folder-btn .cell-big-text { font-size: clamp(1.6rem, 4.5vw, 2.2rem); }
+body.grid-5 .cell.folder-btn .cell-label { font-size: clamp(0.55rem, 1.6vw, 0.75rem); }
+
 /* Grid size adjustments for 3x3 */
 body.grid-3 .cell .cell-label { font-size: clamp(1rem, 3.5vw, 1.4rem); }
 body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
@@ -3587,6 +3594,7 @@ body.sensory-high-contrast .task-tile {
         <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
           <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
           <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
+          <button class="settings-btn grid-size-opt" data-size="5" style="flex:1;">5x5 Confident</button>
           <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
         </div>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
@@ -3945,6 +3953,17 @@ body.sensory-high-contrast .task-tile {
       </div>
       <span class="picker-label">4x4 Growing</span>
       <span class="picker-desc">Building sentences</span>
+    </button>
+    <button class="grid-picker-card" data-size="5" aria-label="5 by 5 Confident grid, 25 buttons, best for expanding vocabulary">
+      <div class="picker-grid-preview" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span class="picker-label">5x5 Confident</span>
+      <span class="picker-desc">Expanding vocabulary</span>
     </button>
     <button class="grid-picker-card" data-size="6" aria-label="6 by 6 Talker grid, 36 buttons, best for combining words fluently">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);">
@@ -4342,7 +4361,7 @@ const LANG_ES = {
     'speed.fast': 'Velocidad: rapida', 'speed.veryFast': 'Velocidad: muy rapida',
     'pitch.veryLow': 'Tono: muy bajo', 'pitch.low': 'Tono: bajo',
     'pitch.normal': 'Tono: normal', 'pitch.high': 'Tono: alto', 'pitch.veryHigh': 'Tono: muy alto',
-    'grid.3x3': '3x3 Inicio', 'grid.4x4': '4x4 Creciendo', 'grid.6x6': '6x6 Hablador',
+    'grid.3x3': '3x3 Inicio', 'grid.4x4': '4x4 Creciendo', 'grid.5x5': '5x5 Seguro', 'grid.6x6': '6x6 Hablador',
     'schedule.noSchedule': 'No hay horario para hoy',
     'schedule.unlockHint': 'Desbloquea el modo padre para empezar uno',
     'schedule.allDone': 'Todo Listo!',
@@ -4541,6 +4560,61 @@ const THREE_BY_THREE_FOLDERS = new Set([
   'general', 'food', 'drinks', 'people', 'feelings',
   'actions', 'toys', 'body', 'animals'
 ]);
+
+// 4x4 Growing: 16 essential folders (no academic-only categories)
+const HOME_GRID_4X4_FOLDERS = [
+  { id: 'folder-general',   label: 'Social',      color: 'pink',   type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-food',      label: 'Food',        color: 'orange', type: 'folder', folderId: null, position: 1 },
+  { id: 'folder-drinks',    label: 'Drinks',      color: 'orange', type: 'folder', folderId: null, position: 2 },
+  { id: 'folder-people',    label: 'People',      color: 'yellow', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-feelings',  label: 'Feelings',    color: 'blue',   type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-actions',   label: 'Actions',     color: 'green',  type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-toys',      label: 'Toys',        color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-body',      label: 'My Body',     color: 'orange', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-animals',   label: 'Animals',     color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-clothes',   label: 'Clothes',     color: 'orange', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-places',    label: 'Places',      color: 'purple', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-things',    label: 'Things',      color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-colors',    label: 'Colors',      color: 'blue',   type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-questions', label: 'Questions',    color: 'purple', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-descriptors',label:'Descriptors',  color: 'blue',   type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-school',    label: 'School',       color: 'orange', type: 'folder', folderId: null, position: 15 }
+];
+
+const FOUR_BY_FOUR_FOLDERS = new Set([
+  'general', 'food', 'drinks', 'people', 'feelings',
+  'actions', 'toys', 'body', 'animals', 'clothes',
+  'places', 'things', 'colors', 'questions', 'descriptors', 'school'
+]);
+
+// 5x5 Confident: all 22 folders + 3 high-frequency standalone words
+const HOME_GRID_5X5_FOLDERS = [
+  { id: 'folder-general',   label: 'Social',      color: 'pink',   type: 'folder', folderId: null, position: 0 },
+  { id: 'folder-food',      label: 'Food',        color: 'orange', type: 'folder', folderId: null, position: 1 },
+  { id: 'folder-drinks',    label: 'Drinks',      color: 'orange', type: 'folder', folderId: null, position: 2 },
+  { id: 'folder-people',    label: 'People',      color: 'yellow', type: 'folder', folderId: null, position: 3 },
+  { id: 'folder-feelings',  label: 'Feelings',    color: 'blue',   type: 'folder', folderId: null, position: 4 },
+  { id: 'folder-actions',   label: 'Actions',     color: 'green',  type: 'folder', folderId: null, position: 5 },
+  { id: 'folder-toys',      label: 'Toys',        color: 'orange', type: 'folder', folderId: null, position: 6 },
+  { id: 'folder-body',      label: 'My Body',     color: 'orange', type: 'folder', folderId: null, position: 7 },
+  { id: 'folder-animals',   label: 'Animals',     color: 'orange', type: 'folder', folderId: null, position: 8 },
+  { id: 'folder-clothes',   label: 'Clothes',     color: 'orange', type: 'folder', folderId: null, position: 9 },
+  { id: 'folder-places',    label: 'Places',      color: 'purple', type: 'folder', folderId: null, position: 10 },
+  { id: 'folder-things',    label: 'Things',      color: 'orange', type: 'folder', folderId: null, position: 11 },
+  { id: 'folder-colors',    label: 'Colors',      color: 'blue',   type: 'folder', folderId: null, position: 12 },
+  { id: 'folder-questions', label: 'Questions',    color: 'purple', type: 'folder', folderId: null, position: 13 },
+  { id: 'folder-descriptors',label:'Descriptors',  color: 'blue',   type: 'folder', folderId: null, position: 14 },
+  { id: 'folder-school',    label: 'School',       color: 'orange', type: 'folder', folderId: null, position: 15 },
+  { id: 'folder-shapes',    label: 'Shapes',       color: 'blue',   type: 'folder', folderId: null, position: 16 },
+  { id: 'folder-123',       label: '123',          color: 'purple', type: 'folder', folderId: null, position: 17 },
+  { id: 'folder-abc',       label: 'ABC',          color: 'purple', type: 'folder', folderId: null, position: 18 },
+  { id: 'folder-time',      label: 'Time',         color: 'purple', type: 'folder', folderId: null, position: 19 },
+  { id: 'folder-where',     label: 'Where',        color: 'purple', type: 'folder', folderId: null, position: 20 },
+  { id: 'folder-nature',    label: 'Nature',       color: 'orange', type: 'folder', folderId: null, position: 21 },
+  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 22 },
+  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 23 },
+  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 24 }
+];
 
 // ── Default Vocabulary ──
 const DEFAULT_BUTTONS = [
@@ -5098,14 +5172,14 @@ async function saveButtons() {
 
 function getGridSize() {
   const stored = localStorage.getItem('aac-grid-size');
-  if (stored === '3' || stored === '6') return parseInt(stored);
+  if (stored === '3' || stored === '5' || stored === '6') return parseInt(stored);
   return 4;
 }
 
 function setGridSize(size) {
   localStorage.setItem('aac-grid-size', String(size));
   document.documentElement.style.setProperty('--grid-cols', size);
-  document.body.classList.remove('grid-3', 'grid-4', 'grid-6');
+  document.body.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
   document.body.classList.add(`grid-${size}`);
 }
 
@@ -5114,6 +5188,13 @@ function getTemplate(size) {
   if (size === 3) {
     const filtered = folderContents.filter(b => THREE_BY_THREE_FOLDERS.has(b.folderId));
     return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_3X3_FOLDERS, ...filtered]));
+  }
+  if (size === 4) {
+    const filtered = folderContents.filter(b => FOUR_BY_FOUR_FOLDERS.has(b.folderId));
+    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_4X4_FOLDERS, ...filtered]));
+  }
+  if (size === 5) {
+    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...folderContents]));
   }
   if (size === 6) {
     const homeFolders = DEFAULT_BUTTONS.filter(b => b.folderId === null && b.type !== 'core');
@@ -7050,7 +7131,7 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
   btn.addEventListener('click', async () => {
     const newSize = parseInt(btn.dataset.size);
     if (newSize === getGridSize()) return;
-    const names = { 3: t('grid.3x3', '3x3 Starter'), 4: t('grid.4x4', '4x4 Growing'), 6: t('grid.6x6', '6x6 Talker') };
+    const names = { 3: t('grid.3x3', '3x3 Starter'), 4: t('grid.4x4', '4x4 Growing'), 5: t('grid.5x5', '5x5 Confident'), 6: t('grid.6x6', '6x6 Talker') };
     const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
     if (!confirm(confirmMsg)) return;
     await clearAllData();
@@ -9600,7 +9681,7 @@ document.getElementById('btn-reset-track').addEventListener('click', async () =>
 
 // ── Landscape Grid Optimization ──
 let landscapeActive = false;
-const LANDSCAPE_COL_MAP = { 3: 4, 4: 6, 6: 8 };
+const LANDSCAPE_COL_MAP = { 3: 4, 4: 6, 5: 7, 6: 8 };
 
 function updateLandscapeGrid() {
   const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
