@@ -1130,56 +1130,29 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   letter-spacing: 0.04em;
 }
 
-/* Activities tab view */
-#view-activities {
+/* Activities overlay */
+#activities-overlay {
   display: none;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-#view-activities.active { display: flex; }
-.activities-header {
-  padding: 16px 16px 4px;
-}
-.activities-header h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: var(--chrome-text);
-}
-.activities-header p {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
-  color: #888;
-}
-.activities-grid-wrap {
-  padding: 8px 16px 16px;
-  flex: 1;
-}
-.activities-locked {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 115;
   justify-content: center;
-  gap: 12px;
-  padding: 40px 20px;
-  text-align: center;
-  flex: 1;
+  align-items: flex-start;
+  padding-top: 5vh;
+  overflow-y: auto;
 }
-.activities-locked-icon { font-size: 2rem; opacity: 0.5; }
-.activities-locked-text { font-size: 0.95rem; color: #888; font-weight: 600; }
-.activities-locked-sub { font-size: 0.85rem; color: #aaa; }
-.activities-locked-btn {
-  margin-top: 8px;
-  padding: 10px 24px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: #fff3e0;
-  color: #E65100;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
+#activities-overlay.open { display: flex; }
+#activities-overlay-panel {
+  background: linear-gradient(180deg, #faf8ff 0%, #fff 100%);
+  border-radius: var(--radius-lg);
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: var(--shadow-lifted);
 }
 
 /* Activity export button on cards */
@@ -3924,22 +3897,17 @@ body.sensory-high-contrast .task-tile {
 </div>
 
 <!-- Activities View -->
-<div id="view-activities" class="view" role="tabpanel" aria-labelledby="tab-activities">
-  <div id="activities-locked-state" class="activities-locked">
-    <span class="activities-locked-icon">&#128274;</span>
-    <span class="activities-locked-text">Parent Mode Required</span>
-    <span class="activities-locked-sub">Enable Parent Mode to manage activities</span>
-    <button class="activities-locked-btn" id="btn-activities-unlock">Unlock Parent Mode</button>
-  </div>
-  <div id="activities-unlocked-state" style="display:none;flex-direction:column;flex:1;">
-    <div class="activities-header">
-      <h3>Choose an Activity</h3>
-      <p>Focus the board on words for a specific routine</p>
+<div id="activities-overlay">
+  <div id="activities-overlay-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div>
+        <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#333;">Choose an Activity</h3>
+        <p style="margin:4px 0 0;font-size:0.85rem;color:#888;">Focus the board on words for a specific routine</p>
+      </div>
+      <button id="btn-activities-overlay-close" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;color:#888;" aria-label="Close activities">&#x2715;</button>
     </div>
-    <div class="activities-grid-wrap">
-      <div class="activity-cards" id="activities-tab-cards"></div>
-      <button id="btn-import-activity" style="margin-top:12px;padding:10px 16px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.85rem;font-weight:600;color:#888;cursor:pointer;width:100%;text-align:center;">Import Activity Template</button>
-    </div>
+    <div class="activity-cards" id="activities-tab-cards"></div>
+    <button id="btn-import-activity" style="margin-top:12px;padding:10px 16px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.85rem;font-weight:600;color:#888;cursor:pointer;width:100%;text-align:center;">Import Activity Template</button>
   </div>
 </div>
 
@@ -4065,10 +4033,6 @@ body.sensory-high-contrast .task-tile {
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="tab-label">Talk</span>
   </button>
-  <button class="tab-btn" id="tab-activities" role="tab" aria-selected="false" aria-controls="view-activities">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-    <span class="tab-label">Activities</span>
-  </button>
   <button class="tab-btn" id="tab-schedule" role="tab" aria-selected="false" aria-controls="view-schedule">
     <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     <span class="tab-label">Schedule</span>
@@ -4094,6 +4058,7 @@ body.sensory-high-contrast .task-tile {
       <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
       <button class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
       <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
+      <button class="settings-btn" id="btn-open-activities" style="background:#f3e5f5;color:#6A1B9A;margin-top:8px;">Activities</button>
     </div>
 
     <div class="settings-section" id="getting-started-section">
@@ -8082,7 +8047,6 @@ document.getElementById('search-input').addEventListener('input', e => {
 function getTabViewMap() {
   return {
     'tab-talk': { view: 'view-talk', title: t('tab.talk', 'Talk') },
-    'tab-activities': { view: 'view-activities', title: t('tab.activities', 'Activities') },
     'tab-schedule': { view: 'view-schedule', title: t('tab.schedule', 'Schedule') },
     'tab-rewards': { view: 'view-rewards', title: t('tab.rewards', 'Rewards') },
   };
@@ -8138,7 +8102,6 @@ const _origSwitchTab = switchTab;
 switchTab = function(tabId) {
   _origSwitchTab(tabId);
   updateBackButton();
-  if (tabId === 'tab-activities') renderActivitiesTab();
 };
 
 const _origRenderGrid = renderGrid;
@@ -8605,19 +8568,6 @@ function renderActivityCards() {
 }
 
 function renderActivitiesTab() {
-  const locked = document.getElementById('activities-locked-state');
-  const unlocked = document.getElementById('activities-unlocked-state');
-  if (!locked || !unlocked) return;
-
-  if (!parentMode) {
-    locked.style.display = '';
-    unlocked.style.display = 'none';
-    return;
-  }
-
-  locked.style.display = 'none';
-  unlocked.style.display = 'flex';
-
   const container = document.getElementById('activities-tab-cards');
   if (!container) return;
   container.innerHTML = '';
@@ -8663,18 +8613,19 @@ function renderActivitiesTab() {
   container.appendChild(createCard);
 }
 
-let activitiesUnlockTaps = 0;
-let activitiesUnlockTimer = null;
-document.getElementById('btn-activities-unlock').addEventListener('click', () => {
-  activitiesUnlockTaps++;
-  if (activitiesUnlockTimer) clearTimeout(activitiesUnlockTimer);
-  activitiesUnlockTimer = setTimeout(() => { activitiesUnlockTaps = 0; }, 3000);
-  if (activitiesUnlockTaps >= 3) {
-    activitiesUnlockTaps = 0;
-    setParentMode(true);
-    renderActivitiesTab();
-  } else {
-    showToast(`Tap ${3 - activitiesUnlockTaps} more times`);
+document.getElementById('btn-open-activities').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+  renderActivitiesTab();
+  document.getElementById('activities-overlay').classList.add('open');
+});
+
+document.getElementById('btn-activities-overlay-close').addEventListener('click', () => {
+  document.getElementById('activities-overlay').classList.remove('open');
+});
+
+document.getElementById('activities-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'activities-overlay') {
+    e.target.classList.remove('open');
   }
 });
 
@@ -8716,6 +8667,7 @@ document.getElementById('btn-activity-start').addEventListener('click', () => {
   const overlay = document.getElementById('activity-preview-overlay');
   const activityId = overlay.dataset.activityId;
   overlay.classList.remove('open');
+  document.getElementById('activities-overlay').classList.remove('open');
   document.getElementById('settings-overlay').classList.remove('open');
   startActivity(activityId);
 });
@@ -8751,10 +8703,6 @@ function endActivity() {
 
 // Close button is parent-gated: requires parentMode
 document.getElementById('btn-activity-close').addEventListener('click', () => {
-  if (!parentMode) {
-    showToast('Enable Parent Mode to end activity');
-    return;
-  }
   endActivity();
 });
 
