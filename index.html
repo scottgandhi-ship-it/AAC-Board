@@ -1086,19 +1086,19 @@ body.activity-mode #grid-container {
 }
 body.sensory-reduced-motion #activity-banner { animation: none; }
 
-/* Activity cards in settings */
+/* Activity cards -- used in Activities tab and settings */
 .activity-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
   margin-top: 8px;
 }
 .activity-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
+  gap: 6px;
+  padding: 14px 8px;
   border: 2px solid var(--chrome-border);
   border-radius: var(--radius-md);
   background: var(--chrome-surface-alt);
@@ -1107,15 +1107,184 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--chrome-text);
-  transition: border-color 0.2s, background 0.2s;
-  min-height: 64px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  min-height: 80px;
+  position: relative;
 }
 .activity-card:active {
   background: rgba(108,99,255,0.08);
   border-color: var(--chrome-primary);
 }
-.activity-card-icon { font-size: 1.4rem; }
+.activity-card.activity-active {
+  border-color: var(--chrome-primary);
+  background: rgba(108,99,255,0.06);
+  box-shadow: 0 0 0 2px rgba(108,99,255,0.2);
+}
+.activity-card-icon { font-size: 1.6rem; }
 .activity-card-label { text-align: center; line-height: 1.2; }
+.activity-card-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--chrome-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Activities tab view */
+#view-activities {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#view-activities.active { display: flex; }
+.activities-header {
+  padding: 16px 16px 4px;
+}
+.activities-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--chrome-text);
+}
+.activities-header p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #888;
+}
+.activities-grid-wrap {
+  padding: 8px 16px 16px;
+  flex: 1;
+}
+.activities-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  flex: 1;
+}
+.activities-locked-icon { font-size: 2rem; opacity: 0.5; }
+.activities-locked-text { font-size: 0.95rem; color: #888; font-weight: 600; }
+.activities-locked-sub { font-size: 0.85rem; color: #aaa; }
+.activities-locked-btn {
+  margin-top: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: #fff3e0;
+  color: #E65100;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Activity export button on cards */
+.activity-card-export {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.06);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #888;
+  padding: 0;
+}
+.parent-mode .activity-card-export { display: flex; }
+.activity-card-export:active { background: rgba(108,99,255,0.15); }
+
+/* Demoted settings gear in tab bar */
+.tab-btn-gear {
+  flex: 0 0 48px !important;
+  color: #bbb;
+}
+.tab-btn-gear .tab-label { display: none; }
+.tab-btn-gear.parent-active { color: var(--bar-bg); }
+
+/* Create Activity modal */
+#create-activity-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 120;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5vh;
+  overflow-y: auto;
+}
+#create-activity-overlay.open { display: flex; }
+#create-activity-panel {
+  background: linear-gradient(180deg, #faf8ff 0%, #fff 100%);
+  border-radius: var(--radius-lg);
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: var(--shadow-lifted);
+}
+#create-activity-panel h3 { margin: 0 0 16px; font-size: 1.1rem; }
+.create-icon-btn, .create-color-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.create-icon-btn.selected, .create-color-btn.selected {
+  border-color: var(--chrome-primary);
+  box-shadow: 0 0 0 2px rgba(108,99,255,0.2);
+}
+.create-word-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+.create-word-chip[data-color="green"]  { background: #e8f5e9; color: #2E7D32; }
+.create-word-chip[data-color="orange"] { background: #fff3e0; color: #E65100; }
+.create-word-chip[data-color="blue"]   { background: #e3f2fd; color: #1565C0; }
+.create-word-chip[data-color="yellow"] { background: #fffde7; color: #F57F17; }
+.create-word-chip[data-color="pink"]   { background: #fce4ec; color: #C62828; }
+.create-word-chip[data-color="purple"] { background: #f3e5f5; color: #6A1B9A; }
+.create-word-chip.selected { opacity: 0.5; text-decoration: line-through; }
+.create-selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(108,99,255,0.1);
+  color: var(--chrome-primary);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
 
 /* Activity preview overlay */
 #activity-preview-overlay {
@@ -3763,6 +3932,58 @@ body.sensory-high-contrast .task-tile {
   </div>
 </div>
 
+<!-- Activities View -->
+<div id="view-activities" class="view" role="tabpanel" aria-labelledby="tab-activities">
+  <div id="activities-locked-state" class="activities-locked">
+    <span class="activities-locked-icon">&#128274;</span>
+    <span class="activities-locked-text">Parent Mode Required</span>
+    <span class="activities-locked-sub">Enable Parent Mode to manage activities</span>
+    <button class="activities-locked-btn" id="btn-activities-unlock">Unlock Parent Mode</button>
+  </div>
+  <div id="activities-unlocked-state" style="display:none;flex-direction:column;flex:1;">
+    <div class="activities-header">
+      <h3>Choose an Activity</h3>
+      <p>Focus the board on words for a specific routine</p>
+    </div>
+    <div class="activities-grid-wrap">
+      <div class="activity-cards" id="activities-tab-cards"></div>
+      <button id="btn-import-activity" style="margin-top:12px;padding:10px 16px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.85rem;font-weight:600;color:#888;cursor:pointer;width:100%;text-align:center;">Import Activity Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Activity Modal -->
+<div id="create-activity-overlay">
+  <div id="create-activity-panel">
+    <h3>Create Activity</h3>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Activity Name</label>
+      <input type="text" id="create-activity-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Icon</label>
+      <div id="create-activity-icons" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Color</label>
+      <div id="create-activity-colors" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:6px;">Select Words</label>
+      <input type="text" id="create-activity-word-search" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:0.9rem;font-family:inherit;box-sizing:border-box;margin-bottom:8px;" aria-label="Search words">
+      <div id="create-activity-selected" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;min-height:32px;"></div>
+      <div id="create-activity-word-list" style="max-height:200px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="btn-create-activity-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
+      <button id="btn-create-activity-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Activity</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Activity Input -->
+<input type="file" id="import-activity-input" accept=".aactemplate,.json" style="display:none">
+
 <!-- Schedule View -->
 <div id="view-schedule" class="view" role="tabpanel" aria-labelledby="tab-schedule">
   <div id="schedule-content">
@@ -3853,6 +4074,10 @@ body.sensory-high-contrast .task-tile {
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="tab-label">Talk</span>
   </button>
+  <button class="tab-btn" id="tab-activities" role="tab" aria-selected="false" aria-controls="view-activities">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span class="tab-label">Activities</span>
+  </button>
   <button class="tab-btn" id="tab-schedule" role="tab" aria-selected="false" aria-controls="view-schedule">
     <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     <span class="tab-label">Schedule</span>
@@ -3861,9 +4086,8 @@ body.sensory-high-contrast .task-tile {
     <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     <span class="tab-label">Rewards</span>
   </button>
-  <button class="tab-btn" id="btn-parent-settings" aria-label="Settings">
+  <button class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span class="tab-label">Settings</span>
   </button>
 </nav>
 
@@ -5632,48 +5856,51 @@ const ACTIVITY_BUNDLES = [
     id: 'mealtime', name: 'Mealtime', nameEs: 'Hora de comer', icon: '🍽️',
     color: '#FF9800',
     words: [
-      { id: 'act-meal-eat',       label: 'eat',       labelEs: 'comer',       color: 'green',  icon: '🍽️',  symbolKw: 'eat' },
-      { id: 'act-meal-drink',     label: 'drink',     labelEs: 'beber',       color: 'green',  icon: '🥤',  symbolKw: 'drink' },
-      { id: 'act-meal-want',      label: 'want',      labelEs: 'quiero',      color: 'green',  icon: '👉',  symbolKw: 'want' },
-      { id: 'act-meal-open',      label: 'open',      labelEs: 'abrir',       color: 'green',  icon: '📂',  symbolKw: 'open' },
-      { id: 'act-meal-all-done',  label: 'all done',  labelEs: 'termine',     color: 'green',  icon: '✅',  symbolKw: 'finished' },
-      { id: 'act-meal-more',      label: 'more',      labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
-      { id: 'act-meal-yummy',     label: 'yummy',     labelEs: 'rico',        color: 'blue',   icon: '😋',  symbolKw: 'delicious' },
-      { id: 'act-meal-yucky',     label: 'yucky',     labelEs: 'feo',         color: 'blue',   icon: '🤢',  symbolKw: 'disgusting' },
-      { id: 'act-meal-hot',       label: 'hot',       labelEs: 'caliente',    color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
-      { id: 'act-meal-cold',      label: 'cold',      labelEs: 'frio',        color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
-      { id: 'act-meal-spoon',     label: 'spoon',     labelEs: 'cuchara',     color: 'orange', icon: '🥄',  symbolKw: 'spoon' },
-      { id: 'act-meal-cup',       label: 'cup',       labelEs: 'vaso',        color: 'orange', icon: '🥤',  symbolKw: 'cup' },
-      { id: 'act-meal-bowl',      label: 'bowl',      labelEs: 'plato',       color: 'orange', icon: '🥣',  symbolKw: 'bowl' },
-      { id: 'act-meal-water',     label: 'water',     labelEs: 'agua',        color: 'orange', icon: '💧',  symbolKw: 'water' },
-      { id: 'act-meal-please',    label: 'please',    labelEs: 'por favor',   color: 'pink',   icon: '🙏',  symbolKw: 'please' },
-      { id: 'act-meal-thank-you', label: 'thank you', labelEs: 'gracias',     color: 'pink',   icon: '💕',  symbolKw: 'thank you' },
+      { id: 'act-meal-i',        label: 'I',         labelEs: 'yo',          color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-meal-eat',      label: 'eat',       labelEs: 'comer',       color: 'green',  icon: '🍽️',  symbolKw: 'eat' },
+      { id: 'act-meal-drink',    label: 'drink',     labelEs: 'beber',       color: 'green',  icon: '🥤',  symbolKw: 'drink' },
+      { id: 'act-meal-want',     label: 'want',      labelEs: 'quiero',      color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-meal-open',     label: 'open',      labelEs: 'abrir',       color: 'green',  icon: '📂',  symbolKw: 'open' },
+      { id: 'act-meal-all-done', label: 'all done',  labelEs: 'termine',     color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-meal-more',     label: 'more',      labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-meal-yummy',    label: 'yummy',     labelEs: 'rico',        color: 'blue',   icon: '😋',  symbolKw: 'delicious' },
+      { id: 'act-meal-yucky',    label: 'yucky',     labelEs: 'feo',         color: 'blue',   icon: '🤢',  symbolKw: 'disgusting' },
+      { id: 'act-meal-hot',      label: 'hot',       labelEs: 'caliente',    color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
+      { id: 'act-meal-cold',     label: 'cold',      labelEs: 'frio',        color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+      { id: 'act-meal-spoon',    label: 'spoon',     labelEs: 'cuchara',     color: 'orange', icon: '🥄',  symbolKw: 'spoon' },
+      { id: 'act-meal-cup',      label: 'cup',       labelEs: 'vaso',        color: 'orange', icon: '🥤',  symbolKw: 'cup' },
+      { id: 'act-meal-water',    label: 'water',     labelEs: 'agua',        color: 'orange', icon: '💧',  symbolKw: 'water' },
+      { id: 'act-meal-please',   label: 'please',    labelEs: 'por favor',   color: 'pink',   icon: '🙏',  symbolKw: 'please' },
+      { id: 'act-meal-no',       label: 'no',        labelEs: 'no',          color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
     id: 'bathtime', name: 'Bath Time', nameEs: 'Hora del bano', icon: '🛁',
     color: '#29B6F6',
     words: [
+      { id: 'act-bath-i',        label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-bath-wash',     label: 'wash',     labelEs: 'lavar',     color: 'green',  icon: '🧼',  symbolKw: 'wash' },
       { id: 'act-bath-pour',     label: 'pour',     labelEs: 'verter',    color: 'green',  icon: '🫗',  symbolKw: 'pour' },
       { id: 'act-bath-splash',   label: 'splash',   labelEs: 'salpicar',  color: 'green',  icon: '💦',  symbolKw: 'splash' },
       { id: 'act-bath-dry',      label: 'dry',      labelEs: 'secar',     color: 'green',  icon: '🧻',  symbolKw: 'dry' },
+      { id: 'act-bath-help',     label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘',  symbolKw: 'help' },
       { id: 'act-bath-all-done', label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
       { id: 'act-bath-wet',      label: 'wet',      labelEs: 'mojado',    color: 'blue',   icon: '💧',  symbolKw: 'wet' },
-      { id: 'act-bath-warm',     label: 'warm',     labelEs: 'tibio',     color: 'blue',   icon: '🌡️', symbolKw: 'warm' },
       { id: 'act-bath-cold',     label: 'cold',     labelEs: 'frio',      color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
       { id: 'act-bath-more',     label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕',  symbolKw: 'more' },
       { id: 'act-bath-water',    label: 'water',    labelEs: 'agua',      color: 'orange', icon: '💧',  symbolKw: 'water' },
       { id: 'act-bath-towel',    label: 'towel',    labelEs: 'toalla',    color: 'orange', icon: '🧴',  symbolKw: 'towel' },
       { id: 'act-bath-soap',     label: 'soap',     labelEs: 'jabon',     color: 'orange', icon: '🧼',  symbolKw: 'soap' },
       { id: 'act-bath-bubbles',  label: 'bubbles',  labelEs: 'burbujas',  color: 'orange', icon: '🫧',  symbolKw: 'bubbles' },
-      { id: 'act-bath-duck',     label: 'duck',     labelEs: 'pato',      color: 'orange', icon: '🦆',  symbolKw: 'duck' },
+      { id: 'act-bath-no',       label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎',  symbolKw: 'no' },
+      { id: 'act-bath-out',      label: 'out',      labelEs: 'afuera',    color: 'purple', icon: '🚪',  symbolKw: 'out' },
     ]
   },
   {
     id: 'playground', name: 'Playground', nameEs: 'Parque', icon: '🛝',
     color: '#66BB6A',
     words: [
+      { id: 'act-play-i',        label: 'I',        labelEs: 'yo',         color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-play-go',       label: 'go',       labelEs: 'ir',         color: 'green',  icon: '▶️',  symbolKw: 'go' },
       { id: 'act-play-push',     label: 'push',     labelEs: 'empujar',    color: 'green',  icon: '🤲',  symbolKw: 'push' },
       { id: 'act-play-slide',    label: 'slide',    labelEs: 'resbalar',   color: 'green',  icon: '🛝',  symbolKw: 'slide' },
@@ -5682,11 +5909,11 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-play-run',      label: 'run',      labelEs: 'correr',     color: 'green',  icon: '🏃',  symbolKw: 'run' },
       { id: 'act-play-stop',     label: 'stop',     labelEs: 'para',       color: 'green',  icon: '🛑',  symbolKw: 'stop' },
       { id: 'act-play-help',     label: 'help',     labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-play-want',     label: 'want',     labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
       { id: 'act-play-more',     label: 'more',     labelEs: 'mas',        color: 'blue',   icon: '➕',  symbolKw: 'more' },
       { id: 'act-play-fast',     label: 'fast',     labelEs: 'rapido',     color: 'blue',   icon: '⚡',  symbolKw: 'fast' },
-      { id: 'act-play-high',     label: 'high',     labelEs: 'alto',       color: 'blue',   icon: '⬆️',  symbolKw: 'high' },
       { id: 'act-play-my-turn',  label: 'my turn',  labelEs: 'mi turno',   color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
-      { id: 'act-play-your-turn',label: 'your turn', labelEs: 'tu turno',  color: 'pink',   icon: '👉',  symbolKw: 'your turn' },
+      { id: 'act-play-no',       label: 'no',       labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
       { id: 'act-play-up',       label: 'up',       labelEs: 'arriba',     color: 'purple', icon: '⬆️',  symbolKw: 'up' },
       { id: 'act-play-down',     label: 'down',     labelEs: 'abajo',      color: 'purple', icon: '⬇️',  symbolKw: 'down' },
     ]
@@ -5695,13 +5922,14 @@ const ACTIVITY_BUNDLES = [
     id: 'bedtime', name: 'Bedtime', nameEs: 'Hora de dormir', icon: '🌙',
     color: '#5C6BC0',
     words: [
+      { id: 'act-bed-i',         label: 'I',         labelEs: 'yo',          color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-bed-read',      label: 'read',      labelEs: 'leer',        color: 'green',  icon: '📖',  symbolKw: 'read' },
       { id: 'act-bed-sleep',     label: 'sleep',     labelEs: 'dormir',      color: 'green',  icon: '😴',  symbolKw: 'sleep' },
       { id: 'act-bed-hug',       label: 'hug',       labelEs: 'abrazo',      color: 'green',  icon: '🤗',  symbolKw: 'hug' },
-      { id: 'act-bed-sing',      label: 'sing',      labelEs: 'cantar',      color: 'green',  icon: '🎵',  symbolKw: 'sing' },
       { id: 'act-bed-want',      label: 'want',      labelEs: 'quiero',      color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-bed-help',      label: 'help',      labelEs: 'ayuda',       color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-bed-all-done',  label: 'all done',  labelEs: 'termine',     color: 'green',  icon: '✅',  symbolKw: 'finished' },
       { id: 'act-bed-tired',     label: 'tired',     labelEs: 'cansado',     color: 'blue',   icon: '😴',  symbolKw: 'tired' },
-      { id: 'act-bed-dark',      label: 'dark',      labelEs: 'oscuro',      color: 'blue',   icon: '🌑',  symbolKw: 'dark' },
       { id: 'act-bed-more',      label: 'more',      labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
       { id: 'act-bed-scared',    label: 'scared',    labelEs: 'asustado',    color: 'blue',   icon: '😨',  symbolKw: 'scared' },
       { id: 'act-bed-blanket',   label: 'blanket',   labelEs: 'cobija',      color: 'orange', icon: '🛏️', symbolKw: 'blanket' },
@@ -5709,47 +5937,51 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-bed-light',     label: 'light',     labelEs: 'luz',         color: 'orange', icon: '💡',  symbolKw: 'light' },
       { id: 'act-bed-water',     label: 'water',     labelEs: 'agua',        color: 'orange', icon: '💧',  symbolKw: 'water' },
       { id: 'act-bed-goodnight', label: 'goodnight', labelEs: 'buenas noches',color:'pink',   icon: '🌙',  symbolKw: 'goodnight' },
+      { id: 'act-bed-no',        label: 'no',        labelEs: 'no',          color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
     id: 'dressing', name: 'Getting Dressed', nameEs: 'Vestirse', icon: '👕',
     color: '#AB47BC',
     words: [
-      { id: 'act-dress-put-on',   label: 'put on',   labelEs: 'poner',     color: 'green',  icon: '👕',  symbolKw: 'put on' },
-      { id: 'act-dress-take-off', label: 'take off', labelEs: 'quitar',    color: 'green',  icon: '👗',  symbolKw: 'take off' },
-      { id: 'act-dress-help',     label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘',  symbolKw: 'help' },
-      { id: 'act-dress-zip',      label: 'zip',      labelEs: 'cerrar',    color: 'green',  icon: '🔗',  symbolKw: 'zipper' },
-      { id: 'act-dress-all-done', label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
-      { id: 'act-dress-want',     label: 'want',     labelEs: 'quiero',    color: 'green',  icon: '👉',  symbolKw: 'want' },
-      { id: 'act-dress-tight',    label: 'tight',    labelEs: 'apretado',  color: 'blue',   icon: '😣',  symbolKw: 'tight' },
-      { id: 'act-dress-itchy',    label: 'itchy',    labelEs: 'pica',      color: 'blue',   icon: '😖',  symbolKw: 'itchy' },
-      { id: 'act-dress-cold',     label: 'cold',     labelEs: 'frio',      color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
-      { id: 'act-dress-shirt',    label: 'shirt',    labelEs: 'camisa',    color: 'orange', icon: '👕',  symbolKw: 'shirt' },
-      { id: 'act-dress-pants',    label: 'pants',    labelEs: 'pantalones',color: 'orange', icon: '👖',  symbolKw: 'pants' },
-      { id: 'act-dress-shoes',    label: 'shoes',    labelEs: 'zapatos',   color: 'orange', icon: '👟',  symbolKw: 'shoes' },
-      { id: 'act-dress-socks',    label: 'socks',    labelEs: 'calcetines',color: 'orange', icon: '🧦',  symbolKw: 'socks' },
-      { id: 'act-dress-coat',     label: 'coat',     labelEs: 'abrigo',    color: 'orange', icon: '🧥',  symbolKw: 'coat' },
-      { id: 'act-dress-this-one', label: 'this one', labelEs: 'este',      color: 'yellow', icon: '👆',  symbolKw: 'this' },
+      { id: 'act-dress-i',        label: 'I',        labelEs: 'yo',          color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-dress-put-on',   label: 'put on',   labelEs: 'poner',       color: 'green',  icon: '👕',  symbolKw: 'put on' },
+      { id: 'act-dress-take-off', label: 'take off',  labelEs: 'quitar',     color: 'green',  icon: '👗',  symbolKw: 'take off' },
+      { id: 'act-dress-help',     label: 'help',      labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-dress-all-done', label: 'all done',  labelEs: 'termine',    color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-dress-want',     label: 'want',      labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-dress-tight',    label: 'tight',     labelEs: 'apretado',   color: 'blue',   icon: '😣',  symbolKw: 'tight' },
+      { id: 'act-dress-itchy',    label: 'itchy',     labelEs: 'pica',       color: 'blue',   icon: '😖',  symbolKw: 'itchy' },
+      { id: 'act-dress-cold',     label: 'cold',      labelEs: 'frio',       color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+      { id: 'act-dress-shirt',    label: 'shirt',     labelEs: 'camisa',     color: 'orange', icon: '👕',  symbolKw: 'shirt' },
+      { id: 'act-dress-pants',    label: 'pants',     labelEs: 'pantalones', color: 'orange', icon: '👖',  symbolKw: 'pants' },
+      { id: 'act-dress-shoes',    label: 'shoes',     labelEs: 'zapatos',    color: 'orange', icon: '👟',  symbolKw: 'shoes' },
+      { id: 'act-dress-socks',    label: 'socks',     labelEs: 'calcetines', color: 'orange', icon: '🧦',  symbolKw: 'socks' },
+      { id: 'act-dress-coat',     label: 'coat',      labelEs: 'abrigo',     color: 'orange', icon: '🧥',  symbolKw: 'coat' },
+      { id: 'act-dress-this-one', label: 'this one',  labelEs: 'este',       color: 'yellow', icon: '👆',  symbolKw: 'this' },
+      { id: 'act-dress-no',       label: 'no',        labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
     id: 'circletime', name: 'Circle Time', nameEs: 'Hora del circulo', icon: '🎶',
     color: '#EC407A',
     words: [
+      { id: 'act-circle-i',       label: 'I',        labelEs: 'yo',         color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-circle-sing',    label: 'sing',     labelEs: 'cantar',     color: 'green',  icon: '🎵',  symbolKw: 'sing' },
       { id: 'act-circle-read',    label: 'read',     labelEs: 'leer',       color: 'green',  icon: '📖',  symbolKw: 'read' },
       { id: 'act-circle-listen',  label: 'listen',   labelEs: 'escuchar',   color: 'green',  icon: '👂',  symbolKw: 'listen' },
       { id: 'act-circle-look',    label: 'look',     labelEs: 'mira',       color: 'green',  icon: '👀',  symbolKw: 'look' },
       { id: 'act-circle-want',    label: 'want',     labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-circle-help',    label: 'help',     labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
       { id: 'act-circle-my-turn', label: 'my turn',  labelEs: 'mi turno',   color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
       { id: 'act-circle-hi',      label: 'hi',       labelEs: 'hola',       color: 'pink',   icon: '👋',  symbolKw: 'hello' },
       { id: 'act-circle-bye',     label: 'bye',      labelEs: 'adios',      color: 'pink',   icon: '👋',  symbolKw: 'goodbye' },
+      { id: 'act-circle-no',      label: 'no',       labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
       { id: 'act-circle-more',    label: 'more',     labelEs: 'mas',        color: 'blue',   icon: '➕',  symbolKw: 'more' },
       { id: 'act-circle-loud',    label: 'loud',     labelEs: 'fuerte',     color: 'blue',   icon: '🔊',  symbolKw: 'loud' },
       { id: 'act-circle-quiet',   label: 'quiet',    labelEs: 'silencio',   color: 'blue',   icon: '🤫',  symbolKw: 'quiet' },
       { id: 'act-circle-song',    label: 'song',     labelEs: 'cancion',    color: 'orange', icon: '🎶',  symbolKw: 'song' },
       { id: 'act-circle-book',    label: 'book',     labelEs: 'libro',      color: 'orange', icon: '📚',  symbolKw: 'book' },
-      { id: 'act-circle-friend',  label: 'friend',   labelEs: 'amigo',      color: 'orange', icon: '🤝',  symbolKw: 'friend' },
     ]
   },
   {
@@ -5761,6 +5993,8 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-car-go',         label: 'go',        labelEs: 'ir',         color: 'green',  icon: '▶️',  symbolKw: 'go' },
       { id: 'act-car-stop',       label: 'stop',      labelEs: 'para',       color: 'green',  icon: '🛑',  symbolKw: 'stop' },
       { id: 'act-car-look',       label: 'look',      labelEs: 'mira',       color: 'green',  icon: '👀',  symbolKw: 'look' },
+      { id: 'act-car-help',       label: 'help',      labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-car-all-done',   label: 'all done',  labelEs: 'termine',    color: 'green',  icon: '✅',  symbolKw: 'finished' },
       { id: 'act-car-music',      label: 'music',     labelEs: 'musica',     color: 'orange', icon: '🎵',  symbolKw: 'music' },
       { id: 'act-car-window',     label: 'window',    labelEs: 'ventana',    color: 'orange', icon: '🪟',  symbolKw: 'window' },
       { id: 'act-car-snack',      label: 'snack',     labelEs: 'merienda',   color: 'orange', icon: '🍪',  symbolKw: 'snack' },
@@ -5769,7 +6003,7 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-car-hot',        label: 'hot',       labelEs: 'caliente',   color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
       { id: 'act-car-cold',       label: 'cold',      labelEs: 'frio',       color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
       { id: 'act-car-please',     label: 'please',    labelEs: 'por favor',  color: 'pink',   icon: '🙏',  symbolKw: 'please' },
-      { id: 'act-car-are-we-there',label:'are we there',labelEs:'ya llegamos',color:'pink',   icon: '❓',  symbolKw: 'arrive' },
+      { id: 'act-car-no',         label: 'no',        labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
@@ -5782,15 +6016,16 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-sens-touch',    label: 'touch',    labelEs: 'tocar',     color: 'green',  icon: '✋',  symbolKw: 'touch' },
       { id: 'act-sens-squeeze',  label: 'squeeze',  labelEs: 'apretar',   color: 'green',  icon: '🤜',  symbolKw: 'squeeze' },
       { id: 'act-sens-pour',     label: 'pour',     labelEs: 'verter',    color: 'green',  icon: '🫗',  symbolKw: 'pour' },
-      { id: 'act-sens-mix',      label: 'mix',      labelEs: 'mezclar',   color: 'green',  icon: '🥄',  symbolKw: 'mix' },
+      { id: 'act-sens-help',     label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-sens-stop',     label: 'stop',     labelEs: 'para',      color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-sens-all-done', label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
       { id: 'act-sens-water',    label: 'water',    labelEs: 'agua',      color: 'orange', icon: '💧',  symbolKw: 'water' },
-      { id: 'act-sens-bubbles',  label: 'bubbles',  labelEs: 'burbujas',  color: 'orange', icon: '🫧',  symbolKw: 'bubbles' },
       { id: 'act-sens-more',     label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕',  symbolKw: 'more' },
       { id: 'act-sens-wet',      label: 'wet',      labelEs: 'mojado',    color: 'blue',   icon: '💧',  symbolKw: 'wet' },
       { id: 'act-sens-sticky',   label: 'sticky',   labelEs: 'pegajoso',  color: 'blue',   icon: '🍯',  symbolKw: 'sticky' },
       { id: 'act-sens-soft',     label: 'soft',     labelEs: 'suave',     color: 'blue',   icon: '🧸',  symbolKw: 'soft' },
-      { id: 'act-sens-yucky',    label: 'yucky',    labelEs: 'feo',       color: 'pink',   icon: '🤢',  symbolKw: 'disgusting' },
-      { id: 'act-sens-cool',     label: 'cool',     labelEs: 'genial',    color: 'pink',   icon: '😎',  symbolKw: 'cool' },
+      { id: 'act-sens-yucky',    label: 'yucky',    labelEs: 'feo',       color: 'blue',   icon: '🤢',  symbolKw: 'disgusting' },
+      { id: 'act-sens-no',       label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
@@ -5799,10 +6034,11 @@ const ACTIVITY_BUNDLES = [
     words: [
       { id: 'act-book-i',       label: 'I',       labelEs: 'yo',         color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-book-it',      label: 'it',      labelEs: 'eso',        color: 'yellow', icon: '👆',  symbolKw: 'it' },
+      { id: 'act-book-where',   label: 'where',   labelEs: 'donde',      color: 'yellow', icon: '❓',  symbolKw: 'where' },
       { id: 'act-book-read',    label: 'read',    labelEs: 'leer',       color: 'green',  icon: '📖',  symbolKw: 'read' },
       { id: 'act-book-turn',    label: 'turn',    labelEs: 'voltear',    color: 'green',  icon: '📄',  symbolKw: 'turn' },
       { id: 'act-book-look',    label: 'look',    labelEs: 'mira',       color: 'green',  icon: '👀',  symbolKw: 'look' },
-      { id: 'act-book-see',     label: 'see',     labelEs: 'ver',        color: 'green',  icon: '👁️', symbolKw: 'see' },
+      { id: 'act-book-want',    label: 'want',    labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
       { id: 'act-book-book',    label: 'book',    labelEs: 'libro',      color: 'orange', icon: '📚',  symbolKw: 'book' },
       { id: 'act-book-page',    label: 'page',    labelEs: 'pagina',     color: 'orange', icon: '📄',  symbolKw: 'page' },
       { id: 'act-book-funny',   label: 'funny',   labelEs: 'gracioso',   color: 'blue',   icon: '😄',  symbolKw: 'funny' },
@@ -5811,47 +6047,50 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-book-again',   label: 'again',   labelEs: 'otra vez',   color: 'blue',   icon: '🔄',  symbolKw: 'again' },
       { id: 'act-book-uh-oh',   label: 'uh oh',   labelEs: 'uy',         color: 'pink',   icon: '😯',  symbolKw: 'surprise' },
       { id: 'act-book-the-end', label: 'the end', labelEs: 'el fin',     color: 'pink',   icon: '🔚',  symbolKw: 'end' },
+      { id: 'act-book-no',      label: 'no',      labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
     id: 'doctor', name: 'Doctor Visit', nameEs: 'Visita al doctor', icon: '🩺',
     color: '#EF5350',
     words: [
-      { id: 'act-doc-i',       label: 'I',       labelEs: 'yo',        color: 'yellow', icon: '🙋',  symbolKw: 'I' },
-      { id: 'act-doc-my',      label: 'my',      labelEs: 'mi',        color: 'yellow', icon: '🙋',  symbolKw: 'my' },
-      { id: 'act-doc-wait',    label: 'wait',    labelEs: 'espera',    color: 'green',  icon: '⏳',  symbolKw: 'wait' },
-      { id: 'act-doc-sit',     label: 'sit',     labelEs: 'sentarse',  color: 'green',  icon: '🪑',  symbolKw: 'sit' },
-      { id: 'act-doc-help',    label: 'help',    labelEs: 'ayuda',     color: 'green',  icon: '🆘',  symbolKw: 'help' },
-      { id: 'act-doc-hurt',    label: 'hurt',    labelEs: 'duele',     color: 'blue',   icon: '🤕',  symbolKw: 'pain' },
-      { id: 'act-doc-scared',  label: 'scared',  labelEs: 'asustado',  color: 'blue',   icon: '😨',  symbolKw: 'scared' },
-      { id: 'act-doc-gentle',  label: 'gentle',  labelEs: 'suave',     color: 'blue',   icon: '🤲',  symbolKw: 'gentle' },
-      { id: 'act-doc-all-done',label: 'all done',labelEs: 'termine',   color: 'blue',   icon: '✅',  symbolKw: 'finished' },
-      { id: 'act-doc-body',    label: 'body',    labelEs: 'cuerpo',    color: 'orange', icon: '🧍',  symbolKw: 'body' },
-      { id: 'act-doc-turn',    label: 'turn',    labelEs: 'turno',     color: 'orange', icon: '🔄',  symbolKw: 'turn' },
-      { id: 'act-doc-doctor',  label: 'doctor',  labelEs: 'doctor',    color: 'orange', icon: '👨‍⚕️',symbolKw: 'doctor' },
-      { id: 'act-doc-please',  label: 'please',  labelEs: 'por favor', color: 'pink',   icon: '🙏',  symbolKw: 'please' },
-      { id: 'act-doc-hi',      label: 'hi',      labelEs: 'hola',      color: 'pink',   icon: '👋',  symbolKw: 'hello' },
+      { id: 'act-doc-i',        label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-doc-my',       label: 'my',       labelEs: 'mi',        color: 'yellow', icon: '🙋',  symbolKw: 'my' },
+      { id: 'act-doc-wait',     label: 'wait',     labelEs: 'espera',    color: 'green',  icon: '⏳',  symbolKw: 'wait' },
+      { id: 'act-doc-sit',      label: 'sit',      labelEs: 'sentarse',  color: 'green',  icon: '🪑',  symbolKw: 'sit' },
+      { id: 'act-doc-help',     label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-doc-want',     label: 'want',     labelEs: 'quiero',    color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-doc-stop',     label: 'stop',     labelEs: 'para',      color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-doc-all-done', label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-doc-hurt',     label: 'hurt',     labelEs: 'duele',     color: 'blue',   icon: '🤕',  symbolKw: 'pain' },
+      { id: 'act-doc-scared',   label: 'scared',   labelEs: 'asustado',  color: 'blue',   icon: '😨',  symbolKw: 'scared' },
+      { id: 'act-doc-gentle',   label: 'gentle',   labelEs: 'suave',     color: 'blue',   icon: '🤲',  symbolKw: 'gentle' },
+      { id: 'act-doc-doctor',   label: 'doctor',   labelEs: 'doctor',    color: 'orange', icon: '👨‍⚕️',symbolKw: 'doctor' },
+      { id: 'act-doc-please',   label: 'please',   labelEs: 'por favor', color: 'pink',   icon: '🙏',  symbolKw: 'please' },
+      { id: 'act-doc-hi',       label: 'hi',       labelEs: 'hola',      color: 'pink',   icon: '👋',  symbolKw: 'hello' },
+      { id: 'act-doc-no',       label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
     id: 'arttime', name: 'Art Time', nameEs: 'Hora del arte', icon: '🎨',
     color: '#FF7043',
     words: [
-      { id: 'act-art-i',      label: 'I',      labelEs: 'yo',         color: 'yellow', icon: '🙋',  symbolKw: 'I' },
-      { id: 'act-art-my',     label: 'my',     labelEs: 'mi',         color: 'yellow', icon: '🙋',  symbolKw: 'my' },
-      { id: 'act-art-want',   label: 'want',   labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
-      { id: 'act-art-cut',    label: 'cut',    labelEs: 'cortar',     color: 'green',  icon: '✂️',  symbolKw: 'cut' },
-      { id: 'act-art-draw',   label: 'draw',   labelEs: 'dibujar',    color: 'green',  icon: '✏️',  symbolKw: 'draw' },
-      { id: 'act-art-glue',   label: 'glue',   labelEs: 'pegar',      color: 'green',  icon: '🧴',  symbolKw: 'glue' },
-      { id: 'act-art-help',   label: 'help',   labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
-      { id: 'act-art-color',  label: 'color',  labelEs: 'color',      color: 'orange', icon: '🌈',  symbolKw: 'color' },
-      { id: 'act-art-paper',  label: 'paper',  labelEs: 'papel',      color: 'orange', icon: '📄',  symbolKw: 'paper' },
-      { id: 'act-art-marker', label: 'marker', labelEs: 'marcador',   color: 'orange', icon: '🖍️', symbolKw: 'marker' },
-      { id: 'act-art-red',    label: 'red',    labelEs: 'rojo',       color: 'blue',   icon: '🔴',  symbolKw: 'red' },
-      { id: 'act-art-blue',   label: 'blue',   labelEs: 'azul',       color: 'blue',   icon: '🔵',  symbolKw: 'blue' },
-      { id: 'act-art-big',    label: 'big',    labelEs: 'grande',     color: 'blue',   icon: '⬆️',  symbolKw: 'big' },
-      { id: 'act-art-pretty', label: 'pretty', labelEs: 'bonito',     color: 'pink',   icon: '🌸',  symbolKw: 'pretty' },
-      { id: 'act-art-on',     label: 'on',     labelEs: 'en',         color: 'purple', icon: '📍',  symbolKw: 'on' },
+      { id: 'act-art-i',        label: 'I',        labelEs: 'yo',         color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-art-my',       label: 'my',       labelEs: 'mi',         color: 'yellow', icon: '🙋',  symbolKw: 'my' },
+      { id: 'act-art-want',     label: 'want',     labelEs: 'quiero',     color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-art-cut',      label: 'cut',      labelEs: 'cortar',     color: 'green',  icon: '✂️',  symbolKw: 'cut' },
+      { id: 'act-art-draw',     label: 'draw',     labelEs: 'dibujar',    color: 'green',  icon: '✏️',  symbolKw: 'draw' },
+      { id: 'act-art-glue',     label: 'glue',     labelEs: 'pegar',      color: 'green',  icon: '🧴',  symbolKw: 'glue' },
+      { id: 'act-art-help',     label: 'help',     labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-art-all-done', label: 'all done', labelEs: 'termine',    color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-art-color',    label: 'color',    labelEs: 'color',      color: 'orange', icon: '🌈',  symbolKw: 'color' },
+      { id: 'act-art-paper',    label: 'paper',    labelEs: 'papel',      color: 'orange', icon: '📄',  symbolKw: 'paper' },
+      { id: 'act-art-marker',   label: 'marker',   labelEs: 'marcador',   color: 'orange', icon: '🖍️', symbolKw: 'marker' },
+      { id: 'act-art-more',     label: 'more',     labelEs: 'mas',        color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-art-red',      label: 'red',      labelEs: 'rojo',       color: 'blue',   icon: '🔴',  symbolKw: 'red' },
+      { id: 'act-art-blue',     label: 'blue',     labelEs: 'azul',       color: 'blue',   icon: '🔵',  symbolKw: 'blue' },
+      { id: 'act-art-big',      label: 'big',      labelEs: 'grande',     color: 'blue',   icon: '⬆️',  symbolKw: 'big' },
+      { id: 'act-art-no',       label: 'no',       labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
   {
@@ -5864,15 +6103,15 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-groc-get',      label: 'get',      labelEs: 'agarrar',    color: 'green',  icon: '🤲',  symbolKw: 'get' },
       { id: 'act-groc-put',      label: 'put',      labelEs: 'poner',      color: 'green',  icon: '📥',  symbolKw: 'put' },
       { id: 'act-groc-push',     label: 'push',     labelEs: 'empujar',    color: 'green',  icon: '🛒',  symbolKw: 'push' },
+      { id: 'act-groc-help',     label: 'help',     labelEs: 'ayuda',      color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-groc-stop',     label: 'stop',     labelEs: 'para',       color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-groc-all-done', label: 'all done', labelEs: 'termine',    color: 'green',  icon: '✅',  symbolKw: 'finished' },
       { id: 'act-groc-cart',     label: 'cart',     labelEs: 'carrito',    color: 'orange', icon: '🛒',  symbolKw: 'cart' },
       { id: 'act-groc-food',     label: 'food',     labelEs: 'comida',     color: 'orange', icon: '🍎',  symbolKw: 'food' },
       { id: 'act-groc-bag',      label: 'bag',      labelEs: 'bolsa',      color: 'orange', icon: '🛍️', symbolKw: 'bag' },
-      { id: 'act-groc-yummy',    label: 'yummy',    labelEs: 'rico',       color: 'blue',   icon: '😋',  symbolKw: 'delicious' },
       { id: 'act-groc-more',     label: 'more',     labelEs: 'mas',        color: 'blue',   icon: '➕',  symbolKw: 'more' },
-      { id: 'act-groc-all-done', label: 'all done', labelEs: 'termine',    color: 'blue',   icon: '✅',  symbolKw: 'finished' },
       { id: 'act-groc-no',       label: 'no',       labelEs: 'no',         color: 'pink',   icon: '👎',  symbolKw: 'no' },
       { id: 'act-groc-please',   label: 'please',   labelEs: 'por favor',  color: 'pink',   icon: '🙏',  symbolKw: 'please' },
-      { id: 'act-groc-in',       label: 'in',       labelEs: 'en',         color: 'purple', icon: '📥',  symbolKw: 'in' },
     ]
   },
 ];
@@ -7852,6 +8091,7 @@ document.getElementById('search-input').addEventListener('input', e => {
 function getTabViewMap() {
   return {
     'tab-talk': { view: 'view-talk', title: t('tab.talk', 'Talk') },
+    'tab-activities': { view: 'view-activities', title: t('tab.activities', 'Activities') },
     'tab-schedule': { view: 'view-schedule', title: t('tab.schedule', 'Schedule') },
     'tab-rewards': { view: 'view-rewards', title: t('tab.rewards', 'Rewards') },
   };
@@ -7907,6 +8147,7 @@ const _origSwitchTab = switchTab;
 switchTab = function(tabId) {
   _origSwitchTab(tabId);
   updateBackButton();
+  if (tabId === 'tab-activities') renderActivitiesTab();
 };
 
 const _origRenderGrid = renderGrid;
@@ -7951,6 +8192,7 @@ function setParentMode(enabled) {
     document.getElementById('view-insights').classList.remove('open');
     document.getElementById('settings-overlay').classList.remove('open');
   }
+  if (typeof renderActivitiesTab === 'function') renderActivitiesTab();
 }
 
 function resetParentAutoLock() {
@@ -8353,21 +8595,100 @@ document.getElementById('edit-camera-input').addEventListener('change', async e 
 
 // ── Activity Overlays ──
 
+function getAllActivities() {
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  return [...ACTIVITY_BUNDLES, ...custom];
+}
+
 function renderActivityCards() {
   const container = document.getElementById('activity-cards');
   if (!container) return;
   container.innerHTML = '';
-  ACTIVITY_BUNDLES.forEach(activity => {
+  getAllActivities().forEach(activity => {
     const card = document.createElement('button');
     card.className = 'activity-card';
-    card.innerHTML = `<span class="activity-card-icon">${activity.icon}</span><span class="activity-card-label">${currentLang === 'es' ? activity.nameEs : activity.name}</span>`;
+    card.innerHTML = `<span class="activity-card-icon">${activity.icon}</span><span class="activity-card-label">${currentLang === 'es' ? (activity.nameEs || activity.name) : activity.name}</span>`;
     card.addEventListener('click', () => openActivityPreview(activity.id));
     container.appendChild(card);
   });
 }
 
+function renderActivitiesTab() {
+  const locked = document.getElementById('activities-locked-state');
+  const unlocked = document.getElementById('activities-unlocked-state');
+  if (!locked || !unlocked) return;
+
+  if (!parentMode) {
+    locked.style.display = '';
+    unlocked.style.display = 'none';
+    return;
+  }
+
+  locked.style.display = 'none';
+  unlocked.style.display = 'flex';
+
+  const container = document.getElementById('activities-tab-cards');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const allActivities = getAllActivities();
+  allActivities.forEach(activity => {
+    const card = document.createElement('button');
+    const isActive = activeActivity && activeActivity.id === activity.id;
+    card.className = 'activity-card' + (isActive ? ' activity-active' : '');
+    const label = currentLang === 'es' ? (activity.nameEs || activity.name) : activity.name;
+
+    let badgeHtml = '';
+    if (isActive) {
+      badgeHtml = '<span class="activity-card-badge">Active</span>';
+    }
+
+    const exportBtn = `<button class="activity-card-export" title="Export activity" aria-label="Export ${activity.name}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+
+    card.innerHTML = `${exportBtn}<span class="activity-card-icon">${activity.icon}</span><span class="activity-card-label">${label}</span>${badgeHtml}`;
+
+    const exportBtnEl = card.querySelector('.activity-card-export');
+    exportBtnEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      exportActivity(activity);
+    });
+
+    if (isActive) {
+      card.addEventListener('click', () => {
+        endActivity();
+        renderActivitiesTab();
+      });
+    } else {
+      card.addEventListener('click', () => openActivityPreview(activity.id));
+    }
+    container.appendChild(card);
+  });
+
+  const createCard = document.createElement('button');
+  createCard.className = 'activity-card';
+  createCard.style.cssText = 'border-style:dashed;color:#aaa;';
+  createCard.innerHTML = '<span class="activity-card-icon" style="font-size:1.8rem;opacity:0.5;">+</span><span class="activity-card-label">Create Activity</span>';
+  createCard.addEventListener('click', openCreateActivityModal);
+  container.appendChild(createCard);
+}
+
+let activitiesUnlockTaps = 0;
+let activitiesUnlockTimer = null;
+document.getElementById('btn-activities-unlock').addEventListener('click', () => {
+  activitiesUnlockTaps++;
+  if (activitiesUnlockTimer) clearTimeout(activitiesUnlockTimer);
+  activitiesUnlockTimer = setTimeout(() => { activitiesUnlockTaps = 0; }, 3000);
+  if (activitiesUnlockTaps >= 3) {
+    activitiesUnlockTaps = 0;
+    setParentMode(true);
+    renderActivitiesTab();
+  } else {
+    showToast(`Tap ${3 - activitiesUnlockTaps} more times`);
+  }
+});
+
 function openActivityPreview(activityId) {
-  const activity = ACTIVITY_BUNDLES.find(a => a.id === activityId);
+  const activity = getAllActivities().find(a => a.id === activityId);
   if (!activity) return;
   const overlay = document.getElementById('activity-preview-overlay');
   const title = document.getElementById('activity-preview-title');
@@ -8409,19 +8730,18 @@ document.getElementById('btn-activity-start').addEventListener('click', () => {
 });
 
 function startActivity(activityId) {
-  const activity = ACTIVITY_BUNDLES.find(a => a.id === activityId);
+  const allActs = getAllActivities();
+  const activity = allActs.find(a => a.id === activityId);
   if (!activity) return;
   activeActivity = activity;
   currentFolder = null;
   document.body.classList.add('activity-mode');
 
-  // Update banner
   const banner = document.getElementById('activity-banner');
   document.getElementById('activity-banner-icon').textContent = activity.icon;
-  document.getElementById('activity-banner-label').textContent = currentLang === 'es' ? activity.nameEs : activity.name;
+  document.getElementById('activity-banner-label').textContent = currentLang === 'es' ? (activity.nameEs || activity.name) : activity.name;
   banner.classList.add('active');
 
-  // Switch to Talk tab if not already
   if (activeTab !== 'talk') switchTab('tab-talk');
 
   renderGrid();
@@ -8451,6 +8771,262 @@ document.getElementById('btn-activity-close').addEventListener('click', () => {
 const _origSettingsOpen = document.getElementById('btn-parent-settings').onclick;
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
   renderActivityCards();
+});
+
+// ── Create Activity ──
+const CREATE_ACTIVITY_ICONS = ['🎯','🏠','🚗','🎵','🎨','🛒','📚','🧩','🎮','🌳','🏊','🍳','🧹','🐶','⚽','🎭'];
+const CREATE_ACTIVITY_COLORS = ['#FF9800','#29B6F6','#66BB6A','#5C6BC0','#AB47BC','#EC407A','#26A69A','#7E57C2','#8D6E63','#EF5350','#FF7043','#42A5F5'];
+let createActivitySelectedWords = [];
+let createActivityIcon = '';
+let createActivityColor = '';
+
+function openCreateActivityModal() {
+  createActivitySelectedWords = [];
+  createActivityIcon = CREATE_ACTIVITY_ICONS[0];
+  createActivityColor = CREATE_ACTIVITY_COLORS[0];
+  document.getElementById('create-activity-name').value = '';
+  document.getElementById('create-activity-word-search').value = '';
+
+  const iconsContainer = document.getElementById('create-activity-icons');
+  iconsContainer.innerHTML = '';
+  CREATE_ACTIVITY_ICONS.forEach(icon => {
+    const btn = document.createElement('button');
+    btn.className = 'create-icon-btn' + (icon === createActivityIcon ? ' selected' : '');
+    btn.textContent = icon;
+    btn.addEventListener('click', () => {
+      createActivityIcon = icon;
+      iconsContainer.querySelectorAll('.create-icon-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    iconsContainer.appendChild(btn);
+  });
+
+  const colorsContainer = document.getElementById('create-activity-colors');
+  colorsContainer.innerHTML = '';
+  CREATE_ACTIVITY_COLORS.forEach(color => {
+    const btn = document.createElement('button');
+    btn.className = 'create-color-btn' + (color === createActivityColor ? ' selected' : '');
+    btn.style.background = color;
+    btn.addEventListener('click', () => {
+      createActivityColor = color;
+      colorsContainer.querySelectorAll('.create-color-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    colorsContainer.appendChild(btn);
+  });
+
+  renderCreateWordPicker('');
+  renderCreateSelectedWords();
+
+  document.getElementById('create-activity-overlay').classList.add('open');
+}
+
+function renderCreateWordPicker(filter) {
+  const container = document.getElementById('create-activity-word-list');
+  container.innerHTML = '';
+  const search = filter.toLowerCase().trim();
+
+  const allWords = [];
+  buttons.forEach(b => {
+    if (b.type === 'folder') return;
+    const label = b.label || '';
+    if (search && !label.toLowerCase().includes(search)) return;
+    allWords.push({ label: label, labelEs: b.labelEs || '', color: b.color || 'orange', icon: b.icon || '' });
+  });
+
+  const seen = new Set();
+  allWords.forEach(w => {
+    if (seen.has(w.label)) return;
+    seen.add(w.label);
+    const isSelected = createActivitySelectedWords.some(s => s.label === w.label);
+    const chip = document.createElement('button');
+    chip.className = 'create-word-chip' + (isSelected ? ' selected' : '');
+    chip.setAttribute('data-color', w.color);
+    chip.textContent = (w.icon ? w.icon + ' ' : '') + w.label;
+    chip.addEventListener('click', () => {
+      if (isSelected) {
+        createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
+      } else {
+        if (createActivitySelectedWords.length >= 16) {
+          showToast('Maximum 16 words per activity');
+          return;
+        }
+        createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon });
+      }
+      renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+      renderCreateSelectedWords();
+    });
+    container.appendChild(chip);
+  });
+
+  if (container.children.length === 0) {
+    container.innerHTML = '<p style="color:#aaa;font-size:0.85rem;text-align:center;margin:8px 0;">No matching words</p>';
+  }
+}
+
+function renderCreateSelectedWords() {
+  const container = document.getElementById('create-activity-selected');
+  container.innerHTML = '';
+  if (createActivitySelectedWords.length === 0) {
+    container.innerHTML = '<span style="color:#bbb;font-size:0.8rem;">Tap words below to add them</span>';
+    return;
+  }
+  createActivitySelectedWords.forEach(w => {
+    const chip = document.createElement('button');
+    chip.className = 'create-selected-chip';
+    chip.textContent = w.label + ' \u00D7';
+    chip.addEventListener('click', () => {
+      createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
+      renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+      renderCreateSelectedWords();
+    });
+    container.appendChild(chip);
+  });
+}
+
+document.getElementById('create-activity-word-search').addEventListener('input', (e) => {
+  renderCreateWordPicker(e.target.value);
+});
+
+document.getElementById('btn-create-activity-cancel').addEventListener('click', () => {
+  document.getElementById('create-activity-overlay').classList.remove('open');
+});
+
+document.getElementById('create-activity-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'create-activity-overlay') {
+    e.target.classList.remove('open');
+  }
+});
+
+document.getElementById('btn-create-activity-save').addEventListener('click', () => {
+  const name = document.getElementById('create-activity-name').value.trim();
+  if (!name) { showToast('Enter an activity name'); return; }
+  if (createActivitySelectedWords.length < 3) { showToast('Select at least 3 words'); return; }
+
+  const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const activity = {
+    id: id,
+    name: name,
+    nameEs: name,
+    icon: createActivityIcon,
+    color: createActivityColor,
+    custom: true,
+    words: createActivitySelectedWords.map((w, i) => ({
+      id: id + '-' + i,
+      label: w.label,
+      labelEs: w.labelEs || w.label,
+      color: w.color,
+      icon: w.icon || '',
+      symbolKw: w.label,
+    })),
+  };
+
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  custom.push(activity);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+
+  document.getElementById('create-activity-overlay').classList.remove('open');
+  renderActivitiesTab();
+  renderActivityCards();
+  showToast(`${activity.icon} ${activity.name} created`);
+});
+
+// ── Export / Import Activities ──
+
+function exportActivity(activity) {
+  const template = {
+    format: 'aac-activity-template',
+    version: 1,
+    activity: {
+      name: activity.name,
+      nameEs: activity.nameEs || activity.name,
+      icon: activity.icon,
+      color: activity.color,
+      words: activity.words.map(w => ({
+        label: w.label,
+        labelEs: w.labelEs || w.label,
+        color: w.color,
+        icon: w.icon || '',
+        symbolKw: w.symbolKw || w.label,
+      })),
+    },
+  };
+
+  const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+  const fileName = activity.name.toLowerCase().replace(/\s+/g, '-') + '.aactemplate';
+
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], fileName, { type: 'application/json' });
+    const shareData = { files: [file], title: activity.name + ' Activity Template' };
+    if (navigator.canShare(shareData)) {
+      navigator.share(shareData).catch(() => downloadBlob(blob, fileName));
+      return;
+    }
+  }
+  downloadBlob(blob, fileName);
+}
+
+function downloadBlob(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+function importActivityFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.activity || !data.activity.name || !Array.isArray(data.activity.words)) {
+        showToast('Invalid activity template file');
+        return;
+      }
+
+      const act = data.activity;
+      const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      const activity = {
+        id: id,
+        name: act.name,
+        nameEs: act.nameEs || act.name,
+        icon: act.icon || '🎯',
+        color: act.color || '#FF9800',
+        custom: true,
+        words: act.words.map((w, i) => ({
+          id: id + '-' + i,
+          label: w.label,
+          labelEs: w.labelEs || w.label,
+          color: w.color || 'orange',
+          icon: w.icon || '',
+          symbolKw: w.symbolKw || w.label,
+        })),
+      };
+
+      const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+      custom.push(activity);
+      localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+
+      renderActivitiesTab();
+      renderActivityCards();
+      showToast(`${activity.icon} ${activity.name} imported`);
+    } catch (err) {
+      showToast('Could not read activity file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('import-activity-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) importActivityFromFile(file);
+  e.target.value = '';
+});
+
+document.getElementById('btn-import-activity').addEventListener('click', () => {
+  document.getElementById('import-activity-input').click();
 });
 
 // ── Symbol Library (ARASAAC) ──
