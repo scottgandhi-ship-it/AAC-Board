@@ -29,7 +29,16 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Notes: .project/features/QuickPhrases_Notes.md
 - Status: IMPLEMENTED -- awaiting validation
 
+### Activity Overlays (Phase 2, P1)
+- Plan: .project/features/ActivityOverlays.md
+- Notes: .project/features/ActivityOverlays_Notes.md
+- Status: PLANNING -- awaiting approval
+- Concept: Parent/SLP-controlled contextual vocabulary overlays (not a tab)
+- Initial bundles: Mealtime, Bath Time, Playground, Bedtime, Getting Dressed, Circle Time
+- Second wave: 6 additional bundles designed by Marci (pending)
+
 ## Next Up
+- Activity Overlays Wave 2 (6 additional activity bundles)
 - Milestone 5: iOS + Android App Store Submissions
 
 ## Completed Features
