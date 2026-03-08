@@ -1,6 +1,6 @@
 # Deep Vocabulary Expansion (Levels 1-2)
 
-**Status**: PLANNING -- awaiting developer approval
+**Status**: DONE -- validated 2026-03-07
 **Phase**: Phase 2 (Enhance)
 **Priority**: P0
 **Clinical advisor**: Marci (Early Intervention Specialist)

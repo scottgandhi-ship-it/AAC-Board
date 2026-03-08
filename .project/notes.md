@@ -5,6 +5,12 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 
 ## Active Features
 
+### Export/Share Boards (Milestone 4.4)
+- Plan: .project/features/ExportShareBoards.md
+- Notes: .project/features/ExportShareBoards_Notes.md
+- Status: IMPLEMENTED -- awaiting testing and validation
+- Branch: feature/export-import-boards
+
 ### Marketing Website
 - Plan: .project/features/MarketingWebsite.md
 - Status: PLANNING -- awaiting approval
@@ -14,8 +20,6 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Status: PLANNING -- gap analysis complete, awaiting approval
 
 ## Next Up
-- Multiple TTS Voices (Phase 2, P1)
-- Milestone 4.4: Export/Share Boards + OBF format
 - Milestone 5: iOS + Android App Store Submissions
 
 ## Completed Features
