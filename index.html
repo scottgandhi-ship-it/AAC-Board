@@ -1326,6 +1326,11 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   color: #fff;
 }
 #btn-activity-start:active { background: #5B54E0; }
+#btn-activity-customize {
+  background: #f3e5f5;
+  color: #6A1B9A;
+}
+#btn-activity-customize:active { background: #e1bee7; }
 #btn-activity-cancel {
   background: var(--chrome-surface-alt);
   color: var(--chrome-text-secondary);
@@ -3891,6 +3896,7 @@ body.sensory-high-contrast .task-tile {
     <div id="activity-preview-words"></div>
     <div id="activity-preview-actions">
       <button id="btn-activity-cancel">Cancel</button>
+      <button id="btn-activity-customize">Customize</button>
       <button id="btn-activity-start">Start Activity</button>
     </div>
   </div>
@@ -8663,6 +8669,15 @@ document.getElementById('activity-preview-overlay').addEventListener('click', (e
   }
 });
 
+document.getElementById('btn-activity-customize').addEventListener('click', () => {
+  const overlay = document.getElementById('activity-preview-overlay');
+  const activityId = overlay.dataset.activityId;
+  const activity = getAllActivities().find(a => a.id === activityId);
+  overlay.classList.remove('open');
+  document.getElementById('activities-overlay').classList.remove('open');
+  if (activity) openCreateActivityModal(activity);
+});
+
 document.getElementById('btn-activity-start').addEventListener('click', () => {
   const overlay = document.getElementById('activity-preview-overlay');
   const activityId = overlay.dataset.activityId;
@@ -8719,16 +8734,31 @@ let createActivitySelectedWords = [];
 let createActivityIcon = '';
 let createActivityColor = '';
 
-function openCreateActivityModal() {
-  createActivitySelectedWords = [];
-  createActivityIcon = CREATE_ACTIVITY_ICONS[0];
-  createActivityColor = CREATE_ACTIVITY_COLORS[0];
-  document.getElementById('create-activity-name').value = '';
+function openCreateActivityModal(prefillActivity) {
+  if (prefillActivity) {
+    createActivitySelectedWords = prefillActivity.words.map(w => ({
+      label: w.label,
+      labelEs: w.labelEs || w.label,
+      color: w.color,
+      icon: w.icon || '',
+    }));
+    createActivityIcon = prefillActivity.icon || CREATE_ACTIVITY_ICONS[0];
+    createActivityColor = prefillActivity.color || CREATE_ACTIVITY_COLORS[0];
+    document.getElementById('create-activity-name').value = prefillActivity.name + ' (Copy)';
+  } else {
+    createActivitySelectedWords = [];
+    createActivityIcon = CREATE_ACTIVITY_ICONS[0];
+    createActivityColor = CREATE_ACTIVITY_COLORS[0];
+    document.getElementById('create-activity-name').value = '';
+  }
   document.getElementById('create-activity-word-search').value = '';
 
   const iconsContainer = document.getElementById('create-activity-icons');
   iconsContainer.innerHTML = '';
-  CREATE_ACTIVITY_ICONS.forEach(icon => {
+  const iconList = CREATE_ACTIVITY_ICONS.includes(createActivityIcon)
+    ? CREATE_ACTIVITY_ICONS
+    : [createActivityIcon, ...CREATE_ACTIVITY_ICONS];
+  iconList.forEach(icon => {
     const btn = document.createElement('button');
     btn.className = 'create-icon-btn' + (icon === createActivityIcon ? ' selected' : '');
     btn.textContent = icon;
@@ -8742,7 +8772,10 @@ function openCreateActivityModal() {
 
   const colorsContainer = document.getElementById('create-activity-colors');
   colorsContainer.innerHTML = '';
-  CREATE_ACTIVITY_COLORS.forEach(color => {
+  const colorList = CREATE_ACTIVITY_COLORS.includes(createActivityColor)
+    ? CREATE_ACTIVITY_COLORS
+    : [createActivityColor, ...CREATE_ACTIVITY_COLORS];
+  colorList.forEach(color => {
     const btn = document.createElement('button');
     btn.className = 'create-color-btn' + (color === createActivityColor ? ' selected' : '');
     btn.style.background = color;
@@ -8837,10 +8870,19 @@ document.getElementById('create-activity-overlay').addEventListener('click', (e)
   }
 });
 
+const CORE_WORDS = ['i', 'want', 'more', 'help', 'no', 'stop', 'yes', 'all done', 'don\'t want'];
+
 document.getElementById('btn-create-activity-save').addEventListener('click', () => {
   const name = document.getElementById('create-activity-name').value.trim();
   if (!name) { showToast('Enter an activity name'); return; }
   if (createActivitySelectedWords.length < 3) { showToast('Select at least 3 words'); return; }
+
+  const selectedLabels = createActivitySelectedWords.map(w => w.label.toLowerCase());
+  const hasCoreWord = CORE_WORDS.some(cw => selectedLabels.includes(cw));
+  if (!hasCoreWord) {
+    const proceed = confirm('This activity has no core words (like "help", "more", "stop", "no", "want"). Core words let your child make requests, protest, and ask for help in any situation.\n\nSave anyway?');
+    if (!proceed) return;
+  }
 
   const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
   const activity = {
