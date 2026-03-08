@@ -691,6 +691,81 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 .settings-btn:active { background: #f0f0f0; }
 
+/* ── Export / Import Panel ── */
+.export-import-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 110;
+  justify-content: center;
+  align-items: center;
+}
+.export-import-overlay.open { display: flex; }
+
+.export-import-panel {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: var(--shadow-lifted), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+.export-mode-option {
+  border: 2px solid #eee;
+  padding: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.export-mode-option.selected {
+  border-color: #5c6bc0;
+  background: #f3f4ff;
+}
+.export-mode-option h4 {
+  font-weight: 700;
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+}
+.export-mode-option p {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0;
+}
+
+.export-progress {
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  margin: 12px 0;
+}
+.export-progress-bar {
+  height: 100%;
+  background: #5c6bc0;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.import-preview-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.import-preview-label {
+  color: #888;
+  font-size: 0.9rem;
+}
+.import-preview-value {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 /* ── Getting Started Guide Accordion ── */
 .guide-item { border-bottom: 1px solid #eee; }
 .guide-item:last-child { border-bottom: none; }
@@ -3395,10 +3470,18 @@ body.sensory-high-contrast .task-tile {
     </div>
     <div class="settings-section">
       <h3>Data</h3>
+      <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
+      <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
+      <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
       <button class="settings-btn" id="btn-reset-defaults" style="color:#e53935;">Reset all to defaults</button>
     </div>
     <button id="btn-close-settings">Done</button>
   </div>
+</div>
+
+<!-- Export / Import Overlay -->
+<div id="export-import-overlay" class="export-import-overlay">
+  <div id="export-import-panel" class="export-import-panel"></div>
 </div>
 
 <!-- Edit Button Modal -->
@@ -6794,6 +6877,14 @@ document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
 });
 
+document.getElementById('btn-export-board').addEventListener('click', showExportModal);
+document.getElementById('btn-import-board').addEventListener('click', startImport);
+document.getElementById('import-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) handleImportFile(file);
+  e.target.value = '';
+});
+
 // ── Getting Started Guide Accordion ──
 document.getElementById('getting-started-section').addEventListener('click', e => {
   const title = e.target.closest('.guide-title');
@@ -7412,6 +7503,442 @@ document.getElementById('quick-photo-input').addEventListener('change', async e 
   openEditModal(newId);
   e.target.value = '';
 });
+
+// ── Export / Import Board ──
+const CURRENT_EXPORT_VERSION = 1;
+const MAX_IMPORT_SIZE = 10 * 1024 * 1024;
+
+const EXPORTED_SETTINGS_KEYS = [
+  'aac-grid-size',
+  'aac-voice',
+  'aac-pitch',
+  'aac-language',
+  'aac-grammar-plurals',
+  'aac-grammar-verbs',
+  'aac-grammar-articles',
+  'aac-auto-speak',
+  'aac-sensory-reduced-motion',
+  'aac-sensory-high-contrast',
+  'aac-sensory-quiet',
+  'aac-custom-es-labels',
+  'aac-bigram-counts'
+];
+
+function showExportImportPanel(html) {
+  const panel = document.getElementById('export-import-panel');
+  panel.innerHTML = html;
+  document.getElementById('export-import-overlay').classList.add('open');
+}
+
+function closeExportImportPanel() {
+  document.getElementById('export-import-overlay').classList.remove('open');
+}
+
+function showExportModal() {
+  const html = `
+    <h2>Export Board</h2>
+    <div style="margin-bottom:16px;">
+      <label for="export-board-name" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Board name</label>
+      <input type="text" id="export-board-name" value="My AAC Board" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div id="export-mode-template" class="export-mode-option selected" tabindex="0" role="radio" aria-checked="true">
+      <h4>Share as Template</h4>
+      <p>Board structure without personal photos. Best for sharing with others.</p>
+    </div>
+    <div id="export-mode-backup" class="export-mode-option" tabindex="0" role="radio" aria-checked="false" style="margin-top:8px;">
+      <h4>Full Backup</h4>
+      <p>Complete board with all your custom photos. Best for moving to a new device.</p>
+    </div>
+    <div class="export-progress" id="export-progress" style="display:none;">
+      <div class="export-progress-bar" id="export-progress-bar" style="width:0%"></div>
+    </div>
+    <div id="export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>
+    <button class="settings-btn" id="btn-do-export" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Export</button>
+    <button class="settings-btn" id="btn-cancel-export">Cancel</button>
+  `;
+  showExportImportPanel(html);
+
+  let selectedMode = 'template';
+
+  const templateOpt = document.getElementById('export-mode-template');
+  const backupOpt = document.getElementById('export-mode-backup');
+
+  function selectMode(mode) {
+    selectedMode = mode;
+    templateOpt.classList.toggle('selected', mode === 'template');
+    backupOpt.classList.toggle('selected', mode === 'backup');
+    templateOpt.setAttribute('aria-checked', mode === 'template');
+    backupOpt.setAttribute('aria-checked', mode === 'backup');
+  }
+
+  templateOpt.addEventListener('click', () => selectMode('template'));
+  backupOpt.addEventListener('click', () => selectMode('backup'));
+  templateOpt.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMode('template'); }});
+  backupOpt.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMode('backup'); }});
+
+  document.getElementById('btn-cancel-export').addEventListener('click', closeExportImportPanel);
+  document.getElementById('btn-do-export').addEventListener('click', async () => {
+    const boardName = document.getElementById('export-board-name').value.trim() || 'My AAC Board';
+    const exportBtn = document.getElementById('btn-do-export');
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Exporting...';
+
+    try {
+      const data = await buildExportData(selectedMode, boardName, (progress) => {
+        const bar = document.getElementById('export-progress');
+        const fill = document.getElementById('export-progress-bar');
+        const status = document.getElementById('export-status');
+        bar.style.display = 'block';
+        status.style.display = 'block';
+        fill.style.width = Math.round(progress * 100) + '%';
+        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
+      });
+
+      const jsonStr = JSON.stringify(data);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const safeName = boardName.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = safeName + '_' + dateStr + '.aacboard';
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      closeExportImportPanel();
+      showToast('Board exported!');
+    } catch (err) {
+      exportBtn.disabled = false;
+      exportBtn.textContent = 'Export';
+      showToast('Export failed. Please try again.');
+    }
+  });
+}
+
+async function buildExportData(mode, boardName, onProgress) {
+  const allButtons = await loadButtons();
+
+  const settings = {};
+  EXPORTED_SETTINGS_KEYS.forEach(key => {
+    const val = localStorage.getItem(key);
+    if (val !== null) settings[key] = val;
+  });
+
+  const images = {};
+  if (mode === 'backup') {
+    loadCustomImageCache();
+    const customIds = allButtons.filter(b => isCustomImage(b.id)).map(b => b.id);
+    for (let i = 0; i < customIds.length; i++) {
+      const id = customIds[i];
+      try {
+        const blob = await loadImage(id);
+        if (blob) {
+          const compressed = await compressImage(blob);
+          images[id] = compressed;
+        }
+      } catch {}
+      if (onProgress) onProgress((i + 1) / customIds.length);
+    }
+  }
+
+  return {
+    format: 'aac-board',
+    version: CURRENT_EXPORT_VERSION,
+    exportMode: mode,
+    exportDate: new Date().toISOString(),
+    boardName: boardName,
+    buttons: allButtons,
+    settings: settings,
+    images: images
+  };
+}
+
+function compressImage(blob) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxSize = 512;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
+    img.src = url;
+  });
+}
+
+function startImport() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(file) {
+  if (file.size > MAX_IMPORT_SIZE) {
+    showToast('File is too large. Maximum size is 10MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch {
+      showToast("This file doesn't appear to be a valid AAC board.");
+      return;
+    }
+
+    if (data.format !== 'aac-board') {
+      showToast("This file doesn't appear to be a valid AAC board.");
+      return;
+    }
+    if (typeof data.version !== 'number' || data.version > CURRENT_EXPORT_VERSION) {
+      showToast('This board was created with a newer version of the app. Please update first.');
+      return;
+    }
+    if (!Array.isArray(data.buttons) || !data.settings) {
+      showToast("This file doesn't appear to be a valid AAC board.");
+      return;
+    }
+
+    showImportPreview(data);
+  };
+  reader.onerror = () => {
+    showToast('Failed to read file. Please try again.');
+  };
+  reader.readAsText(file);
+}
+
+async function showImportPreview(data) {
+  const wordCount = data.buttons.filter(b => b.type !== 'folder' && b.type !== 'core').length;
+  const folderCount = data.buttons.filter(b => b.type === 'folder').length;
+  const imageCount = Object.keys(data.images || {}).length;
+  const gridSize = data.settings['aac-grid-size'] || '4';
+  const language = data.settings['aac-language'] || 'en';
+  const langDisplay = language === 'es' ? 'Spanish' : language === 'both' ? 'Both' : 'English';
+  const dateDisplay = data.exportDate ? new Date(data.exportDate).toLocaleDateString() : 'Unknown';
+  const modeDisplay = data.exportMode === 'backup' ? 'Full Backup' : 'Template';
+
+  let existingButtons = [];
+  try { existingButtons = await loadButtons(); } catch {}
+  const hasExistingData = existingButtons.length > 0;
+
+  let html = `
+    <h2>Import Board</h2>
+    <div style="margin-bottom:16px;">
+      <div class="import-preview-row">
+        <span class="import-preview-label">Board Name</span>
+        <span class="import-preview-value">${escapeHtml(data.boardName || 'Unnamed')}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Type</span>
+        <span class="import-preview-value">${modeDisplay}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Exported</span>
+        <span class="import-preview-value">${dateDisplay}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Words</span>
+        <span class="import-preview-value">${wordCount}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Folders</span>
+        <span class="import-preview-value">${folderCount}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Grid Size</span>
+        <span class="import-preview-value">${gridSize}x${gridSize}</span>
+      </div>
+      <div class="import-preview-row">
+        <span class="import-preview-label">Language</span>
+        <span class="import-preview-value">${langDisplay}</span>
+      </div>`;
+
+  if (imageCount > 0) {
+    html += `
+      <div class="import-preview-row">
+        <span class="import-preview-label">Custom Images</span>
+        <span class="import-preview-value">${imageCount}</span>
+      </div>`;
+  }
+
+  html += `</div>`;
+
+  if (hasExistingData) {
+    html += `
+      <p style="color:#e53935;font-size:0.9rem;font-weight:600;margin-bottom:12px;">This will replace your current board.</p>
+      <button class="settings-btn" id="btn-backup-first" style="background:#fff3e0;color:#E65100;">Back Up First</button>
+      <button class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Replace My Board</button>
+      <button class="settings-btn" id="btn-cancel-import">Cancel</button>`;
+  } else {
+    html += `
+      <button class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Use This Board</button>
+      <button class="settings-btn" id="btn-cancel-import">Cancel</button>`;
+  }
+
+  showExportImportPanel(html);
+
+  document.getElementById('btn-cancel-import').addEventListener('click', closeExportImportPanel);
+
+  if (document.getElementById('btn-backup-first')) {
+    document.getElementById('btn-backup-first').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-backup-first');
+      btn.disabled = true;
+      btn.textContent = 'Backing up...';
+      try {
+        const backupData = await buildExportData('backup', 'Backup_Before_Import');
+        const jsonStr = JSON.stringify(backupData);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Backup_Before_Import_' + dateStr + '.aacboard';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        btn.textContent = 'Backup saved!';
+        btn.style.background = '#C8E6C9';
+        btn.style.color = '#2E7D32';
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Back Up First';
+        showToast('Backup failed. Please try again.');
+      }
+    });
+  }
+
+  document.getElementById('btn-do-import').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-do-import');
+    btn.disabled = true;
+    btn.textContent = 'Importing...';
+    try {
+      await applyImport(data);
+      closeExportImportPanel();
+      document.getElementById('settings-overlay').classList.remove('open');
+      showToast('Board imported! ' + wordCount + ' words, ' + folderCount + ' folders.');
+    } catch {
+      btn.disabled = false;
+      btn.textContent = hasExistingData ? 'Replace My Board' : 'Use This Board';
+      showToast('Import failed. Please try again.');
+    }
+  });
+}
+
+async function applyImport(data) {
+  const db = await openDB();
+
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE_BUTTONS, STORE_IMAGES], 'readwrite');
+    tx.objectStore(STORE_BUTTONS).clear();
+
+    const imgStore = tx.objectStore(STORE_IMAGES);
+    const cursorReq = imgStore.openCursor();
+    cursorReq.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        const key = cursor.key;
+        if (typeof key === 'string' && !key.startsWith('reward-') && !key.startsWith('sched-')) {
+          cursor.delete();
+        }
+        cursor.continue();
+      }
+    };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BUTTONS, 'readwrite');
+    const store = tx.objectStore(STORE_BUTTONS);
+    data.buttons.forEach(b => store.put(b));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+
+  if (data.images && Object.keys(data.images).length > 0) {
+    const newCustomCache = {};
+    for (const [id, dataUrl] of Object.entries(data.images)) {
+      try {
+        const resp = await fetch(dataUrl);
+        const blob = await resp.blob();
+        await saveImage(id, blob);
+        newCustomCache[id] = true;
+      } catch {}
+    }
+    localStorage.setItem('aac-custom-images', JSON.stringify(newCustomCache));
+    customImageCache = newCustomCache;
+  } else {
+    localStorage.setItem('aac-custom-images', '{}');
+    customImageCache = {};
+  }
+
+  EXPORTED_SETTINGS_KEYS.forEach(key => {
+    if (data.settings[key] !== undefined) {
+      localStorage.setItem(key, data.settings[key]);
+    }
+  });
+
+  localStorage.removeItem('aac-symbols-cached');
+
+  await reloadBoard();
+}
+
+async function reloadBoard() {
+  buttons = await loadButtons();
+
+  const gridSize = getGridSize();
+  setGridSize(gridSize);
+
+  rebuildCoreWordsCache();
+  buildIconLookup();
+  renderGrid();
+
+  applySensoryPreferences();
+  const savedLang = localStorage.getItem('aac-language') || 'en';
+  currentLang = savedLang;
+  document.documentElement.lang = (savedLang === 'es') ? 'es' : 'en';
+  document.documentElement.classList.toggle('lang-es', savedLang === 'es' || savedLang === 'both');
+  updateLanguageButtons();
+  updateUIStrings();
+  updateGridSizeButtons();
+
+  speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
+  selectedVoiceName = localStorage.getItem('aac-voice') || '';
+  initSpeech();
+  updateSpeedDisplay();
+  updatePitchDisplay();
+
+  ['plurals', 'verbs', 'articles'].forEach(key => {
+    const el = document.getElementById('grammar-' + key);
+    if (el) el.checked = grammarEnabled(key);
+  });
+
+  loadBigrams();
+  loadAutoSpeak();
+  document.getElementById('setting-auto-speak').checked = autoSpeakEnabled;
+
+  currentFolder = null;
+  switchTab('talk');
+
+  setTimeout(() => downloadSymbolsForButtons().catch(() => {}), 1000);
+}
 
 // ── Toast ──
 function showToast(msg) {
