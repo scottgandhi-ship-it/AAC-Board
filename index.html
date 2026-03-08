@@ -8007,6 +8007,21 @@ const SYMBOL_KEYWORDS = {
   'thg-towel': 'towel', 'thg-backpack': 'backpack', 'thg-scissors': 'scissors', 'thg-phone': 'phone',
   'thg-tv': 'television', 'thg-headphones': 'headphones', 'thg-tissue': 'tissue', 'thg-soap': 'soap',
   'thg-pencil': 'pencil', 'thg-paper': 'paper', 'thg-light': 'light', 'thg-fan': 'fan',
+  // Questions
+  'q-what': 'what', 'q-where': 'where', 'q-when': 'when', 'q-who': 'who',
+  'q-why': 'why', 'q-how': 'how', 'q-can-i': 'can I', 'q-is-it': 'is it',
+  'q-do-you': 'do you', 'q-which': 'which',
+  // Colors
+  'clr-red': 'red color', 'clr-blue': 'blue color', 'clr-green': 'green color',
+  'clr-yellow': 'yellow color', 'clr-orange': 'orange color', 'clr-purple': 'purple color',
+  'clr-pink': 'pink color', 'clr-black': 'black color', 'clr-white': 'white color',
+  'clr-brown': 'brown color', 'clr-gray': 'gray color', 'clr-rainbow': 'rainbow',
+  // Shapes
+  'shp-circle': 'circle', 'shp-square': 'square', 'shp-triangle': 'triangle',
+  'shp-rectangle': 'rectangle', 'shp-star': 'star shape', 'shp-heart': 'heart shape',
+  'shp-diamond': 'diamond shape', 'shp-oval': 'oval',
+  // Animals (moved from People)
+  'ppl-cat': 'cat', 'ppl-dog': 'dog',
 };
 
 const ARASAAC_API = 'https://api.arasaac.org/v1';
@@ -8053,7 +8068,8 @@ function isCustomImage(buttonId) {
 }
 
 async function downloadSymbolsForButtons() {
-  if (localStorage.getItem('aac-symbols-cached') === '1') return;
+  const SYMBOL_VERSION = '2';
+  if (localStorage.getItem('aac-symbols-cached') === SYMBOL_VERSION) return;
   if (!navigator.onLine) return;
 
   const kwMap = currentLang !== 'en' ? { ...SYMBOL_KEYWORDS, ...LANG_ES.symbolKeywords } : SYMBOL_KEYWORDS;
@@ -8085,7 +8101,7 @@ async function downloadSymbolsForButtons() {
     }
   }
 
-  localStorage.setItem('aac-symbols-cached', '1');
+  localStorage.setItem('aac-symbols-cached', SYMBOL_VERSION);
   showToast(t('toast.symbolsReady', 'Symbols ready!'));
   renderGrid();
 }
