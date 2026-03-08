@@ -3730,10 +3730,10 @@ body.sensory-high-contrast .task-tile {
       <div class="settings-section">
         <h3>Grid Size</h3>
         <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-          <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">3x3 Starter</button>
-          <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">4x4 Growing</button>
-          <button class="settings-btn grid-size-opt" data-size="5" style="flex:1;">5x5 Confident</button>
-          <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">6x6 Talker</button>
+          <button class="settings-btn grid-size-opt" data-size="3" style="flex:1;">Starter</button>
+          <button class="settings-btn grid-size-opt" data-size="4" style="flex:1;">Growing</button>
+          <button class="settings-btn grid-size-opt" data-size="5" style="flex:1;">Confident</button>
+          <button class="settings-btn grid-size-opt" data-size="6" style="flex:1;">Talker</button>
         </div>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
@@ -4092,26 +4092,26 @@ body.sensory-high-contrast .task-tile {
     <button class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
   </div>
   <div class="grid-picker-options">
-    <button class="grid-picker-card" data-size="3" aria-label="3 by 3 Starter grid, 9 buttons, best for learning to request">
+    <button class="grid-picker-card" data-size="3" aria-label="Starter grid, best for learning to request">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);">
         <span></span><span></span><span></span>
         <span></span><span></span><span></span>
         <span></span><span></span><span></span>
       </div>
-      <span class="picker-label">3x3 Starter</span>
+      <span class="picker-label">Starter</span>
       <span class="picker-desc">Learning to request</span>
     </button>
-    <button class="grid-picker-card" data-size="4" aria-label="4 by 4 Growing grid, 16 buttons, best for building sentences">
+    <button class="grid-picker-card" data-size="4" aria-label="Growing grid, best for building sentences">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);">
         <span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span>
       </div>
-      <span class="picker-label">4x4 Growing</span>
+      <span class="picker-label">Growing</span>
       <span class="picker-desc">Building sentences</span>
     </button>
-    <button class="grid-picker-card" data-size="5" aria-label="5 by 5 Confident grid, 25 buttons, best for expanding vocabulary">
+    <button class="grid-picker-card" data-size="5" aria-label="Confident grid, best for expanding vocabulary">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);">
         <span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span>
@@ -4119,10 +4119,10 @@ body.sensory-high-contrast .task-tile {
         <span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span>
       </div>
-      <span class="picker-label">5x5 Confident</span>
+      <span class="picker-label">Confident</span>
       <span class="picker-desc">Expanding vocabulary</span>
     </button>
-    <button class="grid-picker-card" data-size="6" aria-label="6 by 6 Talker grid, 36 buttons, best for combining words fluently">
+    <button class="grid-picker-card" data-size="6" aria-label="Talker grid, best for combining words fluently">
       <div class="picker-grid-preview" style="grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);">
         <span></span><span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -4131,7 +4131,7 @@ body.sensory-high-contrast .task-tile {
         <span></span><span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
-      <span class="picker-label">6x6 Talker</span>
+      <span class="picker-label">Talker</span>
       <span class="picker-desc">Combining words fluently</span>
     </button>
   </div>
@@ -4553,7 +4553,7 @@ const LANG_ES = {
     'speed.fast': 'Velocidad: rapida', 'speed.veryFast': 'Velocidad: muy rapida',
     'pitch.veryLow': 'Tono: muy bajo', 'pitch.low': 'Tono: bajo',
     'pitch.normal': 'Tono: normal', 'pitch.high': 'Tono: alto', 'pitch.veryHigh': 'Tono: muy alto',
-    'grid.3x3': '3x3 Inicio', 'grid.4x4': '4x4 Creciendo', 'grid.5x5': '5x5 Seguro', 'grid.6x6': '6x6 Hablador',
+    'grid.3x3': 'Inicio', 'grid.4x4': 'Creciendo', 'grid.5x5': 'Seguro', 'grid.6x6': 'Hablador',
     'schedule.noSchedule': 'No hay horario para hoy',
     'schedule.unlockHint': 'Desbloquea el modo padre para empezar uno',
     'schedule.allDone': 'Todo Listo!',
@@ -7403,7 +7403,7 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
   btn.addEventListener('click', async () => {
     const newSize = parseInt(btn.dataset.size);
     if (newSize === getGridSize()) return;
-    const names = { 3: t('grid.3x3', '3x3 Starter'), 4: t('grid.4x4', '4x4 Growing'), 5: t('grid.5x5', '5x5 Confident'), 6: t('grid.6x6', '6x6 Talker') };
+    const names = { 3: t('grid.3x3', 'Starter'), 4: t('grid.4x4', 'Growing'), 5: t('grid.5x5', 'Confident'), 6: t('grid.6x6', 'Talker') };
     const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
     if (!confirm(confirmMsg)) return;
     await clearAllData();
