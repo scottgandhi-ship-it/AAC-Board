@@ -327,7 +327,7 @@ Storage approach:
 ### Subphase 1: Data Model and Activity Definitions
 
 - Define the activity data structure in the app's JS
-- Create the 6 built-in activity bundles with word lists, colors, and ARASAAC symbol IDs
+- Create all 12 built-in activity bundles with word lists, colors, and ARASAAC symbol IDs
 - Add Spanish translations for all activity words
 - Add activity state management (activeActivity, isActivityMode)
 
@@ -367,7 +367,7 @@ Storage approach:
 - Manual browser testing (mobile and desktop)
 - Screen reader testing for activity overlay
 - Lighthouse audit (accessibility, performance)
-- Test all 6 activity bundles end-to-end
+- Test all 12 activity bundles end-to-end
 - Validate Spanish translations speak correctly
 - Test parent gate on close button
 
@@ -385,11 +385,206 @@ Storage approach:
 8. Activity words behave identically to regular words (tap to add, speech output)
 9. Parent can end an activity, returning to the full Talk grid
 10. Activity state does not persist across app reloads (always starts fresh)
-11. All 6 built-in activities display correctly with proper words
+11. All 12 built-in activities display correctly with proper words
 12. Spanish translations are available for all activity words
 13. Activity overlay is accessible (keyboard navigable, screen reader compatible)
 14. Close button requires parent gate to dismiss (child cannot close it)
 15. No impact on the child's default Talk experience when no activity is active
+
+---
+
+## Wave 2 Activity Bundles (6)
+
+### 7. Car Ride / Going Places
+
+**Context**: Driving to therapy, school, errands. Child is in car seat with limited control.
+
+**Word List** (14 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| want | green | verb |
+| go | green | verb |
+| stop | green | verb |
+| look | green | verb |
+| music | orange | noun |
+| window | orange | noun |
+| snack | orange | noun |
+| home | orange | noun |
+| more | blue | descriptor |
+| hot | blue | descriptor |
+| cold | blue | descriptor |
+| please | pink | social |
+| are we there | pink | social |
+
+**Common scenarios**:
+- Requesting music on/off ("want music", "more")
+- Temperature discomfort ("hot", "cold")
+- Asking about destination ("are we there", "home")
+- Requesting snack on longer rides
+- Commenting on things outside ("look")
+
+---
+
+### 8. Sensory Play
+
+**Context**: Playdough, water table, sand, slime, finger paint, shaving cream -- OT staple.
+
+**Word List** (15 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| my | yellow | pronoun |
+| want | green | verb |
+| touch | green | verb |
+| squeeze | green | verb |
+| pour | green | verb |
+| mix | green | verb |
+| water | orange | noun |
+| bubbles | orange | noun |
+| more | blue | descriptor |
+| wet | blue | descriptor |
+| sticky | blue | descriptor |
+| soft | blue | descriptor |
+| yucky | pink | social |
+| cool | pink | social |
+
+**Common scenarios**:
+- Requesting more material ("more water", "more bubbles")
+- Rejecting textures ("yucky", "sticky" as protest)
+- Requesting actions ("pour", "squeeze", "mix")
+- Describing sensations ("wet", "soft", "sticky")
+- Expressing enjoyment ("cool")
+
+---
+
+### 9. Book Time / Story Time
+
+**Context**: Shared book reading, dialogic reading -- strongest evidence base for language development.
+
+**Word List** (14 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| it | yellow | pronoun |
+| read | green | verb |
+| turn | green | verb |
+| look | green | verb |
+| see | green | verb |
+| book | orange | noun |
+| page | orange | noun |
+| funny | blue | descriptor |
+| silly | blue | descriptor |
+| more | blue | descriptor |
+| again | blue | descriptor |
+| uh oh | pink | social |
+| the end | pink | social |
+
+**Common scenarios**:
+- Requesting rereading ("again", "more", "read")
+- Commenting on pictures ("look", "funny", "silly", "uh oh")
+- Turning pages ("turn", "page")
+- Signaling done ("the end")
+
+---
+
+### 10. Doctor / Therapy Visit
+
+**Context**: Medical appointments, dentist, haircuts -- any body-contact appointment. Trauma-informed.
+
+**Word List** (14 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| my | yellow | pronoun |
+| wait | green | verb |
+| sit | green | verb |
+| help | green | verb |
+| hurt | blue | descriptor |
+| scared | blue | descriptor |
+| gentle | blue | descriptor |
+| all done | blue | descriptor |
+| body | orange | noun |
+| turn | orange | noun |
+| doctor | orange | noun |
+| please | pink | social |
+| hi | pink | social |
+
+**Common scenarios**:
+- Communicating pain ("hurt")
+- Expressing fear ("scared")
+- Requesting gentler handling ("gentle", "please")
+- Signaling at capacity ("all done", "help")
+- Greeting providers ("hi")
+
+---
+
+### 11. Art / Craft Time
+
+**Context**: Drawing, coloring, cutting, gluing -- preschool and OT staple.
+
+**Word List** (15 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| my | yellow | pronoun |
+| want | green | verb |
+| cut | green | verb |
+| draw | green | verb |
+| glue | green | verb |
+| help | green | verb |
+| color | orange | noun |
+| paper | orange | noun |
+| marker | orange | noun |
+| red | blue | descriptor |
+| blue | blue | descriptor |
+| big | blue | descriptor |
+| pretty | pink | social |
+| on | purple | preposition |
+
+**Common scenarios**:
+- Requesting materials ("want marker", "want paper")
+- Requesting colors ("want red", "blue")
+- Requesting help ("help cut", "help glue")
+- Describing work ("big", "pretty")
+- Directing placement ("on")
+
+---
+
+### 12. Grocery Store / Shopping
+
+**Context**: Community outings -- grocery store, Target, library, farmers market.
+
+**Word List** (15 words):
+
+| Word | Color (Fitzgerald Key) | Category |
+|------|----------------------|----------|
+| I | yellow | pronoun |
+| that | yellow | pronoun |
+| want | green | verb |
+| get | green | verb |
+| put | green | verb |
+| push | green | verb |
+| cart | orange | noun |
+| food | orange | noun |
+| bag | orange | noun |
+| yummy | blue | descriptor |
+| more | blue | descriptor |
+| all done | blue | descriptor |
+| no | pink | social |
+| please | pink | social |
+| in | purple | preposition |
+
+**Common scenarios**:
+- Requesting items ("want that", "get that")
+- Helping with process ("put in cart", "push cart")
+- Expressing preference ("yummy", "no")
+- Signaling overwhelm ("all done")
 
 ---
 
@@ -399,7 +594,6 @@ Storage approach:
 - **Custom activities**: Parent can create their own activity bundles with custom word selections
 - **SLP sharing**: Export/import activity bundles via the existing .aacboard sharing format
 - **Usage tracking**: Track which activities are used most, which words are tapped during activities
-- **Additional bundles**: Marci is designing 6 more activities for the second wave
 - **Activity suggestions**: Based on time of day, suggest relevant activities (morning -> Getting Dressed, evening -> Bedtime)
 
 ---
