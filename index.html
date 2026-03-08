@@ -529,9 +529,25 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 }
 .onboarding-skip:active { color: var(--chrome-text-secondary); }
 
-@media (max-width: 400px) {
-  .grid-picker-options { flex-direction: column; align-items: center; }
-  .grid-picker-card { max-width: 100%; width: 100%; }
+@media (max-width: 500px) {
+  .grid-picker-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 320px;
+  }
+  .grid-picker-card {
+    max-width: 100%;
+    min-width: 0;
+    padding: 14px 8px;
+  }
+  .grid-picker-card .picker-grid-preview {
+    width: 56px;
+    height: 56px;
+  }
+  #grid-picker-overlay { padding: 20px 16px; gap: 12px; }
+  #grid-picker-overlay h2 { font-size: 1.2rem; }
+  #grid-picker-overlay p { font-size: 0.85rem; margin: 0 0 4px; }
 }
 
 .onboarding-dots {
@@ -613,6 +629,7 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   justify-content: center;
   padding: 24px;
   gap: 16px;
+  overflow-y: auto;
 }
 #grid-picker-overlay.visible { display: flex; }
 #grid-picker-overlay h2 {
@@ -5650,6 +5667,7 @@ const Onboarding = {
     this.setState({ complete: true });
     document.getElementById('onboarding-overlay').classList.remove('visible');
     document.getElementById('coach-marks-overlay').classList.remove('visible');
+    window.dispatchEvent(new Event('onboarding-complete'));
   },
 
   dismiss() {
@@ -10318,9 +10336,13 @@ if (screen.orientation) {
       settingsBtn.addEventListener('click', triggerNativeInstall);
     }
 
-    // Show banner after a short delay (let parent explore first)
+    // Show banner after onboarding completes (or after delay if already onboarded)
     if (!wasDismissed) {
-      setTimeout(showBanner, 5000);
+      if (Onboarding.isComplete()) {
+        setTimeout(showBanner, 3000);
+      } else {
+        window.addEventListener('onboarding-complete', function() { setTimeout(showBanner, 2000); }, { once: true });
+      }
     }
   });
 
@@ -10356,7 +10378,11 @@ if (screen.orientation) {
     }
 
     if (!wasDismissed) {
-      setTimeout(showBanner, 5000);
+      if (Onboarding.isComplete()) {
+        setTimeout(showBanner, 3000);
+      } else {
+        window.addEventListener('onboarding-complete', function() { setTimeout(showBanner, 2000); }, { once: true });
+      }
     }
   }
 
