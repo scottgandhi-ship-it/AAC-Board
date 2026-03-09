@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#7C74FF">
@@ -1176,12 +1176,11 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
 .parent-mode .activity-card-export { display: flex; }
 .activity-card-export:active { background: rgba(108,99,255,0.15); }
 
-/* Demoted settings gear in tab bar */
+/* Settings gear in tab bar */
 .tab-btn-gear {
-  flex: 0 0 48px !important;
-  color: #bbb;
+  flex: 1;
+  color: #999;
 }
-.tab-btn-gear .tab-label { display: none; }
 .tab-btn-gear.parent-active { color: var(--bar-bg); }
 
 /* Create Activity modal */
@@ -1829,12 +1828,13 @@ html.lang-es #search-results:empty::after {
 /* ── Tab Bar ── */
 #tab-bar {
   display: flex;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(8px);
+  background: #fff;
   flex-shrink: 0;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  padding: 4px 8px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 6px 12px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   gap: 4px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
 }
 
 .tab-btn {
@@ -1843,42 +1843,43 @@ html.lang-es #search-results:empty::after {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 0;
-  min-height: 54px;
+  gap: 4px;
+  padding: 8px 0 6px;
+  min-height: 52px;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.7rem;
-  font-weight: 700;
-  color: #aaa;
+  font-weight: 600;
+  color: #999;
   position: relative;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.tab-btn:active { background: rgba(0,0,0,0.04); }
+.tab-btn:active { background: rgba(108,99,255,0.06); }
 
 .tab-btn.active {
   color: var(--bar-bg);
-  background: rgba(108, 99, 255, 0.08);
+  background: none;
 }
 
 .tab-btn.active::after {
   content: '';
   position: absolute;
-  bottom: 2px;
-  left: 30%;
-  right: 30%;
+  top: 0;
+  left: 25%;
+  right: 25%;
   height: 3px;
   background: var(--bar-bg);
-  border-radius: 3px;
+  border-radius: 0 0 3px 3px;
 }
 
 .tab-btn svg {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -1893,7 +1894,9 @@ html.lang-es #search-results:empty::after {
 
 .tab-label {
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.6rem;
 }
 
 /* ── Placeholder Views ── */
@@ -3406,9 +3409,8 @@ html.lang-es #search-results:empty::after {
   .cell { padding: 6px 4px; border-radius: 14px; }
   .cell .cell-label { font-size: clamp(0.6rem, 2.5vw, 0.85rem); }
   .cell .cell-big-text { font-size: clamp(1.2rem, 5vw, 2rem); }
-  #tab-bar { padding: 2px 4px; gap: 2px; }
-  .tab-btn { padding: 4px 0; }
-  .tab-label { font-size: 0.65rem; }
+  #tab-bar { padding: 4px 8px; padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)); gap: 2px; }
+  .tab-btn { padding: 6px 0 4px; min-height: 48px; }
   .rewards-grid { gap: 8px; }
   .task-tile { border-radius: var(--radius-md); }
   .task-tile-number { font-size: 1.1rem; }
@@ -3460,20 +3462,13 @@ html.lang-es #search-results:empty::after {
   #grid-container { padding: 6px; }
   #grid { gap: 4px; }
   .cell { padding: 4px 3px; gap: 2px; }
-  #tab-bar { padding: 2px 4px; }
-  .tab-btn { min-height: 40px; padding: 2px 0; }
-  .tab-btn svg { width: 20px; height: 20px; }
-  .tab-label { font-size: 0.6rem; }
+  #tab-bar { padding: 4px 6px; padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+  .tab-btn { min-height: 44px; padding: 4px 0 2px; }
+  .tab-btn svg { width: 22px; height: 22px; }
 }
 
 /* Safe area support for notched devices */
 @supports (padding-top: env(safe-area-inset-top)) {
-  #app-header {
-    padding-top: env(safe-area-inset-top);
-  }
-  #tab-bar {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
@@ -4049,6 +4044,7 @@ body.sensory-high-contrast .task-tile {
   </button>
   <button class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="tab-label">Settings</span>
   </button>
 </nav>
 
