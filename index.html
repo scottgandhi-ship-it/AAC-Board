@@ -4183,6 +4183,15 @@ body.sensory-high-contrast .task-tile {
     <!-- Category: Communication -->
     <div class="settings-category-content active" id="settings-cat-communication">
       <div class="settings-section">
+        <h3>Child's Name</h3>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Adds a "My name is ___" quick phrase so your child can introduce themselves with one tap.</p>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="child-name-input" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
+          <button class="settings-btn" id="btn-save-child-name" style="background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap;">Save</button>
+        </div>
+        <p id="child-name-status" style="font-size:0.8rem;color:#43A047;margin-top:4px;display:none;"></p>
+      </div>
+      <div class="settings-section">
         <h3>Grid Size</h3>
         <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
           <button class="settings-btn grid-size-opt" data-size="3" style="flex:0 0 auto;min-width:72px;">Starter</button>
@@ -6205,6 +6214,7 @@ function showGridPicker(onComplete) {
       buttons = getTemplate(size);
       await saveButtons();
       overlay.classList.remove('visible');
+      updateChildNamePhrase();
       rebuildCoreWordsCache();
       buildIconLookup();
       renderGrid();
@@ -6634,6 +6644,7 @@ async function init() {
 
     if (migrated) saveButtons();
     setGridSize(gridSize);
+    updateChildNamePhrase();
     rebuildCoreWordsCache();
     buildIconLookup();
     renderGrid();
@@ -6659,6 +6670,7 @@ async function init() {
     buttons = getTemplate(gridSize);
     await saveButtons();
     setGridSize(gridSize);
+    updateChildNamePhrase();
     rebuildCoreWordsCache();
     buildIconLookup();
     renderGrid();
@@ -8211,6 +8223,7 @@ document.querySelectorAll('.grid-size-opt').forEach(btn => {
     await clearAllData();
     setGridSize(newSize);
     buttons = getTemplate(newSize);
+    updateChildNamePhrase();
     await saveButtons();
     currentFolder = null;
     rebuildCoreWordsCache();
@@ -8373,6 +8386,81 @@ document.getElementById('btn-reset-predictions').addEventListener('click', () =>
   showToast(t('toast.predictionsReset', 'Predictions reset'));
 });
 
+// ── Child's Name (personalized quick phrase) ──
+function updateChildNamePhrase() {
+  const name = (localStorage.getItem('aac-child-name') || '').trim();
+  const QP_ID = 'qp-my-name';
+
+  // Remove existing name phrase if present
+  const hadPhrase = buttons.some(b => b.id === QP_ID);
+  buttons = buttons.filter(b => b.id !== QP_ID);
+
+  // Reset positions for quick phrases (undo any previous shift)
+  if (hadPhrase) {
+    buttons.filter(b => b.folderId === 'quick').forEach(b => {
+      if (b.position > 0) b.position -= 1;
+    });
+  }
+
+  if (name) {
+    // Shift existing quick phrases down by 1 to make room at position 0
+    buttons.filter(b => b.folderId === 'quick').forEach(b => {
+      b.position = (b.position || 0) + 1;
+    });
+
+    buttons.push({
+      id: QP_ID,
+      label: `My name is ${name}`,
+      color: 'yellow',
+      type: 'fringe',
+      folderId: 'quick',
+      position: 0
+    });
+
+    BUTTON_ICONS[QP_ID] = '\u{1F44B}';
+    LANG_ES.labels[QP_ID] = `me llamo ${name}`;
+    SYMBOL_KEYWORDS[QP_ID] = 'name hello wave';
+  } else {
+    delete BUTTON_ICONS[QP_ID];
+    delete LANG_ES.labels[QP_ID];
+    delete SYMBOL_KEYWORDS[QP_ID];
+  }
+}
+
+document.getElementById('btn-save-child-name').addEventListener('click', async () => {
+  const input = document.getElementById('child-name-input');
+  const name = input.value.trim();
+  const status = document.getElementById('child-name-status');
+
+  if (!name) {
+    localStorage.removeItem('aac-child-name');
+    updateChildNamePhrase();
+    await saveButtons();
+    if (currentFolder === 'quick') renderGrid();
+    status.textContent = 'Name cleared. Quick phrase removed.';
+    status.style.color = '#888';
+    status.style.display = 'block';
+    showToast('Name quick phrase removed');
+    return;
+  }
+
+  localStorage.setItem('aac-child-name', name);
+  updateChildNamePhrase();
+  await saveButtons();
+  if (currentFolder === 'quick') renderGrid();
+  status.textContent = `"My name is ${name}" added to Quick Phrases!`;
+  status.style.color = '#43A047';
+  status.style.display = 'block';
+  showToast(`"My name is ${name}" added!`);
+});
+
+// Populate child name input on settings open
+document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  const saved = localStorage.getItem('aac-child-name') || '';
+  document.getElementById('child-name-input').value = saved;
+  document.getElementById('child-name-status').style.display = 'none';
+});
+
 document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
 
 document.getElementById('btn-clear-usage').addEventListener('click', () => {
@@ -8389,6 +8477,7 @@ document.getElementById('btn-reset-defaults').addEventListener('click', async ()
   clearPredictions();
   clearUsageData();
   buttons = getTemplate(getGridSize());
+  updateChildNamePhrase();
   await saveButtons();
   currentFolder = null;
   rebuildCoreWordsCache();
