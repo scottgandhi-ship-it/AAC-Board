@@ -1834,7 +1834,7 @@ html.lang-es #search-results:empty::after {
 #tab-bar {
   display: flex;
   position: fixed;
-  bottom: 0;
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
   z-index: 100;
