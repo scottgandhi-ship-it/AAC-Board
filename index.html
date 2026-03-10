@@ -535,48 +535,9 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 .onboarding-skip:active { color: var(--chrome-text-secondary); }
 
 @media (max-width: 500px) {
-  .grid-picker-options {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
-    max-width: none;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    padding: 4px 24px 12px;
-    margin: 0 -16px;
-    scrollbar-width: none;
-  }
-  .grid-picker-options::-webkit-scrollbar { display: none; }
-  .grid-picker-card {
-    flex: 0 0 68%;
-    max-width: 68%;
-    min-width: 0;
-    padding: 18px 12px;
-    scroll-snap-align: center;
-  }
-  .grid-picker-card .picker-grid-preview {
-    width: 56px;
-    height: 56px;
-  }
   #grid-picker-overlay { padding: 20px 16px; gap: 12px; }
   #grid-picker-overlay h2 { font-size: 1.2rem; }
   #grid-picker-overlay p { font-size: 0.85rem; margin: 0 0 4px; }
-  .grid-picker-scroll-hint {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    color: #999;
-    margin-top: -4px;
-    animation: hint-fade 2.5s ease-in-out infinite;
-  }
-  @keyframes hint-fade {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-  }
 }
 
 .onboarding-dots {
@@ -674,82 +635,57 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   text-align: center;
   margin: 0 0 8px;
 }
-.grid-picker-options {
-  display: flex;
-  gap: 16px;
-  width: 100%;
-  max-width: 600px;
-  justify-content: center;
-  flex-wrap: wrap;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.grid-picker-card {
-  flex: 1;
-  min-width: 140px;
-  max-width: 180px;
-  border: 3px solid #e0e0e0;
-  border-radius: 20px;
-  padding: 20px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  background: #fafafa;
-  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+.grid-size-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  max-width: 360px;
+  min-height: 48px;
+  padding: 12px 40px 12px 16px;
+  font-size: 1rem;
   font-family: inherit;
+  color: #333;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.grid-size-select:focus, .grid-size-select:focus-visible {
+  border-color: #5C6BC0;
+  outline: 2px solid #5C6BC0;
+  outline-offset: 2px;
+}
+#grid-picker-overlay .grid-size-select {
+  margin: 8px 0;
+}
+.grid-picker-continue {
+  min-height: 48px;
+  padding: 12px 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: #5C6BC0;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.grid-picker-card:active { transform: scale(0.96); }
-.grid-picker-card:hover, .grid-picker-card:focus-visible {
-  border-color: var(--bar-bg);
-  box-shadow: 0 4px 20px rgba(108,99,255,0.2);
-}
-.grid-picker-card .picker-grid-preview {
-  display: grid;
-  gap: 4px;
-  width: 80px;
-  height: 80px;
-}
-.grid-picker-card .picker-grid-preview span {
-  background: var(--bar-bg);
-  border-radius: 4px;
-  opacity: 0.5;
-}
-.grid-picker-card .picker-label {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #333;
-}
-.grid-picker-card .picker-desc {
-  font-size: 0.8rem;
-  color: #888;
-  text-align: center;
-  line-height: 1.3;
-}
-
-.grid-picker-scroll-hint {
-  display: none;
-}
-.grid-picker-scroll-dots {
-  display: none;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 4px;
-}
-.grid-picker-scroll-dots .scroll-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #d0d0d0;
-  transition: background 0.25s, transform 0.25s;
-}
-.grid-picker-scroll-dots .scroll-dot.active {
-  background: var(--bar-bg);
-  transform: scale(1.3);
-}
-@media (max-width: 500px) {
-  .grid-picker-scroll-dots { display: flex; }
-}
+.grid-picker-continue:hover { background: #4a59b0; }
+.grid-picker-continue:active { transform: scale(0.97); }
 
 /* Search result cells reuse same color system */
 .search-result-cell[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
@@ -4241,12 +4177,13 @@ body.sensory-high-contrast .task-tile {
       </div>
       <div class="settings-section">
         <h3>Grid Size</h3>
-        <div id="grid-size-buttons" style="display:flex;gap:8px;margin-bottom:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <button class="settings-btn grid-size-opt" data-size="3" style="flex:0 0 auto;min-width:72px;">Starter</button>
-          <button class="settings-btn grid-size-opt" data-size="4" style="flex:0 0 auto;min-width:72px;">Growing</button>
-          <button class="settings-btn grid-size-opt" data-size="5" style="flex:0 0 auto;min-width:72px;">Confident</button>
-          <button class="settings-btn grid-size-opt" data-size="6" style="flex:0 0 auto;min-width:72px;">Talker</button>
-        </div>
+        <label for="settings-grid-select" class="visually-hidden">Grid size</label>
+        <select id="settings-grid-select" class="grid-size-select">
+          <option value="3">Starter (3x3) — Learning to request</option>
+          <option value="4">Growing (4x4) — Building sentences</option>
+          <option value="5">Confident (5x5) — Expanding vocabulary</option>
+          <option value="6">Talker (6x6) — Combining words fluently</option>
+        </select>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
       <div class="settings-section">
@@ -4620,57 +4557,14 @@ body.sensory-high-contrast .task-tile {
     <button class="settings-btn picker-lang-opt active" data-lang="en" style="flex:0 1 120px;padding:10px;">English</button>
     <button class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
   </div>
-  <div class="grid-picker-options">
-    <button class="grid-picker-card" data-size="3" aria-label="Starter grid, best for learning to request">
-      <div class="picker-grid-preview" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);">
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-      </div>
-      <span class="picker-label">Starter</span>
-      <span class="picker-desc">Learning to request</span>
-    </button>
-    <button class="grid-picker-card" data-size="4" aria-label="Growing grid, best for building sentences">
-      <div class="picker-grid-preview" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);">
-        <span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span>
-      </div>
-      <span class="picker-label">Growing</span>
-      <span class="picker-desc">Building sentences</span>
-    </button>
-    <button class="grid-picker-card" data-size="5" aria-label="Confident grid, best for expanding vocabulary">
-      <div class="picker-grid-preview" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);">
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <span class="picker-label">Confident</span>
-      <span class="picker-desc">Expanding vocabulary</span>
-    </button>
-    <button class="grid-picker-card" data-size="6" aria-label="Talker grid, best for combining words fluently">
-      <div class="picker-grid-preview" style="grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <span class="picker-label">Talker</span>
-      <span class="picker-desc">Combining words fluently</span>
-    </button>
-  </div>
-  <div class="grid-picker-scroll-hint" aria-hidden="true">Swipe for more options</div>
-  <div class="grid-picker-scroll-dots" aria-hidden="true">
-    <span class="scroll-dot active" data-index="0"></span>
-    <span class="scroll-dot" data-index="1"></span>
-    <span class="scroll-dot" data-index="2"></span>
-    <span class="scroll-dot" data-index="3"></span>
-  </div>
+  <label for="grid-picker-select" class="visually-hidden">Grid size</label>
+  <select id="grid-picker-select" class="grid-size-select" aria-label="Choose grid size">
+    <option value="3">Starter (3x3) — Learning to request</option>
+    <option value="4" selected>Growing (4x4) — Building sentences</option>
+    <option value="5">Confident (5x5) — Expanding vocabulary</option>
+    <option value="6">Talker (6x6) — Combining words fluently</option>
+  </select>
+  <button class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
   <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
 </div>
 
@@ -5090,6 +4984,8 @@ const LANG_ES = {
     'pitch.veryLow': 'Tono: muy bajo', 'pitch.low': 'Tono: bajo',
     'pitch.normal': 'Tono: normal', 'pitch.high': 'Tono: alto', 'pitch.veryHigh': 'Tono: muy alto',
     'grid.3x3': 'Inicio', 'grid.4x4': 'Creciendo', 'grid.5x5': 'Seguro', 'grid.6x6': 'Hablador',
+    'grid.3x3.desc': 'Aprendiendo a pedir', 'grid.4x4.desc': 'Construyendo oraciones',
+    'grid.5x5.desc': 'Ampliando vocabulario', 'grid.6x6.desc': 'Combinando palabras con fluidez',
     'schedule.noSchedule': 'No hay horario para hoy',
     'schedule.unlockHint': 'Desbloquea el modo padre para empezar uno',
     'schedule.allDone': 'Todo Listo!',
@@ -5234,6 +5130,19 @@ function updateUIStrings() {
     if (p1) p1.textContent = esRewardsNone;
     if (p2) p2.textContent = esRewardsHint;
   }
+  // Grid size dropdown options
+  const gridOpts = [
+    { val: '3', label: t('grid.3x3', 'Starter'), desc: t('grid.3x3.desc', 'Learning to request') },
+    { val: '4', label: t('grid.4x4', 'Growing'), desc: t('grid.4x4.desc', 'Building sentences') },
+    { val: '5', label: t('grid.5x5', 'Confident'), desc: t('grid.5x5.desc', 'Expanding vocabulary') },
+    { val: '6', label: t('grid.6x6', 'Talker'), desc: t('grid.6x6.desc', 'Combining words fluently') },
+  ];
+  document.querySelectorAll('.grid-size-select').forEach(sel => {
+    gridOpts.forEach(o => {
+      const opt = sel.querySelector(`option[value="${o.val}"]`);
+      if (opt) opt.textContent = `${o.label} (${o.val}x${o.val}) \u2014 ${o.desc}`;
+    });
+  });
 }
 
 // ── Core Word Definitions (single source of truth) ──
@@ -6262,41 +6171,21 @@ function showGridPicker(onComplete) {
   }
   overlay.dataset.bound = 'true';
   overlay.classList.add('visible');
-  overlay.querySelectorAll('.grid-picker-card').forEach(card => {
-    card.addEventListener('click', async () => {
-      const size = parseInt(card.dataset.size);
-      setGridSize(size);
-      buttons = getTemplate(size);
-      await saveButtons();
-      overlay.classList.remove('visible');
-      updateChildNamePhrase();
-      rebuildCoreWordsCache();
-      buildIconLookup();
-      renderGrid();
-      finalizeInit();
-      if (_gridPickerCallback) { _gridPickerCallback(); _gridPickerCallback = null; }
-    });
+  const select = document.getElementById('grid-picker-select');
+  const continueBtn = document.getElementById('btn-grid-picker-continue');
+  continueBtn.addEventListener('click', async () => {
+    const size = parseInt(select.value);
+    setGridSize(size);
+    buttons = getTemplate(size);
+    await saveButtons();
+    overlay.classList.remove('visible');
+    updateChildNamePhrase();
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
+    finalizeInit();
+    if (_gridPickerCallback) { _gridPickerCallback(); _gridPickerCallback = null; }
   });
-
-  const optionsEl = overlay.querySelector('.grid-picker-options');
-  const dots = overlay.querySelectorAll('.grid-picker-scroll-dots .scroll-dot');
-  const hintEl = overlay.querySelector('.grid-picker-scroll-hint');
-  if (optionsEl && dots.length) {
-    optionsEl.addEventListener('scroll', () => {
-      const cards = optionsEl.querySelectorAll('.grid-picker-card');
-      const scrollLeft = optionsEl.scrollLeft;
-      const containerWidth = optionsEl.offsetWidth;
-      let closest = 0;
-      let minDist = Infinity;
-      cards.forEach((card, i) => {
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2 - scrollLeft;
-        const dist = Math.abs(cardCenter - containerWidth / 2);
-        if (dist < minDist) { minDist = dist; closest = i; }
-      });
-      dots.forEach((d, i) => d.classList.toggle('active', i === closest));
-      if (hintEl && scrollLeft > 10) hintEl.style.display = 'none';
-    }, { passive: true });
-  }
 }
 
 // ── Onboarding ──
@@ -6415,7 +6304,7 @@ document.getElementById('coach-marks-overlay').addEventListener('click', (e) => 
 
 // Tap outside onboarding overlay steps dismisses onboarding
 document.getElementById('onboarding-overlay').addEventListener('click', (e) => {
-  if (!e.target.closest('.onboarding-content') && !e.target.closest('.onboarding-btn') && !e.target.closest('.grid-picker-card') && !e.target.closest('#grid-picker-overlay')) {
+  if (!e.target.closest('.onboarding-content') && !e.target.closest('.onboarding-btn') && !e.target.closest('#grid-picker-overlay')) {
     Onboarding.dismiss();
   }
 });
@@ -8266,7 +8155,7 @@ document.getElementById('btn-toggle-parent-mode').addEventListener('click', () =
 // ── Settings ──
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.add('open');
-  updateGridSizeButtons();
+  updateGridSizeSelect();
 });
 
 // ── Insights (opened from Settings) ──
@@ -8281,32 +8170,31 @@ document.getElementById('btn-close-insights').addEventListener('click', () => {
 });
 
 // ── Grid Size Settings ──
-function updateGridSizeButtons() {
+function updateGridSizeSelect() {
   const current = getGridSize();
-  document.querySelectorAll('.grid-size-opt').forEach(btn => {
-    btn.classList.toggle('active', parseInt(btn.dataset.size) === current);
-  });
+  const sel = document.getElementById('settings-grid-select');
+  if (sel) sel.value = String(current);
 }
 
-document.querySelectorAll('.grid-size-opt').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const newSize = parseInt(btn.dataset.size);
-    if (newSize === getGridSize()) return;
-    const names = { 3: t('grid.3x3', 'Starter'), 4: t('grid.4x4', 'Growing'), 5: t('grid.5x5', 'Confident'), 6: t('grid.6x6', 'Talker') };
-    const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
-    if (!confirm(confirmMsg)) return;
-    await clearAllData();
-    setGridSize(newSize);
-    buttons = getTemplate(newSize);
-    updateChildNamePhrase();
-    await saveButtons();
-    currentFolder = null;
-    rebuildCoreWordsCache();
-    buildIconLookup();
-    renderGrid();
-    updateGridSizeButtons();
-    showToast(names[newSize]);
-  });
+document.getElementById('settings-grid-select').addEventListener('change', async (e) => {
+  const newSize = parseInt(e.target.value);
+  if (newSize === getGridSize()) return;
+  const names = { 3: t('grid.3x3', 'Starter'), 4: t('grid.4x4', 'Growing'), 5: t('grid.5x5', 'Confident'), 6: t('grid.6x6', 'Talker') };
+  const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
+  if (!confirm(confirmMsg)) {
+    e.target.value = String(getGridSize());
+    return;
+  }
+  await clearAllData();
+  setGridSize(newSize);
+  buttons = getTemplate(newSize);
+  updateChildNamePhrase();
+  await saveButtons();
+  currentFolder = null;
+  rebuildCoreWordsCache();
+  buildIconLookup();
+  renderGrid();
+  showToast(names[newSize]);
 });
 
 // ── Grammar Settings ──
@@ -10162,7 +10050,7 @@ async function reloadBoard() {
   document.documentElement.classList.toggle('lang-es', savedLang === 'es' || savedLang === 'both');
   updateLanguageButtons();
   updateUIStrings();
-  updateGridSizeButtons();
+  updateGridSizeSelect();
 
   speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
   selectedVoiceName = localStorage.getItem('aac-voice') || '';
