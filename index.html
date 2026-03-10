@@ -536,15 +536,25 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
 @media (max-width: 500px) {
   .grid-picker-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: nowrap;
     gap: 12px;
-    max-width: 320px;
+    max-width: none;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 4px 24px 12px;
+    margin: 0 -16px;
+    scrollbar-width: none;
   }
+  .grid-picker-options::-webkit-scrollbar { display: none; }
   .grid-picker-card {
-    max-width: 100%;
+    flex: 0 0 68%;
+    max-width: 68%;
     min-width: 0;
-    padding: 14px 8px;
+    padding: 18px 12px;
+    scroll-snap-align: center;
   }
   .grid-picker-card .picker-grid-preview {
     width: 56px;
@@ -553,6 +563,20 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   #grid-picker-overlay { padding: 20px 16px; gap: 12px; }
   #grid-picker-overlay h2 { font-size: 1.2rem; }
   #grid-picker-overlay p { font-size: 0.85rem; margin: 0 0 4px; }
+  .grid-picker-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #999;
+    margin-top: -4px;
+    animation: hint-fade 2.5s ease-in-out infinite;
+  }
+  @keyframes hint-fade {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
 }
 
 .onboarding-dots {
@@ -701,6 +725,30 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   color: #888;
   text-align: center;
   line-height: 1.3;
+}
+
+.grid-picker-scroll-hint {
+  display: none;
+}
+.grid-picker-scroll-dots {
+  display: none;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.grid-picker-scroll-dots .scroll-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d0d0d0;
+  transition: background 0.25s, transform 0.25s;
+}
+.grid-picker-scroll-dots .scroll-dot.active {
+  background: var(--bar-bg);
+  transform: scale(1.3);
+}
+@media (max-width: 500px) {
+  .grid-picker-scroll-dots { display: flex; }
 }
 
 /* Search result cells reuse same color system */
@@ -4616,6 +4664,13 @@ body.sensory-high-contrast .task-tile {
       <span class="picker-desc">Combining words fluently</span>
     </button>
   </div>
+  <div class="grid-picker-scroll-hint" aria-hidden="true">Swipe for more options</div>
+  <div class="grid-picker-scroll-dots" aria-hidden="true">
+    <span class="scroll-dot active" data-index="0"></span>
+    <span class="scroll-dot" data-index="1"></span>
+    <span class="scroll-dot" data-index="2"></span>
+    <span class="scroll-dot" data-index="3"></span>
+  </div>
   <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
 </div>
 
@@ -6222,6 +6277,26 @@ function showGridPicker(onComplete) {
       if (_gridPickerCallback) { _gridPickerCallback(); _gridPickerCallback = null; }
     });
   });
+
+  const optionsEl = overlay.querySelector('.grid-picker-options');
+  const dots = overlay.querySelectorAll('.grid-picker-scroll-dots .scroll-dot');
+  const hintEl = overlay.querySelector('.grid-picker-scroll-hint');
+  if (optionsEl && dots.length) {
+    optionsEl.addEventListener('scroll', () => {
+      const cards = optionsEl.querySelectorAll('.grid-picker-card');
+      const scrollLeft = optionsEl.scrollLeft;
+      const containerWidth = optionsEl.offsetWidth;
+      let closest = 0;
+      let minDist = Infinity;
+      cards.forEach((card, i) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2 - scrollLeft;
+        const dist = Math.abs(cardCenter - containerWidth / 2);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+      if (hintEl && scrollLeft > 10) hintEl.style.display = 'none';
+    }, { passive: true });
+  }
 }
 
 // ── Onboarding ──
