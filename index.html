@@ -2381,6 +2381,7 @@ body.sensory-high-contrast .settings-btn {
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="grid"></div>
+    </div>
   </div>
 </div>
 
@@ -2390,8 +2391,17 @@ body.sensory-high-contrast .settings-btn {
     <h3 id="activity-preview-title"></h3>
     <p style="font-size:0.85rem;color:#888;margin:0;" id="activity-preview-desc"></p>
     <div id="activity-preview-words"></div>
+    <div id="activity-preview-level" class="parent-mode-only" style="margin:8px 0;display:flex;align-items:center;gap:8px;">
+      <label style="font-weight:600;font-size:0.85rem;color:#555;">Level:</label>
+      <select id="activity-preview-level-select" class="grid-size-select" style="flex:1;" aria-label="Vocabulary level for this activity">
+        <option value="">Use default</option>
+        <option value="starter">Starter</option>
+        <option value="expanded">Expanded</option>
+      </select>
+    </div>
     <div id="activity-preview-actions">
       <button id="btn-activity-cancel">Cancel</button>
+      <button id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
       <button id="btn-activity-customize">Customize</button>
       <button id="btn-activity-start">Start Activity</button>
     </div>
@@ -2401,8 +2411,55 @@ body.sensory-high-contrast .settings-btn {
 <!-- Activities View -->
 <div id="view-activities" class="view" role="tabpanel" aria-labelledby="tab-activities">
   <div id="activities-view-content">
+    <div style="margin-bottom:12px;">
+      <label for="activity-template-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Activity Templates</label>
+      <select id="activity-template-select" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fff;color:#333;cursor:pointer;" aria-label="Choose an activity template">
+        <option value="">Choose a template...</option>
+      </select>
+    </div>
+    <h3 style="font-size:0.95rem;font-weight:700;color:#555;margin:0 0 8px;">My Activities</h3>
     <div class="activity-cards" id="activities-tab-cards"></div>
+    <div id="routines-section" style="margin-top:16px;">
+      <h3 style="font-size:0.95rem;font-weight:700;color:#555;margin:0 0 8px;">Routines</h3>
+      <div class="activity-cards" id="routines-tab-cards"></div>
+    </div>
     <button id="btn-import-activity" class="activities-import-btn">Import Activity Template</button>
+  </div>
+</div>
+
+<!-- Routine Transition Prompt -->
+<div id="routine-transition-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);z-index:125;justify-content:center;align-items:center;">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+    <p style="font-size:0.9rem;color:#888;margin:0 0 4px;">Next in routine:</p>
+    <p id="routine-transition-name" style="font-size:1.3rem;font-weight:700;margin:0 0 16px;"></p>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button id="btn-routine-end" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">End Routine</button>
+      <button id="btn-routine-next" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Start</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Routine Modal -->
+<div id="create-routine-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);z-index:120;justify-content:center;align-items:flex-start;padding-top:5vh;overflow-y:auto;">
+  <div style="background:linear-gradient(180deg, #faf8ff 0%, #fff 100%);border-radius:var(--radius-lg);width:92%;max-width:420px;max-height:85vh;overflow-y:auto;padding:20px;box-shadow:var(--shadow-lifted);">
+    <h3 style="margin:0 0 16px;font-size:1.1rem;">Create Routine</h3>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Routine Name</label>
+      <input type="text" id="create-routine-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Icon</label>
+      <div id="create-routine-icons" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:6px;">Activities (in order)</label>
+      <div id="create-routine-selected" style="min-height:40px;margin-bottom:8px;"></div>
+      <div id="create-routine-activity-list" style="max-height:200px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="btn-create-routine-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
+      <button id="btn-create-routine-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Routine</button>
+    </div>
   </div>
 </div>
 
@@ -2413,6 +2470,13 @@ body.sensory-high-contrast .settings-btn {
     <div style="margin-bottom:12px;">
       <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Activity Name</label>
       <input type="text" id="create-activity-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div id="create-activity-suggestions" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <label style="font-weight:600;font-size:0.9rem;color:#555;">Suggested Words</label>
+        <button id="btn-add-all-suggestions" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
+      </div>
+      <div id="create-activity-suggestion-chips" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
     <div style="margin-bottom:12px;">
       <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Icon</label>
@@ -2454,6 +2518,10 @@ body.sensory-high-contrast .settings-btn {
     <div class="insights-section" id="insights-weekly">
       <h3>This Week</h3>
       <div class="weekly-chart" id="insights-weekly-chart"></div>
+    </div>
+    <div class="insights-section" id="insights-activities" style="display:none;">
+      <h3>Activity Insights</h3>
+      <div id="insights-activity-list"></div>
     </div>
     <div class="insights-actions">
       <button id="btn-export-csv">Export CSV</button>
@@ -2695,6 +2763,14 @@ body.sensory-high-contrast .settings-btn {
       <div class="settings-section parent-mode-only">
         <h3>Activities</h3>
         <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Focus the board on words for a specific routine. The child sees only activity-relevant words until you end it.</p>
+        <div style="margin-bottom:12px;">
+          <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Default Vocabulary Level</label>
+          <select id="settings-vocab-level" class="grid-size-select" style="width:100%;" aria-label="Vocabulary level">
+            <option value="starter">Starter (4-6 essential words)</option>
+            <option value="expanded">Expanded (all words)</option>
+          </select>
+          <p style="font-size:0.8rem;color:#999;margin-top:4px;">Starter shows only core words per activity. Expanded shows all words. You can override per activity.</p>
+        </div>
         <div class="activity-cards" id="activity-cards"></div>
       </div>
       <div class="settings-section">
@@ -4038,6 +4114,40 @@ let activeTab = 'talk';
 
 // ── Activity Overlays ──
 let activeActivity = null; // null when no activity is active
+let vocabLevel = localStorage.getItem('aac-vocab-level') || 'expanded';
+let activityLevelOverrides = JSON.parse(localStorage.getItem('aac-activity-level-overrides') || '{}');
+
+function saveActivityLevelOverrides() {
+  localStorage.setItem('aac-activity-level-overrides', JSON.stringify(activityLevelOverrides));
+}
+
+const STARTER_WORDS = {
+  mealtime:    ['I', 'eat', 'drink', 'want', 'more', 'no'],
+  bathtime:    ['I', 'wash', 'help', 'all done', 'more', 'no'],
+  playground:  ['I', 'go', 'push', 'stop', 'more', 'no'],
+  bedtime:     ['I', 'read', 'want', 'hug', 'more', 'no'],
+  dressing:    ['I', 'help', 'put on', 'want', 'all done', 'no'],
+  circletime:  ['I', 'sing', 'want', 'my turn', 'more', 'no'],
+  carride:     ['I', 'want', 'go', 'music', 'more', 'no'],
+  sensoryplay: ['I', 'want', 'touch', 'help', 'more', 'no'],
+  booktime:    ['I', 'read', 'want', 'more', 'again', 'no'],
+  doctor:      ['I', 'help', 'want', 'stop', 'hurt', 'no'],
+  arttime:     ['I', 'want', 'draw', 'help', 'more', 'no'],
+  grocery:     ['I', 'want', 'get', 'help', 'more', 'no'],
+};
+
+function getActivityWords(activity) {
+  const level = activityLevelOverrides[activity.id] || vocabLevel;
+  if (level === 'expanded') return activity.words;
+  const starterLabels = STARTER_WORDS[activity.id];
+  if (starterLabels) {
+    return activity.words.filter(w => starterLabels.includes(w.label));
+  }
+  if (activity.words.some(w => w.tier)) {
+    return activity.words.filter(w => w.tier === 'starter');
+  }
+  return activity.words.slice(0, 6);
+}
 
 const ACTIVITY_BUNDLES = [
   {
@@ -4733,6 +4843,7 @@ function finalizeInit() {
   setTimeout(() => downloadSymbolsForButtons().catch(e => {
     showToast(t('toast.symbolFailed', 'Symbol download failed. Try again from Settings.'));
   }), 2000);
+
 }
 
 // ── Sensory Preferences ──
@@ -5160,20 +5271,21 @@ function renderGrid() {
   // Activity overlay mode: show activity-specific words instead of the main grid
   if (activeActivity) {
     folderLabel.style.display = 'none';
-    activeActivity.words.forEach((w, i) => {
+    const allWords = getActivityWords(activeActivity);
+    const cols = getGridSize();
+
+    allWords.forEach((w, i) => {
       const cell = document.createElement('button');
       cell.className = 'cell';
       cell.setAttribute('data-color', w.color);
       cell.setAttribute('data-type', 'fringe');
       cell.setAttribute('data-id', w.id);
 
-      // Emoji icon
       const bigText = document.createElement('span');
       bigText.className = 'cell-big-text';
       bigText.textContent = w.icon || '💬';
       cell.appendChild(bigText);
 
-      // Try to load ARASAAC symbol
       loadImage(w.id).then(blob => {
         if (blob) {
           const img = document.createElement('img');
@@ -5185,7 +5297,6 @@ function renderGrid() {
         }
       });
 
-      // Label
       const label = document.createElement('span');
       label.className = 'cell-label';
       const primaryText = currentLang === 'es' ? w.labelEs : w.label;
@@ -5209,11 +5320,10 @@ function renderGrid() {
       grid.appendChild(cell);
     });
 
-    const totalCells = grid.children.length;
-    const cols = getGridSize();
-    const rows = Math.ceil(totalCells / cols);
+    const rows = Math.ceil(allWords.length / cols);
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     grid.style.flex = '1';
+
     return;
   }
 
@@ -5602,6 +5712,7 @@ function recordUsageEvent(btnId, source) {
   if (parentMode) return;
   if (!btnId) return;
   const evt = { v: 1, btnId, ts: Date.now(), source: source || 'independent' };
+  if (activeActivity) evt.activityId = activeActivity.id;
   usageLog.push(evt);
 
   const dk = todayKey();
@@ -5618,6 +5729,73 @@ function clearUsageData() {
   usageSummary = { dailyCounts: {}, wordCounts: {}, totalCount: 0 };
   localStorage.removeItem('aac-usage-log');
   localStorage.removeItem('aac-usage-summary');
+  activitySessions = [];
+  localStorage.removeItem('aac-activity-sessions');
+}
+
+// ── Activity Session Tracking ──
+let activitySessions = JSON.parse(localStorage.getItem('aac-activity-sessions') || '[]');
+
+function startActivitySession(activityId) {
+  activitySessions.push({ activityId, startedAt: Date.now(), endedAt: null });
+  saveActivitySessions();
+}
+
+function endActivitySession() {
+  let changed = false;
+  const now = Date.now();
+  for (const s of activitySessions) {
+    if (s.endedAt === null) { s.endedAt = now; changed = true; }
+  }
+  if (changed) saveActivitySessions();
+}
+
+function saveActivitySessions() {
+  const cutoff = Date.now() - (USAGE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+  activitySessions = activitySessions.filter(s => s.startedAt >= cutoff);
+  if (activitySessions.length > 500) activitySessions = activitySessions.slice(-500);
+  localStorage.setItem('aac-activity-sessions', JSON.stringify(activitySessions));
+}
+
+function getActivityInsights() {
+  const allActs = getAllActivities();
+  const actMap = {};
+
+  for (const session of activitySessions) {
+    if (!actMap[session.activityId]) actMap[session.activityId] = { sessions: 0, totalMs: 0, wordCounts: {} };
+    actMap[session.activityId].sessions++;
+    if (session.endedAt) actMap[session.activityId].totalMs += session.endedAt - session.startedAt;
+  }
+
+  for (const evt of usageLog) {
+    if (!evt.activityId) continue;
+    if (!actMap[evt.activityId]) actMap[evt.activityId] = { sessions: 0, totalMs: 0, wordCounts: {} };
+    actMap[evt.activityId].wordCounts[evt.btnId] = (actMap[evt.activityId].wordCounts[evt.btnId] || 0) + 1;
+  }
+
+  return Object.entries(actMap)
+    .map(([id, data]) => {
+      const act = allActs.find(a => a.id === id);
+      const topWords = Object.entries(data.wordCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([btnId, count]) => {
+          const w = act ? act.words.find(w => w.id === btnId) : null;
+          return { label: w ? w.label : btnId, count };
+        });
+      const totalWords = Object.values(data.wordCounts).reduce((s, c) => s + c, 0);
+      const avgMin = data.sessions > 0 ? Math.round((data.totalMs / data.sessions) / 60000) : 0;
+      return {
+        activityId: id,
+        name: act ? act.name : id,
+        icon: act ? act.icon : '?',
+        sessions: data.sessions,
+        totalWords,
+        avgMinutes: avgMin,
+        topWords,
+      };
+    })
+    .sort((a, b) => b.sessions - a.sessions);
 }
 
 function getWordFrequencies() {
@@ -5724,6 +5902,38 @@ function renderInsights() {
       '<div class="weekly-bar' + (day.isToday ? ' today' : '') + '" style="height:' + heightPct + '%;"></div>' +
       '<div class="weekly-bar-label">' + day.dayName + '</div>';
     weekEl.appendChild(col);
+  }
+
+  const actInsights = getActivityInsights();
+  const actSection = document.getElementById('insights-activities');
+  const actList = document.getElementById('insights-activity-list');
+  if (actInsights.length === 0) {
+    actSection.style.display = 'none';
+  } else {
+    actSection.style.display = 'block';
+    actList.innerHTML = '';
+    for (const ai of actInsights) {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#f8f7ff;border-radius:10px;padding:12px;margin-bottom:8px;';
+      let topWordsHtml = '';
+      if (ai.topWords.length > 0) {
+        topWordsHtml = '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">' +
+          ai.topWords.map(w => '<span style="background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:2px 6px;font-size:0.75rem;">' + escapeHtml(w.label) + ' <strong>' + w.count + '</strong></span>').join('') +
+          '</div>';
+      }
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+        '<span style="font-size:1.3rem;">' + ai.icon + '</span>' +
+        '<strong style="font-size:0.95rem;">' + escapeHtml(ai.name) + '</strong>' +
+        '</div>' +
+        '<div style="display:flex;gap:12px;font-size:0.8rem;color:#666;">' +
+        '<span>' + ai.sessions + ' sessions</span>' +
+        '<span>' + ai.totalWords + ' words</span>' +
+        (ai.avgMinutes > 0 ? '<span>~' + ai.avgMinutes + ' min avg</span>' : '') +
+        '</div>' +
+        topWordsHtml;
+      actList.appendChild(card);
+    }
   }
 }
 
@@ -6342,6 +6552,15 @@ document.getElementById('settings-grid-select').addEventListener('change', async
   showToast(names[newSize]);
 });
 
+// ── Vocabulary Level Setting ──
+const vocabLevelSelect = document.getElementById('settings-vocab-level');
+vocabLevelSelect.value = vocabLevel;
+vocabLevelSelect.addEventListener('change', (e) => {
+  vocabLevel = e.target.value;
+  localStorage.setItem('aac-vocab-level', vocabLevel);
+  if (activeActivity) renderGrid();
+});
+
 // ── Grammar Settings ──
 ['plurals', 'verbs', 'articles'].forEach(key => {
   const el = document.getElementById('grammar-' + key);
@@ -6767,10 +6986,15 @@ document.getElementById('edit-camera-input').addEventListener('change', async e 
 
 // ── Activity Overlays ──
 
+let _allActivitiesCache = null;
 function getAllActivities() {
-  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
-  return [...ACTIVITY_BUNDLES, ...custom];
+  if (!_allActivitiesCache) {
+    const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+    _allActivitiesCache = [...ACTIVITY_BUNDLES, ...custom];
+  }
+  return _allActivitiesCache;
 }
+function invalidateActivitiesCache() { _allActivitiesCache = null; }
 
 function renderActivityCards() {
   const container = document.getElementById('activity-cards');
@@ -6790,8 +7014,18 @@ function renderActivitiesTab() {
   if (!container) return;
   container.innerHTML = '';
 
-  const allActivities = getAllActivities();
-  allActivities.forEach(activity => {
+  const templateSelect = document.getElementById('activity-template-select');
+  templateSelect.innerHTML = '<option value="">Choose a template...</option>';
+  ACTIVITY_BUNDLES.forEach(activity => {
+    const label = currentLang === 'es' ? (activity.nameEs || activity.name) : activity.name;
+    const opt = document.createElement('option');
+    opt.value = activity.id;
+    opt.textContent = `${activity.icon} ${label}`;
+    templateSelect.appendChild(opt);
+  });
+
+  const customActivities = getAllActivities().filter(a => a.custom);
+  customActivities.forEach(activity => {
     const card = document.createElement('button');
     const isActive = activeActivity && activeActivity.id === activity.id;
     card.className = 'activity-card' + (isActive ? ' activity-active' : '');
@@ -6800,6 +7034,10 @@ function renderActivitiesTab() {
     let badgeHtml = '';
     if (isActive) {
       badgeHtml = '<span class="activity-card-badge">Active</span>';
+    }
+    const effectiveLevel = activityLevelOverrides[activity.id] || vocabLevel;
+    if (effectiveLevel === 'starter') {
+      badgeHtml += '<span style="position:absolute;top:4px;left:4px;font-size:0.6rem;background:#E3F2FD;color:#1565C0;padding:1px 4px;border-radius:4px;">Starter</span>';
     }
 
     const exportBtn = `<button class="activity-card-export" title="Export activity" aria-label="Export ${activity.name}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
@@ -6829,7 +7067,16 @@ function renderActivitiesTab() {
   createCard.innerHTML = '<span class="activity-card-icon" style="font-size:1.8rem;opacity:0.5;">+</span><span class="activity-card-label">Create Activity</span>';
   createCard.addEventListener('click', () => openCreateActivityModal());
   container.appendChild(createCard);
+
+  renderRoutinesTab();
 }
+
+document.getElementById('activity-template-select').addEventListener('change', (e) => {
+  const id = e.target.value;
+  if (!id) return;
+  e.target.value = '';
+  openActivityPreview(id);
+});
 
 
 function openActivityPreview(activityId) {
@@ -6842,6 +7089,7 @@ function openActivityPreview(activityId) {
 
   title.innerHTML = `<span>${activity.icon}</span> ${currentLang === 'es' ? activity.nameEs : activity.name}`;
   desc.textContent = `${activity.words.length} words`;
+  document.getElementById('btn-activity-delete').style.display = activity.custom ? '' : 'none';
   wordsContainer.innerHTML = '';
 
   activity.words.forEach(w => {
@@ -6851,6 +7099,14 @@ function openActivityPreview(activityId) {
     chip.textContent = currentLang === 'es' ? w.labelEs : w.label;
     wordsContainer.appendChild(chip);
   });
+
+  const levelSelect = document.getElementById('activity-preview-level-select');
+  levelSelect.value = activityLevelOverrides[activityId] || '';
+  levelSelect.onchange = () => {
+    const val = levelSelect.value;
+    if (val) { activityLevelOverrides[activityId] = val; } else { delete activityLevelOverrides[activityId]; }
+    saveActivityLevelOverrides();
+  };
 
   overlay.classList.add('open');
   overlay.dataset.activityId = activityId;
@@ -6881,6 +7137,22 @@ document.getElementById('btn-activity-start').addEventListener('click', () => {
   startActivity(activityId);
 });
 
+document.getElementById('btn-activity-delete').addEventListener('click', () => {
+  const overlay = document.getElementById('activity-preview-overlay');
+  const activityId = overlay.dataset.activityId;
+  const activity = getAllActivities().find(a => a.id === activityId);
+  if (!activity || !activity.custom) return;
+  if (!confirm(`Delete "${activity.name}"? This cannot be undone.`)) return;
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  const updated = custom.filter(a => a.id !== activityId);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(updated));
+  invalidateActivitiesCache();
+  overlay.classList.remove('open');
+  renderActivitiesTab();
+  renderActivityCards();
+  showToast(`${activity.icon} ${activity.name} deleted`);
+});
+
 function startActivity(activityId) {
   const allActs = getAllActivities();
   const activity = allActs.find(a => a.id === activityId);
@@ -6888,6 +7160,7 @@ function startActivity(activityId) {
   activeActivity = activity;
   currentFolder = null;
   document.body.classList.add('activity-mode');
+  startActivitySession(activityId);
 
   const banner = document.getElementById('activity-banner');
   document.getElementById('activity-banner-icon').textContent = activity.icon;
@@ -6902,17 +7175,213 @@ function startActivity(activityId) {
 
 function endActivity() {
   if (!activeActivity) return;
+  endActivitySession();
   const name = activeActivity.name;
+  const hadRoutine = !!activeRoutine;
   activeActivity = null;
   document.body.classList.remove('activity-mode');
   document.getElementById('activity-banner').classList.remove('active');
-  renderGrid();
-  showToast(`${name} activity ended`);
+
+  if (hadRoutine) {
+    advanceRoutine();
+  } else {
+    renderGrid();
+    showToast(`${name} activity ended`);
+  }
 }
 
 // Close button is parent-gated: requires parentMode
 document.getElementById('btn-activity-close').addEventListener('click', () => {
   endActivity();
+});
+
+// ── Activity Routines ──
+let routines = JSON.parse(localStorage.getItem('aac-routines') || '[]');
+let activeRoutine = null;
+let createRoutineSelectedIds = [];
+let createRoutineIcon = '📋';
+const ROUTINE_ICONS = ['📋','🌅','🌙','🏫','🏥','🎉','🏖️','🧸','🚌','🛒','⛪','🎪','🍽️','🧹','📚','🎨'];
+
+function saveRoutines() {
+  localStorage.setItem('aac-routines', JSON.stringify(routines));
+}
+
+function renderRoutinesTab() {
+  const container = document.getElementById('routines-tab-cards');
+  if (!container) return;
+  container.innerHTML = '';
+  const allActs = getAllActivities();
+
+  routines.forEach(routine => {
+    const card = document.createElement('button');
+    const isActive = activeRoutine && activeRoutine.routine.id === routine.id;
+    card.className = 'activity-card' + (isActive ? ' activity-active' : '');
+    card.style.position = 'relative';
+    const actNames = routine.activityIds
+      .map(id => { const a = allActs.find(x => x.id === id); return a ? a.icon : '?'; })
+      .join(' ');
+
+    let badgeHtml = isActive ? '<span class="activity-card-badge">Active</span>' : '';
+    card.innerHTML = `<span class="activity-card-icon">${routine.icon}</span><span class="activity-card-label">${routine.name}</span><span style="font-size:0.7rem;color:#888;display:block;">${actNames}</span>${badgeHtml}`;
+
+    if (isActive) {
+      card.addEventListener('click', () => {
+        endRoutine();
+        renderActivitiesTab();
+        renderRoutinesTab();
+      });
+    } else {
+      card.addEventListener('click', () => startRoutine(routine.id));
+    }
+    container.appendChild(card);
+  });
+
+  const createCard = document.createElement('button');
+  createCard.className = 'activity-card';
+  createCard.style.cssText = 'border-style:dashed;color:#aaa;';
+  createCard.innerHTML = '<span class="activity-card-icon" style="font-size:1.8rem;opacity:0.5;">+</span><span class="activity-card-label">Create Routine</span>';
+  createCard.addEventListener('click', () => openCreateRoutineModal());
+  container.appendChild(createCard);
+}
+
+function startRoutine(routineId) {
+  const routine = routines.find(r => r.id === routineId);
+  if (!routine || routine.activityIds.length === 0) return;
+  activeRoutine = { routine, currentIndex: 0 };
+  startActivity(routine.activityIds[0]);
+  renderRoutinesTab();
+}
+
+function advanceRoutine() {
+  if (!activeRoutine) return;
+  activeRoutine.currentIndex++;
+  if (activeRoutine.currentIndex >= activeRoutine.routine.activityIds.length) {
+    showToast('Routine complete!');
+    activeRoutine = null;
+    renderActivitiesTab();
+    renderRoutinesTab();
+    return;
+  }
+  const nextId = activeRoutine.routine.activityIds[activeRoutine.currentIndex];
+  const allActs = getAllActivities();
+  const nextAct = allActs.find(a => a.id === nextId);
+  if (!nextAct) { showToast('Activity not found, ending routine'); activeRoutine = null; renderRoutinesTab(); return; }
+
+  const overlay = document.getElementById('routine-transition-overlay');
+  document.getElementById('routine-transition-name').textContent = nextAct.icon + ' ' + nextAct.name;
+  overlay.style.display = 'flex';
+}
+
+function endRoutine() {
+  activeRoutine = null;
+  endActivity();
+  document.getElementById('routine-transition-overlay').style.display = 'none';
+  renderRoutinesTab();
+}
+
+document.getElementById('btn-routine-next').addEventListener('click', () => {
+  document.getElementById('routine-transition-overlay').style.display = 'none';
+  if (activeRoutine) {
+    const nextId = activeRoutine.routine.activityIds[activeRoutine.currentIndex];
+    startActivity(nextId);
+  }
+});
+
+document.getElementById('btn-routine-end').addEventListener('click', () => {
+  endRoutine();
+});
+
+function openCreateRoutineModal() {
+  createRoutineSelectedIds = [];
+  createRoutineIcon = ROUTINE_ICONS[0];
+  document.getElementById('create-routine-name').value = '';
+
+  const iconsContainer = document.getElementById('create-routine-icons');
+  iconsContainer.innerHTML = '';
+  ROUTINE_ICONS.forEach(icon => {
+    const btn = document.createElement('button');
+    btn.className = 'create-icon-btn' + (icon === createRoutineIcon ? ' selected' : '');
+    btn.textContent = icon;
+    btn.addEventListener('click', () => {
+      createRoutineIcon = icon;
+      iconsContainer.querySelectorAll('.create-icon-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    iconsContainer.appendChild(btn);
+  });
+
+  renderRoutineActivityPicker();
+  renderRoutineSelected();
+  document.getElementById('create-routine-overlay').style.display = 'flex';
+}
+
+function renderRoutineActivityPicker() {
+  const container = document.getElementById('create-routine-activity-list');
+  container.innerHTML = '';
+  const allActs = getAllActivities();
+  allActs.forEach(act => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:1px solid #eee;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;margin-bottom:4px;';
+    btn.innerHTML = `<span>${act.icon}</span><span>${act.name}</span>`;
+    btn.addEventListener('click', () => {
+      createRoutineSelectedIds.push(act.id);
+      renderRoutineSelected();
+    });
+    container.appendChild(btn);
+  });
+}
+
+function renderRoutineSelected() {
+  const container = document.getElementById('create-routine-selected');
+  container.innerHTML = '';
+  if (createRoutineSelectedIds.length === 0) {
+    container.innerHTML = '<span style="color:#bbb;font-size:0.8rem;">Tap activities below to add them in order</span>';
+    return;
+  }
+  const allActs = getAllActivities();
+  createRoutineSelectedIds.forEach((id, i) => {
+    const act = allActs.find(a => a.id === id);
+    if (!act) return;
+    const chip = document.createElement('button');
+    chip.className = 'create-selected-chip';
+    chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;';
+    chip.innerHTML = `<span style="font-size:0.7rem;color:#999;font-weight:700;">${i + 1}</span> ${act.icon} ${act.name} <span style="color:#aaa;">\u00D7</span>`;
+    chip.addEventListener('click', () => {
+      createRoutineSelectedIds.splice(i, 1);
+      renderRoutineSelected();
+    });
+    container.appendChild(chip);
+  });
+}
+
+document.getElementById('btn-create-routine-cancel').addEventListener('click', () => {
+  document.getElementById('create-routine-overlay').style.display = 'none';
+});
+
+document.getElementById('create-routine-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'create-routine-overlay') {
+    document.getElementById('create-routine-overlay').style.display = 'none';
+  }
+});
+
+document.getElementById('btn-create-routine-save').addEventListener('click', () => {
+  const name = document.getElementById('create-routine-name').value.trim();
+  if (!name) { showToast('Enter a routine name'); return; }
+  if (createRoutineSelectedIds.length < 2) { showToast('Add at least 2 activities'); return; }
+
+  const routine = {
+    id: 'routine-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    name: name,
+    nameEs: name,
+    icon: createRoutineIcon,
+    activityIds: [...createRoutineSelectedIds],
+  };
+
+  routines.push(routine);
+  saveRoutines();
+  document.getElementById('create-routine-overlay').style.display = 'none';
+  renderRoutinesTab();
+  showToast(`${routine.icon} ${routine.name} routine created`);
 });
 
 // Populate activity cards when settings opens
@@ -6927,6 +7396,158 @@ const CREATE_ACTIVITY_COLORS = ['#FF9800','#29B6F6','#66BB6A','#5C6BC0','#AB47BC
 let createActivitySelectedWords = [];
 let createActivityIcon = '';
 let createActivityColor = '';
+
+// ── Smart Word Suggestions ──
+const ACTIVITY_KEYWORD_MAP = {
+  mealtime:    ['meal', 'food', 'eat', 'lunch', 'dinner', 'breakfast', 'snack', 'feeding'],
+  bathtime:    ['bath', 'wash', 'shower', 'tub'],
+  playground:  ['play', 'park', 'playground', 'outside', 'recess'],
+  bedtime:     ['bed', 'sleep', 'nap', 'night', 'bedtime'],
+  dressing:    ['dress', 'clothes', 'shirt', 'shoes', 'outfit'],
+  circletime:  ['circle', 'sing', 'song', 'music', 'dance', 'group'],
+  carride:     ['car', 'ride', 'drive', 'trip', 'travel'],
+  sensoryplay: ['sensory', 'playdoh', 'sand', 'slime', 'texture'],
+  booktime:    ['book', 'read', 'story', 'library', 'reading'],
+  doctor:      ['doctor', 'dentist', 'hospital', 'clinic', 'checkup', 'appointment'],
+  arttime:     ['art', 'draw', 'paint', 'color', 'craft', 'coloring'],
+  grocery:     ['store', 'shop', 'grocery', 'market', 'shopping'],
+};
+
+const EXTRA_SUGGESTION_WORDS = {
+  swimming: [
+    { label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋' },
+    { label: 'swim',     labelEs: 'nadar',     color: 'green',  icon: '🏊' },
+    { label: 'splash',   labelEs: 'salpicar',  color: 'green',  icon: '💦' },
+    { label: 'kick',     labelEs: 'patear',    color: 'green',  icon: '🦶' },
+    { label: 'jump',     labelEs: 'saltar',    color: 'green',  icon: '🤸' },
+    { label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘' },
+    { label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅' },
+    { label: 'cold',     labelEs: 'frio',      color: 'blue',   icon: '🥶' },
+    { label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕' },
+    { label: 'water',    labelEs: 'agua',      color: 'orange', icon: '💧' },
+    { label: 'towel',    labelEs: 'toalla',    color: 'orange', icon: '🧴' },
+    { label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎' },
+  ],
+  haircut: [
+    { label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋' },
+    { label: 'wait',     labelEs: 'espera',    color: 'green',  icon: '⏳' },
+    { label: 'sit',      labelEs: 'sentarse',  color: 'green',  icon: '🪑' },
+    { label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘' },
+    { label: 'stop',     labelEs: 'para',      color: 'green',  icon: '🛑' },
+    { label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅' },
+    { label: 'scared',   labelEs: 'asustado',  color: 'blue',   icon: '😨' },
+    { label: 'gentle',   labelEs: 'suave',     color: 'blue',   icon: '🤲' },
+    { label: 'loud',     labelEs: 'fuerte',    color: 'blue',   icon: '🔊' },
+    { label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕' },
+    { label: 'please',   labelEs: 'por favor', color: 'pink',   icon: '🙏' },
+    { label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎' },
+  ],
+};
+
+const EXTRA_KEYWORD_MAP = {
+  swimming: ['swim', 'pool', 'beach', 'water park'],
+  haircut:  ['haircut', 'barber', 'hair', 'salon'],
+};
+
+function matchActivitySuggestions(name) {
+  const tokens = name.toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return [];
+
+  const matchedWords = [];
+  const seen = new Set();
+
+  function addWords(words) {
+    words.forEach(w => {
+      const key = w.label.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        matchedWords.push({ label: w.label, labelEs: w.labelEs || '', color: w.color || 'orange', icon: w.icon || '' });
+      }
+    });
+  }
+
+  const kwMatch = (t, kw) => kw === t || (t.length >= 4 && (kw.startsWith(t) || t.startsWith(kw)));
+
+  for (const [bundleId, keywords] of Object.entries(ACTIVITY_KEYWORD_MAP)) {
+    if (tokens.some(t => keywords.some(kw => kwMatch(t, kw)))) {
+      const bundle = ACTIVITY_BUNDLES.find(b => b.id === bundleId);
+      if (bundle) addWords(bundle.words);
+    }
+  }
+
+  for (const [extraId, keywords] of Object.entries(EXTRA_KEYWORD_MAP)) {
+    if (tokens.some(t => keywords.some(kw => kwMatch(t, kw)))) {
+      addWords(EXTRA_SUGGESTION_WORDS[extraId]);
+    }
+  }
+
+  return matchedWords;
+}
+
+function renderActivitySuggestions() {
+  const name = document.getElementById('create-activity-name').value.trim();
+  const container = document.getElementById('create-activity-suggestions');
+  const chipsEl = document.getElementById('create-activity-suggestion-chips');
+
+  const suggestions = matchActivitySuggestions(name);
+  const filtered = suggestions.filter(s =>
+    !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
+  );
+
+  if (filtered.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  chipsEl.innerHTML = '';
+
+  filtered.forEach(s => {
+    const chip = document.createElement('button');
+    chip.className = 'create-word-chip';
+    chip.setAttribute('data-color', s.color);
+    chip.style.borderStyle = 'dashed';
+    chip.textContent = (s.icon ? s.icon + ' ' : '') + s.label;
+    chip.addEventListener('click', () => {
+      if (createActivitySelectedWords.length >= 32) {
+        showToast('Maximum 32 words per activity');
+        return;
+      }
+      createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
+      renderActivitySuggestions();
+      renderCreateSelectedWords();
+      renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+    });
+    chipsEl.appendChild(chip);
+  });
+}
+
+document.getElementById('create-activity-name').addEventListener('input', () => {
+  renderActivitySuggestions();
+});
+
+document.getElementById('btn-add-all-suggestions').addEventListener('click', () => {
+  const name = document.getElementById('create-activity-name').value.trim();
+  const suggestions = matchActivitySuggestions(name);
+  const filtered = suggestions.filter(s =>
+    !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
+  );
+  let added = 0;
+  for (const s of filtered) {
+    if (createActivitySelectedWords.length >= 32) {
+      showToast('Maximum 32 words reached');
+      break;
+    }
+    createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
+    added++;
+  }
+  if (added > 0) {
+    renderActivitySuggestions();
+    renderCreateSelectedWords();
+    renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+    showToast(added + ' words added');
+  }
+});
 
 function openCreateActivityModal(prefillActivity) {
   if (prefillActivity) {
@@ -6983,6 +7604,7 @@ function openCreateActivityModal(prefillActivity) {
 
   renderCreateWordPicker('');
   renderCreateSelectedWords();
+  renderActivitySuggestions();
 
   document.getElementById('create-activity-overlay').classList.add('open');
 }
@@ -7013,8 +7635,8 @@ function renderCreateWordPicker(filter) {
       if (isSelected) {
         createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
       } else {
-        if (createActivitySelectedWords.length >= 16) {
-          showToast('Maximum 16 words per activity');
+        if (createActivitySelectedWords.length >= 32) {
+          showToast('Maximum 32 words per activity');
           return;
         }
         createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon });
@@ -7037,10 +7659,12 @@ function renderCreateSelectedWords() {
     container.innerHTML = '<span style="color:#bbb;font-size:0.8rem;">Tap words below to add them</span>';
     return;
   }
-  createActivitySelectedWords.forEach(w => {
+  createActivitySelectedWords.forEach((w, i) => {
     const chip = document.createElement('button');
     chip.className = 'create-selected-chip';
-    chip.textContent = w.label + ' \u00D7';
+    if (i < 6) chip.style.borderColor = 'var(--bar-bg)';
+    chip.textContent = (i < 6 ? '\u2605 ' : '') + w.label + ' \u00D7';
+    chip.title = i < 6 ? 'Starter word (shown in Starter level)' : 'Expanded word';
     chip.addEventListener('click', () => {
       createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
       renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
@@ -7093,12 +7717,14 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
       color: w.color,
       icon: w.icon || '',
       symbolKw: w.label,
+      tier: i < 6 ? 'starter' : 'expanded',
     })),
   };
 
   const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
   custom.push(activity);
   localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+  invalidateActivitiesCache();
 
   document.getElementById('create-activity-overlay').classList.remove('open');
   renderActivitiesTab();
@@ -7183,6 +7809,7 @@ function importActivityFromFile(file) {
       const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
       custom.push(activity);
       localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+      invalidateActivitiesCache();
 
       renderActivitiesTab();
       renderActivityCards();

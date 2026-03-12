@@ -30,3 +30,6 @@ Phase B+C Complete -- Schedule and Rewards transferred, awaiting testing
 - 2026-03-11: Project created as part of AAC Board / Guiding Steps app split
 - 2026-03-11: Scaffold created (index.html + sw.js + manifest.json)
 - 2026-03-11: Phase B+C -- Schedule and Rewards features transferred from AAC Board (3,864 lines total). All CSS, HTML, JS, SVG constants, DB helpers, event listeners integrated. Spanish i18n removed. Audio upgraded to AAC Board quality. Reset defaults handler added.
+- 2026-03-12: Visible Steps Setting implemented (parent-mode setting, 2-6 steps, default 3, segmented buttons, dynamic card sizing for 2-4 steps)
+- 2026-03-12: Parent Mode quick toggle added (lock icon in header, hold 0.5s to toggle, gold active indicator)
+- 2026-03-12: Social Stories feature fully implemented (8 templates, full-screen reader with swipe/TTS, wizard editor with sentence type guidance, 30+ stock SVGs, offline support). User tested -- has feedback for next session.
