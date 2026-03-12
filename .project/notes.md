@@ -1,53 +1,33 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-App Split -- separating AAC Board and Guiding Steps per SLP/DT feedback
+Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor alignment
 
 ## Active Features
 
-### AAC Board / Guiding Steps App Split
-- Plan: .project/features/AppSplit.md
-- Notes: .project/features/AppSplit_Notes.md
-- Status: Phase A COMPLETE (scaffold) -- awaiting developer approval to proceed
-- Guiding Steps scaffold: guiding-steps/ (index.html + sw.js + manifest.json)
+### Activities Expansion (6 features)
+- Plan: .project/features/ActivitiesExpansion.md
+- Notes: .project/features/ActivitiesExpansion_Notes.md
+- Status: PLANNING -- awaiting approval
+- Scope: Smart suggestions, schedule integration, activity insights, vocab levels, routines, expanded word limit
+
+### Marketing Website
+- Plan: .project/features/MarketingWebsite.md
+- Status: PLANNING -- awaiting approval
+
+### Investor Deck -> Roadmap Alignment
+- Plan: .project/features/InvestorDeck-RoadmapAlignment.md
+- Status: PLANNING -- gap analysis complete, awaiting approval
+
+## Next Up
+- Milestone 5: iOS + Android App Store Submissions
+
+## Completed Features
 
 ### Export/Share Boards (Milestone 4.4)
 - Plan: .project/features/ExportShareBoards.md
 - Notes: .project/features/ExportShareBoards_Notes.md
-- Status: IMPLEMENTED -- awaiting testing and validation
-- Branch: feature/export-import-boards
-
-### Marketing Website
-- Plan: .project/features/MarketingWebsite.md
-- Status: PLANNING -- on hold pending app split
-
-### Investor Deck -> Roadmap Alignment
-- Plan: .project/features/InvestorDeck-RoadmapAlignment.md
-- Status: PLANNING -- gap analysis complete, needs revision for app split
-
-### Sensory/Regulation Words (Phase 2, P0)
-- Plan: .project/features/SensoryRegulationWords.md
-- Notes: .project/features/SensoryRegulationWords_Notes.md
-- Status: IMPLEMENTED -- awaiting validation
-
-### Quick Phrases (Phase 2, P0)
-- Plan: .project/features/QuickPhrases.md
-- Notes: .project/features/QuickPhrases_Notes.md
-- Status: IMPLEMENTED -- awaiting validation
-
-### Activity Overlays (Phase 2, P1)
-- Plan: .project/features/ActivityOverlays.md
-- Notes: .project/features/ActivityOverlays_Notes.md
-- Status: PLANNING -- awaiting approval (will become Activities tab post-split)
-- Concept: Parent/SLP-controlled contextual vocabulary overlays (not a tab)
-- Initial bundles: Mealtime, Bath Time, Playground, Bedtime, Getting Dressed, Circle Time
-- Second wave: 6 additional bundles designed by Marci (pending)
-
-## Next Up
-- Activity Overlays Wave 2 (6 additional activity bundles)
-- Milestone 5: iOS + Android App Store Submissions
-
-## Completed Features
+- Status: DONE -- merged via PR #35
 
 ### Deep Vocabulary Expansion (Phase 2, P0)
 - Plan: .project/features/DeepVocabularyExpansion.md
@@ -112,6 +92,9 @@ App Split -- separating AAC Board and Guiding Steps per SLP/DT feedback
 - Plan: .project/features/CompetitiveAnalysis.md
 - Status: COMPLETE -- research delivered 2026-03-07
 
+## Next Up
+- Activities Expansion Phase 2 implementation (pending plan approval)
+
 ## Session History
 - 2026-02-28: Initialized .project workflow structure
 - 2026-02-28: Created planning docs for Navigation/ParentMode, Reward Tracker, Visual Schedules
@@ -128,6 +111,3 @@ App Split -- separating AAC Board and Guiding Steps per SLP/DT feedback
 - 2026-03-07: Getting Started Guide -- 8 accordion tips in Settings for parents
 - 2026-03-07: Investor Deck alignment -- gap analysis of 17 features across 4 phases
 - 2026-03-07: Deep Vocabulary Expansion -- 283 to 415 communication words, 6 new folders, 132 new words, Spanish translations, PR #34
-- 2026-03-11: App Split initiated -- SLP/DT feedback: separate AAC (communication + Activities) from behavioral tools (Schedule, Rewards, Social Stories)
-- 2026-03-11: Created Guiding Steps scaffold at guiding-steps/ (shared design system, PWA structure, parent mode, sensory prefs, TTS, celebration system)
-- 2026-03-11: Created AppSplit.md planning doc with 7-phase execution plan (A through G)

@@ -1,7 +1,7 @@
 # Export/Share Boards -- Notes
 
 ## Current Status
-Phase 2: Implementation COMPLETE -- awaiting testing and validation
+DONE -- merged via PR #35, validated 2026-03-07
 
 ## Agent Input
 - Marci: SLP-to-family handoff is the primary use case. Custom images must survive export. Exclude usage data (privacy/HIPAA). Compress images for textable file sizes. OBF format not needed -- no real-world adoption. Template vs Full Backup distinction.
