@@ -1,9 +1,15 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor alignment
+App Split -- separating AAC Board and Guiding Steps per SLP/DT feedback
 
 ## Active Features
+
+### AAC Board / Guiding Steps App Split
+- Plan: .project/features/AppSplit.md
+- Notes: .project/features/AppSplit_Notes.md
+- Status: Phase A COMPLETE (scaffold) -- awaiting developer approval to proceed
+- Guiding Steps scaffold: guiding-steps/ (index.html + sw.js + manifest.json)
 
 ### Export/Share Boards (Milestone 4.4)
 - Plan: .project/features/ExportShareBoards.md
@@ -13,11 +19,11 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 
 ### Marketing Website
 - Plan: .project/features/MarketingWebsite.md
-- Status: PLANNING -- awaiting approval
+- Status: PLANNING -- on hold pending app split
 
 ### Investor Deck -> Roadmap Alignment
 - Plan: .project/features/InvestorDeck-RoadmapAlignment.md
-- Status: PLANNING -- gap analysis complete, awaiting approval
+- Status: PLANNING -- gap analysis complete, needs revision for app split
 
 ### Sensory/Regulation Words (Phase 2, P0)
 - Plan: .project/features/SensoryRegulationWords.md
@@ -32,7 +38,7 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 ### Activity Overlays (Phase 2, P1)
 - Plan: .project/features/ActivityOverlays.md
 - Notes: .project/features/ActivityOverlays_Notes.md
-- Status: PLANNING -- awaiting approval
+- Status: PLANNING -- awaiting approval (will become Activities tab post-split)
 - Concept: Parent/SLP-controlled contextual vocabulary overlays (not a tab)
 - Initial bundles: Mealtime, Bath Time, Playground, Bedtime, Getting Dressed, Circle Time
 - Second wave: 6 additional bundles designed by Marci (pending)
@@ -122,3 +128,6 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - 2026-03-07: Getting Started Guide -- 8 accordion tips in Settings for parents
 - 2026-03-07: Investor Deck alignment -- gap analysis of 17 features across 4 phases
 - 2026-03-07: Deep Vocabulary Expansion -- 283 to 415 communication words, 6 new folders, 132 new words, Spanish translations, PR #34
+- 2026-03-11: App Split initiated -- SLP/DT feedback: separate AAC (communication + Activities) from behavioral tools (Schedule, Rewards, Social Stories)
+- 2026-03-11: Created Guiding Steps scaffold at guiding-steps/ (shared design system, PWA structure, parent mode, sensory prefs, TTS, celebration system)
+- 2026-03-11: Created AppSplit.md planning doc with 7-phase execution plan (A through G)

@@ -4287,6 +4287,7 @@ body.sensory-high-contrast .task-tile {
         <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
         <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
         <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
+        <button class="settings-btn parent-mode-only" id="btn-clear-symbol-cache" style="background:#fff3e0;color:#E65100;">Clear Symbol Cache</button>
         <button class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
       </div>
     </div>
@@ -4575,7 +4576,12 @@ body.sensory-high-contrast .task-tile {
 // ── Language Support ──
 let currentLang = localStorage.getItem('aac-language') || 'en';
 
-const LANG_ES = {
+let _langEsCache = null;
+function getLangEs() {
+  if (!_langEsCache) _langEsCache = _buildLangEs();
+  return _langEsCache;
+}
+function _buildLangEs() { return {
   labels: {
     // Core words
     'core-i': 'yo', 'core-want': 'quiero', 'core-dont-want': 'no quiero',
@@ -5023,15 +5029,15 @@ const LANG_ES = {
     'Bathroom': 'Bano', 'Self-Care': 'Cuidado personal', 'Daily Tasks': 'Tareas diarias',
     'Behavior': 'Comportamiento', 'Bedtime': 'Hora de dormir',
   },
-};
+}; }
 
 function t(key, fallback) {
   if (currentLang === 'en') return fallback;
-  return LANG_ES.uiStrings[key] || fallback;
+  return getLangEs().uiStrings[key] || fallback;
 }
 
 function getDisplayLabel(btn) {
-  const esLabel = LANG_ES.labels[btn.id];
+  const esLabel = getLangEs().labels[btn.id];
   if (currentLang === 'en') return btn.label;
   // Check for custom Spanish label
   const customEs = getCustomEsLabels();
@@ -5048,17 +5054,17 @@ function getSpeakLabel(btn) {
   if (currentLang === 'en') return btn.label;
   const customEs = getCustomEsLabels();
   if (customEs[btn.id]) return customEs[btn.id];
-  return LANG_ES.labels[btn.id] || btn.label;
+  return getLangEs().labels[btn.id] || btn.label;
 }
 
 function getPrimaryLabel(btn) {
   if (currentLang === 'en') return btn.label;
-  return LANG_ES.labels[btn.id] || btn.label;
+  return getLangEs().labels[btn.id] || btn.label;
 }
 
 function getSecondaryLabel(btn) {
   if (currentLang !== 'both') return null;
-  return LANG_ES.labels[btn.id] || null;
+  return getLangEs().labels[btn.id] || null;
 }
 
 function getCustomEsLabels() {
@@ -6140,24 +6146,31 @@ function setGridSize(size) {
   document.body.classList.add(`grid-${size}`);
 }
 
+const _templateCache = {};
+function invalidateTemplateCache() {
+  for (const k in _templateCache) delete _templateCache[k];
+}
+
 function getTemplate(size) {
+  if (_templateCache[size]) return _templateCache[size].map(b => ({...b}));
   const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
+  let template;
   if (size === 3) {
     const filtered = folderContents.filter(b => THREE_BY_THREE_FOLDERS.has(b.folderId));
-    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_3X3_FOLDERS, ...filtered]));
-  }
-  if (size === 4) {
+    template = [...CORE_WORD_DEFS, ...HOME_GRID_3X3_FOLDERS, ...filtered];
+  } else if (size === 4) {
     const filtered = folderContents.filter(b => FOUR_BY_FOUR_FOLDERS.has(b.folderId));
-    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_4X4_FOLDERS, ...filtered]));
-  }
-  if (size === 5) {
-    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...folderContents]));
-  }
-  if (size === 6) {
+    template = [...CORE_WORD_DEFS, ...HOME_GRID_4X4_FOLDERS, ...filtered];
+  } else if (size === 5) {
+    template = [...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...folderContents];
+  } else if (size === 6) {
     const homeFolders = DEFAULT_BUTTONS.filter(b => b.folderId === null && b.type !== 'core');
-    return JSON.parse(JSON.stringify([...CORE_WORD_DEFS, ...homeFolders, ...HOME_GRID_6X6_EXTRAS, ...folderContents]));
+    template = [...CORE_WORD_DEFS, ...homeFolders, ...HOME_GRID_6X6_EXTRAS, ...folderContents];
+  } else {
+    template = [...DEFAULT_BUTTONS];
   }
-  return JSON.parse(JSON.stringify(DEFAULT_BUTTONS));
+  _templateCache[size] = template;
+  return template.map(b => ({...b}));
 }
 
 let _gridPickerCallback = null;
@@ -6344,6 +6357,26 @@ async function deleteImage(buttonId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_IMAGES, 'readwrite');
     tx.objectStore(STORE_IMAGES).delete(buttonId);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getImageCacheCount() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readonly');
+    const req = tx.objectStore(STORE_IMAGES).count();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function clearImageCache() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readwrite');
+    tx.objectStore(STORE_IMAGES).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -6574,7 +6607,7 @@ async function init() {
     // Migrate: add core words for existing users who don't have them yet
     const hasCoreWords = buttons.some(b => b.type === 'core');
     if (!hasCoreWords) {
-      buttons.unshift(...JSON.parse(JSON.stringify(CORE_WORD_DEFS)));
+      buttons.unshift(...CORE_WORD_DEFS.map(b => ({...b})));
       migrated = true;
     }
 
@@ -6956,7 +6989,7 @@ const GRAMMAR_EN = {
 function spanishPluralize(word) {
   if (!word || word.length < 2) return word + 's';
   const lower = word.toLowerCase();
-  if (LANG_ES.pluralOverrides[lower]) return LANG_ES.pluralOverrides[lower];
+  if (getLangEs().pluralOverrides[lower]) return getLangEs().pluralOverrides[lower];
   if (lower.endsWith('z')) return word.slice(0, -1) + 'ces';
   if (/[aeiou]$/.test(lower)) return word + 's';
   if (/[ln]$/.test(lower) || /[rsdfghjkp]$/.test(lower)) return word + 'es';
@@ -6966,8 +6999,8 @@ function spanishPluralize(word) {
 const GRAMMAR_ES = {
   pluralize: spanishPluralize,
   thirdPersonPronouns: new Set(['el', 'ella']),
-  uncountable: LANG_ES.uncountable,
-  verbForms: LANG_ES.verbForms,
+  uncountable: getLangEs().uncountable,
+  verbForms: getLangEs().verbForms,
   moreWord: 'mas',
   apply(words, btnIds) {
     if (!words || words.length === 0) return '';
@@ -6995,7 +7028,7 @@ const GRAMMAR_ES = {
         if (i === 0 || (prevCat !== 'noun' && prevCat !== 'descriptor' &&
             !['mas', 'mi', 'tu', 'el', 'la', 'un', 'una', 'unos', 'unas'].includes(result[i - 1].toLowerCase()))) {
           if (!this.uncountable.has(lower)) {
-            const gender = LANG_ES.nounGender[id] || 'm';
+            const gender = getLangEs().nounGender[id] || 'm';
             const article = gender === 'f' ? 'una' : 'un';
             result[i] = article + ' ' + result[i];
           }
@@ -7019,7 +7052,7 @@ const SPEAK_OVERRIDES = { 'I': 'eye' };
 
 function getSpeakOverrides() {
   if (currentLang === 'en') return SPEAK_OVERRIDES;
-  return LANG_ES.speakOverrides;
+  return getLangEs().speakOverrides;
 }
 
 function speak(text) {
@@ -7038,8 +7071,29 @@ function speak(text) {
 
 // Quick-access action buttons injected at the top of most folder grids
 // ── Render Grid ──
+// Delegated core strip listener (set up once)
+let _coreDelegationReady = false;
+function setupCoreDelegation() {
+  if (_coreDelegationReady) return;
+  _coreDelegationReady = true;
+
+  document.getElementById('core-word-strip').addEventListener('click', (e) => {
+    const el = e.target.closest('.core-strip-btn[data-id]');
+    if (!el) return;
+    const btnId = el.getAttribute('data-id');
+    const btn = buttons.find(b => b.id === btnId);
+    if (!btn) return;
+    const speakText = getSpeakLabel(btn);
+    speak(speakText);
+    addWordToMessage(speakText, btn.id);
+    renderPredictions(btn.id);
+    recordUsageEvent(btn.id, 'independent');
+  });
+}
+
 function renderCoreStrip() {
   const strip = document.getElementById('core-word-strip');
+  setupCoreDelegation();
   strip.innerHTML = '';
   coreWordsCache.forEach(btn => {
     const el = document.createElement('button');
@@ -7051,13 +7105,6 @@ function renderCoreStrip() {
     const coreSecondary = getSecondaryLabel(btn);
     let labelHtml = `<span class="core-label">${coreLabel}${coreSecondary ? '<span class="core-label-secondary">' + coreSecondary + '</span>' : ''}</span>`;
     el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') + labelHtml;
-    el.addEventListener('click', () => {
-      const speakText = getSpeakLabel(btn);
-      speak(speakText);
-      addWordToMessage(speakText, btn.id);
-      renderPredictions(btn.id);
-      recordUsageEvent(btn.id, 'independent');
-    });
     strip.appendChild(el);
   });
 }
@@ -7065,7 +7112,9 @@ function renderCoreStrip() {
 function renderGrid() {
   const grid = document.getElementById('grid');
   const folderLabel = document.getElementById('folder-label');
+  revokeActiveBlobUrls();
   grid.innerHTML = '';
+  setupGridDelegation();
 
   // Core words are rendered in the dedicated strip above
   renderCoreStrip();
@@ -7735,8 +7784,43 @@ function resolvePredictions(btnId) {
 
 let predictionDebounce = false;
 
+// Delegated prediction bar listener (set up once)
+let _predDelegationReady = false;
+function setupPredictionDelegation() {
+  if (_predDelegationReady) return;
+  _predDelegationReady = true;
+
+  document.getElementById('prediction-bar').addEventListener('click', (e) => {
+    const chip = e.target.closest('.prediction-chip[data-pred-id]');
+    if (!chip) return;
+    if (predictionDebounce) return;
+    predictionDebounce = true;
+    setTimeout(() => { predictionDebounce = false; }, 200);
+
+    const predId = chip.getAttribute('data-pred-id');
+    const pred = buttons.find(b => b.id === predId);
+    if (!pred) return;
+
+    const speakText = getSpeakLabel(pred);
+    const isCoreWord = !!PREDICTIONS[pred.id];
+    addWordToMessage(speakText, pred.id);
+    recordUsageEvent(pred.id, 'independent');
+
+    if (isCoreWord) {
+      speak(speakText);
+      renderPredictions(pred.id);
+    } else if (autoSpeakEnabled) {
+      speak(applyGrammar(messageWords, messageButtonIds));
+      clearPredictions();
+    } else {
+      renderPredictions(null);
+    }
+  });
+}
+
 function renderPredictions(btnId) {
   const bar = document.getElementById('prediction-bar');
+  setupPredictionDelegation();
   const predictions = resolvePredictions(btnId);
   if (!predictions || predictions.length === 0) {
     bar.innerHTML = '';
@@ -7748,31 +7832,10 @@ function renderPredictions(btnId) {
     const chip = document.createElement('button');
     chip.className = 'prediction-chip';
     chip.setAttribute('data-color', pred.color);
+    chip.setAttribute('data-pred-id', pred.id);
     const predLabel = getPrimaryLabel(pred);
     const icon = iconByLabel[pred.label] || BUTTON_ICONS[pred.id] || '';
     chip.textContent = (icon ? icon + ' ' : '') + predLabel;
-    chip.addEventListener('click', () => {
-      if (predictionDebounce) return;
-      predictionDebounce = true;
-      setTimeout(() => { predictionDebounce = false; }, 200);
-
-      const speakText = getSpeakLabel(pred);
-      const isCoreWord = !!PREDICTIONS[pred.id];
-      addWordToMessage(speakText, pred.id);
-      recordUsageEvent(pred.id, 'independent');
-
-      if (isCoreWord) {
-        speak(speakText);
-        renderPredictions(pred.id);
-      } else if (autoSpeakEnabled) {
-        // Auto-speak ON: speak the full sentence and clear
-        speak(applyGrammar(messageWords, messageButtonIds));
-        clearPredictions();
-      } else {
-        // Auto-speak OFF: don't speak, let child keep building
-        renderPredictions(null);
-      }
-    });
     bar.appendChild(chip);
   });
   bar.classList.add('visible');
@@ -7782,6 +7845,14 @@ function clearPredictions() {
   const bar = document.getElementById('prediction-bar');
   bar.innerHTML = '';
   bar.classList.remove('visible');
+}
+
+// Blob URLs tracked for cleanup on re-render
+let activeBlobUrls = [];
+
+function revokeActiveBlobUrls() {
+  for (const url of activeBlobUrls) URL.revokeObjectURL(url);
+  activeBlobUrls = [];
 }
 
 function createCell(btn) {
@@ -7796,14 +7867,16 @@ function createCell(btn) {
   cell.setAttribute('data-type', btn.type);
   cell.setAttribute('data-id', btn.id);
 
-  // Async load image
+  // Async load image (blob URL tracked for cleanup)
   loadImage(btn.id).then(blob => {
     if (blob) {
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(blob);
+      img.loading = 'lazy';
+      const blobUrl = URL.createObjectURL(blob);
+      activeBlobUrls.push(blobUrl);
+      img.src = blobUrl;
       img.alt = btn.label;
       cell.prepend(img);
-      // Remove big text if present
       const big = cell.querySelector('.cell-big-text');
       if (big) big.remove();
     }
@@ -7833,35 +7906,60 @@ function createCell(btn) {
   }
   cell.appendChild(label);
 
-  let holdTimer = null;
-  let didLongPress = false;
+  // No per-cell event listeners -- handled by delegated grid listeners
+  return cell;
+}
+
+// Delegated grid event handlers (set up once, never removed)
+let _gridDelegationReady = false;
+let _gridHoldTimer = null;
+let _gridDidLongPress = false;
+let _gridHoldBtnId = null;
+
+function setupGridDelegation() {
+  if (_gridDelegationReady) return;
+  _gridDelegationReady = true;
+
+  const grid = document.getElementById('grid');
+
+  function getCellFromEvent(e) {
+    return e.target.closest('.cell[data-id]');
+  }
 
   function startHold(e) {
     if (!parentMode) return;
-    didLongPress = false;
-    holdTimer = setTimeout(() => {
-      didLongPress = true;
-      holdTimer = null;
-      openEditModal(btn.id);
+    const cell = getCellFromEvent(e);
+    if (!cell) return;
+    _gridDidLongPress = false;
+    _gridHoldBtnId = cell.getAttribute('data-id');
+    _gridHoldTimer = setTimeout(() => {
+      _gridDidLongPress = true;
+      _gridHoldTimer = null;
+      openEditModal(_gridHoldBtnId);
     }, 600);
   }
 
   function cancelHold() {
-    if (holdTimer) {
-      clearTimeout(holdTimer);
-      holdTimer = null;
+    if (_gridHoldTimer) {
+      clearTimeout(_gridHoldTimer);
+      _gridHoldTimer = null;
     }
   }
 
-  cell.addEventListener('touchstart', startHold, { passive: true });
-  cell.addEventListener('touchend', cancelHold);
-  cell.addEventListener('touchcancel', cancelHold);
-  cell.addEventListener('mousedown', startHold);
-  cell.addEventListener('mouseup', cancelHold);
-  cell.addEventListener('mouseleave', cancelHold);
+  grid.addEventListener('touchstart', startHold, { passive: true });
+  grid.addEventListener('touchend', cancelHold);
+  grid.addEventListener('touchcancel', cancelHold);
+  grid.addEventListener('mousedown', startHold);
+  grid.addEventListener('mouseup', cancelHold);
+  grid.addEventListener('mouseleave', cancelHold);
 
-  cell.addEventListener('click', () => {
-    if (didLongPress) { didLongPress = false; return; }
+  grid.addEventListener('click', (e) => {
+    const cell = getCellFromEvent(e);
+    if (!cell) return;
+    if (_gridDidLongPress) { _gridDidLongPress = false; return; }
+    const btnId = cell.getAttribute('data-id');
+    const btn = buttons.find(b => b.id === btnId);
+    if (!btn) return;
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
       currentFolder = folderId;
@@ -7882,8 +7980,6 @@ function createCell(btn) {
     speak(speakText);
     recordUsageEvent(btn.id, 'independent');
   });
-
-  return cell;
 }
 
 // ── Message Bar ──
@@ -7911,17 +8007,29 @@ function addWordToMessage(word, btnId) {
   renderMessage();
 }
 
+// Delegated message bar listener (set up once)
+let _msgDelegationReady = false;
+function setupMessageDelegation() {
+  if (_msgDelegationReady) return;
+  _msgDelegationReady = true;
+
+  document.getElementById('message-words').addEventListener('click', (e) => {
+    const chip = e.target.closest('.word-chip');
+    if (!chip) return;
+    speak(chip.textContent);
+  });
+}
+
 function renderMessage() {
   const container = document.getElementById('message-words');
+  setupMessageDelegation();
   container.innerHTML = '';
   messageWords.forEach((w, i) => {
     const chip = document.createElement('span');
     chip.className = 'word-chip';
     chip.textContent = w;
-    chip.addEventListener('click', () => speak(w));
     container.appendChild(chip);
   });
-  // Auto-scroll to show latest word
   container.scrollLeft = container.scrollWidth;
 }
 
@@ -8433,6 +8541,16 @@ document.getElementById('btn-clear-usage').addEventListener('click', () => {
   showToast(t('toast.usageCleared', 'Usage data cleared'));
 });
 
+document.getElementById('btn-clear-symbol-cache').addEventListener('click', async () => {
+  const count = await getImageCacheCount();
+  if (!confirm(t('confirm.clearSymbolCache', `Clear ${count} cached symbols? They will re-download when online.`))) return;
+  await clearImageCache();
+  localStorage.removeItem('aac-symbols-cached');
+  revokeActiveBlobUrls();
+  renderGrid();
+  showToast(t('toast.symbolCacheCleared', `Cleared ${count} cached symbols`));
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm(t('confirm.resetDefaults', 'Reset all buttons to defaults? Your custom images and edits will be lost.'))) return;
   await clearAllData();
@@ -8500,7 +8618,7 @@ function openEditModal(buttonId) {
   if (currentLang !== 'en') {
     esRow.style.display = '';
     const customEs = getCustomEsLabels();
-    document.getElementById('edit-label-es').value = customEs[btn.id] || LANG_ES.labels[btn.id] || '';
+    document.getElementById('edit-label-es').value = customEs[btn.id] || getLangEs().labels[btn.id] || '';
   } else {
     esRow.style.display = 'none';
   }
@@ -9068,7 +9186,12 @@ document.getElementById('btn-import-activity').addEventListener('click', () => {
 });
 
 // ── Symbol Library (ARASAAC) ──
-const SYMBOL_KEYWORDS = {
+let _symbolKeywordsCache = null;
+function getSymbolKeywords() {
+  if (!_symbolKeywordsCache) _symbolKeywordsCache = _buildSymbolKeywords();
+  return _symbolKeywordsCache;
+}
+function _buildSymbolKeywords() { return {
   // Core words
   'core-i': 'I', 'core-want': 'want', 'core-dont-want': 'don\'t want', 'core-help': 'help', 'core-more': 'more',
   // 6x6 extras
@@ -9227,15 +9350,22 @@ const SYMBOL_KEYWORDS = {
   'shp-diamond': 'diamond shape', 'shp-oval': 'oval',
   // Animals (moved from People)
   'ppl-cat': 'cat', 'ppl-dog': 'dog',
-};
+}; }
 
-// Add activity word symbol keywords dynamically
-ACTIVITY_BUNDLES.forEach(activity => {
-  activity.words.forEach(w => {
-    SYMBOL_KEYWORDS[w.id] = w.symbolKw;
-    LANG_ES.symbolKeywords[w.id] = w.labelEs;
+// Add activity word symbol keywords dynamically (deferred until first access)
+let _activityKwAdded = false;
+function ensureActivityKeywords() {
+  if (_activityKwAdded) return;
+  _activityKwAdded = true;
+  const kw = getSymbolKeywords();
+  const es = getLangEs();
+  ACTIVITY_BUNDLES.forEach(activity => {
+    activity.words.forEach(w => {
+      kw[w.id] = w.symbolKw;
+      es.symbolKeywords[w.id] = w.labelEs;
+    });
   });
-});
+}
 
 const ARASAAC_API = 'https://api.arasaac.org/v1';
 
@@ -9285,7 +9415,8 @@ async function downloadSymbolsForButtons() {
   if (localStorage.getItem('aac-symbols-cached') === SYMBOL_VERSION) return;
   if (!navigator.onLine) return;
 
-  const kwMap = currentLang !== 'en' ? { ...SYMBOL_KEYWORDS, ...LANG_ES.symbolKeywords } : SYMBOL_KEYWORDS;
+  ensureActivityKeywords();
+  const kwMap = currentLang !== 'en' ? { ...getSymbolKeywords(), ...getLangEs().symbolKeywords } : getSymbolKeywords();
   const entries = Object.entries(kwMap);
   let completed = 0;
   const total = entries.length;
@@ -10563,7 +10694,7 @@ function renderDefaultActivities() {
   categories.forEach(cat => {
     const title = document.createElement('div');
     title.className = 'picker-category-title';
-    title.textContent = (currentLang !== 'en' && LANG_ES.scheduleCategories[cat]) ? LANG_ES.scheduleCategories[cat] : cat;
+    title.textContent = (currentLang !== 'en' && getLangEs().scheduleCategories[cat]) ? getLangEs().scheduleCategories[cat] : cat;
     container.appendChild(title);
 
     const grid = document.createElement('div');
@@ -10572,7 +10703,7 @@ function renderDefaultActivities() {
     DEFAULT_SCHEDULE_ACTIVITIES.filter(a => a.category === cat).forEach(act => {
       const item = document.createElement('button');
       item.className = 'picker-item';
-      const displayLabel = (currentLang !== 'en' && LANG_ES.scheduleActivities[act.key]) ? LANG_ES.scheduleActivities[act.key] : act.label;
+      const displayLabel = (currentLang !== 'en' && getLangEs().scheduleActivities[act.key]) ? getLangEs().scheduleActivities[act.key] : act.label;
       item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><span class="picker-item-label">' + displayLabel + '</span>';
       item.addEventListener('click', () => {
         editorSteps.push({
@@ -11396,7 +11527,7 @@ function renderTaskImageDefaults() {
   categories.forEach(cat => {
     const title = document.createElement('div');
     title.className = 'picker-category-title';
-    title.textContent = (currentLang !== 'en' && LANG_ES.taskCategories[cat]) ? LANG_ES.taskCategories[cat] : cat;
+    title.textContent = (currentLang !== 'en' && getLangEs().taskCategories[cat]) ? getLangEs().taskCategories[cat] : cat;
     container.appendChild(title);
 
     const grid = document.createElement('div');
@@ -11404,7 +11535,7 @@ function renderTaskImageDefaults() {
     DEFAULT_TASK_IMAGES.filter(a => a.category === cat).forEach(act => {
       const item = document.createElement('button');
       item.className = 'picker-item';
-      const taskLabel = (currentLang !== 'en' && LANG_ES.taskImages[act.key]) ? LANG_ES.taskImages[act.key] : act.label;
+      const taskLabel = (currentLang !== 'en' && getLangEs().taskImages[act.key]) ? getLangEs().taskImages[act.key] : act.label;
       item.innerHTML = '<div class="picker-item-img">' + act.svg + '</div><div class="picker-item-label">' + taskLabel + '</div>';
       item.addEventListener('click', () => {
         configTaskImageType = 'default';

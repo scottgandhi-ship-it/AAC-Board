@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#7C74FF">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<title>Guiding Steps</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* -- App Chrome Colors (shared with AAC Board) -- */
+  --chrome-primary: #7C74FF;
+  --chrome-primary-dark: #5A52D5;
+  --chrome-accent: #F5A623;
+  --chrome-bg: #f5f5f5;
+  --chrome-surface: #ffffff;
+  --chrome-surface-alt: #fafafa;
+  --chrome-text: #333333;
+  --chrome-text-secondary: #666666;
+  --chrome-text-muted: #888888;
+  --chrome-border: #e0e0e0;
+  --chrome-border-light: #eeeeee;
+  --chrome-success: #43A047;
+  --chrome-danger: #D32F2F;
+  --chrome-warning: #FB8C00;
+
+  /* Backward-compatible aliases */
+  --bar-bg: var(--chrome-primary);
+  --bar-bg-dark: var(--chrome-primary-dark);
+
+  /* -- Layout Tokens -- */
+  --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lifted: 0 6px 20px rgba(0,0,0,0.12);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(160deg, #e8eaf6 0%, #fce4ec 40%, #fff8e1 80%, #e8f5e9 100%);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* -- App Header -- */
+#app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(108,99,255,0.08) 0%, rgba(244,143,177,0.1) 50%, rgba(255,183,77,0.08) 100%);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid rgba(108,99,255,0.12);
+  flex-shrink: 0;
+  padding: 0 12px;
+}
+
+#app-header.parent-active {
+  border-bottom-color: #FFA726;
+  background: rgba(255,243,224,0.9);
+}
+
+#app-header-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--bar-bg);
+  letter-spacing: 0.03em;
+}
+
+.parent-mode-only { display: none !important; }
+.parent-mode .parent-mode-only { display: block !important; }
+
+#btn-parent-settings.parent-active {
+  color: #FF8F00;
+}
+#btn-parent-settings.parent-active svg {
+  stroke: #FF8F00;
+}
+
+/* -- Views -- */
+.view {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.view.active {
+  display: flex;
+}
+
+/* -- Tab Bar -- */
+#tab-bar {
+  display: flex;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding: 4px 8px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 0;
+  min-height: 54px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #aaa;
+  position: relative;
+  border-radius: var(--radius-md);
+  transition: color 0.2s, background 0.2s;
+}
+
+.tab-btn:active { background: rgba(0,0,0,0.04); }
+
+.tab-btn.active {
+  color: var(--bar-bg);
+  background: rgba(108, 99, 255, 0.08);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 30%;
+  right: 30%;
+  height: 3px;
+  background: var(--bar-bg);
+  border-radius: 3px;
+}
+
+.tab-btn svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab-btn.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.tab-label {
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* -- Placeholder Views -- */
+.view-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+.view-placeholder-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+
+.view-placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.view-placeholder-sub {
+  font-size: 0.9rem;
+}
+
+/* -- Toast -- */
+#toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(50,50,60,0.92);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  font-weight: 700;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+}
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* -- Settings Modal -- */
+#settings-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 150;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20px;
+  overflow-y: auto;
+}
+
+#settings-overlay.open { display: flex; }
+
+#settings-panel {
+  background: #faf8ff;
+  border-radius: var(--radius-lg);
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+#settings-panel h2 {
+  margin-bottom: 16px;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.settings-section {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.settings-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.settings-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  background: #fff;
+  color: #555;
+  text-align: center;
+  min-height: 44px;
+}
+
+.settings-btn:active { background: #f5f5f5; }
+
+.settings-checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--bar-bg);
+}
+
+#btn-close-settings {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--bar-bg);
+  color: #fff;
+  margin-top: 8px;
+}
+
+/* -- Celebration Overlay -- */
+#celebration-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: linear-gradient(160deg, rgba(237,232,255,0.95) 0%, rgba(252,228,236,0.95) 40%, rgba(255,243,224,0.95) 80%, rgba(232,245,233,0.95) 100%);
+  backdrop-filter: blur(8px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+#celebration-overlay.visible { display: flex; }
+
+#celebration-reward {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  color: #fff;
+  font-weight: 800;
+  animation: celebrationPop 0.6s ease;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+}
+
+#celebration-reward img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+#celebration-text {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--bar-bg);
+  letter-spacing: 0.02em;
+}
+
+@keyframes celebrationPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  z-index: 251;
+  pointer-events: none;
+  animation: confettiFall 2.5s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
+  .confetti-piece { animation: none; display: none; }
+}
+
+/* -- Sensory-Friendly: Reduced Motion -- */
+body.sensory-reduced-motion *,
+body.sensory-reduced-motion *::before,
+body.sensory-reduced-motion *::after {
+  animation-duration: 0.01s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.05s !important;
+}
+body.sensory-reduced-motion .confetti-piece {
+  display: none !important;
+}
+
+/* -- Sensory-Friendly: High Contrast -- */
+body.sensory-high-contrast *:focus {
+  outline: 3px solid #1565C0 !important;
+  outline-offset: 2px;
+}
+body.sensory-high-contrast .settings-btn {
+  border: 2px solid rgba(0,0,0,0.2);
+}
+
+/* -- Mobile Responsive -- */
+
+/* Small phones (< 360px) */
+@media (max-width: 359px) {
+  #app-header { height: 40px; padding: 0 8px; }
+  #app-header-title { font-size: 0.9rem; }
+  #tab-bar { padding: 2px 4px; gap: 2px; }
+  .tab-btn { padding: 4px 0; }
+  .tab-label { font-size: 0.65rem; }
+}
+
+/* Standard phones (360-479px) */
+@media (min-width: 360px) and (max-width: 479px) {
+  #app-header { height: 44px; }
+}
+
+/* Landscape on phones -- reclaim vertical space */
+@media (orientation: landscape) and (max-height: 500px) {
+  #app-header { height: 36px; }
+  #app-header-title { font-size: 0.85rem; }
+  #tab-bar { padding: 2px 4px; }
+  .tab-btn { min-height: 40px; padding: 2px 0; }
+  .tab-btn svg { width: 20px; height: 20px; }
+  .tab-label { font-size: 0.6rem; }
+}
+
+/* Safe area support for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #app-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  #tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<div id="app-header">
+  <span id="app-header-title">Schedule</span>
+</div>
+
+<!-- Schedule View -->
+<div id="view-schedule" class="view active" role="tabpanel" aria-labelledby="tab-schedule">
+  <div class="view-placeholder">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <div class="view-placeholder-text">Schedule</div>
+    <div class="view-placeholder-sub">Feature coming in Phase B</div>
+  </div>
+</div>
+
+<!-- Rewards View -->
+<div id="view-rewards" class="view" role="tabpanel" aria-labelledby="tab-rewards">
+  <div class="view-placeholder">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <div class="view-placeholder-text">Rewards</div>
+    <div class="view-placeholder-sub">Feature coming in Phase C</div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-overlay">
+  <div id="settings-panel">
+    <h2>Settings</h2>
+
+    <div class="settings-section">
+      <h3>Parent Mode</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
+      <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Sensory Preferences</h3>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
+      </label>
+      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>Voice</h3>
+      <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
+      <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
+      <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Data</h3>
+      <button class="settings-btn danger parent-mode-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
+    </div>
+
+    <button id="btn-close-settings">Done</button>
+  </div>
+</div>
+
+<!-- Celebration Overlay -->
+<div id="celebration-overlay">
+  <div id="celebration-reward"></div>
+  <div id="celebration-text"></div>
+</div>
+
+<!-- Tab Bar -->
+<nav id="tab-bar" role="tablist" aria-label="App navigation">
+  <button class="tab-btn active" id="tab-schedule" role="tab" aria-selected="true" aria-controls="view-schedule">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span class="tab-label">Schedule</span>
+  </button>
+  <button class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span class="tab-label">Rewards</span>
+  </button>
+  <button class="tab-btn" id="btn-parent-settings" aria-label="Settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="tab-label">Settings</span>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// -- State --
+let parentMode = false;
+let activeTab = 'schedule';
+
+// -- Parent Mode --
+let parentAutoLockTimer = null;
+const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
+
+// -- IndexedDB --
+const DB_NAME = 'guiding-steps';
+const DB_VERSION = 1;
+const STORE_IMAGES = 'images';
+const STORE_REWARD_TRACKS = 'rewardTracks';
+const STORE_SCHED_TEMPLATES = 'scheduleTemplates';
+const STORE_ACTIVE_SCHED = 'activeSchedule';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_IMAGES)) {
+        db.createObjectStore(STORE_IMAGES);
+      }
+      if (!db.objectStoreNames.contains(STORE_REWARD_TRACKS)) {
+        db.createObjectStore(STORE_REWARD_TRACKS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_SCHED_TEMPLATES)) {
+        db.createObjectStore(STORE_SCHED_TEMPLATES, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_ACTIVE_SCHED)) {
+        db.createObjectStore(STORE_ACTIVE_SCHED, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// -- Image DB Helpers --
+async function saveImage(key, blob) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readwrite');
+    tx.objectStore(STORE_IMAGES).put(blob, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadImage(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readonly');
+    const req = tx.objectStore(STORE_IMAGES).get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function deleteImage(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readwrite');
+    tx.objectStore(STORE_IMAGES).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// -- Utility: escapeHtml --
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// -- Toast --
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// -- Tab System --
+function getTabViewMap() {
+  return {
+    'tab-schedule': { view: 'view-schedule', title: 'Schedule' },
+    'tab-rewards': { view: 'view-rewards', title: 'Rewards' },
+  };
+}
+
+function switchTab(tabId) {
+  const tabInfo = getTabViewMap()[tabId];
+  if (!tabInfo) return;
+
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  document.getElementById(tabId).classList.add('active');
+  document.getElementById(tabId).setAttribute('aria-selected', 'true');
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(tabInfo.view).classList.add('active');
+
+  document.getElementById('app-header-title').textContent = tabInfo.title;
+  activeTab = tabId.replace('tab-', '');
+}
+
+document.querySelectorAll('.tab-btn').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.id));
+});
+
+// -- Settings Modal --
+document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.add('open');
+});
+
+document.getElementById('btn-close-settings').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+});
+
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('settings-overlay').classList.remove('open');
+  }
+});
+
+// -- Parent Mode --
+function setParentMode(enabled) {
+  parentMode = enabled;
+  const header = document.getElementById('app-header');
+  const settingsBtn = document.getElementById('btn-parent-settings');
+  const toggleBtn = document.getElementById('btn-toggle-parent-mode');
+
+  if (enabled) {
+    header.classList.add('parent-active');
+    document.body.classList.add('parent-mode');
+    settingsBtn.classList.add('parent-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Disable Parent Mode';
+      toggleBtn.style.background = '#ffccbc';
+      toggleBtn.style.color = '#BF360C';
+    }
+    showToast('Parent mode unlocked');
+    resetParentAutoLock();
+  } else {
+    header.classList.remove('parent-active');
+    document.body.classList.remove('parent-mode');
+    settingsBtn.classList.remove('parent-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Enable Parent Mode';
+      toggleBtn.style.background = '#fff3e0';
+      toggleBtn.style.color = '#E65100';
+    }
+    if (parentAutoLockTimer) {
+      clearTimeout(parentAutoLockTimer);
+      parentAutoLockTimer = null;
+    }
+    document.getElementById('settings-overlay').classList.remove('open');
+  }
+}
+
+function resetParentAutoLock() {
+  if (parentAutoLockTimer) clearTimeout(parentAutoLockTimer);
+  if (!parentMode) return;
+  parentAutoLockTimer = setTimeout(() => {
+    setParentMode(false);
+    showToast('Parent mode locked (timeout)');
+  }, PARENT_AUTO_LOCK_MS);
+}
+
+document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
+document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
+
+document.getElementById('btn-toggle-parent-mode').addEventListener('click', () => {
+  setParentMode(!parentMode);
+});
+
+// -- Sensory Preferences --
+const SENSORY_KEYS = [
+  { id: 'sensory-reduced-motion', storageKey: 'gs-sensory-reduced-motion', bodyClass: 'sensory-reduced-motion' },
+  { id: 'sensory-high-contrast', storageKey: 'gs-sensory-high-contrast', bodyClass: 'sensory-high-contrast' },
+  { id: 'sensory-quiet', storageKey: 'gs-sensory-quiet', bodyClass: 'sensory-quiet' }
+];
+
+function applySensoryPreferences() {
+  SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
+    const stored = localStorage.getItem(storageKey);
+    let enabled;
+    if (stored !== null) {
+      enabled = stored === 'true';
+    } else if (id === 'sensory-reduced-motion') {
+      enabled = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } else if (id === 'sensory-high-contrast') {
+      enabled = window.matchMedia('(prefers-contrast: more)').matches;
+    } else {
+      enabled = false;
+    }
+    document.body.classList.toggle(bodyClass, enabled);
+    const checkbox = document.getElementById(id);
+    if (checkbox) checkbox.checked = enabled;
+  });
+}
+
+SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
+  document.getElementById(id).addEventListener('change', (e) => {
+    const on = e.target.checked;
+    document.body.classList.toggle(bodyClass, on);
+    localStorage.setItem(storageKey, String(on));
+  });
+});
+
+// -- Speech (TTS) --
+let voices = [];
+let selectedVoiceName = localStorage.getItem('gs-voice') || '';
+let speechRate = 0.85;
+
+function initSpeech() {
+  if (!('speechSynthesis' in window)) return;
+  const load = () => {
+    voices = speechSynthesis.getVoices();
+    populateVoiceSelect();
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+
+const NOVELTY_VOICES = /\b(bells|jester|bad news|good news|whisper|zarvox|trinoids|organ|cellos|boing|bahh|albert|bubbles|superstar|wobble|junior|kathy|princess|ralph|fred)\b/i;
+const GOOD_VOICE_NAMES = /\b(samantha|alex|allison|ava|susan|tom|kate|daniel|karen|fiona|moira|tessa|google|zira|david|jenny|aria|guy|mark|cortana|siri|eloquence)\b/i;
+
+function populateVoiceSelect() {
+  const select = document.getElementById('voice-select');
+  select.innerHTML = '';
+  const filtered = voices.filter(v => !NOVELTY_VOICES.test(v.name));
+  filtered.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = v.name + (v.lang ? ' (' + v.lang + ')' : '');
+    select.appendChild(opt);
+  });
+  if (selectedVoiceName && filtered.some(v => v.name === selectedVoiceName)) {
+    select.value = selectedVoiceName;
+  }
+}
+
+document.getElementById('voice-select').addEventListener('change', e => {
+  selectedVoiceName = e.target.value;
+  localStorage.setItem('gs-voice', selectedVoiceName);
+});
+
+function getVoice() {
+  if (selectedVoiceName) {
+    const found = voices.find(v => v.name === selectedVoiceName);
+    if (found) return found;
+  }
+  const good = voices.filter(v => v.lang === 'en-US' && GOOD_VOICE_NAMES.test(v.name));
+  if (good.length > 0) return good[0];
+  const us = voices.filter(v => v.lang === 'en-US');
+  return us.length > 0 ? us[0] : null;
+}
+
+function speak(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = getVoice();
+  if (voice) utter.voice = voice;
+  utter.rate = speechRate;
+  speechSynthesis.speak(utter);
+}
+
+document.getElementById('btn-voice-test').addEventListener('click', () => {
+  speak('Hello! I am ready to help.');
+});
+
+// -- Audio Context (for sound effects) --
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function playDing() {
+  if (document.body.classList.contains('sensory-quiet')) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch {}
+}
+
+function playTaDa() {
+  if (document.body.classList.contains('sensory-quiet')) return;
+  try {
+    const ctx = getAudioCtx();
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      gain.gain.value = 0.15;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4 + i * 0.15);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + 0.4 + i * 0.15);
+    });
+  } catch {}
+}
+
+// -- Celebration System --
+function triggerCelebration(label, imageHtml) {
+  const overlay = document.getElementById('celebration-overlay');
+  document.getElementById('celebration-reward').innerHTML = imageHtml || '';
+  document.getElementById('celebration-text').textContent = label || 'Great job!';
+  overlay.classList.add('visible');
+  playTaDa();
+  spawnConfetti();
+  setTimeout(() => overlay.classList.remove('visible'), 3000);
+}
+
+function spawnConfetti() {
+  if (document.body.classList.contains('sensory-reduced-motion')) return;
+  const colors = ['#7C74FF', '#F48FB1', '#FFB74D', '#81C784', '#64B5F6', '#FFD54F'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.animationDuration = (2 + Math.random()) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3500);
+  }
+}
+
+// -- Celebration overlay tap to dismiss --
+document.getElementById('celebration-overlay').addEventListener('click', () => {
+  document.getElementById('celebration-overlay').classList.remove('visible');
+});
+
+// -- Init --
+function init() {
+  applySensoryPreferences();
+  initSpeech();
+}
+
+init();
+
+// -- Service Worker Registration --
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

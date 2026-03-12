@@ -1,11 +1,11 @@
-const CACHE_NAME = 'aac-board-v42';
+const CACHE_NAME = 'guiding-steps-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json'
 ];
 
-// Install — pre-cache shell assets
+// Install -- pre-cache shell assets
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
@@ -14,7 +14,7 @@ self.addEventListener('install', e => {
   );
 });
 
-// Activate — delete old caches
+// Activate -- delete old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -23,7 +23,7 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch — network-first strategy
+// Fetch -- network-first strategy
 self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
