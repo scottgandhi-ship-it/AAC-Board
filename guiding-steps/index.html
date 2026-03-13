@@ -57,26 +57,15 @@ body { display: flex; flex-direction: column; }
   border-bottom: 2px solid rgba(108,99,255,0.12);
   flex-shrink: 0; padding: 0 12px;
 }
-#app-header.parent-active { border-bottom-color: #FFA726; background: rgba(255,243,224,0.9); }
-#app-header-title { font-size: 1rem; font-weight: 800; color: var(--bar-bg); letter-spacing: 0.03em; }
-#btn-parent-lock {
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer; padding: 6px;
-  color: rgba(124, 116, 255, 0.3); transition: color 0.2s, transform 0.2s;
-  -webkit-user-select: none; user-select: none;
-}
-#btn-parent-lock svg { width: 20px; height: 20px; }
-#btn-parent-lock.holding { color: #C9A84C; transform: translateY(-50%) scale(1.15); }
-#app-header.parent-active #btn-parent-lock { color: #C9A84C; }
-#app-header.parent-active::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-  height: 2px; background: #C9A84C; animation: parentLineIn 0.2s ease forwards;
-}
-@keyframes parentLineIn { from { opacity: 0; } to { opacity: 1; } }
-.parent-mode-only { display: none !important; }
-.parent-mode .parent-mode-only { display: block !important; }
-#btn-parent-settings.parent-active { color: #FF8F00; }
-#btn-parent-settings.parent-active svg { stroke: #FF8F00; }
+#app-header-title { font-size: 1rem; font-weight: 800; color: var(--bar-bg); letter-spacing: 0.03em; cursor: pointer; }
+
+/* -- Kids Mode -- */
+.kids-mode .parent-only { display: none !important; }
+.kids-mode #btn-parent-settings { display: none !important; }
+.kids-mode #rewards-parent-controls { display: none !important; }
+.kids-mode #schedule-parent-controls { display: none !important; }
+.kids-mode .story-card-actions { display: none !important; }
+.kids-mode #stories-parent-controls { display: none !important; }
 
 /* -- Views -- */
 .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
@@ -609,15 +598,12 @@ body { display: flex; flex-direction: column; }
   color: #888;
 }
 
-/* Parent mode reward controls */
 #rewards-parent-controls {
-  display: none;
+  display: flex;
   gap: 8px;
   padding: 8px 16px;
   flex-shrink: 0;
 }
-
-.parent-mode #rewards-parent-controls { display: flex; }
 
 .rewards-parent-btn {
   flex: 1;
@@ -1231,15 +1217,12 @@ body { display: flex; flex-direction: column; }
   fill: none;
 }
 
-/* Schedule parent controls */
 #schedule-parent-controls {
-  display: none;
+  display: flex;
   gap: 8px;
   padding: 8px 16px;
   flex-shrink: 0;
 }
-
-.parent-mode #schedule-parent-controls { display: flex; }
 
 .sched-parent-btn {
   flex: 1;
@@ -1744,9 +1727,8 @@ body.sensory-high-contrast .task-tile {
 .story-card-title { font-size: 0.9rem; font-weight: 700; color: #333; line-height: 1.2; }
 .story-card-meta { font-size: 0.75rem; color: #888; margin-top: 4px; }
 .story-card-actions {
-  display: none; gap: 6px; padding: 0 10px 10px;
+  display: flex; gap: 6px; padding: 0 10px 10px;
 }
-.parent-mode .story-card-actions { display: flex; }
 .story-card-action-btn {
   background: none; border: 1px solid #ddd; border-radius: 6px;
   padding: 4px 10px; font-size: 0.75rem; font-family: inherit; font-weight: 600;
@@ -1767,9 +1749,8 @@ body.sensory-high-contrast .task-tile {
 #stories-empty-new:active { transform: scale(0.97); }
 
 #stories-parent-controls {
-  display: none; gap: 8px; padding: 8px 16px; flex-shrink: 0;
+  display: flex; gap: 8px; padding: 8px 16px; flex-shrink: 0;
 }
-.parent-mode #stories-parent-controls { display: flex; }
 .stories-parent-btn {
   flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm);
   background: var(--chrome-primary); color: #fff; font-size: 0.95rem;
@@ -2114,16 +2095,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   border: none; cursor: pointer; display: flex; align-items: center;
   justify-content: center; color: #555;
 }
-#picker-lock {
-  width: 36px; height: 36px; border-radius: 50%; background: none;
-  border: none; cursor: pointer; display: flex; align-items: center;
-  justify-content: center; color: rgba(124, 116, 255, 0.3);
-  transition: color 0.2s, transform 0.2s; -webkit-user-select: none; user-select: none;
-}
-#picker-lock svg { width: 20px; height: 20px; }
-#picker-lock.holding { color: #C9A84C; transform: scale(1.15); }
-.parent-mode #picker-lock { color: #C9A84C; }
-
 #picker-grid {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
   padding: 12px; flex: 1; overflow-y: auto; align-content: start;
@@ -2196,11 +2167,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 <!-- App Header -->
 <div id="app-header">
   <span id="app-header-title">Schedule</span>
-  <button id="btn-parent-lock" aria-label="Hold to toggle parent mode">
-    <svg id="parent-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    </svg>
-  </button>
 </div>
 
 <!-- Schedule View -->
@@ -2214,7 +2180,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="schedule-empty">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       <div style="font-size:1.1rem;font-weight:600;">No schedule for today</div>
-      <div style="font-size:0.9rem;">Unlock parent mode to start one</div>
+      <div style="font-size:0.9rem;">Tap Start Schedule below to begin</div>
     </div>
     <div id="schedule-all-done">
       <div class="schedule-done-icon">
@@ -2238,7 +2204,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="rewards-empty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <div id="rewards-empty-text">No reward tracks yet</div>
-        <div id="rewards-empty-sub">Unlock parent mode to create one</div>
+        <div id="rewards-empty-sub">Tap New Track below to create one</div>
       </div>
       <div id="rewards-task-header">
         <div id="rewards-task-image" role="img" aria-label=""></div>
@@ -2539,11 +2505,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <span>Choose a Template</span>
-    <button id="picker-lock" aria-label="Hold to toggle parent mode">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    </button>
   </div>
   <div id="picker-grid"></div>
 </div>
@@ -2553,9 +2514,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="settings-panel">
     <h2>Settings</h2>
     <div class="settings-section">
-      <h3>Parent Mode</h3>
-      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
-      <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+      <h3>Kids Mode</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Hides editing controls for child use</p>
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+        <input type="checkbox" id="toggle-kids-mode" class="settings-checkbox"> Enable Kids Mode
+      </label>
     </div>
     <div class="settings-section">
       <h3>Sensory Preferences</h3>
@@ -2572,7 +2535,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       </label>
       <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects.</p>
     </div>
-    <div class="settings-section parent-mode-only">
+    <div class="settings-section parent-only">
       <h3>Schedule</h3>
       <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:8px;">Steps shown at a time</label>
       <div class="seg-group" id="visible-steps-group" role="radiogroup" aria-label="Number of visible schedule steps">
@@ -2592,7 +2555,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     </div>
     <div class="settings-section">
       <h3>Data</h3>
-      <button class="settings-btn danger parent-mode-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
+      <button class="settings-btn danger parent-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
     </div>
     <button id="btn-close-settings">Done</button>
   </div>
@@ -2765,10 +2728,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 <script>
 // -- State --
-let parentMode = false;
+let kidsMode = localStorage.getItem('gs-kids-mode') === 'true';
 let activeTab = 'schedule';
-let parentAutoLockTimer = null;
-const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DEFAULT_VISIBLE_STEPS = 3;
 let stories = [];
 let visibleStepsCount = parseInt(localStorage.getItem('gs-visible-steps'), 10) || DEFAULT_VISIBLE_STEPS;
@@ -3034,71 +2995,29 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('settings-overlay').classList.remove('open');
 });
 
-// -- Parent Mode --
-function setParentMode(enabled) {
-  parentMode = enabled;
-  const header = document.getElementById('app-header');
-  const settingsBtn = document.getElementById('btn-parent-settings');
-  const toggleBtn = document.getElementById('btn-toggle-parent-mode');
+// -- Kids Mode --
+function setKidsMode(enabled) {
+  kidsMode = enabled;
+  localStorage.setItem('gs-kids-mode', enabled ? 'true' : 'false');
+  const toggle = document.getElementById('toggle-kids-mode');
   if (enabled) {
-    header.classList.add('parent-active');
-    document.body.classList.add('parent-mode');
-    settingsBtn.classList.add('parent-active');
-    if (toggleBtn) { toggleBtn.textContent = 'Disable Parent Mode'; toggleBtn.style.background = '#ffccbc'; toggleBtn.style.color = '#BF360C'; }
-    showToast('Parent mode unlocked');
-    resetParentAutoLock();
+    document.body.classList.add('kids-mode');
+    if (toggle) toggle.checked = true;
   } else {
-    header.classList.remove('parent-active');
-    document.body.classList.remove('parent-mode');
-    settingsBtn.classList.remove('parent-active');
-    if (toggleBtn) { toggleBtn.textContent = 'Enable Parent Mode'; toggleBtn.style.background = '#fff3e0'; toggleBtn.style.color = '#E65100'; }
-    if (parentAutoLockTimer) { clearTimeout(parentAutoLockTimer); parentAutoLockTimer = null; }
-    document.getElementById('settings-overlay').classList.remove('open');
+    document.body.classList.remove('kids-mode');
+    if (toggle) toggle.checked = false;
   }
   renderSchedule();
 }
 
-function resetParentAutoLock() {
-  if (parentAutoLockTimer) clearTimeout(parentAutoLockTimer);
-  if (!parentMode) return;
-  parentAutoLockTimer = setTimeout(() => { setParentMode(false); showToast('Parent mode locked (timeout)'); }, PARENT_AUTO_LOCK_MS);
-}
+document.getElementById('toggle-kids-mode').addEventListener('change', (e) => {
+  setKidsMode(e.target.checked);
+  showToast(e.target.checked ? 'Kids Mode enabled' : 'Kids Mode disabled');
+});
 
-document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
-document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
-document.getElementById('btn-toggle-parent-mode').addEventListener('click', () => { setParentMode(!parentMode); });
-
-// -- Hold-to-Toggle Parent Mode (Lock Icon) --
-(function() {
-  const lockBtn = document.getElementById('btn-parent-lock');
-  let holdTimer = null;
-  let didActivate = false;
-
-  function startHold(e) {
-    e.preventDefault();
-    didActivate = false;
-    lockBtn.classList.add('holding');
-    holdTimer = setTimeout(() => {
-      didActivate = true;
-      lockBtn.classList.remove('holding');
-      if (navigator.vibrate) navigator.vibrate(10);
-      setParentMode(!parentMode);
-    }, 500);
-  }
-
-  function cancelHold() {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    lockBtn.classList.remove('holding');
-  }
-
-  lockBtn.addEventListener('touchstart', startHold, { passive: false });
-  lockBtn.addEventListener('touchend', cancelHold);
-  lockBtn.addEventListener('touchcancel', cancelHold);
-  lockBtn.addEventListener('mousedown', startHold);
-  lockBtn.addEventListener('mouseup', cancelHold);
-  lockBtn.addEventListener('mouseleave', cancelHold);
-  lockBtn.addEventListener('click', (e) => { if (didActivate) e.stopPropagation(); });
-})();
+document.getElementById('app-header-title').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.add('open');
+});
 
 // -- Sensory Preferences --
 const SENSORY_KEYS = [
@@ -5205,10 +5124,10 @@ function openTemplatePicker() {
     card.appendChild(info);
     card.addEventListener('click', () => {
       picker.classList.remove('open');
-      if (parentMode) {
-        createStoryFromTemplate(tmpl);
-      } else {
+      if (kidsMode) {
         readTemplateStory(tmpl);
+      } else {
+        createStoryFromTemplate(tmpl);
       }
     });
     grid.appendChild(card);
@@ -5232,10 +5151,6 @@ function openTemplatePicker() {
   sInfo.appendChild(sDesc);
   scratch.appendChild(sInfo);
   scratch.addEventListener('click', () => {
-    if (!parentMode) {
-      showToast('Requires parent mode');
-      return;
-    }
     picker.classList.remove('open');
     openStoryEditor(null);
   });
@@ -5257,35 +5172,6 @@ function readTemplateStory(tmpl) {
 document.getElementById('picker-close').addEventListener('click', () => {
   document.getElementById('template-picker').classList.remove('open');
 });
-
-(function() {
-  const plck = document.getElementById('picker-lock');
-  let pHold = null, pDidActivate = false;
-  function pStart(e) {
-    e.preventDefault();
-    pDidActivate = false;
-    plck.classList.add('holding');
-    pHold = setTimeout(() => {
-      pDidActivate = true;
-      plck.classList.remove('holding');
-      if (navigator.vibrate) navigator.vibrate(10);
-      setParentMode(!parentMode);
-      document.getElementById('template-picker').classList.remove('open');
-      openTemplatePicker();
-    }, 500);
-  }
-  function pCancel() {
-    if (pHold) { clearTimeout(pHold); pHold = null; }
-    plck.classList.remove('holding');
-  }
-  plck.addEventListener('touchstart', pStart, { passive: false });
-  plck.addEventListener('touchend', pCancel);
-  plck.addEventListener('touchcancel', pCancel);
-  plck.addEventListener('mousedown', pStart);
-  plck.addEventListener('mouseup', pCancel);
-  plck.addEventListener('mouseleave', pCancel);
-  plck.addEventListener('click', (e) => { if (pDidActivate) e.stopPropagation(); });
-})();
 
 document.getElementById('btn-new-story').addEventListener('click', openTemplatePicker);
 document.getElementById('stories-empty-new').addEventListener('click', openTemplatePicker);
@@ -5974,6 +5860,7 @@ document.getElementById('helper-generate').addEventListener('click', generateSto
 // -- Init --
 async function init() {
   applySensoryPreferences();
+  if (kidsMode) setKidsMode(true);
   initSpeech();
   await initSchedules();
   await initRewards();
