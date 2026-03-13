@@ -905,7 +905,39 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
   margin: 0 2px;
 }
 
-/* ── Getting Started Guide Accordion ── */
+/* ── Getting Started Guide ── */
+.getting-started-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  gap: 8px;
+}
+.getting-started-toggle h3 {
+  flex: 1;
+  margin: 0;
+}
+.getting-started-toggle .guide-chevron {
+  transition: transform 0.2s;
+}
+#getting-started-section.open .getting-started-toggle .guide-chevron {
+  transform: rotate(90deg);
+}
+.getting-started-items {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+#getting-started-section.open .getting-started-items {
+  max-height: 2000px;
+}
+
 .guide-item { border-bottom: 1px solid #eee; }
 .guide-item:last-child { border-bottom: none; }
 
@@ -940,7 +972,6 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 .guide-chevron {
   font-size: 0.8rem;
   color: #bbb;
-  transition: transform 0.2s;
   flex-shrink: 0;
 }
 .guide-item.open .guide-chevron {
@@ -977,34 +1008,34 @@ body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 /* ── Settings Category Nav ── */
 .settings-nav {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 0 0 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--chrome-border-light);
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 16px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--chrome-border-light);
 }
-.settings-nav::-webkit-scrollbar { display: none; }
 
 .settings-category-btn {
-  flex-shrink: 0;
-  padding: 8px 16px;
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
   border: 2px solid var(--chrome-border);
-  border-radius: 20px;
+  border-radius: 12px;
   background: var(--chrome-surface-alt);
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--chrome-text-secondary);
   cursor: pointer;
   font-family: inherit;
-  min-height: 36px;
-  white-space: nowrap;
+  min-height: 48px;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .settings-category-btn.active {
   border-color: var(--chrome-primary);
-  background: rgba(124, 116, 255, 0.08);
+  background: rgba(124, 116, 255, 0.12);
   color: var(--chrome-primary);
+  box-shadow: 0 2px 8px rgba(124, 116, 255, 0.15);
 }
 
 .settings-category-content {
@@ -2562,7 +2593,11 @@ body.sensory-high-contrast .settings-btn {
     </div>
 
     <div class="settings-section" id="getting-started-section">
-      <h3>Getting Started</h3>
+      <button class="getting-started-toggle" aria-expanded="false" aria-controls="getting-started-items">
+        <h3>Getting Started</h3>
+        <span class="guide-chevron" aria-hidden="true">&#9654;</span>
+      </button>
+      <div class="getting-started-items" id="getting-started-items">
       <div class="guide-item">
         <button class="guide-title" aria-expanded="false" aria-controls="guide-1-content">
           <div class="guide-title-text">
@@ -2658,6 +2693,7 @@ body.sensory-high-contrast .settings-btn {
         <div class="guide-content" id="guide-8-content" role="region">
           <p>That is completely normal. You are not failing. Every time you model a word, you're planting a seed. Some days it will feel like nothing is happening. Keep going. You are giving your child a voice, and that is extraordinary.</p>
         </div>
+      </div>
       </div>
     </div>
 
@@ -6601,8 +6637,23 @@ document.getElementById('import-file-input').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-// ── Getting Started Guide Accordion ──
-document.getElementById('getting-started-section').addEventListener('click', e => {
+// ── Getting Started Collapsible ──
+const gettingStartedSection = document.getElementById('getting-started-section');
+const gettingStartedToggle = gettingStartedSection.querySelector('.getting-started-toggle');
+
+if (localStorage.getItem('aac-getting-started-expanded') === 'true') {
+  gettingStartedSection.classList.add('open');
+  gettingStartedToggle.setAttribute('aria-expanded', 'true');
+}
+
+gettingStartedToggle.addEventListener('click', () => {
+  const isOpen = gettingStartedSection.classList.toggle('open');
+  gettingStartedToggle.setAttribute('aria-expanded', String(isOpen));
+  localStorage.setItem('aac-getting-started-expanded', String(isOpen));
+});
+
+// ── Getting Started Guide Accordion (tips inside) ──
+document.getElementById('getting-started-items').addEventListener('click', e => {
   const title = e.target.closest('.guide-title');
   if (!title) return;
   const item = title.closest('.guide-item');
@@ -7261,6 +7312,7 @@ function advanceRoutine() {
   if (activeRoutine.currentIndex >= activeRoutine.routine.activityIds.length) {
     showToast('Routine complete!');
     activeRoutine = null;
+    renderGrid();
     renderActivitiesTab();
     renderRoutinesTab();
     return;
@@ -7268,7 +7320,7 @@ function advanceRoutine() {
   const nextId = activeRoutine.routine.activityIds[activeRoutine.currentIndex];
   const allActs = getAllActivities();
   const nextAct = allActs.find(a => a.id === nextId);
-  if (!nextAct) { showToast('Activity not found, ending routine'); activeRoutine = null; renderRoutinesTab(); return; }
+  if (!nextAct) { showToast('Activity not found, ending routine'); activeRoutine = null; renderGrid(); renderRoutinesTab(); return; }
 
   const overlay = document.getElementById('routine-transition-overlay');
   document.getElementById('routine-transition-name').textContent = nextAct.icon + ' ' + nextAct.name;
@@ -7279,6 +7331,7 @@ function endRoutine() {
   activeRoutine = null;
   endActivity();
   document.getElementById('routine-transition-overlay').style.display = 'none';
+  renderGrid();
   renderRoutinesTab();
 }
 
