@@ -8590,19 +8590,25 @@ document.getElementById('create-activity-overlay').addEventListener('click', (e)
 
 const CORE_WORDS = ['i', 'want', 'more', 'help', 'no', 'stop', 'yes', 'all done', 'don\'t want'];
 
+const ACTIVITY_CORE_WORDS = [
+  { label: 'I',          labelEs: 'yo',        color: 'yellow', icon: '🙋', symbolKw: 'I' },
+  { label: 'want',       labelEs: 'quiero',    color: 'green',  icon: '👉', symbolKw: 'want' },
+  { label: "don't want", labelEs: 'no quiero', color: 'red',    icon: '🚫', symbolKw: 'no want' },
+  { label: 'more',       labelEs: 'mas',       color: 'blue',   icon: '➕', symbolKw: 'more' },
+  { label: 'help',       labelEs: 'ayuda',     color: 'green',  icon: '🆘', symbolKw: 'help' },
+];
+
 document.getElementById('btn-create-activity-save').addEventListener('click', () => {
   const name = document.getElementById('create-activity-name').value.trim();
   if (!name) { showToast('Enter an activity name'); return; }
   if (createActivitySelectedWords.length < 3) { showToast('Select at least 3 words'); return; }
 
-  const selectedLabels = createActivitySelectedWords.map(w => w.label.toLowerCase());
-  const hasCoreWord = CORE_WORDS.some(cw => selectedLabels.includes(cw));
-  if (!hasCoreWord) {
-    const proceed = confirm('This activity has no core words (like "help", "more", "stop", "no", "want"). Core words let your child make requests, protest, and ask for help in any situation.\n\nSave anyway?');
-    if (!proceed) return;
-  }
-
   const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+
+  const selectedLabels = new Set(createActivitySelectedWords.map(w => w.label.toLowerCase()));
+  const coreToAdd = ACTIVITY_CORE_WORDS.filter(cw => !selectedLabels.has(cw.label.toLowerCase()));
+  const allWords = [...coreToAdd, ...createActivitySelectedWords];
+
   const activity = {
     id: id,
     name: name,
@@ -8610,13 +8616,13 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
     icon: createActivityIcon,
     color: createActivityColor,
     custom: true,
-    words: createActivitySelectedWords.map((w, i) => ({
+    words: allWords.map((w, i) => ({
       id: id + '-' + i,
       label: w.label,
       labelEs: w.labelEs || w.label,
       color: w.color,
       icon: w.icon || '',
-      symbolKw: w.label,
+      symbolKw: w.symbolKw || w.label,
       tier: i < 6 ? 'starter' : 'expanded',
     })),
   };
