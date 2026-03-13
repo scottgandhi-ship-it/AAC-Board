@@ -2287,10 +2287,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <input type="text" id="editor-story-title">
       </div>
       <div class="editor-field">
-        <label for="editor-child-name">Child's Name</label>
-        <input type="text" id="editor-child-name">
-      </div>
-      <div class="editor-field">
         <label for="editor-parent-name">Parent/Caregiver Name</label>
         <input type="text" id="editor-parent-name">
       </div>
@@ -2514,6 +2510,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="settings-panel">
     <h2>Settings</h2>
     <div class="settings-section">
+      <h3>Child Profile</h3>
+      <label for="settings-child-name" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Child's Name</label>
+      <input type="text" id="settings-child-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
+    </div>
+    <div class="settings-section">
       <h3>Kids Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Hides editing controls for child use</p>
       <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
@@ -2618,11 +2619,22 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <option value="60">60 minutes</option>
       </select>
     </div>
+    <button id="btn-reward-save-template" style="display:none;width:100%;margin-top:12px;padding:10px;border:2px solid #7C74FF;border-radius:10px;background:#f3f0ff;color:#5A52D5;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;">Save as Template</button>
     <div class="reward-config-btn-row">
       <button id="btn-reward-cancel">Cancel</button>
       <button id="btn-reward-delete" style="display:none">Delete</button>
       <button id="btn-reward-save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Reward Template Picker -->
+<div id="reward-tmpl-picker" style="display:none;position:fixed;inset:0;z-index:960;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:var(--radius-lg);max-width:400px;width:100%;max-height:80vh;overflow-y:auto;padding:20px;">
+    <h2 style="font-size:1.1rem;font-weight:800;color:#333;margin-bottom:16px;">New Reward Track</h2>
+    <div id="reward-tmpl-list"></div>
+    <button id="btn-reward-from-scratch" style="width:100%;padding:14px;border:2px dashed #ccc;border-radius:var(--radius-sm);background:none;font-size:0.95rem;font-weight:600;color:#888;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Start from Scratch</button>
+    <button id="btn-reward-tmpl-cancel" style="width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Cancel</button>
   </div>
 </div>
 
@@ -2736,12 +2748,13 @@ let visibleStepsCount = parseInt(localStorage.getItem('gs-visible-steps'), 10) |
 
 // -- IndexedDB --
 const DB_NAME = 'guiding-steps';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_IMAGES = 'images';
 const STORE_REWARD_TRACKS = 'rewardTracks';
 const STORE_SCHED_TEMPLATES = 'scheduleTemplates';
 const STORE_ACTIVE_SCHED = 'activeSchedule';
 const STORE_STORIES = 'socialStories';
+const STORE_REWARD_TMPLS = 'rewardTemplates';
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -2753,8 +2766,13 @@ function openDB() {
       if (!db.objectStoreNames.contains(STORE_SCHED_TEMPLATES)) db.createObjectStore(STORE_SCHED_TEMPLATES, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_ACTIVE_SCHED)) db.createObjectStore(STORE_ACTIVE_SCHED, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_STORIES)) db.createObjectStore(STORE_STORIES, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(STORE_REWARD_TMPLS)) db.createObjectStore(STORE_REWARD_TMPLS, { keyPath: 'id' });
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onblocked = () => console.warn('IndexedDB upgrade blocked — close other tabs');
+    req.onsuccess = () => {
+      req.result.onversionchange = () => { req.result.close(); };
+      resolve(req.result);
+    };
     req.onerror = () => reject(req.error);
   });
 }
@@ -2876,6 +2894,37 @@ async function deleteTrackFromDB(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_REWARD_TRACKS, 'readwrite');
     tx.objectStore(STORE_REWARD_TRACKS).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── Reward Template DB Helpers ──
+async function loadRewardTemplates() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TMPLS, 'readonly');
+    const req = tx.objectStore(STORE_REWARD_TMPLS).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveRewardTemplate(tmpl) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TMPLS, 'readwrite');
+    tx.objectStore(STORE_REWARD_TMPLS).put(tmpl);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteRewardTemplate(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_REWARD_TMPLS, 'readwrite');
+    tx.objectStore(STORE_REWARD_TMPLS).delete(id);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -3014,6 +3063,19 @@ document.getElementById('toggle-kids-mode').addEventListener('change', (e) => {
   setKidsMode(e.target.checked);
   showToast(e.target.checked ? 'Kids Mode enabled' : 'Kids Mode disabled');
 });
+
+// -- Child Profile --
+function getGlobalChildName() {
+  return localStorage.getItem('gs-child-name') || '';
+}
+
+(function() {
+  const input = document.getElementById('settings-child-name');
+  input.value = getGlobalChildName();
+  input.addEventListener('change', () => {
+    localStorage.setItem('gs-child-name', input.value.trim());
+  });
+})();
 
 document.getElementById('app-header-title').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.add('open');
@@ -4511,6 +4573,7 @@ function openRewardConfig(trackId) {
   document.getElementById('timer-duration-select').value = track ? track.timerDuration : 30;
   document.getElementById('timer-duration-row').classList.toggle('visible', track ? track.timerEnabled : false);
   document.getElementById('btn-reward-delete').style.display = track ? '' : 'none';
+  document.getElementById('btn-reward-save-template').style.display = track ? '' : 'none';
 
   configTaskImageType = (track && track.taskImageType) || 'none';
   configTaskDefaultImageKey = (track && track.taskDefaultImageKey) || null;
@@ -4690,6 +4753,112 @@ document.getElementById('btn-reward-delete').addEventListener('click', async () 
   showToast('Track deleted');
 });
 
+// ── Reward Templates ──
+document.getElementById('btn-reward-save-template').addEventListener('click', async () => {
+  const taskLabel = document.getElementById('reward-task-input').value.trim();
+  const rewardLabel = document.getElementById('reward-label-input').value.trim();
+  if (!taskLabel || !rewardLabel) {
+    showToast('Fill in task and reward first');
+    return;
+  }
+  const existing = await loadRewardTemplates();
+  if (existing.length >= 10) {
+    showToast('Maximum 10 templates');
+    return;
+  }
+  const name = prompt('Template name:', taskLabel + ' / ' + rewardLabel);
+  if (!name || !name.trim()) return;
+  const tmpl = {
+    id: 'rtmpl-' + Date.now(),
+    name: name.trim(),
+    taskLabel,
+    rewardLabel,
+    targetCount: configStepperValue,
+    timerEnabled: document.getElementById('timer-toggle').checked,
+    timerDuration: parseInt(document.getElementById('timer-duration-select').value, 10),
+    taskImageType: configTaskImageType,
+    taskDefaultImageKey: configTaskDefaultImageKey,
+    createdAt: Date.now()
+  };
+  await saveRewardTemplate(tmpl);
+  showToast('Template saved');
+});
+
+function openRewardTemplatePicker(tmpls) {
+  const picker = document.getElementById('reward-tmpl-picker');
+  const list = document.getElementById('reward-tmpl-list');
+  list.innerHTML = '';
+  tmpls.forEach(tmpl => {
+    const card = document.createElement('div');
+    card.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;background:#f9f9f9;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;';
+    card.addEventListener('mouseenter', () => card.style.background = '#f0edff');
+    card.addEventListener('mouseleave', () => card.style.background = '#f9f9f9');
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    info.innerHTML = '<div style="font-weight:700;font-size:0.95rem;color:#333;">' + escHtml(tmpl.name) + '</div>'
+      + '<div style="font-size:0.8rem;color:#888;">' + escHtml(tmpl.taskLabel) + ' &rarr; ' + escHtml(tmpl.rewardLabel) + ' &middot; ' + tmpl.targetCount + ' steps</div>';
+    card.appendChild(info);
+    const del = document.createElement('button');
+    del.style.cssText = 'width:32px;height:32px;border:none;border-radius:50%;background:#ffebee;color:#D32F2F;font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
+    del.innerHTML = '&times;';
+    del.title = 'Delete template';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await deleteRewardTemplate(tmpl.id);
+      const updated = await loadRewardTemplates();
+      if (updated.length === 0) {
+        picker.style.display = 'none';
+        openRewardConfig(null);
+      } else {
+        openRewardTemplatePicker(updated);
+      }
+      showToast('Template deleted');
+    });
+    card.appendChild(del);
+    card.addEventListener('click', () => {
+      picker.style.display = 'none';
+      openRewardConfigFromTemplate(tmpl);
+    });
+    list.appendChild(card);
+  });
+  picker.style.display = 'flex';
+}
+
+function openRewardConfigFromTemplate(tmpl) {
+  openRewardConfig(null);
+  document.getElementById('reward-task-input').value = tmpl.taskLabel;
+  document.getElementById('reward-label-input').value = tmpl.rewardLabel;
+  configStepperValue = tmpl.targetCount;
+  document.getElementById('stepper-value').textContent = configStepperValue;
+  document.getElementById('timer-toggle').checked = tmpl.timerEnabled;
+  document.getElementById('timer-duration-select').value = tmpl.timerDuration;
+  document.getElementById('timer-duration-row').classList.toggle('visible', tmpl.timerEnabled);
+  configTaskImageType = tmpl.taskImageType || 'none';
+  configTaskDefaultImageKey = tmpl.taskDefaultImageKey || null;
+  updateTaskImagePreview();
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById('btn-reward-from-scratch').addEventListener('click', () => {
+  document.getElementById('reward-tmpl-picker').style.display = 'none';
+  openRewardConfig(null);
+});
+
+document.getElementById('btn-reward-tmpl-cancel').addEventListener('click', () => {
+  document.getElementById('reward-tmpl-picker').style.display = 'none';
+});
+
+document.getElementById('reward-tmpl-picker').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('reward-tmpl-picker').style.display = 'none';
+  }
+});
+
 // ── Task Image Config Buttons ──
 document.getElementById('btn-task-image-choose').addEventListener('click', () => {
   openTaskImagePicker();
@@ -4808,10 +4977,19 @@ document.getElementById('task-image-picker-overlay').addEventListener('click', e
   }
 });
 
-document.getElementById('btn-new-track').addEventListener('click', () => {
+document.getElementById('btn-new-track').addEventListener('click', async () => {
   if (rewardTracks.length >= 5) {
     showToast('Maximum 5 tracks');
     return;
+  }
+  try {
+    const tmpls = await loadRewardTemplates();
+    if (tmpls.length > 0) {
+      openRewardTemplatePicker(tmpls);
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not load reward templates:', e);
   }
   openRewardConfig(null);
 });
@@ -4845,7 +5023,7 @@ document.getElementById('celebration-overlay').addEventListener('click', () => {
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
   if (!confirm('Reset everything? All schedules, reward tracks, and settings will be erased.')) return;
   const db = await openDB();
-  const storeNames = [STORE_IMAGES, STORE_REWARD_TRACKS, STORE_SCHED_TEMPLATES, STORE_ACTIVE_SCHED, STORE_STORIES];
+  const storeNames = [STORE_IMAGES, STORE_REWARD_TRACKS, STORE_SCHED_TEMPLATES, STORE_ACTIVE_SCHED, STORE_STORIES, STORE_REWARD_TMPLS];
   for (const storeName of storeNames) {
     await new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readwrite');
@@ -5110,7 +5288,6 @@ function openTemplatePicker() {
     if (tmpl.pages[0] && tmpl.pages[0].stockKey && STORY_SVGS[tmpl.pages[0].stockKey]) {
       cover.innerHTML = STORY_SVGS[tmpl.pages[0].stockKey];
     }
-    card.appendChild(cover);
     const info = document.createElement('div');
     info.className = 'picker-card-info';
     const title = document.createElement('div');
@@ -5122,6 +5299,7 @@ function openTemplatePicker() {
     desc.textContent = tmpl.description;
     info.appendChild(desc);
     card.appendChild(info);
+    card.appendChild(cover);
     card.addEventListener('click', () => {
       picker.classList.remove('open');
       if (kidsMode) {
@@ -5138,7 +5316,6 @@ function openTemplatePicker() {
   sCover.className = 'picker-card-cover';
   sCover.style.background = '#F0F4FF';
   sCover.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#7B8FB2" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-  scratch.appendChild(sCover);
   const sInfo = document.createElement('div');
   sInfo.className = 'picker-card-info';
   const sTitle = document.createElement('div');
@@ -5150,6 +5327,7 @@ function openTemplatePicker() {
   sDesc.textContent = 'Write your own from scratch';
   sInfo.appendChild(sDesc);
   scratch.appendChild(sInfo);
+  scratch.appendChild(sCover);
   scratch.addEventListener('click', () => {
     picker.classList.remove('open');
     openStoryEditor(null);
@@ -5159,14 +5337,16 @@ function openTemplatePicker() {
 }
 
 function readTemplateStory(tmpl) {
+  const globalName = getGlobalChildName();
+  const mode = globalName ? 'third' : 'first';
   const pages = tmpl.pages.map(p => ({
-    text: personalizeStoryText(p.text, '', 'first', 'Mommy'),
+    text: personalizeStoryText(p.text, globalName, mode, 'Mommy'),
     sentenceType: p.sentenceType,
     imageType: 'stock',
     stockKey: p.stockKey,
     customImageKey: null
   }));
-  openStoryReader({ title: tmpl.title, childName: '', personMode: 'first', parentName: 'Mommy' }, pages);
+  openStoryReader({ title: tmpl.title, childName: globalName, personMode: mode, parentName: 'Mommy' }, pages);
 }
 
 document.getElementById('picker-close').addEventListener('click', () => {
@@ -5177,13 +5357,14 @@ document.getElementById('btn-new-story').addEventListener('click', openTemplateP
 document.getElementById('stories-empty-new').addEventListener('click', openTemplatePicker);
 
 function createStoryFromTemplate(tmpl) {
+  const globalName = getGlobalChildName();
   const story = {
     id: generateId(),
     title: tmpl.title,
-    childName: '',
+    childName: globalName,
     childAge: null,
     parentName: '',
-    personMode: 'first',
+    personMode: globalName ? 'third' : 'first',
     createdAt: Date.now(),
     updatedAt: Date.now(),
     readCount: 0,
@@ -5203,13 +5384,14 @@ function createStoryFromTemplate(tmpl) {
 
 // -- Story Editor --
 function openStoryEditor(story) {
+  const globalName = getGlobalChildName();
   editingStory = story || {
     id: generateId(),
     title: '',
-    childName: '',
+    childName: globalName,
     childAge: null,
     parentName: '',
-    personMode: 'first',
+    personMode: globalName ? 'third' : 'first',
     createdAt: Date.now(),
     updatedAt: Date.now(),
     readCount: 0,
@@ -5224,7 +5406,6 @@ function openStoryEditor(story) {
   editorPersonMode = editingStory.personMode || 'first';
 
   document.getElementById('editor-story-title').value = editingStory.title;
-  document.getElementById('editor-child-name').value = editingStory.childName;
   document.getElementById('editor-parent-name').value = editingStory.parentName;
   document.querySelectorAll('#editor-person-mode .seg-btn').forEach(btn => {
     btn.setAttribute('aria-checked', String(btn.dataset.value === editorPersonMode));
@@ -5288,11 +5469,9 @@ document.getElementById('editor-child-age').addEventListener('click', (e) => {
 
 document.getElementById('editor-setup-next').addEventListener('click', () => {
   editingStory.title = document.getElementById('editor-story-title').value.trim();
-  editingStory.childName = document.getElementById('editor-child-name').value.trim();
   editingStory.parentName = document.getElementById('editor-parent-name').value.trim();
   editingStory.personMode = editorPersonMode;
   if (!editingStory.title) { showToast('Please enter a story title'); return; }
-  if (!editingStory.childName) { showToast('Please enter the child\'s name'); return; }
   if (!editingStory.childAge) {
     const group = document.getElementById('editor-child-age');
     group.classList.remove('pulse');
@@ -5559,7 +5738,6 @@ document.getElementById('editor-preview-btn').addEventListener('click', () => {
 // Save
 document.getElementById('editor-save').addEventListener('click', async () => {
   editingStory.title = document.getElementById('editor-story-title').value.trim() || editingStory.title;
-  editingStory.childName = document.getElementById('editor-child-name').value.trim() || editingStory.childName;
   editingStory.parentName = document.getElementById('editor-parent-name').value.trim() || editingStory.parentName;
   editingStory.personMode = editorPersonMode;
   editingStory.updatedAt = Date.now();
