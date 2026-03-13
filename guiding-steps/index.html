@@ -94,6 +94,77 @@ body { display: flex; flex-direction: column; }
 .tab-btn.active svg { fill: currentColor; stroke: currentColor; }
 .tab-label { line-height: 1; letter-spacing: 0.02em; }
 
+/* -- Onboarding Overlay -- */
+#gs-onboarding-overlay {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: linear-gradient(135deg, #ede8ff 0%, #fce4ec 30%, #fff3e0 60%, #e8f5e9 100%);
+  justify-content: center; align-items: center; padding: 32px;
+  flex-direction: column;
+}
+#gs-onboarding-overlay.visible { display: flex; }
+.gs-onboarding-content {
+  max-width: 400px; width: 100%; text-align: center;
+}
+.gs-onboarding-headline {
+  font-size: 1.6rem; font-weight: 800; color: #333; margin-bottom: 8px; line-height: 1.3;
+}
+.gs-onboarding-subhead {
+  font-size: 1.1rem; font-weight: 600; color: var(--chrome-primary, #7C74FF); margin-bottom: 16px;
+}
+.gs-onboarding-body {
+  font-size: 1rem; color: #555; line-height: 1.5; margin-bottom: 24px;
+}
+.gs-onboarding-btn {
+  display: block; width: 100%; padding: 16px 48px; border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+  background: linear-gradient(135deg, #7C74FF, #6C63FF); color: #fff;
+  box-shadow: 0 4px 12px rgba(124,116,255,0.3); margin-bottom: 12px; min-height: 48px;
+}
+.gs-onboarding-btn:active { transform: scale(0.98); }
+.gs-onboarding-skip {
+  display: block; width: 100%; background: none; border: none; color: #999;
+  font-size: 0.95rem; cursor: pointer; padding: 8px; font-family: inherit;
+}
+.gs-onboarding-step { display: none; flex-direction: column; align-items: center; width: 100%; }
+.gs-onboarding-step.active { display: flex; }
+.gs-onboarding-dots {
+  display: flex; gap: 8px; justify-content: center; margin-top: 24px;
+}
+.gs-onboarding-dots .dot {
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.15);
+}
+.gs-onboarding-dots .dot.active { background: #7C74FF; }
+.gs-feature-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; width: 100%; }
+.gs-feature-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: rgba(255,255,255,0.85); border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: left;
+}
+.gs-feature-card-icon { font-size: 2rem; flex-shrink: 0; width: 48px; text-align: center; }
+.gs-feature-card-name { font-size: 1rem; font-weight: 700; color: #333; }
+.gs-feature-card-desc { font-size: 0.85rem; color: #666; margin-top: 2px; }
+
+/* -- Coach Mark Tooltip -- */
+#gs-coach-mark {
+  display: none; position: fixed; z-index: 360;
+  background: rgba(250,248,255,0.97); backdrop-filter: blur(8px);
+  padding: 16px 20px; border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  max-width: 280px; text-align: center;
+}
+#gs-coach-mark.visible { display: block; }
+.gs-coach-text { font-size: 1rem; font-weight: 600; color: #333; line-height: 1.4; }
+#gs-coach-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 350;
+  background: rgba(0,0,0,0.25);
+}
+#gs-coach-backdrop.visible { display: block; }
+
+@media (max-width: 500px) {
+  .gs-onboarding-headline { font-size: 1.4rem; }
+  #gs-onboarding-overlay { padding: 24px 16px; }
+}
+
 /* -- Toast -- */
 #toast {
   position: fixed; bottom: 80px; left: 50%;
@@ -2729,6 +2800,72 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <span class="tab-label">Settings</span>
   </button>
 </nav>
+
+<!-- Onboarding Overlay -->
+<div id="gs-onboarding-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Guiding Steps">
+  <div id="gs-onboarding-step-1" class="gs-onboarding-step active">
+    <div class="gs-onboarding-content">
+      <h1 class="gs-onboarding-headline">Every day is a little easier when your child knows what's next.</h1>
+      <p class="gs-onboarding-subhead">Guiding Steps helps your child follow routines, earn rewards, and understand social situations.</p>
+      <button class="gs-onboarding-btn" id="gs-btn-start">Get Started</button>
+      <button class="gs-onboarding-skip" id="gs-btn-skip-1">Skip</button>
+    </div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+  <div id="gs-onboarding-step-2" class="gs-onboarding-step">
+    <div class="gs-onboarding-content">
+      <h2 class="gs-onboarding-headline" style="font-size:1.5rem;">Who are we helping today?</h2>
+      <p class="gs-onboarding-body">We'll use their name to make stories and schedules feel personal.</p>
+      <label for="gs-onboarding-child-name" style="display:block;font-size:0.9rem;color:#666;margin-bottom:6px;text-align:left;">Child's name</label>
+      <input type="text" id="gs-onboarding-child-name" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:14px;border:2px solid #ddd;border-radius:12px;font-size:1.1rem;font-family:inherit;box-sizing:border-box;margin-bottom:16px;">
+      <button class="gs-onboarding-btn" id="gs-btn-name-next">Next</button>
+      <button class="gs-onboarding-skip" id="gs-btn-name-skip">Skip for now</button>
+    </div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+  <div id="gs-onboarding-step-3" class="gs-onboarding-step">
+    <div class="gs-onboarding-content">
+      <h2 class="gs-onboarding-headline" style="font-size:1.5rem;">Three tools, one app.</h2>
+      <div class="gs-feature-cards">
+        <div class="gs-feature-card">
+          <div class="gs-feature-card-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#7C74FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <div>
+            <div class="gs-feature-card-name">Schedules</div>
+            <div class="gs-feature-card-desc">Visual routines your child can follow step by step</div>
+          </div>
+        </div>
+        <div class="gs-feature-card">
+          <div class="gs-feature-card-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div>
+            <div class="gs-feature-card-name">Rewards</div>
+            <div class="gs-feature-card-desc">Track progress toward goals they care about</div>
+          </div>
+        </div>
+        <div class="gs-feature-card">
+          <div class="gs-feature-card-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div>
+            <div class="gs-feature-card-name">Stories</div>
+            <div class="gs-feature-card-desc">Social stories that teach what to expect</div>
+          </div>
+        </div>
+      </div>
+      <button class="gs-onboarding-btn" id="gs-btn-tour-done">Let's Go</button>
+    </div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+  </div>
+</div>
+
+<!-- Coach Mark -->
+<div id="gs-coach-backdrop"></div>
+<div id="gs-coach-mark">
+  <p class="gs-coach-text">Start here -- tap to begin your child's first schedule.</p>
+</div>
 
 <!-- Toast -->
 <div id="toast"></div>
@@ -6065,6 +6202,118 @@ function joinWords(arr) {
 
 document.getElementById('helper-generate').addEventListener('click', generateStoryFromHelper);
 
+// -- Onboarding --
+const GSOnboarding = {
+  KEY: 'gs-onboarding',
+
+  getState() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  },
+
+  setState(updates) {
+    const state = this.getState() || { version: 1, complete: false, currentStep: 1, date: null };
+    Object.assign(state, updates);
+    localStorage.setItem(this.KEY, JSON.stringify(state));
+  },
+
+  isComplete() {
+    const state = this.getState();
+    return state && state.complete === true;
+  },
+
+  init() {
+    if (this.isComplete()) return;
+    const state = this.getState();
+    const step = (state && state.currentStep >= 1 && state.currentStep <= 4) ? state.currentStep : 1;
+    if (step === 4) {
+      this.showCoachMark();
+    } else {
+      this.showStep(step);
+    }
+  },
+
+  showStep(step) {
+    const overlay = document.getElementById('gs-onboarding-overlay');
+    overlay.classList.add('visible');
+    overlay.querySelectorAll('.gs-onboarding-step').forEach(s => s.classList.remove('active'));
+    const stepEl = document.getElementById('gs-onboarding-step-' + step);
+    if (stepEl) stepEl.classList.add('active');
+    this.setState({ currentStep: step, date: this.getState()?.date || Date.now() });
+
+    if (step === 2) {
+      const nameInput = document.getElementById('gs-onboarding-child-name');
+      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+    }
+  },
+
+  showCoachMark() {
+    this.setState({ currentStep: 4 });
+    const btn = document.getElementById('btn-start-schedule');
+    if (!btn) { this.complete(); return; }
+
+    const backdrop = document.getElementById('gs-coach-backdrop');
+    const tooltip = document.getElementById('gs-coach-mark');
+    backdrop.classList.add('visible');
+    tooltip.classList.add('visible');
+
+    const rect = btn.getBoundingClientRect();
+    tooltip.style.left = Math.max(16, rect.left + rect.width / 2 - 140) + 'px';
+    tooltip.style.bottom = (window.innerHeight - rect.top + 12) + 'px';
+
+    const dismiss = () => {
+      backdrop.classList.remove('visible');
+      tooltip.classList.remove('visible');
+      this.complete();
+    };
+
+    btn.addEventListener('click', dismiss, { once: true });
+    backdrop.addEventListener('click', dismiss, { once: true });
+  },
+
+  complete() {
+    this.setState({ complete: true });
+    document.getElementById('gs-onboarding-overlay').classList.remove('visible');
+    document.getElementById('gs-coach-backdrop').classList.remove('visible');
+    document.getElementById('gs-coach-mark').classList.remove('visible');
+  }
+};
+
+document.getElementById('gs-btn-start').addEventListener('click', () => {
+  GSOnboarding.showStep(2);
+});
+
+document.getElementById('gs-btn-skip-1').addEventListener('click', () => {
+  GSOnboarding.complete();
+});
+
+document.getElementById('gs-btn-name-next').addEventListener('click', () => {
+  const name = (document.getElementById('gs-onboarding-child-name').value || '').trim();
+  if (name) {
+    localStorage.setItem('gs-child-name', name);
+    const settingsInput = document.getElementById('settings-child-name');
+    if (settingsInput) settingsInput.value = name;
+  }
+  GSOnboarding.showStep(3);
+});
+
+document.getElementById('gs-btn-name-skip').addEventListener('click', () => {
+  GSOnboarding.showStep(3);
+});
+
+document.getElementById('gs-btn-tour-done').addEventListener('click', () => {
+  document.getElementById('gs-onboarding-overlay').classList.remove('visible');
+  GSOnboarding.showCoachMark();
+});
+
+document.getElementById('gs-onboarding-overlay').addEventListener('click', (e) => {
+  if (!e.target.closest('.gs-onboarding-content') && !e.target.closest('.gs-onboarding-btn')) {
+    GSOnboarding.complete();
+  }
+});
+
 // -- Init --
 async function init() {
   applySensoryPreferences();
@@ -6073,6 +6322,7 @@ async function init() {
   await initSchedules();
   await initRewards();
   await initStories();
+  GSOnboarding.init();
 }
 
 init();
