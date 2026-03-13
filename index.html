@@ -433,6 +433,206 @@ body.grid-5 .cell.folder-btn .cell-label { font-size: clamp(0.55rem, 1.6vw, 0.75
 body.grid-3 .cell .cell-label { font-size: clamp(1rem, 3.5vw, 1.4rem); }
 body.grid-3 .cell .cell-big-text { font-size: clamp(2.2rem, 7vw, 3.2rem); }
 
+/* Grid size adjustments for 2x2 (My Picks) */
+body.grid-2 #core-word-strip { display: none; }
+body.grid-2 #grid {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+body.grid-2 .cell { padding: 12px 8px; gap: 6px; }
+body.grid-2 .cell .cell-label { font-size: clamp(1.4rem, 5vw, 2rem); }
+body.grid-2 .cell .cell-big-text { font-size: clamp(3rem, 10vw, 4.5rem); }
+
+/* Grid size adjustments for 2x1 (This or That) */
+body.grid-21 #core-word-strip { display: none; }
+body.grid-21 #grid {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+}
+body.grid-21 .cell { padding: 14px 10px; gap: 8px; }
+body.grid-21 .cell .cell-label { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+body.grid-21 .cell .cell-big-text { font-size: clamp(3.5rem, 12vw, 5.5rem); }
+
+/* Grid size adjustments for 1x1 (First Words) */
+body.grid-1 #core-word-strip { display: none; }
+body.grid-1 #grid {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+body.grid-1 .cell { padding: 16px 12px; gap: 8px; }
+body.grid-1 .cell .cell-label { font-size: clamp(2rem, 7vw, 3rem); }
+body.grid-1 .cell .cell-big-text { font-size: clamp(4rem, 15vw, 7rem); }
+
+/* Early learner empty slot */
+.early-learner-empty-slot {
+  border: 3px dashed #ccc;
+  background: rgba(124, 116, 255, 0.04);
+  color: #aaa;
+}
+.early-learner-empty-slot .cell-big-text {
+  color: #bbb;
+}
+.early-learner-empty-slot .cell-label {
+  color: #aaa;
+}
+
+/* ── Word Picker Modal ── */
+#word-picker-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+#word-picker-overlay.visible { display: flex; }
+#word-picker-modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+.word-picker-header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.word-picker-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.word-picker-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+.word-picker-count {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 600;
+}
+.word-picker-search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.word-picker-search:focus { border-color: var(--chrome-primary); }
+.word-picker-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.word-picker-preset-btn {
+  padding: 8px 14px;
+  border: 2px solid var(--chrome-border);
+  border-radius: 20px;
+  background: var(--chrome-surface-alt);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--chrome-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 36px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.word-picker-preset-btn:active { transform: scale(0.97); }
+.word-picker-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.word-picker-group-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #999;
+  padding: 8px 8px 4px;
+  letter-spacing: 0.5px;
+}
+.word-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  min-height: 48px;
+  transition: background 0.15s;
+  border: 2px solid transparent;
+}
+.word-picker-item:active { background: #f5f5f5; }
+.word-picker-item.selected {
+  border-color: var(--chrome-primary);
+  background: rgba(124, 116, 255, 0.08);
+}
+.word-picker-item-icon {
+  font-size: 1.5rem;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.word-picker-item-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.word-picker-item-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.word-picker-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.word-picker-footer button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 48px;
+  transition: transform 0.15s;
+}
+.word-picker-footer button:active { transform: scale(0.97); }
+.word-picker-cancel {
+  background: #f0f0f0;
+  color: #555;
+}
+.word-picker-confirm {
+  background: var(--chrome-primary);
+  color: #fff;
+}
+.word-picker-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Onboarding Overlay */
 #onboarding-overlay {
   display: none;
@@ -2720,12 +2920,15 @@ body.sensory-high-contrast .settings-btn {
         <h3>Grid Size</h3>
         <label for="settings-grid-select" class="visually-hidden">Grid size</label>
         <select id="settings-grid-select" class="grid-size-select">
-          <option value="3">Starter (3x3) — Learning to request</option>
-          <option value="4">Growing (4x4) — Building sentences</option>
-          <option value="5">Confident (5x5) — Expanding vocabulary</option>
-          <option value="6">Talker (6x6) — Combining words fluently</option>
+          <option value="1">First Words (1) — One big word, one big moment</option>
+          <option value="21">This or That (2) — Picking between two</option>
+          <option value="2">My Picks (4) — A few favorites to start</option>
+          <option value="3">Let's Talk (9) — Asking for what I need</option>
+          <option value="4">More to Say (16) — Building sentences my way</option>
+          <option value="5">Big Talker (25) — Lots of words to choose from</option>
+          <option value="6">Chatterbox (36) — So much to say!</option>
         </select>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Changing grid size resets buttons to defaults for that layout.</p>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="grid-size-hint">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
       <div class="settings-section">
         <h3 data-t="settings.language">Language</h3>
@@ -2963,6 +3166,24 @@ body.sensory-high-contrast .settings-btn {
   </div>
 </div>
 
+<div id="word-picker-overlay" role="dialog" aria-modal="true" aria-label="Choose words for grid">
+  <div id="word-picker-modal">
+    <div class="word-picker-header">
+      <div class="word-picker-header-row">
+        <h3 class="word-picker-title">Choose Words</h3>
+        <span class="word-picker-count" id="word-picker-count"></span>
+      </div>
+      <input type="text" class="word-picker-search" id="word-picker-search" aria-label="Search words">
+      <div class="word-picker-presets" id="word-picker-presets"></div>
+    </div>
+    <div class="word-picker-body" id="word-picker-body"></div>
+    <div class="word-picker-footer">
+      <button class="word-picker-cancel" id="word-picker-cancel">Cancel</button>
+      <button class="word-picker-confirm" id="word-picker-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <div id="grid-picker-overlay" role="dialog" aria-label="Choose communication level">
   <h2>Choose a starting layout</h2>
   <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
@@ -2973,10 +3194,13 @@ body.sensory-high-contrast .settings-btn {
   </div>
   <label for="grid-picker-select" class="visually-hidden">Grid size</label>
   <select id="grid-picker-select" class="grid-size-select" aria-label="Choose grid size">
-    <option value="3">Starter (3x3) — Learning to request</option>
-    <option value="4" selected>Growing (4x4) — Building sentences</option>
-    <option value="5">Confident (5x5) — Expanding vocabulary</option>
-    <option value="6">Talker (6x6) — Combining words fluently</option>
+    <option value="1">First Words (1) — One big word, one big moment</option>
+    <option value="21">This or That (2) — Picking between two</option>
+    <option value="2">My Picks (4) — A few favorites to start</option>
+    <option value="3">Let's Talk (9) — Asking for what I need</option>
+    <option value="4" selected>More to Say (16) — Building sentences my way</option>
+    <option value="5">Big Talker (25) — Lots of words to choose from</option>
+    <option value="6">Chatterbox (36) — So much to say!</option>
   </select>
   <button class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
   <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
@@ -3402,9 +3626,13 @@ function _buildLangEs() { return {
     'speed.fast': 'Velocidad: rapida', 'speed.veryFast': 'Velocidad: muy rapida',
     'pitch.veryLow': 'Tono: muy bajo', 'pitch.low': 'Tono: bajo',
     'pitch.normal': 'Tono: normal', 'pitch.high': 'Tono: alto', 'pitch.veryHigh': 'Tono: muy alto',
-    'grid.3x3': 'Inicio', 'grid.4x4': 'Creciendo', 'grid.5x5': 'Seguro', 'grid.6x6': 'Hablador',
-    'grid.3x3.desc': 'Aprendiendo a pedir', 'grid.4x4.desc': 'Construyendo oraciones',
-    'grid.5x5.desc': 'Ampliando vocabulario', 'grid.6x6.desc': 'Combinando palabras con fluidez',
+    'grid.1': 'Primeras Palabras', 'grid.1.desc': 'Una gran palabra, un gran momento',
+    'grid.21': 'Esto o Eso', 'grid.21.desc': 'Eligiendo entre dos',
+    'grid.2': 'Mis Favoritos', 'grid.2.desc': 'Algunos favoritos para empezar',
+    'grid.3': 'Hablemos', 'grid.3.desc': 'Pidiendo lo que necesito',
+    'grid.4': 'Mas que Decir', 'grid.4.desc': 'Construyendo oraciones a mi manera',
+    'grid.5': 'Gran Hablador', 'grid.5.desc': 'Muchas palabras para elegir',
+    'grid.6': 'Parlanchin', 'grid.6.desc': 'Tanto que decir!',
   },
 }; }
 
@@ -3493,15 +3721,19 @@ function updateUIStrings() {
   });
   // Grid size dropdown options
   const gridOpts = [
-    { val: '3', label: t('grid.3x3', 'Starter'), desc: t('grid.3x3.desc', 'Learning to request') },
-    { val: '4', label: t('grid.4x4', 'Growing'), desc: t('grid.4x4.desc', 'Building sentences') },
-    { val: '5', label: t('grid.5x5', 'Confident'), desc: t('grid.5x5.desc', 'Expanding vocabulary') },
-    { val: '6', label: t('grid.6x6', 'Talker'), desc: t('grid.6x6.desc', 'Combining words fluently') },
+    { val: '1', label: t('grid.1', 'First Words'), desc: t('grid.1.desc', 'One big word, one big moment') },
+    { val: '21', label: t('grid.21', 'This or That'), desc: t('grid.21.desc', 'Picking between two') },
+    { val: '2', label: t('grid.2', 'My Picks'), desc: t('grid.2.desc', 'A few favorites to start') },
+    { val: '3', label: t('grid.3', 'Let\'s Talk'), desc: t('grid.3.desc', 'Asking for what I need') },
+    { val: '4', label: t('grid.4', 'More to Say'), desc: t('grid.4.desc', 'Building sentences my way') },
+    { val: '5', label: t('grid.5', 'Big Talker'), desc: t('grid.5.desc', 'Lots of words to choose from') },
+    { val: '6', label: t('grid.6', 'Chatterbox'), desc: t('grid.6.desc', 'So much to say!') },
   ];
+  const slotCounts = { '1': 1, '21': 2, '2': 4, '3': 9, '4': 16, '5': 25, '6': 36 };
   document.querySelectorAll('.grid-size-select').forEach(sel => {
     gridOpts.forEach(o => {
       const opt = sel.querySelector(`option[value="${o.val}"]`);
-      if (opt) opt.textContent = `${o.label} (${o.val}x${o.val}) \u2014 ${o.desc}`;
+      if (opt) opt.textContent = `${o.label} (${slotCounts[o.val]}) \u2014 ${o.desc}`;
     });
   });
 }
@@ -4151,6 +4383,7 @@ let activeTab = 'talk';
 
 // ── Activity Overlays ──
 let activeActivity = null; // null when no activity is active
+let _activitySlotOverrides = null;
 let vocabLevel = localStorage.getItem('aac-vocab-level') || 'expanded';
 let activityLevelOverrides = JSON.parse(localStorage.getItem('aac-activity-level-overrides') || '{}');
 
@@ -4512,17 +4745,35 @@ async function saveButtons() {
   });
 }
 
+function isEarlyLearnerGrid(size) { return size === 1 || size === 21 || size === 2; }
+
 function getGridSize() {
   const stored = localStorage.getItem('aac-grid-size');
-  if (stored === '3' || stored === '5' || stored === '6') return parseInt(stored);
+  if (['1', '21', '2', '3', '5', '6'].includes(stored)) return parseInt(stored);
   return 4;
 }
 
 function setGridSize(size) {
   localStorage.setItem('aac-grid-size', String(size));
-  document.documentElement.style.setProperty('--grid-cols', size);
-  document.body.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
+  const cols = size === 21 ? 2 : size;
+  document.documentElement.style.setProperty('--grid-cols', cols);
+  document.body.classList.remove('grid-1', 'grid-21', 'grid-2', 'grid-3', 'grid-4', 'grid-5', 'grid-6');
   document.body.classList.add(`grid-${size}`);
+}
+
+const EARLY_LEARNER_SLOTS = { 1: 1, 21: 2, 2: 4 };
+
+function getEarlyLearnerWords(size) {
+  const key = 'aac-early-words-' + size;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function saveEarlyLearnerWords(size, wordIds) {
+  const max = EARLY_LEARNER_SLOTS[size] || 1;
+  localStorage.setItem('aac-early-words-' + size, JSON.stringify(wordIds.slice(0, max)));
 }
 
 const _templateCache = {};
@@ -4531,6 +4782,7 @@ function invalidateTemplateCache() {
 }
 
 function getTemplate(size) {
+  if (isEarlyLearnerGrid(size)) return getEarlyLearnerTemplate(size);
   if (_templateCache[size]) return _templateCache[size].map(b => ({...b}));
   const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
   let template;
@@ -4552,6 +4804,195 @@ function getTemplate(size) {
   return template.map(b => ({...b}));
 }
 
+function getEarlyLearnerTemplate(size) {
+  const selectedIds = getEarlyLearnerWords(size);
+  if (selectedIds.length === 0) return [];
+  const allWords = getAllVocabWords();
+  return selectedIds.map((id, i) => {
+    const found = allWords.find(w => w.id === id);
+    if (!found) return null;
+    return { ...found, folderId: null, type: 'fringe', position: i };
+  }).filter(Boolean);
+}
+
+function getAllVocabWords() {
+  const words = [];
+  const seen = new Set();
+  const sources = [...HOME_GRID_6X6_EXTRAS, ...DEFAULT_BUTTONS];
+  sources.forEach(b => {
+    if (b.type === 'folder') return;
+    if (seen.has(b.id)) return;
+    seen.add(b.id);
+    words.push(b);
+  });
+  return words;
+}
+
+function getPickerWords() {
+  const all = getAllVocabWords();
+  const seenLabel = new Set();
+  return all.filter(w => {
+    const key = (w.label || '').toLowerCase();
+    if (seenLabel.has(key)) return false;
+    seenLabel.add(key);
+    return true;
+  });
+}
+
+const CHOOSER_PRESETS = [
+  { name: 'Basics', nameEs: 'Basicos', ids: ['t-yes', 't-no', 'core-more', 't-stop'] },
+  { name: 'Requesting', nameEs: 'Peticiones', ids: ['core-want', 'core-help', 'core-more', 'gen-all-done'] },
+  { name: 'Play', nameEs: 'Jugar', ids: ['t-go', 't-stop', 'core-more', 'core-help'] },
+];
+
+const FITZGERALD_COLOR_ORDER = ['yellow', 'green', 'orange', 'blue', 'pink', 'red', 'purple'];
+const FITZGERALD_COLOR_LABELS = {
+  yellow: 'Pronouns', green: 'Verbs', orange: 'Nouns',
+  blue: 'Descriptors', pink: 'Social', red: 'Important', purple: 'Prepositions'
+};
+const FITZGERALD_COLOR_HEX = {
+  yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
+  blue: '#42A5F5', pink: '#EC407A', red: '#EF5350', purple: '#AB47BC'
+};
+
+let _wordPickerState = { maxSelections: 1, selectedIds: [], onConfirm: null, slotIndex: null };
+
+function openWordPicker(maxSelections, currentIds, onConfirm, slotIndex, wordSource) {
+  _wordPickerState = {
+    maxSelections,
+    selectedIds: [...currentIds],
+    onConfirm,
+    slotIndex: slotIndex !== undefined ? slotIndex : null,
+    wordSource: wordSource || null
+  };
+  const overlay = document.getElementById('word-picker-overlay');
+  const search = document.getElementById('word-picker-search');
+  const presetsContainer = document.getElementById('word-picker-presets');
+  search.value = '';
+
+  presetsContainer.innerHTML = '';
+  if (maxSelections === 4) {
+    CHOOSER_PRESETS.forEach(preset => {
+      const btn = document.createElement('button');
+      btn.className = 'word-picker-preset-btn';
+      btn.textContent = currentLang === 'es' ? preset.nameEs : preset.name;
+      btn.addEventListener('click', () => {
+        _wordPickerState.selectedIds = [...preset.ids];
+        document.getElementById('word-picker-search').value = '';
+        renderWordPickerList('');
+        updateWordPickerCount();
+      });
+      presetsContainer.appendChild(btn);
+    });
+  }
+
+  renderWordPickerList('');
+  updateWordPickerCount();
+  overlay.classList.add('visible');
+  search.focus();
+}
+
+function renderWordPickerList(filter) {
+  const body = document.getElementById('word-picker-body');
+  body.innerHTML = '';
+  const allWords = _wordPickerState.wordSource || getPickerWords();
+  const lowerFilter = filter.toLowerCase().trim();
+
+  const grouped = {};
+  allWords.forEach(w => {
+    const searchLabel = (w.label + ' ' + (w.labelEs || '')).toLowerCase();
+    if (lowerFilter && !searchLabel.includes(lowerFilter)) return;
+    const color = w.color || 'orange';
+    if (!grouped[color]) grouped[color] = [];
+    grouped[color].push(w);
+  });
+
+  FITZGERALD_COLOR_ORDER.forEach(color => {
+    const words = grouped[color];
+    if (!words || words.length === 0) return;
+    const groupLabel = document.createElement('div');
+    groupLabel.className = 'word-picker-group-label';
+    groupLabel.textContent = FITZGERALD_COLOR_LABELS[color] || color;
+    body.appendChild(groupLabel);
+
+    words.sort((a, b) => a.label.localeCompare(b.label));
+    words.forEach(w => {
+      const item = document.createElement('div');
+      item.className = 'word-picker-item';
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', String(_wordPickerState.selectedIds.includes(w.id)));
+      if (_wordPickerState.selectedIds.includes(w.id)) item.classList.add('selected');
+
+      const icon = document.createElement('span');
+      icon.className = 'word-picker-item-icon';
+      icon.textContent = BUTTON_ICONS[w.id] || '💬';
+
+      const label = document.createElement('span');
+      label.className = 'word-picker-item-label';
+      const primaryText = currentLang === 'es' ? (w.labelEs || w.label) : w.label;
+      label.textContent = primaryText;
+
+      const dot = document.createElement('span');
+      dot.className = 'word-picker-item-color';
+      dot.style.background = FITZGERALD_COLOR_HEX[w.color] || '#ccc';
+
+      item.appendChild(icon);
+      item.appendChild(label);
+      item.appendChild(dot);
+
+      item.addEventListener('click', () => {
+        const idx = _wordPickerState.selectedIds.indexOf(w.id);
+        if (idx >= 0) {
+          _wordPickerState.selectedIds.splice(idx, 1);
+          item.classList.remove('selected');
+          item.setAttribute('aria-selected', 'false');
+        } else if (_wordPickerState.slotIndex !== null) {
+          _wordPickerState.selectedIds = [w.id];
+          body.querySelectorAll('.word-picker-item.selected').forEach(el => {
+            el.classList.remove('selected');
+            el.setAttribute('aria-selected', 'false');
+          });
+          item.classList.add('selected');
+          item.setAttribute('aria-selected', 'true');
+        } else if (_wordPickerState.selectedIds.length < _wordPickerState.maxSelections) {
+          _wordPickerState.selectedIds.push(w.id);
+          item.classList.add('selected');
+          item.setAttribute('aria-selected', 'true');
+        }
+        updateWordPickerCount();
+      });
+
+      body.appendChild(item);
+    });
+  });
+}
+
+function updateWordPickerCount() {
+  const count = document.getElementById('word-picker-count');
+  const confirm = document.getElementById('word-picker-confirm');
+  const { selectedIds, maxSelections } = _wordPickerState;
+  count.textContent = `${selectedIds.length} / ${maxSelections}`;
+  confirm.disabled = selectedIds.length === 0;
+}
+
+function closeWordPicker() {
+  document.getElementById('word-picker-overlay').classList.remove('visible');
+}
+
+document.getElementById('word-picker-search').addEventListener('input', (e) => {
+  renderWordPickerList(e.target.value);
+});
+
+document.getElementById('word-picker-cancel').addEventListener('click', closeWordPicker);
+
+document.getElementById('word-picker-confirm').addEventListener('click', () => {
+  if (_wordPickerState.selectedIds.length === 0) return;
+  if (_wordPickerState.onConfirm) {
+    _wordPickerState.onConfirm(_wordPickerState.selectedIds);
+  }
+  closeWordPicker();
+});
+
 let _gridPickerCallback = null;
 
 function showGridPicker(onComplete) {
@@ -4568,6 +5009,16 @@ function showGridPicker(onComplete) {
   continueBtn.addEventListener('click', async () => {
     const size = parseInt(select.value);
     setGridSize(size);
+
+    if (isEarlyLearnerGrid(size)) {
+      buttons = [];
+      overlay.classList.remove('visible');
+      renderGrid();
+      finalizeInit();
+      if (_gridPickerCallback) { _gridPickerCallback(); _gridPickerCallback = null; }
+      return;
+    }
+
     buttons = getTemplate(size);
     await saveButtons();
     overlay.classList.remove('visible');
@@ -5304,6 +5755,50 @@ function renderGrid() {
   grid.innerHTML = '';
   setupGridDelegation();
 
+  const gridSize = getGridSize();
+
+  // Early learner grids: slot-based, no folders, no core strip
+  if (isEarlyLearnerGrid(gridSize) && !activeActivity) {
+    renderCoreStrip();
+    folderLabel.style.display = 'none';
+    const totalSlots = EARLY_LEARNER_SLOTS[gridSize] || 1;
+    const selectedIds = getEarlyLearnerWords(gridSize);
+    const allWords = getAllVocabWords();
+
+    for (let i = 0; i < totalSlots; i++) {
+      const wordId = selectedIds[i] || null;
+      const w = wordId ? allWords.find(v => v.id === wordId) : null;
+
+      if (w) {
+        const c = createCell({ ...w, folderId: null, type: 'fringe', position: i });
+        c.style.animationDelay = `${i * 25}ms`;
+        c.setAttribute('data-slot', String(i));
+        grid.appendChild(c);
+      } else {
+        const empty = document.createElement('button');
+        empty.className = 'cell early-learner-empty-slot';
+        empty.setAttribute('data-slot', String(i));
+        empty.innerHTML = '<span class="cell-big-text">+</span><span class="cell-label">Tap to pick</span>';
+        empty.addEventListener('click', () => {
+          openWordPicker(1, [], (ids) => {
+            const current = getEarlyLearnerWords(gridSize);
+            while (current.length < i) current.push('');
+            current[i] = ids[0];
+            saveEarlyLearnerWords(gridSize, current);
+            buttons = getTemplate(gridSize);
+            renderGrid();
+          }, i);
+        });
+        grid.appendChild(empty);
+      }
+    }
+
+    const rows = gridSize === 2 ? 2 : 1;
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    grid.style.flex = '1';
+    return;
+  }
+
   // Core words are rendered in the dedicated strip above
   renderCoreStrip();
 
@@ -5311,14 +5806,32 @@ function renderGrid() {
   if (activeActivity) {
     folderLabel.style.display = 'none';
     const allWords = getActivityWords(activeActivity);
-    const cols = getGridSize();
+    const gridSize = getGridSize();
+    const earlyLearner = isEarlyLearnerGrid(gridSize);
+    const totalSlots = earlyLearner ? (EARLY_LEARNER_SLOTS[gridSize] || 1) : allWords.length;
+    const wordsToShow = earlyLearner ? allWords.slice(0, totalSlots) : allWords;
 
-    allWords.forEach((w, i) => {
+    if (earlyLearner && _activitySlotOverrides) {
+      Object.entries(_activitySlotOverrides).forEach(([slot, wordId]) => {
+        const idx = parseInt(slot);
+        if (idx < wordsToShow.length) {
+          const replacement = allWords.find(w => w.id === wordId);
+          if (replacement) wordsToShow[idx] = replacement;
+        }
+      });
+    }
+
+    if (earlyLearner && allWords.length > totalSlots) {
+      showToast('Showing ' + totalSlots + ' word' + (totalSlots > 1 ? 's' : '') + ' for this activity to match your child\'s level');
+    }
+
+    wordsToShow.forEach((w, i) => {
       const cell = document.createElement('button');
       cell.className = 'cell';
       cell.setAttribute('data-color', w.color);
       cell.setAttribute('data-type', 'fringe');
       cell.setAttribute('data-id', w.id);
+      if (earlyLearner) cell.setAttribute('data-slot', String(i));
 
       const bigText = document.createElement('span');
       bigText.className = 'cell-big-text';
@@ -5359,7 +5872,8 @@ function renderGrid() {
       grid.appendChild(cell);
     });
 
-    const rows = Math.ceil(allWords.length / cols);
+    const cols = earlyLearner ? (gridSize === 1 ? 1 : 2) : gridSize;
+    const rows = earlyLearner ? (gridSize === 2 ? 2 : 1) : Math.ceil(wordsToShow.length / cols);
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     grid.style.flex = '1';
 
@@ -6222,7 +6736,29 @@ function setupGridDelegation() {
     _gridHoldTimer = setTimeout(() => {
       _gridDidLongPress = true;
       _gridHoldTimer = null;
-      openEditModal(_gridHoldBtnId);
+      const size = getGridSize();
+      if (isEarlyLearnerGrid(size)) {
+        const slotAttr = cell.getAttribute('data-slot');
+        const slotIndex = slotAttr !== null ? parseInt(slotAttr) : 0;
+        const currentIds = getEarlyLearnerWords(size);
+        const activityWords = activeActivity ? getActivityWords(activeActivity) : null;
+        openWordPicker(1, _gridHoldBtnId ? [_gridHoldBtnId] : [], (ids) => {
+          if (activeActivity) {
+            if (!_activitySlotOverrides) _activitySlotOverrides = {};
+            _activitySlotOverrides[slotIndex] = ids[0];
+            renderGrid();
+          } else {
+            const allIds = [...currentIds];
+            while (allIds.length <= slotIndex) allIds.push('');
+            allIds[slotIndex] = ids[0];
+            saveEarlyLearnerWords(size, allIds);
+            buttons = getTemplate(size);
+            renderGrid();
+          }
+        }, slotIndex, activityWords);
+      } else {
+        openEditModal(_gridHoldBtnId);
+      }
     }, 600);
   }
 
@@ -6573,7 +7109,22 @@ function updateGridSizeSelect() {
 document.getElementById('settings-grid-select').addEventListener('change', async (e) => {
   const newSize = parseInt(e.target.value);
   if (newSize === getGridSize()) return;
-  const names = { 3: t('grid.3x3', 'Starter'), 4: t('grid.4x4', 'Growing'), 5: t('grid.5x5', 'Confident'), 6: t('grid.6x6', 'Talker') };
+  const names = {
+    1: t('grid.1', 'First Words'), 21: t('grid.21', 'This or That'),
+    2: t('grid.2', 'My Picks'), 3: t('grid.3', 'Let\'s Talk'),
+    4: t('grid.4', 'More to Say'), 5: t('grid.5', 'Big Talker'),
+    6: t('grid.6', 'Chatterbox')
+  };
+
+  if (isEarlyLearnerGrid(newSize)) {
+    setGridSize(newSize);
+    currentFolder = null;
+    buttons = getTemplate(newSize);
+    renderGrid();
+    showToast(names[newSize]);
+    return;
+  }
+
   const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
   if (!confirm(confirmMsg)) {
     e.target.value = String(getGridSize());
@@ -7212,6 +7763,7 @@ function startActivity(activityId) {
   const activity = allActs.find(a => a.id === activityId);
   if (!activity) return;
   activeActivity = activity;
+  _activitySlotOverrides = null;
   currentFolder = null;
   document.body.classList.add('activity-mode');
   startActivitySession(activityId);
@@ -7233,6 +7785,7 @@ function endActivity() {
   const name = activeActivity.name;
   const hadRoutine = !!activeRoutine;
   activeActivity = null;
+  _activitySlotOverrides = null;
   document.body.classList.remove('activity-mode');
   document.getElementById('activity-banner').classList.remove('active');
 
@@ -8918,7 +9471,7 @@ function showToast(msg) {
 
 // ── Landscape Grid Optimization ──
 let landscapeActive = false;
-const LANDSCAPE_COL_MAP = { 3: 4, 4: 6, 5: 7, 6: 8 };
+const LANDSCAPE_COL_MAP = { 1: 1, 21: 2, 2: 2, 3: 4, 4: 6, 5: 7, 6: 8 };
 
 function updateLandscapeGrid() {
   const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;

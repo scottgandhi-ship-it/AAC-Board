@@ -5,6 +5,12 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 
 ## Active Features
 
+### Early Learner Grids (1x1 Explorer & 2x2 Chooser)
+- Plan: .project/features/EarlyLearnerGrids.md
+- Notes: .project/features/EarlyLearnerGrids_Notes.md
+- Status: PLANNING -- awaiting approval
+- Scope: 1x1 and 2x2 fixed grid modes, word picker UI, quick-swap, no folders, SLP-friendly
+
 ### Activities Expansion (6 features)
 - Plan: .project/features/ActivitiesExpansion.md
 - Notes: .project/features/ActivitiesExpansion_Notes.md
