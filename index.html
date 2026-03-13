@@ -2920,13 +2920,13 @@ body.sensory-high-contrast .settings-btn {
         <h3>Grid Size</h3>
         <label for="settings-grid-select" class="visually-hidden">Grid size</label>
         <select id="settings-grid-select" class="grid-size-select">
-          <option value="1">First Words (1) — One big word, one big moment</option>
-          <option value="21">This or That (2) — Picking between two</option>
-          <option value="2">My Picks (4) — A few favorites to start</option>
-          <option value="3">Let's Talk (9) — Asking for what I need</option>
-          <option value="4">More to Say (16) — Building sentences my way</option>
-          <option value="5">Big Talker (25) — Lots of words to choose from</option>
-          <option value="6">Chatterbox (36) — So much to say!</option>
+          <option value="1">First Words (1x1)</option>
+          <option value="21">This or That (2x1)</option>
+          <option value="2">My Picks (2x2)</option>
+          <option value="3">Let's Talk (3x3)</option>
+          <option value="4">More to Say (4x4)</option>
+          <option value="5">Big Talker (5x5)</option>
+          <option value="6">Chatterbox (6x6)</option>
         </select>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="grid-size-hint">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
@@ -3144,15 +3144,26 @@ body.sensory-high-contrast .settings-btn {
       <button class="onboarding-btn" id="btn-onboarding-start">Get Started</button>
       <button class="onboarding-skip" id="btn-onboarding-skip">Skip</button>
     </div>
-    <div class="onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
   <div id="onboarding-step-2" class="onboarding-step">
+    <div class="onboarding-content">
+      <h2 class="onboarding-headline" style="font-size:1.5rem;">Who are we helping today?</h2>
+      <p class="onboarding-body">We'll use their name to make the experience feel personal.</p>
+      <label for="onboarding-child-name" style="display:block;font-size:0.9rem;color:#666;margin-bottom:6px;text-align:left;">Child's name</label>
+      <input type="text" id="onboarding-child-name" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:14px;border:2px solid #ddd;border-radius:12px;font-size:1.1rem;font-family:inherit;box-sizing:border-box;margin-bottom:16px;">
+      <button class="onboarding-btn" id="btn-onboarding-name-next">Next</button>
+      <button class="onboarding-skip" id="btn-onboarding-name-skip">Skip for now</button>
+    </div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+  <div id="onboarding-step-3" class="onboarding-step">
     <div class="onboarding-content">
       <h2 class="onboarding-step-title">Choose a starting layout</h2>
       <p class="onboarding-step-desc">Pick the grid size that matches your child's communication level.</p>
       <p class="onboarding-reassure">You can change this anytime.</p>
     </div>
-    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
   </div>
 </div>
 
@@ -3162,7 +3173,7 @@ body.sensory-high-contrast .settings-btn {
     <p class="coach-marks-headline">Your child learns by watching <strong>YOU</strong> do it.</p>
     <p class="coach-marks-body">Tap a few words to build a sentence. Try it now!</p>
     <p class="coach-marks-counter" id="coach-tap-counter"></p>
-    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
   </div>
 </div>
 
@@ -3194,16 +3205,16 @@ body.sensory-high-contrast .settings-btn {
   </div>
   <label for="grid-picker-select" class="visually-hidden">Grid size</label>
   <select id="grid-picker-select" class="grid-size-select" aria-label="Choose grid size">
-    <option value="1">First Words (1) — One big word, one big moment</option>
-    <option value="21">This or That (2) — Picking between two</option>
-    <option value="2">My Picks (4) — A few favorites to start</option>
-    <option value="3">Let's Talk (9) — Asking for what I need</option>
-    <option value="4" selected>More to Say (16) — Building sentences my way</option>
-    <option value="5">Big Talker (25) — Lots of words to choose from</option>
-    <option value="6">Chatterbox (36) — So much to say!</option>
+    <option value="1">First Words (1x1)</option>
+    <option value="21">This or That (2x1)</option>
+    <option value="2">My Picks (2x2)</option>
+    <option value="3">Let's Talk (3x3)</option>
+    <option value="4" selected>More to Say (4x4)</option>
+    <option value="5">Big Talker (5x5)</option>
+    <option value="6">Chatterbox (6x6)</option>
   </select>
   <button class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
-  <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+  <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
 </div>
 
 <!-- Toast -->
@@ -3721,19 +3732,18 @@ function updateUIStrings() {
   });
   // Grid size dropdown options
   const gridOpts = [
-    { val: '1', label: t('grid.1', 'First Words'), desc: t('grid.1.desc', 'One big word, one big moment') },
-    { val: '21', label: t('grid.21', 'This or That'), desc: t('grid.21.desc', 'Picking between two') },
-    { val: '2', label: t('grid.2', 'My Picks'), desc: t('grid.2.desc', 'A few favorites to start') },
-    { val: '3', label: t('grid.3', 'Let\'s Talk'), desc: t('grid.3.desc', 'Asking for what I need') },
-    { val: '4', label: t('grid.4', 'More to Say'), desc: t('grid.4.desc', 'Building sentences my way') },
-    { val: '5', label: t('grid.5', 'Big Talker'), desc: t('grid.5.desc', 'Lots of words to choose from') },
-    { val: '6', label: t('grid.6', 'Chatterbox'), desc: t('grid.6.desc', 'So much to say!') },
+    { val: '1', label: t('grid.1', 'First Words'), dim: '1x1' },
+    { val: '21', label: t('grid.21', 'This or That'), dim: '2x1' },
+    { val: '2', label: t('grid.2', 'My Picks'), dim: '2x2' },
+    { val: '3', label: t('grid.3', 'Let\'s Talk'), dim: '3x3' },
+    { val: '4', label: t('grid.4', 'More to Say'), dim: '4x4' },
+    { val: '5', label: t('grid.5', 'Big Talker'), dim: '5x5' },
+    { val: '6', label: t('grid.6', 'Chatterbox'), dim: '6x6' },
   ];
-  const slotCounts = { '1': 1, '21': 2, '2': 4, '3': 9, '4': 16, '5': 25, '6': 36 };
   document.querySelectorAll('.grid-size-select').forEach(sel => {
     gridOpts.forEach(o => {
       const opt = sel.querySelector(`option[value="${o.val}"]`);
-      if (opt) opt.textContent = `${o.label} (${slotCounts[o.val]}) \u2014 ${o.desc}`;
+      if (opt) opt.textContent = `${o.label} (${o.dim})`;
     });
   });
 }
@@ -5011,7 +5021,11 @@ function showGridPicker(onComplete) {
     setGridSize(size);
 
     if (isEarlyLearnerGrid(size)) {
-      buttons = [];
+      const defaults = { 1: ['t-yes'], 21: ['t-stop', 't-go'], 2: ['t-yes', 't-no', 't-go', 't-stop'] };
+      if (defaults[size] && !getEarlyLearnerWords(size).length) {
+        saveEarlyLearnerWords(size, defaults[size]);
+      }
+      buttons = getTemplate(size);
       overlay.classList.remove('visible');
       renderGrid();
       finalizeInit();
@@ -5057,8 +5071,8 @@ const Onboarding = {
   init() {
     if (this.isComplete()) return;
     const state = this.getState();
-    const step = (state && state.currentStep >= 1 && state.currentStep <= 3) ? state.currentStep : 1;
-    if (step === 3) {
+    const step = (state && state.currentStep >= 1 && state.currentStep <= 4) ? state.currentStep : 1;
+    if (step === 4) {
       this.showCoachMarks();
     } else {
       this.showStep(step);
@@ -5074,6 +5088,11 @@ const Onboarding = {
     this.setState({ currentStep: step, date: this.getState()?.date || Date.now() });
 
     if (step === 2) {
+      const nameInput = document.getElementById('onboarding-child-name');
+      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+    }
+
+    if (step === 3) {
       overlay.classList.remove('visible');
       const pickerOverlay = document.getElementById('grid-picker-overlay');
       pickerOverlay.querySelector('.onboarding-reassure').style.display = '';
@@ -5081,7 +5100,7 @@ const Onboarding = {
       showGridPicker(() => {
         pickerOverlay.querySelector('.onboarding-reassure').style.display = 'none';
         pickerOverlay.querySelector('.grid-picker-dots').style.display = 'none';
-        this.setState({ currentStep: 3 });
+        this.setState({ currentStep: 4 });
         this.showCoachMarks();
       });
     }
@@ -5090,9 +5109,9 @@ const Onboarding = {
   showCoachMarks() {
     const overlay = document.getElementById('coach-marks-overlay');
     overlay.classList.add('visible');
-    this.setState({ currentStep: 3 });
+    this.setState({ currentStep: 4 });
     this._tapCount = 0;
-    const TAPS_NEEDED = 3;
+    const TAPS_NEEDED = 1;
     const counter = document.getElementById('coach-tap-counter');
     counter.textContent = '';
 
@@ -5130,6 +5149,19 @@ const Onboarding = {
 // Wire onboarding buttons
 document.getElementById('btn-onboarding-start').addEventListener('click', () => {
   Onboarding.showStep(2);
+});
+
+document.getElementById('btn-onboarding-name-next').addEventListener('click', () => {
+  const name = (document.getElementById('onboarding-child-name').value || '').trim();
+  if (name) {
+    localStorage.setItem('aac-child-name', name);
+    document.getElementById('child-name-input').value = name;
+  }
+  Onboarding.showStep(3);
+});
+
+document.getElementById('btn-onboarding-name-skip').addEventListener('click', () => {
+  Onboarding.showStep(3);
 });
 
 document.getElementById('btn-onboarding-skip').addEventListener('click', () => {
@@ -7117,6 +7149,10 @@ document.getElementById('settings-grid-select').addEventListener('change', async
   };
 
   if (isEarlyLearnerGrid(newSize)) {
+    const defaults = { 1: ['t-yes'], 21: ['t-stop', 't-go'], 2: ['t-yes', 't-no', 't-go', 't-stop'] };
+    if (defaults[newSize] && !getEarlyLearnerWords(newSize).length) {
+      saveEarlyLearnerWords(newSize, defaults[newSize]);
+    }
     setGridSize(newSize);
     currentFolder = null;
     buttons = getTemplate(newSize);

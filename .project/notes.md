@@ -11,6 +11,12 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Status: PLANNING -- awaiting approval
 - Scope: 1x1 and 2x2 fixed grid modes, word picker UI, quick-swap, no folders, SLP-friendly
 
+### Onboarding Child Name Update
+- Plan: .project/features/OnboardingChildName.md
+- Notes: .project/features/OnboardingChildName_Notes.md
+- Status: PLANNING -- awaiting approval
+- Scope: Add child name step to existing 4-step onboarding, settings integration
+
 ### Activities Expansion (6 features)
 - Plan: .project/features/ActivitiesExpansion.md
 - Notes: .project/features/ActivitiesExpansion_Notes.md

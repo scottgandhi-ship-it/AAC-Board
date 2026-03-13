@@ -28,6 +28,12 @@ Story Word Limits feature implemented (all 6 tasks). Awaiting user validation.
 - Notes: .project/features/StoryHelper_Notes.md
 - Status: Phase 1 -- Planning (awaiting approval)
 
+### Onboarding Flow
+- Plan: .project/features/Onboarding.md
+- Notes: .project/features/Onboarding_Notes.md
+- Status: Phase 1 -- Planning (awaiting approval)
+- Scope: 4-step onboarding (Welcome, Child Name, Feature Tour, Coach Marks), settings integration
+
 ### Story Word Limits (Age-Based Page Length Guidance)
 - Plan: .project/features/StoryWordLimits.md
 - Notes: .project/features/StoryWordLimits_Notes.md
