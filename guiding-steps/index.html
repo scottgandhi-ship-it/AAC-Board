@@ -61,7 +61,6 @@ body { display: flex; flex-direction: column; }
 
 /* -- Kids Mode -- */
 .kids-mode .parent-only { display: none !important; }
-.kids-mode #btn-parent-settings { display: none !important; }
 .kids-mode #rewards-parent-controls { display: none !important; }
 .kids-mode #schedule-parent-controls { display: none !important; }
 .kids-mode .story-card-actions { display: none !important; }
@@ -2108,17 +2107,16 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 }
 .picker-card:active { transform: scale(0.97); }
 .picker-card-cover {
-  width: 100%; height: 0; padding-bottom: 75%; position: relative;
+  width: 100%; height: 0; padding-bottom: 66%; position: relative;
   background: #FFF8F0;
 }
 .picker-card-cover svg {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 50%; height: 50%;
+  width: 65%; height: 65%;
 }
-.picker-card-info { padding: 10px; }
-.picker-card-title { font-size: 0.9rem; font-weight: 700; color: #333; }
-.picker-card-desc { font-size: 0.75rem; color: #888; margin-top: 2px; }
+.picker-card-info { padding: 8px 10px; }
+.picker-card-title { font-size: 0.85rem; font-weight: 700; color: #333; text-align: center; }
 
 /* -- Mobile Responsive -- */
 @media (max-width: 359px) {
@@ -2285,6 +2283,10 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div class="editor-field">
         <label for="editor-story-title">Story Title</label>
         <input type="text" id="editor-story-title">
+      </div>
+      <div class="editor-field" id="editor-child-name-field" style="display:none;">
+        <label for="editor-child-name">Child's Name</label>
+        <input type="text" id="editor-child-name">
       </div>
       <div class="editor-field">
         <label for="editor-parent-name">Parent/Caregiver Name</label>
@@ -5288,18 +5290,14 @@ function openTemplatePicker() {
     if (tmpl.pages[0] && tmpl.pages[0].stockKey && STORY_SVGS[tmpl.pages[0].stockKey]) {
       cover.innerHTML = STORY_SVGS[tmpl.pages[0].stockKey];
     }
+    card.appendChild(cover);
     const info = document.createElement('div');
     info.className = 'picker-card-info';
     const title = document.createElement('div');
     title.className = 'picker-card-title';
     title.textContent = tmpl.title;
     info.appendChild(title);
-    const desc = document.createElement('div');
-    desc.className = 'picker-card-desc';
-    desc.textContent = tmpl.description;
-    info.appendChild(desc);
     card.appendChild(info);
-    card.appendChild(cover);
     card.addEventListener('click', () => {
       picker.classList.remove('open');
       if (kidsMode) {
@@ -5316,18 +5314,14 @@ function openTemplatePicker() {
   sCover.className = 'picker-card-cover';
   sCover.style.background = '#F0F4FF';
   sCover.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#7B8FB2" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  scratch.appendChild(sCover);
   const sInfo = document.createElement('div');
   sInfo.className = 'picker-card-info';
   const sTitle = document.createElement('div');
   sTitle.className = 'picker-card-title';
   sTitle.textContent = 'Create Story';
   sInfo.appendChild(sTitle);
-  const sDesc = document.createElement('div');
-  sDesc.className = 'picker-card-desc';
-  sDesc.textContent = 'Write your own from scratch';
-  sInfo.appendChild(sDesc);
   scratch.appendChild(sInfo);
-  scratch.appendChild(sCover);
   scratch.addEventListener('click', () => {
     picker.classList.remove('open');
     openStoryEditor(null);
@@ -5406,6 +5400,14 @@ function openStoryEditor(story) {
   editorPersonMode = editingStory.personMode || 'first';
 
   document.getElementById('editor-story-title').value = editingStory.title;
+  const childNameField = document.getElementById('editor-child-name-field');
+  const childNameInput = document.getElementById('editor-child-name');
+  if (globalName) {
+    childNameField.style.display = 'none';
+  } else {
+    childNameField.style.display = '';
+    childNameInput.value = editingStory.childName || '';
+  }
   document.getElementById('editor-parent-name').value = editingStory.parentName;
   document.querySelectorAll('#editor-person-mode .seg-btn').forEach(btn => {
     btn.setAttribute('aria-checked', String(btn.dataset.value === editorPersonMode));
@@ -5469,6 +5471,10 @@ document.getElementById('editor-child-age').addEventListener('click', (e) => {
 
 document.getElementById('editor-setup-next').addEventListener('click', () => {
   editingStory.title = document.getElementById('editor-story-title').value.trim();
+  if (!getGlobalChildName()) {
+    editingStory.childName = document.getElementById('editor-child-name').value.trim();
+    if (!editingStory.childName) { showToast('Please enter the child\'s name'); return; }
+  }
   editingStory.parentName = document.getElementById('editor-parent-name').value.trim();
   editingStory.personMode = editorPersonMode;
   if (!editingStory.title) { showToast('Please enter a story title'); return; }
@@ -5738,6 +5744,9 @@ document.getElementById('editor-preview-btn').addEventListener('click', () => {
 // Save
 document.getElementById('editor-save').addEventListener('click', async () => {
   editingStory.title = document.getElementById('editor-story-title').value.trim() || editingStory.title;
+  if (!getGlobalChildName()) {
+    editingStory.childName = document.getElementById('editor-child-name').value.trim() || editingStory.childName;
+  }
   editingStory.parentName = document.getElementById('editor-parent-name').value.trim() || editingStory.parentName;
   editingStory.personMode = editorPersonMode;
   editingStory.updatedAt = Date.now();
