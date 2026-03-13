@@ -112,7 +112,7 @@ body { display: flex; flex-direction: column; }
   transform: translateX(-50%) translateY(8px);
   background: rgba(50,50,60,0.92); backdrop-filter: blur(8px);
   color: #fff; padding: 12px 24px; border-radius: var(--radius-lg);
-  font-size: 0.95rem; font-weight: 700; z-index: 300; opacity: 0;
+  font-size: 0.95rem; font-weight: 700; z-index: 9999; opacity: 0;
   transition: opacity 0.3s, transform 0.3s; pointer-events: none;
   box-shadow: 0 6px 24px rgba(0,0,0,0.15);
 }
@@ -1756,8 +1756,15 @@ body.sensory-high-contrast .task-tile {
 
 #stories-empty {
   display: none; flex: 1; flex-direction: column; align-items: center;
-  justify-content: center; gap: 12px; color: #999; padding: 40px; text-align: center;
+  justify-content: center; gap: 16px; color: #999; padding: 40px; text-align: center;
 }
+#stories-empty-new {
+  padding: 20px 48px; border: none; border-radius: var(--radius-md);
+  background: var(--chrome-primary); color: #fff; font-size: 1.1rem;
+  font-weight: 700; cursor: pointer; font-family: inherit;
+  box-shadow: var(--shadow-soft); transition: transform 0.15s;
+}
+#stories-empty-new:active { transform: scale(0.97); }
 
 #stories-parent-controls {
   display: none; gap: 8px; padding: 8px 16px; flex-shrink: 0;
@@ -1869,7 +1876,9 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   padding: 8px 16px; border: none; border-radius: var(--radius-sm);
   background: var(--chrome-primary); color: #fff; font-size: 0.9rem;
   font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: opacity 0.2s;
 }
+#editor-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
 #editor-body {
   flex: 1; overflow-y: auto; padding: 16px;
@@ -1939,6 +1948,154 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 #editor-page-nav { display: flex; gap: 8px; justify-content: space-between; }
 
+/* Age pill selector */
+.age-pill-group {
+  display: flex; gap: 8px; justify-content: center;
+}
+.age-pill {
+  min-width: 48px; min-height: 48px; border-radius: 24px;
+  border: 2px solid var(--chrome-border); background: var(--chrome-surface);
+  font-family: inherit; font-size: 1.1rem; font-weight: 700;
+  color: var(--chrome-text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.age-pill[aria-checked="true"] {
+  background: var(--chrome-primary); border-color: var(--chrome-primary); color: #fff;
+}
+.age-pill-prompt {
+  text-align: center; font-size: 0.8rem; color: var(--chrome-text-muted);
+  margin-top: 6px; transition: opacity 0.2s;
+}
+@keyframes agePulse {
+  0% { box-shadow: 0 0 0 0 rgba(124,116,255,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(124,116,255,0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(124,116,255,0); }
+}
+.age-pill-group.pulse { animation: agePulse 0.4s ease; }
+
+/* Word counter and progress bar */
+.word-counter-row {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  font-size: 0.8rem; margin-top: 4px; min-height: 1.2em;
+}
+.word-counter-count { font-weight: 600; white-space: nowrap; }
+.word-counter-coaching {
+  font-style: italic; color: var(--chrome-text-secondary);
+  flex: 1; min-width: 0;
+}
+.word-progress-bar {
+  height: 4px; border-radius: 2px; margin-top: 4px;
+  background: var(--chrome-border-light); overflow: hidden;
+}
+.word-progress-fill {
+  height: 100%; border-radius: 2px; transition: width 0.2s, background-color 0.2s;
+  background: var(--chrome-primary);
+}
+.word-counter-warning {
+  background: rgba(211,47,47,0.06); border-radius: 8px;
+  padding: 8px 12px; margin-top: 6px; font-size: 0.8rem;
+}
+.word-split-btn {
+  display: inline-block; background: var(--chrome-primary); color: #fff;
+  border: none; border-radius: 20px; padding: 6px 16px;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  font-family: inherit; margin-top: 8px;
+  animation: splitSlideIn 0.2s ease-out;
+}
+@keyframes splitSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* -- Story Helper Wizard -- */
+/* helper visibility controlled via inline style like other editor steps */
+.helper-progress {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 20px;
+}
+.helper-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--chrome-border); transition: all 0.2s;
+}
+.helper-dot.active { background: var(--chrome-primary); transform: scale(1.2); }
+.helper-dot.done { background: var(--chrome-primary); opacity: 0.5; }
+
+.helper-step { display: none; }
+.helper-step.active { display: block; }
+
+.helper-step-title {
+  font-size: 1.15rem; font-weight: 800; color: #444; margin-bottom: 4px;
+}
+.helper-coaching {
+  font-size: 0.85rem; color: #888; font-style: italic;
+  line-height: 1.4; margin-bottom: 16px;
+}
+.helper-field-label {
+  font-size: 0.9rem; font-weight: 700; color: #555; margin-bottom: 6px;
+}
+.helper-field input, .helper-field textarea {
+  width: 100%; padding: 12px; border: 2px solid var(--chrome-border);
+  border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem;
+  box-sizing: border-box;
+}
+.helper-field textarea { resize: vertical; }
+.helper-field { margin-bottom: 16px; }
+
+.helper-chips {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+}
+.helper-chip {
+  padding: 10px 16px; border: 2px solid var(--chrome-border);
+  border-radius: 20px; background: var(--chrome-surface); font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; font-family: inherit; color: #666;
+  transition: all 0.15s; user-select: none; min-height: 44px;
+  display: flex; align-items: center;
+}
+.helper-chip.selected {
+  border-color: var(--chrome-primary); background: rgba(124,116,255,0.1);
+  color: var(--chrome-primary);
+}
+.helper-chip:active { transform: scale(0.96); }
+
+.helper-seq-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.helper-seq-item {
+  display: flex; align-items: center; gap: 8px;
+}
+.helper-seq-item input {
+  flex: 1; padding: 12px; border: 2px solid var(--chrome-border);
+  border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem;
+}
+.helper-seq-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--chrome-primary);
+  color: #fff; font-size: 0.8rem; font-weight: 700; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.helper-seq-remove {
+  width: 36px; height: 36px; border: none; background: none;
+  color: #ccc; font-size: 1.3rem; cursor: pointer; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.helper-seq-remove:hover { color: #D32F2F; background: #ffebee; }
+
+.helper-nav {
+  display: flex; gap: 10px; margin-top: 20px;
+}
+.helper-nav .editor-secondary-btn { flex: 1; }
+.helper-nav .editor-primary-btn { flex: 2; margin-top: 0; }
+
+.helper-add-step {
+  padding: 10px 16px; border: 2px dashed var(--chrome-border);
+  border-radius: var(--radius-sm); background: none; font-size: 0.9rem;
+  font-weight: 600; cursor: pointer; font-family: inherit; color: #888;
+  width: 100%; margin-bottom: 12px;
+}
+.helper-add-step:active { background: rgba(124,116,255,0.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  .helper-dot { transition: none; }
+  .helper-chip { transition: none; }
+}
+
 /* -- Template Picker -- */
 #template-picker {
   display: none; position: fixed; inset: 0; z-index: 950;
@@ -1957,21 +2114,37 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   border: none; cursor: pointer; display: flex; align-items: center;
   justify-content: center; color: #555;
 }
+#picker-lock {
+  width: 36px; height: 36px; border-radius: 50%; background: none;
+  border: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: rgba(124, 116, 255, 0.3);
+  transition: color 0.2s, transform 0.2s; -webkit-user-select: none; user-select: none;
+}
+#picker-lock svg { width: 20px; height: 20px; }
+#picker-lock.holding { color: #C9A84C; transform: scale(1.15); }
+.parent-mode #picker-lock { color: #C9A84C; }
 
 #picker-grid {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
   padding: 12px; flex: 1; overflow-y: auto; align-content: start;
 }
+@media (min-width: 600px) { #picker-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { #picker-grid { grid-template-columns: repeat(4, 1fr); } }
 .picker-card {
   background: #fff; border-radius: var(--radius-md); overflow: hidden;
   box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.15s;
+  display: flex; flex-direction: column;
 }
 .picker-card:active { transform: scale(0.97); }
 .picker-card-cover {
-  width: 100%; aspect-ratio: 4/3; background: #FFF8F0;
-  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 0; padding-bottom: 75%; position: relative;
+  background: #FFF8F0;
 }
-.picker-card-cover svg { width: 50%; height: 50%; }
+.picker-card-cover svg {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%; height: 50%;
+}
 .picker-card-info { padding: 10px; }
 .picker-card-title { font-size: 0.9rem; font-weight: 700; color: #333; }
 .picker-card-desc { font-size: 0.75rem; color: #888; margin-top: 2px; }
@@ -2096,9 +2269,9 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="stories-content">
     <div id="stories-grid"></div>
     <div id="stories-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <div style="font-size:1.1rem;font-weight:600;">No stories yet</div>
-      <div style="font-size:0.9rem;">Social stories help prepare your child for new experiences</div>
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <button id="stories-empty-new">New Story</button>
+      <div style="font-size:0.85rem;">Social stories help prepare your child for new experiences</div>
     </div>
     <div id="stories-parent-controls">
       <button class="stories-parent-btn" id="btn-new-story">New Story</button>
@@ -2156,15 +2329,165 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <input type="text" id="editor-parent-name">
       </div>
       <div class="editor-field">
+        <label>Child's Age (years)</label>
+        <div class="age-pill-group" id="editor-child-age" role="radiogroup" aria-label="Child's age in years">
+          <button class="age-pill" role="radio" aria-checked="false" data-age="2">2</button>
+          <button class="age-pill" role="radio" aria-checked="false" data-age="3">3</button>
+          <button class="age-pill" role="radio" aria-checked="false" data-age="4">4</button>
+          <button class="age-pill" role="radio" aria-checked="false" data-age="5">5</button>
+          <button class="age-pill" role="radio" aria-checked="false" data-age="6">6</button>
+        </div>
+        <div class="age-pill-prompt" id="age-pill-prompt">Select your child's age for page length guidance</div>
+      </div>
+      <div class="editor-field">
         <label>Perspective</label>
         <div class="seg-group" id="editor-person-mode" role="radiogroup" aria-label="Story perspective">
           <button class="seg-btn" role="radio" aria-checked="true" data-value="first">I will...</button>
           <button class="seg-btn" role="radio" aria-checked="false" data-value="third">[Name] will...</button>
         </div>
       </div>
-      <button id="editor-setup-next" class="editor-primary-btn">Next: Edit Pages</button>
+      <button id="editor-setup-next" class="editor-primary-btn">Next</button>
     </div>
-    <!-- Step 2: Pages -->
+    <!-- Step 2: Story Helper Wizard -->
+    <div id="editor-step-helper" class="editor-step" style="display:none">
+      <div class="helper-progress" role="group" aria-label="Story helper progress">
+        <div class="helper-dot" data-step="0"></div>
+        <div class="helper-dot" data-step="1"></div>
+        <div class="helper-dot" data-step="2"></div>
+        <div class="helper-dot" data-step="3"></div>
+        <div class="helper-dot" data-step="4"></div>
+        <div class="helper-dot" data-step="5"></div>
+      </div>
+
+      <div class="helper-step" data-helper="0">
+        <div class="helper-step-title">What's the situation?</div>
+        <div class="helper-coaching">Social stories work best when they're specific to your child's actual experience.</div>
+        <div class="helper-field">
+          <div class="helper-field-label">Describe the situation</div>
+          <input type="text" id="helper-situation" autocomplete="off">
+        </div>
+        <div class="helper-field-label">Or pick a category to get started</div>
+        <div class="helper-chips" id="helper-sparks">
+          <button class="helper-chip" data-val="a new experience">A new experience</button>
+          <button class="helper-chip" data-val="something scary">Something scary</button>
+          <button class="helper-chip" data-val="a routine change">A routine change</button>
+          <button class="helper-chip" data-val="a social interaction">A social interaction</button>
+          <button class="helper-chip" data-val="a sensory challenge">A sensory challenge</button>
+          <button class="helper-chip" data-val="a transition">A transition</button>
+        </div>
+        <div class="helper-nav">
+          <button class="editor-primary-btn" id="helper-next-0">Next</button>
+        </div>
+      </div>
+
+      <div class="helper-step" data-helper="1">
+        <div class="helper-step-title">Setting the scene</div>
+        <div class="helper-coaching">Sensory details help your child mentally prepare. Think about what they'll see, hear, or feel.</div>
+        <div class="helper-field">
+          <div class="helper-field-label">Describe where this happens and what your child will notice</div>
+          <textarea id="helper-scene" rows="3"></textarea>
+          <div class="word-counter-row helper-word-hint" id="helper-scene-hint" style="display:none" aria-live="polite">
+            <span class="word-counter-count"></span>
+            <span class="word-counter-coaching"></span>
+          </div>
+        </div>
+        <div class="helper-field-label">What senses might be involved?</div>
+        <div class="helper-chips" id="helper-senses">
+          <button class="helper-chip" data-val="sights">What they'll see</button>
+          <button class="helper-chip" data-val="sounds">What they'll hear</button>
+          <button class="helper-chip" data-val="touch">What they'll feel or touch</button>
+          <button class="helper-chip" data-val="smells">What they'll smell</button>
+        </div>
+        <div class="helper-nav">
+          <button class="editor-secondary-btn" id="helper-back-1">Back</button>
+          <button class="editor-primary-btn" id="helper-next-1">Next</button>
+        </div>
+      </div>
+
+      <div class="helper-step" data-helper="2">
+        <div class="helper-step-title">What happens?</div>
+        <div class="helper-coaching">Break the event into simple steps. Spend extra time on the part that's most difficult.</div>
+        <div class="helper-seq-list" id="helper-seq-list"></div>
+        <button class="helper-add-step" id="helper-add-seq">+ Add a step</button>
+        <div class="helper-nav">
+          <button class="editor-secondary-btn" id="helper-back-2">Back</button>
+          <button class="editor-primary-btn" id="helper-next-2">Next</button>
+        </div>
+      </div>
+
+      <div class="helper-step" data-helper="3">
+        <div class="helper-step-title">How might they feel?</div>
+        <div class="helper-coaching">Naming hard feelings tells your child the emotion is normal and expected. It's okay to name the scary stuff.</div>
+        <div class="helper-field-label">How might <span class="helper-child-name">your child</span> feel?</div>
+        <div class="helper-chips" id="helper-feelings">
+          <button class="helper-chip" data-val="scared">Scared</button>
+          <button class="helper-chip" data-val="worried">Worried</button>
+          <button class="helper-chip" data-val="confused">Confused</button>
+          <button class="helper-chip" data-val="overwhelmed">Overwhelmed</button>
+          <button class="helper-chip" data-val="excited">Excited</button>
+          <button class="helper-chip" data-val="nervous">Nervous</button>
+          <button class="helper-chip" data-val="upset">Upset</button>
+          <button class="helper-chip" data-val="unsure">Unsure</button>
+        </div>
+        <div class="helper-field">
+          <div class="helper-field-label">How might other people there be feeling? (optional)</div>
+          <input type="text" id="helper-others-feelings" autocomplete="off">
+        </div>
+        <div class="helper-nav">
+          <button class="editor-secondary-btn" id="helper-back-3">Back</button>
+          <button class="editor-primary-btn" id="helper-next-3">Next</button>
+        </div>
+      </div>
+
+      <div class="helper-step" data-helper="4">
+        <div class="helper-step-title">What helps them?</div>
+        <div class="helper-coaching">Use strategies your child already knows. A social story isn't the place for brand-new coping skills -- use what's in their toolbox.</div>
+        <div class="helper-field-label">What strategies help <span class="helper-child-name">your child</span> calm down?</div>
+        <div class="helper-chips" id="helper-coping">
+          <button class="helper-chip" data-val="take deep breaths">Deep breaths</button>
+          <button class="helper-chip" data-val="squeeze a fidget">Squeeze a fidget</button>
+          <button class="helper-chip" data-val="hold {parent}'s hand">Hold my hand</button>
+          <button class="helper-chip" data-val="ask for a break">Ask for a break</button>
+          <button class="helper-chip" data-val="count to five">Count to five</button>
+          <button class="helper-chip" data-val="use my words">Use my words</button>
+          <button class="helper-chip" data-val="hug my stuffy">Hug my stuffy</button>
+          <button class="helper-chip" data-val="close my eyes">Close my eyes</button>
+        </div>
+        <div class="helper-field">
+          <div class="helper-field-label">Any other strategies?</div>
+          <input type="text" id="helper-custom-coping" autocomplete="off">
+        </div>
+        <div class="helper-field">
+          <div class="helper-field-label">Who can help?</div>
+          <input type="text" id="helper-who-helps" autocomplete="off">
+        </div>
+        <div class="helper-nav">
+          <button class="editor-secondary-btn" id="helper-back-4">Back</button>
+          <button class="editor-primary-btn" id="helper-next-4">Next</button>
+        </div>
+      </div>
+
+      <div class="helper-step" data-helper="5">
+        <div class="helper-step-title">The positive ending</div>
+        <div class="helper-coaching">The ending should feel achievable, not perfect. "I tried and I was brave" works better than "I had a great time" if your child probably won't enjoy it.</div>
+        <div class="helper-field">
+          <div class="helper-field-label">How does the story end positively?</div>
+          <textarea id="helper-ending" rows="2"></textarea>
+        </div>
+        <div class="helper-field-label">Or pick a tone</div>
+        <div class="helper-chips" id="helper-tone">
+          <button class="helper-chip" data-val="I was brave">I was brave</button>
+          <button class="helper-chip" data-val="I did it">I did it</button>
+          <button class="helper-chip" data-val="It was okay">It was okay</button>
+          <button class="helper-chip" data-val="I can try again next time">I can try again</button>
+        </div>
+        <div class="helper-nav">
+          <button class="editor-secondary-btn" id="helper-back-5">Back</button>
+          <button class="editor-primary-btn" id="helper-generate">Create Story</button>
+        </div>
+      </div>
+    </div>
+    <!-- Step 3: Pages -->
     <div id="editor-step-pages" class="editor-step" style="display:none">
       <div id="editor-page-indicator"></div>
       <div id="editor-page-image-area">
@@ -2177,7 +2500,15 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div class="editor-field">
         <label for="editor-page-text">Page Text</label>
         <textarea id="editor-page-text" rows="3"></textarea>
-        <div id="editor-text-hint" style="font-size:0.8rem;color:#888;margin-top:4px;"></div>
+        <div class="word-progress-bar"><div class="word-progress-fill" id="editor-word-bar"></div></div>
+        <div class="word-counter-row" aria-live="polite">
+          <span class="word-counter-count" id="editor-word-count"></span>
+          <span class="word-counter-coaching" id="editor-word-coaching"></span>
+        </div>
+        <div id="editor-word-warning" class="word-counter-warning" style="display:none"></div>
+        <div id="editor-split-wrap" style="display:none">
+          <button class="word-split-btn" id="editor-split-btn" aria-label="Split this page into two pages">Split into 2 pages</button>
+        </div>
       </div>
       <div class="editor-field">
         <label>Sentence Type</label>
@@ -2208,9 +2539,13 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <span>Choose a Template</span>
+    <button id="picker-lock" aria-label="Hold to toggle parent mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </button>
   </div>
   <div id="picker-grid"></div>
-  <button id="picker-scratch" class="editor-secondary-btn" style="margin:12px 16px;">Start from Scratch</button>
 </div>
 
 <!-- Settings Modal -->
@@ -4622,6 +4957,51 @@ document.getElementById('btn-reset-defaults').addEventListener('click', async ()
 });
 
 // -- Social Stories --
+const AGE_CONFIG = {
+  2: { wordLimits: { soft: 8, hard: 12 } },
+  3: { wordLimits: { soft: 12, hard: 18 } },
+  4: { wordLimits: { soft: 18, hard: 27 } },
+  5: { wordLimits: { soft: 25, hard: 38 } },
+  6: { wordLimits: { soft: 35, hard: 50 } }
+};
+
+function getAgeConfig(story) {
+  if (!story || !story.childAge) return null;
+  return AGE_CONFIG[story.childAge] || null;
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function countStoryWords(story, text) {
+  if (!text || !text.trim()) return 0;
+  let cleaned = text.trim();
+  const name = story && story.childName ? story.childName.trim() : '';
+  if (name) {
+    const namePattern = new RegExp('\\b' + escapeRegex(name) + '\\b', 'gi');
+    cleaned = cleaned.replace(namePattern, '');
+  }
+  return cleaned.split(/\s+/).filter(Boolean).length;
+}
+
+function getWordLimitState(story, wordCount) {
+  const config = getAgeConfig(story);
+  if (!config) return { state: 'none', soft: 0, hard: 0 };
+  const { soft, hard } = config.wordLimits;
+  const splitThreshold = Math.round(hard * 0.8);
+  if (wordCount >= hard) return { state: 'hardcap', soft, hard, splitThreshold };
+  if (wordCount >= splitThreshold) return { state: 'nearcap', soft, hard, splitThreshold };
+  if (wordCount > soft) return { state: 'over', soft, hard, splitThreshold };
+  return { state: 'ok', soft, hard, splitThreshold };
+}
+
+function storyHasOverlimitPages(story) {
+  const config = getAgeConfig(story);
+  if (!config) return false;
+  return story.pages.some(p => countStoryWords(story, p.text) >= config.wordLimits.hard);
+}
+
 let currentReaderStory = null;
 let currentReaderPage = 0;
 let editingStory = null;
@@ -4825,27 +5205,97 @@ function openTemplatePicker() {
     card.appendChild(info);
     card.addEventListener('click', () => {
       picker.classList.remove('open');
-      createStoryFromTemplate(tmpl);
+      if (parentMode) {
+        createStoryFromTemplate(tmpl);
+      } else {
+        readTemplateStory(tmpl);
+      }
     });
     grid.appendChild(card);
   });
+  const scratch = document.createElement('div');
+  scratch.className = 'picker-card';
+  const sCover = document.createElement('div');
+  sCover.className = 'picker-card-cover';
+  sCover.style.background = '#F0F4FF';
+  sCover.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#7B8FB2" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  scratch.appendChild(sCover);
+  const sInfo = document.createElement('div');
+  sInfo.className = 'picker-card-info';
+  const sTitle = document.createElement('div');
+  sTitle.className = 'picker-card-title';
+  sTitle.textContent = 'Create Story';
+  sInfo.appendChild(sTitle);
+  const sDesc = document.createElement('div');
+  sDesc.className = 'picker-card-desc';
+  sDesc.textContent = 'Write your own from scratch';
+  sInfo.appendChild(sDesc);
+  scratch.appendChild(sInfo);
+  scratch.addEventListener('click', () => {
+    if (!parentMode) {
+      showToast('Requires parent mode');
+      return;
+    }
+    picker.classList.remove('open');
+    openStoryEditor(null);
+  });
+  grid.appendChild(scratch);
   picker.classList.add('open');
+}
+
+function readTemplateStory(tmpl) {
+  const pages = tmpl.pages.map(p => ({
+    text: personalizeStoryText(p.text, '', 'first', 'Mommy'),
+    sentenceType: p.sentenceType,
+    imageType: 'stock',
+    stockKey: p.stockKey,
+    customImageKey: null
+  }));
+  openStoryReader({ title: tmpl.title, childName: '', personMode: 'first', parentName: 'Mommy' }, pages);
 }
 
 document.getElementById('picker-close').addEventListener('click', () => {
   document.getElementById('template-picker').classList.remove('open');
 });
-document.getElementById('picker-scratch').addEventListener('click', () => {
-  document.getElementById('template-picker').classList.remove('open');
-  openStoryEditor(null);
-});
+
+(function() {
+  const plck = document.getElementById('picker-lock');
+  let pHold = null, pDidActivate = false;
+  function pStart(e) {
+    e.preventDefault();
+    pDidActivate = false;
+    plck.classList.add('holding');
+    pHold = setTimeout(() => {
+      pDidActivate = true;
+      plck.classList.remove('holding');
+      if (navigator.vibrate) navigator.vibrate(10);
+      setParentMode(!parentMode);
+      document.getElementById('template-picker').classList.remove('open');
+      openTemplatePicker();
+    }, 500);
+  }
+  function pCancel() {
+    if (pHold) { clearTimeout(pHold); pHold = null; }
+    plck.classList.remove('holding');
+  }
+  plck.addEventListener('touchstart', pStart, { passive: false });
+  plck.addEventListener('touchend', pCancel);
+  plck.addEventListener('touchcancel', pCancel);
+  plck.addEventListener('mousedown', pStart);
+  plck.addEventListener('mouseup', pCancel);
+  plck.addEventListener('mouseleave', pCancel);
+  plck.addEventListener('click', (e) => { if (pDidActivate) e.stopPropagation(); });
+})();
+
 document.getElementById('btn-new-story').addEventListener('click', openTemplatePicker);
+document.getElementById('stories-empty-new').addEventListener('click', openTemplatePicker);
 
 function createStoryFromTemplate(tmpl) {
   const story = {
     id: generateId(),
     title: tmpl.title,
     childName: '',
+    childAge: null,
     parentName: '',
     personMode: 'first',
     createdAt: Date.now(),
@@ -4871,6 +5321,7 @@ function openStoryEditor(story) {
     id: generateId(),
     title: '',
     childName: '',
+    childAge: null,
     parentName: '',
     personMode: 'first',
     createdAt: Date.now(),
@@ -4892,6 +5343,10 @@ function openStoryEditor(story) {
   document.querySelectorAll('#editor-person-mode .seg-btn').forEach(btn => {
     btn.setAttribute('aria-checked', String(btn.dataset.value === editorPersonMode));
   });
+  document.querySelectorAll('#editor-child-age .age-pill').forEach(btn => {
+    btn.setAttribute('aria-checked', String(parseInt(btn.dataset.age) === editingStory.childAge));
+  });
+  updateSetupNextState();
 
   document.getElementById('editor-step-setup').style.display = '';
   document.getElementById('editor-step-pages').style.display = 'none';
@@ -4900,13 +5355,29 @@ function openStoryEditor(story) {
   document.getElementById('story-editor').classList.add('open');
 }
 
+function updateSetupNextState() {
+  const hasAge = editingStory.childAge >= 2 && editingStory.childAge <= 6;
+  const prompt = document.getElementById('age-pill-prompt');
+  prompt.textContent = hasAge ? '' : 'Select your child\'s age for page length guidance';
+  prompt.style.opacity = hasAge ? '0' : '1';
+}
+
 document.getElementById('editor-back').addEventListener('click', () => {
   const setupVisible = document.getElementById('editor-step-setup').style.display !== 'none';
+  const helperVisible = document.getElementById('editor-step-helper').style.display !== 'none';
   if (setupVisible) {
     document.getElementById('story-editor').classList.remove('open');
+  } else if (helperVisible) {
+    if (helperStep > 0) {
+      setHelperStep(helperStep - 1);
+    } else {
+      document.getElementById('editor-step-helper').style.display = 'none';
+      document.getElementById('editor-step-setup').style.display = '';
+    }
   } else {
     document.getElementById('editor-step-setup').style.display = '';
     document.getElementById('editor-step-pages').style.display = 'none';
+    document.getElementById('editor-step-helper').style.display = 'none';
   }
 });
 
@@ -4919,6 +5390,16 @@ document.getElementById('editor-person-mode').addEventListener('click', (e) => {
   });
 });
 
+document.getElementById('editor-child-age').addEventListener('click', (e) => {
+  const pill = e.target.closest('.age-pill');
+  if (!pill) return;
+  editingStory.childAge = parseInt(pill.dataset.age);
+  document.querySelectorAll('#editor-child-age .age-pill').forEach(b => {
+    b.setAttribute('aria-checked', String(parseInt(b.dataset.age) === editingStory.childAge));
+  });
+  updateSetupNextState();
+});
+
 document.getElementById('editor-setup-next').addEventListener('click', () => {
   editingStory.title = document.getElementById('editor-story-title').value.trim();
   editingStory.childName = document.getElementById('editor-child-name').value.trim();
@@ -4926,15 +5407,30 @@ document.getElementById('editor-setup-next').addEventListener('click', () => {
   editingStory.personMode = editorPersonMode;
   if (!editingStory.title) { showToast('Please enter a story title'); return; }
   if (!editingStory.childName) { showToast('Please enter the child\'s name'); return; }
-  document.getElementById('editor-step-setup').style.display = 'none';
-  document.getElementById('editor-step-pages').style.display = '';
-  editingPageIdx = 0;
-  renderEditorPage();
+  if (!editingStory.childAge) {
+    const group = document.getElementById('editor-child-age');
+    group.classList.remove('pulse');
+    void group.offsetWidth;
+    group.classList.add('pulse');
+    return;
+  }
+  const hasContent = editingStory.pages.some(p => p.text && p.text.trim());
+  if (hasContent) {
+    document.getElementById('editor-step-setup').style.display = 'none';
+    document.getElementById('editor-step-pages').style.display = '';
+    editingPageIdx = 0;
+    renderEditorPage();
+  } else {
+    openStoryHelper();
+  }
 });
 
 function renderEditorPage() {
   const page = editingStory.pages[editingPageIdx];
-  document.getElementById('editor-page-indicator').textContent = 'Page ' + (editingPageIdx + 1) + ' of ' + editingStory.pages.length;
+  const indicatorText = 'Page ' + (editingPageIdx + 1) + ' of ' + editingStory.pages.length;
+  const noteText = page._continueNote || '';
+  document.getElementById('editor-page-indicator').innerHTML = indicatorText +
+    (noteText ? '<br><span style="font-size:0.75rem;color:var(--chrome-text-muted);font-weight:400;">' + noteText + '</span>' : '');
 
   const preview = document.getElementById('editor-page-image-preview');
   const removeBtn = document.getElementById('editor-page-remove-img');
@@ -4954,17 +5450,80 @@ function renderEditorPage() {
 
   const displayText = personalizeStoryText(page.text || '', editingStory.childName, editorPersonMode, editingStory.parentName || 'Mommy');
   document.getElementById('editor-page-text').value = page.text || '';
-  const words = (page.text || '').trim().split(/\s+/).filter(Boolean).length;
-  document.getElementById('editor-text-hint').textContent = words > 0 ? words + ' word' + (words !== 1 ? 's' : '') + (words > 10 ? ' -- consider simplifying' : '') : '';
+  updateWordCounter(page.text || '');
 
   document.querySelectorAll('.sentence-type-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.type === page.sentenceType);
   });
 
   updateRatioBar();
+  updateSaveState();
 
   document.getElementById('editor-page-prev').disabled = editingPageIdx === 0;
   document.getElementById('editor-page-delete').style.display = editingStory.pages.length > 1 ? '' : 'none';
+}
+
+function updateWordCounter(text) {
+  const words = countStoryWords(editingStory, text);
+  const limitState = getWordLimitState(editingStory, words);
+  const countEl = document.getElementById('editor-word-count');
+  const coachEl = document.getElementById('editor-word-coaching');
+  const barEl = document.getElementById('editor-word-bar');
+  const warnEl = document.getElementById('editor-word-warning');
+  const splitWrap = document.getElementById('editor-split-wrap');
+
+  if (limitState.state === 'none') {
+    countEl.textContent = words > 0 ? words + ' word' + (words !== 1 ? 's' : '') : '';
+    countEl.style.color = 'var(--chrome-text-muted)';
+    coachEl.textContent = '';
+    barEl.parentElement.style.display = 'none';
+    warnEl.style.display = 'none';
+    splitWrap.style.display = 'none';
+    return;
+  }
+
+  barEl.parentElement.style.display = '';
+  const pct = Math.min(words / limitState.soft * 100, 100);
+  barEl.style.width = pct + '%';
+
+  countEl.textContent = words + ' / ' + limitState.soft + ' words';
+
+  if (limitState.state === 'ok') {
+    countEl.style.color = 'var(--chrome-text-muted)';
+    barEl.style.background = 'var(--chrome-primary)';
+    coachEl.textContent = '';
+    warnEl.style.display = 'none';
+    splitWrap.style.display = 'none';
+  } else if (limitState.state === 'over') {
+    countEl.style.color = 'var(--chrome-accent)';
+    barEl.style.background = 'var(--chrome-accent)';
+    coachEl.textContent = 'Shorter pages are easier to follow -- you know your child best';
+    coachEl.style.color = 'var(--chrome-accent)';
+    warnEl.style.display = 'none';
+    splitWrap.style.display = 'none';
+  } else if (limitState.state === 'nearcap') {
+    countEl.style.color = 'var(--chrome-accent)';
+    barEl.style.background = 'var(--chrome-accent)';
+    coachEl.textContent = 'Getting long -- splitting into two pages can help';
+    coachEl.style.color = 'var(--chrome-accent)';
+    warnEl.style.display = 'none';
+    splitWrap.style.display = '';
+  } else if (limitState.state === 'hardcap') {
+    countEl.style.color = 'var(--chrome-danger)';
+    barEl.style.background = 'var(--chrome-danger)';
+    coachEl.textContent = '';
+    warnEl.style.display = '';
+    warnEl.innerHTML = '<span style="color:var(--chrome-danger);font-weight:600;">Page is full</span> -- try splitting into two pages';
+    splitWrap.style.display = '';
+  }
+}
+
+function updateSaveState() {
+  const saveBtn = document.getElementById('editor-save');
+  const overlimit = storyHasOverlimitPages(editingStory);
+  saveBtn.disabled = overlimit;
+  saveBtn.title = overlimit ? 'Shorten or split pages over the limit' : '';
+  saveBtn.style.opacity = overlimit ? '0.5' : '';
 }
 
 function updateRatioBar() {
@@ -4985,9 +5544,14 @@ function updateRatioBar() {
 }
 
 document.getElementById('editor-page-text').addEventListener('input', (e) => {
-  editingStory.pages[editingPageIdx].text = e.target.value;
-  const words = e.target.value.trim().split(/\s+/).filter(Boolean).length;
-  document.getElementById('editor-text-hint').textContent = words > 0 ? words + ' word' + (words !== 1 ? 's' : '') + (words > 10 ? ' -- consider simplifying' : '') : '';
+  const page = editingStory.pages[editingPageIdx];
+  page.text = e.target.value;
+  if (page._continueNote) {
+    delete page._continueNote;
+    document.getElementById('editor-page-indicator').textContent = 'Page ' + (editingPageIdx + 1) + ' of ' + editingStory.pages.length;
+  }
+  updateWordCounter(e.target.value);
+  updateSaveState();
 });
 
 document.getElementById('editor-sentence-type').addEventListener('click', (e) => {
@@ -5047,6 +5611,60 @@ document.getElementById('editor-page-remove-img').addEventListener('click', asyn
   renderEditorPage();
 });
 
+// Split page
+function splitTextAtSentenceBoundary(text) {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('en', { granularity: 'sentence' });
+    const sentences = [...segmenter.segment(text)].map(s => s.segment);
+    if (sentences.length >= 2) {
+      const totalWords = text.trim().split(/\s+/).length;
+      const midTarget = Math.floor(totalWords / 2);
+      let runningWords = 0;
+      let bestSplit = 1;
+      let bestDist = totalWords;
+      for (let i = 0; i < sentences.length; i++) {
+        runningWords += sentences[i].trim().split(/\s+/).filter(Boolean).length;
+        const dist = Math.abs(runningWords - midTarget);
+        if (dist < bestDist && i < sentences.length - 1) {
+          bestDist = dist;
+          bestSplit = i + 1;
+        }
+      }
+      return [
+        sentences.slice(0, bestSplit).join('').trim(),
+        sentences.slice(bestSplit).join('').trim()
+      ];
+    }
+  }
+  const words = text.trim().split(/\s+/);
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+}
+
+document.getElementById('editor-split-btn').addEventListener('click', () => {
+  const page = editingStory.pages[editingPageIdx];
+  if (!page.text || !page.text.trim()) return;
+  if (editingStory.pages.length >= 12) { showToast('Maximum 12 pages'); return; }
+  const [first, second] = splitTextAtSentenceBoundary(page.text);
+  page.text = first;
+  const continueNote = '(Continued from page ' + (editingPageIdx + 1) + ') ';
+  editingStory.pages.splice(editingPageIdx + 1, 0, {
+    text: second,
+    sentenceType: page.sentenceType,
+    imageType: 'stock',
+    stockKey: null,
+    customImageKey: null,
+    _continueNote: continueNote
+  });
+  const btn = document.getElementById('editor-split-btn');
+  btn.textContent = 'Done!';
+  setTimeout(() => {
+    btn.textContent = 'Split into 2 pages';
+    editingPageIdx++;
+    renderEditorPage();
+  }, 600);
+});
+
 // Preview
 document.getElementById('editor-preview-btn').addEventListener('click', () => {
   openStoryReader(editingStory, editingStory.pages);
@@ -5060,6 +5678,10 @@ document.getElementById('editor-save').addEventListener('click', async () => {
   editingStory.personMode = editorPersonMode;
   editingStory.updatedAt = Date.now();
   if (!editingStory.title) { showToast('Please enter a story title'); return; }
+  if (storyHasOverlimitPages(editingStory)) {
+    showToast('Shorten or split pages over the word limit before saving');
+    return;
+  }
   await saveStory(editingStory);
   const existing = stories.find(s => s.id === editingStory.id);
   if (existing) { Object.assign(existing, editingStory); } else { stories.push(editingStory); }
@@ -5067,6 +5689,287 @@ document.getElementById('editor-save').addEventListener('click', async () => {
   renderStoriesList();
   showToast('Story saved');
 });
+
+// -- Story Helper Wizard --
+let helperStep = 0;
+let helperData = {};
+
+function resetHelperData() {
+  helperData = {
+    situation: '',
+    sparks: [],
+    scene: '',
+    senses: [],
+    steps: ['', '', ''],
+    feelings: [],
+    othersFeelings: '',
+    coping: [],
+    customCoping: '',
+    whoHelps: '',
+    ending: '',
+    tone: ''
+  };
+}
+
+function openStoryHelper() {
+  resetHelperData();
+  document.getElementById('editor-step-setup').style.display = 'none';
+  document.getElementById('editor-step-pages').style.display = 'none';
+  document.getElementById('editor-step-helper').style.display = '';
+  document.getElementById('helper-situation').value = '';
+  document.getElementById('helper-scene').value = '';
+  document.getElementById('helper-others-feelings').value = '';
+  document.getElementById('helper-custom-coping').value = '';
+  document.getElementById('helper-ending').value = '';
+  document.getElementById('helper-who-helps').value = editingStory.parentName || '';
+  document.querySelectorAll('.helper-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.helper-child-name').forEach(el => {
+    el.textContent = editingStory.childName || 'your child';
+  });
+  renderHelperSeqList();
+  setHelperStep(0);
+}
+
+function setHelperStep(n) {
+  helperStep = n;
+  document.querySelectorAll('#editor-step-helper .helper-step').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.helper) === n);
+  });
+  document.querySelectorAll('.helper-dot').forEach(dot => {
+    const s = parseInt(dot.dataset.step);
+    dot.className = 'helper-dot' + (s === n ? ' active' : s < n ? ' done' : '');
+  });
+  document.getElementById('editor-title').textContent = 'Story Helper';
+}
+
+function renderHelperSeqList() {
+  const list = document.getElementById('helper-seq-list');
+  list.innerHTML = '';
+  helperData.steps.forEach((text, i) => {
+    const row = document.createElement('div');
+    row.className = 'helper-seq-item';
+    const num = document.createElement('div');
+    num.className = 'helper-seq-num';
+    num.textContent = i + 1;
+    row.appendChild(num);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = text;
+    input.autocomplete = 'off';
+    const hint = document.createElement('div');
+    hint.className = 'word-counter-row helper-word-hint';
+    hint.style.display = 'none';
+    hint.setAttribute('aria-live', 'polite');
+    hint.innerHTML = '<span class="word-counter-count"></span> <span class="word-counter-coaching"></span>';
+    input.addEventListener('input', () => {
+      helperData.steps[i] = input.value;
+      const wc = countStoryWords(editingStory, input.value);
+      const ls = getWordLimitState(editingStory, wc);
+      if (ls.state === 'none' || ls.state === 'ok') {
+        hint.style.display = 'none';
+      } else {
+        hint.style.display = '';
+        hint.querySelector('.word-counter-count').textContent = wc + ' / ' + ls.soft + ' words';
+        hint.querySelector('.word-counter-count').style.color = ls.state === 'hardcap' ? 'var(--chrome-danger)' : 'var(--chrome-accent)';
+        hint.querySelector('.word-counter-coaching').textContent = 'Shorter pages are easier to follow';
+        hint.querySelector('.word-counter-coaching').style.color = ls.state === 'hardcap' ? 'var(--chrome-danger)' : 'var(--chrome-accent)';
+      }
+    });
+    row.appendChild(input);
+    row.appendChild(hint);
+    if (helperData.steps.length > 2) {
+      const rm = document.createElement('button');
+      rm.className = 'helper-seq-remove';
+      rm.innerHTML = '&times;';
+      rm.setAttribute('aria-label', 'Remove step ' + (i + 1));
+      rm.addEventListener('click', () => {
+        helperData.steps.splice(i, 1);
+        renderHelperSeqList();
+      });
+      row.appendChild(rm);
+    }
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('helper-add-seq').addEventListener('click', () => {
+  if (helperData.steps.length >= 6) { showToast('Maximum 6 steps'); return; }
+  helperData.steps.push('');
+  renderHelperSeqList();
+});
+
+document.querySelectorAll('.helper-chips').forEach(group => {
+  group.addEventListener('click', (e) => {
+    const chip = e.target.closest('.helper-chip');
+    if (!chip) return;
+    const isTone = group.id === 'helper-tone';
+    if (isTone) {
+      group.querySelectorAll('.helper-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    } else {
+      chip.classList.toggle('selected');
+    }
+  });
+});
+
+function getSelectedChips(containerId) {
+  return Array.from(document.querySelectorAll('#' + containerId + ' .helper-chip.selected'))
+    .map(c => c.dataset.val);
+}
+
+function collectHelperData() {
+  helperData.situation = document.getElementById('helper-situation').value.trim();
+  helperData.sparks = getSelectedChips('helper-sparks');
+  helperData.scene = document.getElementById('helper-scene').value.trim();
+  helperData.senses = getSelectedChips('helper-senses');
+  helperData.feelings = getSelectedChips('helper-feelings');
+  helperData.othersFeelings = document.getElementById('helper-others-feelings').value.trim();
+  helperData.coping = getSelectedChips('helper-coping');
+  helperData.customCoping = document.getElementById('helper-custom-coping').value.trim();
+  helperData.whoHelps = document.getElementById('helper-who-helps').value.trim();
+  helperData.ending = document.getElementById('helper-ending').value.trim();
+  helperData.tone = getSelectedChips('helper-tone')[0] || '';
+}
+
+function helperNext(from) {
+  collectHelperData();
+  if (from === 0 && !helperData.situation && helperData.sparks.length === 0) {
+    showToast('Describe the situation or pick a category');
+    return;
+  }
+  if (from === 2) {
+    const filled = helperData.steps.filter(s => s.trim()).length;
+    if (filled < 2) { showToast('Add at least 2 steps'); return; }
+  }
+  setHelperStep(from + 1);
+}
+
+function updateHelperWordHint(hintId, text) {
+  const hint = document.getElementById(hintId);
+  if (!hint) return;
+  const words = countStoryWords(editingStory, text);
+  const limitState = getWordLimitState(editingStory, words);
+  if (limitState.state === 'none' || limitState.state === 'ok') {
+    hint.style.display = 'none';
+    return;
+  }
+  hint.style.display = '';
+  const countEl = hint.querySelector('.word-counter-count');
+  const coachEl = hint.querySelector('.word-counter-coaching');
+  countEl.textContent = words + ' / ' + limitState.soft + ' words';
+  if (limitState.state === 'hardcap') {
+    countEl.style.color = 'var(--chrome-danger)';
+    coachEl.textContent = 'Page is full -- try shorter sentences';
+    coachEl.style.color = 'var(--chrome-danger)';
+  } else {
+    countEl.style.color = 'var(--chrome-accent)';
+    coachEl.textContent = 'Shorter pages are easier to follow';
+    coachEl.style.color = 'var(--chrome-accent)';
+  }
+}
+
+document.getElementById('helper-scene').addEventListener('input', (e) => {
+  updateHelperWordHint('helper-scene-hint', e.target.value);
+});
+
+[0, 1, 2, 3, 4].forEach(i => {
+  document.getElementById('helper-next-' + i).addEventListener('click', () => helperNext(i));
+});
+[1, 2, 3, 4, 5].forEach(i => {
+  document.getElementById('helper-back-' + i).addEventListener('click', () => setHelperStep(i - 1));
+});
+
+function generateStoryFromHelper() {
+  collectHelperData();
+  const endText = helperData.ending || helperData.tone;
+  if (!endText) { showToast('Add an ending or pick a tone'); return; }
+
+  const pages = [];
+  const situation = helperData.situation || helperData.sparks.join(', ');
+  const scene = helperData.scene;
+
+  const introText = scene ? situation + '. ' + scene : situation;
+  pages.push({
+    text: introText,
+    sentenceType: 'descriptive', imageType: 'stock', stockKey: null, customImageKey: null
+  });
+
+  helperData.steps.filter(s => s.trim()).forEach(step => {
+    pages.push({
+      text: step.trim(),
+      sentenceType: 'descriptive', imageType: 'stock', stockKey: null, customImageKey: null
+    });
+  });
+
+  if (helperData.feelings.length > 0) {
+    let feelText = '{name} might feel ' + joinWords(helperData.feelings) + '. That\'s okay.';
+    if (helperData.othersFeelings) {
+      feelText += ' ' + helperData.othersFeelings;
+    }
+    pages.push({
+      text: feelText,
+      sentenceType: 'perspective', imageType: 'stock', stockKey: null, customImageKey: null
+    });
+  }
+
+  const strategies = [...helperData.coping];
+  if (helperData.customCoping) strategies.push(helperData.customCoping);
+  if (strategies.length > 0) {
+    const helper = helperData.whoHelps || '{parent}';
+    let copeText = 'If {name} {verb} feeling worried, {name} can ' + joinWords(strategies) + '.';
+    copeText += ' ' + helper + ' can help.';
+    pages.push({
+      text: copeText,
+      sentenceType: 'cooperative', imageType: 'stock', stockKey: null, customImageKey: null
+    });
+  }
+
+  pages.push({
+    text: endText,
+    sentenceType: 'affirmative', imageType: 'stock', stockKey: null, customImageKey: null
+  });
+
+  const config = getAgeConfig(editingStory);
+  if (config) {
+    const softLimit = config.wordLimits.soft;
+    let didSplit = false;
+    for (let i = pages.length - 1; i >= 0; i--) {
+      if (pages.length >= 12) break;
+      const wc = countStoryWords(editingStory, pages[i].text);
+      if (wc > softLimit) {
+        const [first, second] = splitTextAtSentenceBoundary(pages[i].text);
+        if (first && second) {
+          pages[i].text = first;
+          pages.splice(i + 1, 0, {
+            text: second,
+            sentenceType: pages[i].sentenceType,
+            imageType: 'stock', stockKey: null, customImageKey: null
+          });
+          didSplit = true;
+        }
+      }
+    }
+    if (didSplit) {
+      showToast('Long pages were split to be easier to follow');
+    }
+  }
+
+  editingStory.pages = pages;
+  document.getElementById('editor-step-helper').style.display = 'none';
+  document.getElementById('editor-step-pages').style.display = '';
+  document.getElementById('editor-title').textContent = 'Edit Story';
+  editingPageIdx = 0;
+  renderEditorPage();
+  showToast('Story created -- review and edit your pages');
+}
+
+function joinWords(arr) {
+  if (arr.length === 0) return '';
+  if (arr.length === 1) return arr[0];
+  return arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1];
+}
+
+document.getElementById('helper-generate').addEventListener('click', generateStoryFromHelper);
 
 // -- Init --
 async function init() {

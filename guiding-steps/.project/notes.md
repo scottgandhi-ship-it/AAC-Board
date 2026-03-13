@@ -1,7 +1,7 @@
 # Guiding Steps - Project Notes
 
 ## Current Focus
-Phase B+C Complete -- Schedule and Rewards transferred, awaiting testing
+Story Word Limits feature implemented (all 6 tasks). Awaiting user validation.
 
 ## Active Features
 
@@ -21,6 +21,16 @@ Phase B+C Complete -- Schedule and Rewards transferred, awaiting testing
 ### Social Stories
 - Plan: .project/features/SocialStories.md
 - Notes: .project/features/SocialStories_Notes.md
+- Status: Phase 2 -- Implemented (awaiting validation)
+
+### Story Helper (Guided Creation Wizard)
+- Plan: .project/features/StoryHelper.md
+- Notes: .project/features/StoryHelper_Notes.md
+- Status: Phase 1 -- Planning (awaiting approval)
+
+### Story Word Limits (Age-Based Page Length Guidance)
+- Plan: .project/features/StoryWordLimits.md
+- Notes: .project/features/StoryWordLimits_Notes.md
 - Status: Phase 2 -- Implemented (awaiting validation)
 
 ## Completed Features
