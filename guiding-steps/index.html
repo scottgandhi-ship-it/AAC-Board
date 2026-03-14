@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#7C74FF">
@@ -3325,8 +3325,15 @@ function getVoice() {
   return us.length > 0 ? us[0] : null;
 }
 
+function haptic() {
+  if (window.Capacitor?.isNativePlatform() && window.Capacitor.Plugins?.Haptics) {
+    window.Capacitor.Plugins.Haptics.impact({ style: 'light' });
+  }
+}
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
+  haptic();
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   const voice = getVoice();
@@ -6367,7 +6374,11 @@ async function init() {
 init();
 
 // -- Service Worker Registration --
-if ('serviceWorker' in navigator) {
+if (window.Capacitor?.isNativePlatform()) {
+  navigator.serviceWorker?.getRegistrations().then(regs =>
+    regs.forEach(r => r.unregister())
+  );
+} else if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 

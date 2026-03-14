@@ -1,0 +1,8 @@
+{
+  "appId": "com.lussier.guidingsteps",
+  "appName": "Guiding Steps",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "https"
+  }
+}

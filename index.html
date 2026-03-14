@@ -5576,11 +5576,27 @@ async function deleteButton(id) {
   });
 }
 
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function imageDataToSrc(data) {
+  if (typeof data === 'string') return data;
+  if (data instanceof Blob) return URL.createObjectURL(data);
+  return null;
+}
+
 async function saveImage(buttonId, blob) {
+  const dataURL = (blob instanceof Blob) ? await blobToDataURL(blob) : blob;
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_IMAGES, 'readwrite');
-    tx.objectStore(STORE_IMAGES).put(blob, buttonId);
+    tx.objectStore(STORE_IMAGES).put(dataURL, buttonId);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -6108,8 +6124,15 @@ function getSpeakOverrides() {
   return getLangEs().speakOverrides;
 }
 
+function haptic() {
+  if (window.Capacitor?.isNativePlatform() && window.Capacitor.Plugins?.Haptics) {
+    window.Capacitor.Plugins.Haptics.impact({ style: 'light' });
+  }
+}
+
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
+  haptic();
   speechSynthesis.cancel();
   // Apply overrides for single-word utterances
   const overrides = getSpeakOverrides();
@@ -6252,10 +6275,11 @@ function renderGrid() {
       bigText.textContent = w.icon || '💬';
       cell.appendChild(bigText);
 
-      loadImage(w.id).then(blob => {
-        if (blob) {
+      loadImage(w.id).then(data => {
+        const src = data ? imageDataToSrc(data) : null;
+        if (src) {
           const img = document.createElement('img');
-          img.src = URL.createObjectURL(blob);
+          img.src = src;
           img.alt = w.label;
           cell.prepend(img);
           const big = cell.querySelector('.cell-big-text');
@@ -7109,14 +7133,14 @@ function createCell(btn) {
   cell.setAttribute('data-type', btn.type);
   cell.setAttribute('data-id', btn.id);
 
-  // Async load image (blob URL tracked for cleanup)
-  loadImage(btn.id).then(blob => {
-    if (blob) {
+  // Async load image (data URL or legacy blob)
+  loadImage(btn.id).then(data => {
+    const src = data ? imageDataToSrc(data) : null;
+    if (src) {
       const img = document.createElement('img');
       img.loading = 'lazy';
-      const blobUrl = URL.createObjectURL(blob);
-      activeBlobUrls.push(blobUrl);
-      img.src = blobUrl;
+      if (data instanceof Blob) activeBlobUrls.push(src);
+      img.src = src;
       img.alt = btn.label;
       cell.prepend(img);
       const big = cell.querySelector('.cell-big-text');
@@ -7258,14 +7282,15 @@ function showImagePreview(buttonId) {
   const btn = buttons.find(b => b.id === buttonId);
   if (!btn) return;
   _imagePreviewTriggerCell = document.querySelector('.cell[data-id="' + buttonId + '"]');
-  loadImage(buttonId).then(blob => {
-    if (!blob) return;
+  loadImage(buttonId).then(data => {
+    if (!data) return;
     const overlay = document.getElementById('image-preview-overlay');
     const img = document.getElementById('image-preview-img');
     const label = document.getElementById('image-preview-label');
     if (_imagePreviewBlobUrl) URL.revokeObjectURL(_imagePreviewBlobUrl);
-    _imagePreviewBlobUrl = URL.createObjectURL(blob);
-    img.src = _imagePreviewBlobUrl;
+    const src = imageDataToSrc(data);
+    _imagePreviewBlobUrl = (data instanceof Blob) ? src : null;
+    img.src = src;
     img.alt = btn.label;
     label.textContent = getPrimaryLabel(btn);
     overlay.classList.add('visible');
@@ -8003,9 +8028,10 @@ function openEditModal(buttonId) {
 
   const preview = document.getElementById('edit-image-preview');
   preview.style.display = 'none';
-  loadImage(buttonId).then(blob => {
-    if (blob) {
-      preview.src = URL.createObjectURL(blob);
+  loadImage(buttonId).then(data => {
+    const src = data ? imageDataToSrc(data) : null;
+    if (src) {
+      preview.src = src;
       preview.style.display = 'block';
     }
   });
@@ -9015,6 +9041,16 @@ function getSymbolKeywords() {
   return _symbolKeywordsCache;
 }
 function _buildSymbolKeywords() { return {
+  // Folders
+  'folder-general': 'talk', 'folder-food': 'food', 'folder-drinks': 'drink',
+  'folder-people': 'family', 'folder-feelings': 'feelings', 'folder-actions': 'run',
+  'folder-toys': 'toy', 'folder-body': 'body', 'folder-animals': 'animal',
+  'folder-clothes': 'clothes', 'folder-places': 'house', 'folder-colors': 'color',
+  'folder-shapes': 'shape', 'folder-123': 'number', 'folder-abc': 'alphabet',
+  'folder-questions': 'question', 'folder-things': 'object',
+  'folder-descriptors': 'big', 'folder-time': 'clock', 'folder-where': 'where',
+  'folder-nature': 'nature', 'folder-school': 'school',
+  'folder-senses': 'senses', 'folder-quick': 'talk', 'folder-entertainment': 'television',
   // Core words
   'core-i': 'I', 'core-want': 'want', 'core-dont-want': 'don\'t want', 'core-help': 'help', 'core-more': 'more',
   // 6x6 extras
@@ -9065,18 +9101,18 @@ function _buildSymbolKeywords() { return {
   'body-hand': 'hand', 'body-foot': 'foot', 'body-eyes': 'eye', 'body-ears': 'ear',
   'body-mouth': 'mouth', 'body-nose': 'nose', 'body-teeth': 'tooth', 'body-back': 'back',
   'body-hurts': 'pain', 'body-sick': 'sick', 'body-fever': 'fever', 'body-medicine': 'medicine',
-  'body-bathroom': 'bathroom', 'body-itchy': 'itchy', 'body-dizzy': 'dizzy',
-  'body-too-loud': 'loud', 'body-too-bright': 'bright', 'body-allergic': 'allergy',
+  'body-bathroom': 'bathroom', 'body-itchy': 'scratch', 'body-dizzy': 'dizzy',
+  'body-too-loud': 'loud', 'body-too-bright': 'sun', 'body-allergic': 'allergy',
   'body-wash-hands': 'wash hands', 'body-brush-teeth': 'brush teeth', 'body-go-potty': 'toilet',
   'body-take-bath': 'bath', 'body-get-dressed': 'dress', 'body-put-on': 'put on',
   'body-take-off': 'take off', 'body-dry-off': 'dry', 'body-comb-hair': 'comb hair',
   'body-flush': 'flush',
   // Feelings
   'feel-happy': 'happy', 'feel-sad': 'sad', 'feel-angry': 'angry', 'feel-scared': 'scared',
-  'feel-tired': 'tired', 'feel-excited': 'excited', 'feel-frustrated': 'frustrated', 'feel-calm': 'calm',
+  'feel-tired': 'tired', 'feel-excited': 'excited', 'feel-frustrated': 'angry', 'feel-calm': 'calm',
   'feel-nervous': 'nervous', 'feel-silly': 'silly', 'feel-proud': 'proud', 'feel-bored': 'bored',
   'feel-confused': 'confused', 'feel-love': 'love', 'feel-worried': 'worried',
-  'feel-overwhelmed': 'overwhelmed', 'feel-lonely': 'lonely', 'feel-shy': 'shy',
+  'feel-overwhelmed': 'dizzy', 'feel-lonely': 'lonely', 'feel-shy': 'shy',
   'feel-safe': 'safe', 'feel-need-break': 'break',
   // Actions
   'act-eat': 'eat', 'act-drink': 'drink', 'act-play': 'play', 'act-read': 'read',
@@ -9173,6 +9209,25 @@ function _buildSymbolKeywords() { return {
   'shp-diamond': 'diamond shape', 'shp-oval': 'oval',
   // Animals (moved from People)
   'ppl-cat': 'cat', 'ppl-dog': 'dog',
+  // Expanded Food (fruits, vegetables, snacks, meals, breakfast)
+  'food-blueberry': 'blueberry', 'food-watermelon': 'watermelon', 'food-orange': 'orange fruit',
+  'food-pineapple': 'pineapple', 'food-mango': 'mango', 'food-peach': 'peach',
+  'food-pear': 'pear', 'food-broccoli': 'broccoli', 'food-carrots': 'carrot',
+  'food-corn': 'corn', 'food-peas': 'peas', 'food-green-beans': 'green beans',
+  'food-potatoes': 'potato', 'food-tomato': 'tomato', 'food-cucumber': 'cucumber',
+  'food-popcorn': 'popcorn', 'food-chips': 'chips', 'food-pretzels': 'pretzel',
+  'food-granola': 'cereal bar', 'food-goldfish': 'crackers', 'food-peanut-butter': 'peanut butter',
+  'food-jelly': 'jam', 'food-applesauce': 'applesauce', 'food-mac-cheese': 'macaroni',
+  'food-hot-dog': 'hot dog', 'food-hamburger': 'hamburger', 'food-taco': 'taco',
+  'food-meatballs': 'meatball', 'food-toast': 'toast bread', 'food-oatmeal': 'oatmeal',
+  'food-waffle': 'waffle',
+  // Entertainment
+  'ent-watch': 'watch see', 'ent-movie': 'movie film', 'ent-show': 'television',
+  'ent-video': 'video', 'ent-cartoon': 'cartoon', 'ent-music': 'music',
+  'ent-song': 'song', 'ent-remote': 'remote control', 'ent-turn-on': 'turn on',
+  'ent-turn-off': 'turn off', 'ent-pause': 'pause', 'ent-again': 'again repeat',
+  'ent-funny': 'funny laugh', 'ent-scary': 'scared', 'ent-favorite': 'favorite',
+  'ent-this-one': 'this', 'ent-that-one': 'that', 'ent-different': 'different',
 }; }
 
 // Add activity word symbol keywords dynamically (deferred until first access)
@@ -9202,11 +9257,11 @@ async function searchArasaac(keyword) {
 }
 
 function getArasaacImageUrl(pictoId, resolution) {
-  return `${ARASAAC_API}/pictograms/${pictoId}?resolution=${resolution || 300}&download=false`;
+  return `${ARASAAC_API}/pictograms/${pictoId}?resolution=${resolution || 500}&download=false`;
 }
 
 async function fetchSymbolBlob(pictoId) {
-  const res = await fetch(getArasaacImageUrl(pictoId, 300));
+  const res = await fetch(getArasaacImageUrl(pictoId, 500));
   if (!res.ok) return null;
   return await res.blob();
 }
@@ -9234,7 +9289,7 @@ function isCustomImage(buttonId) {
 }
 
 async function downloadSymbolsForButtons() {
-  const SYMBOL_VERSION = '2';
+  const SYMBOL_VERSION = '6';
   if (localStorage.getItem('aac-symbols-cached') === SYMBOL_VERSION) return;
   if (!navigator.onLine) return;
 
@@ -9782,12 +9837,13 @@ async function buildExportData(mode, boardName, onProgress) {
   };
 }
 
-function compressImage(blob) {
+function compressImage(data) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const url = URL.createObjectURL(blob);
+    const isBlob = data instanceof Blob;
+    const url = isBlob ? URL.createObjectURL(data) : data;
     img.onload = () => {
-      URL.revokeObjectURL(url);
+      if (isBlob) URL.revokeObjectURL(url);
       const maxSize = 512;
       let w = img.width;
       let h = img.height;
@@ -9802,7 +9858,7 @@ function compressImage(blob) {
       ctx.drawImage(img, 0, 0, w, h);
       resolve(canvas.toDataURL('image/jpeg', 0.8));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
+    img.onerror = () => { if (isBlob) URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
     img.src = url;
   });
 }
@@ -10486,7 +10542,11 @@ if (screen.orientation) {
 })();
 
 // ── Register Service Worker ──
-if ('serviceWorker' in navigator) {
+if (window.Capacitor?.isNativePlatform()) {
+  navigator.serviceWorker?.getRegistrations().then(regs =>
+    regs.forEach(r => r.unregister())
+  );
+} else if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
 }
 

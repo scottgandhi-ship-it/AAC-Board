@@ -1,0 +1,9 @@
+{
+  "appId": "com.lussier.aacboard",
+  "appName": "AAC Board",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "https",
+    "allowNavigation": ["api.arasaac.org"]
+  }
+}

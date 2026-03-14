@@ -1,0 +1,20 @@
+{
+  "name": "guiding-steps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "sync": "mkdir -p www && cp index.html manifest.json www/ && npx cap sync",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/cli": "8.2.0",
+    "@capacitor/core": "8.2.0",
+    "@capacitor/haptics": "8.0.1",
+    "@capacitor/ios": "8.2.0"
+  }
+}

@@ -1,2 +1,15 @@
 .claude/launch.json
 .claude/settings.local.json
+
+# Capacitor / iOS build artifacts
+node_modules/
+ios/
+www/
+guiding-steps/node_modules/
+guiding-steps/ios/
+guiding-steps/www/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+Pods/
+.DS_Store
