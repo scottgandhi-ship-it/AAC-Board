@@ -9576,6 +9576,7 @@ document.getElementById('quick-photo-input').addEventListener('change', async e 
   buttons.push(newBtn);
   await saveButton(newBtn);
   await saveImage(newId, file);
+  markAsCustomImage(newId);
   renderGrid();
   document.getElementById('settings-overlay').classList.remove('open');
   openEditModal(newId);
@@ -9704,10 +9705,9 @@ async function triggerExportDownload(data, name) {
 
 async function buildFolderExportData(folderIds, boardName, onProgress) {
   const allButtons = await loadButtons();
-  loadCustomImageCache();
   const folders = [];
   const images = {};
-  const allCustomIds = [];
+  const allBtnIds = [];
 
   for (const folderId of folderIds) {
     const folderBtn = allButtons.find(b => b.id === 'folder-' + folderId);
@@ -9715,18 +9715,19 @@ async function buildFolderExportData(folderIds, boardName, onProgress) {
     const folderButtons = allButtons.filter(b => b.folderId === folderId);
     const exportButtons = folderBtn ? [folderBtn, ...folderButtons] : folderButtons;
     folders.push({ folderId, folderLabel, buttons: exportButtons });
-    folderButtons.forEach(b => { if (isCustomImage(b.id)) allCustomIds.push(b.id); });
-    if (folderBtn && isCustomImage(folderBtn.id)) allCustomIds.push(folderBtn.id);
+    exportButtons.forEach(b => allBtnIds.push(b.id));
   }
 
   let skippedImages = 0;
-  for (let i = 0; i < allCustomIds.length; i++) {
+  for (let i = 0; i < allBtnIds.length; i++) {
     try {
-      const blob = await loadImage(allCustomIds[i]);
-      if (blob) images[allCustomIds[i]] = await compressImage(blob);
-      else skippedImages++;
+      const blob = await loadImage(allBtnIds[i]);
+      if (blob) {
+        images[allBtnIds[i]] = await compressImage(blob);
+        markAsCustomImage(allBtnIds[i]);
+      }
     } catch { skippedImages++; }
-    if (onProgress) onProgress((i + 1) / allCustomIds.length);
+    if (onProgress) onProgress((i + 1) / allBtnIds.length);
   }
 
   return {
