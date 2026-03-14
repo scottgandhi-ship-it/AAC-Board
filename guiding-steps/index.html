@@ -1294,6 +1294,20 @@ body { display: flex; flex-direction: column; }
   flex-shrink: 0;
 }
 
+#schedule-content.state-idle #schedule-parent-controls {
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 40px;
+  gap: 12px;
+}
+
+#schedule-content.state-idle .sched-parent-btn {
+  flex: none;
+  width: 200px;
+  padding: 14px 20px;
+  font-size: 1rem;
+}
+
 .sched-parent-btn {
   flex: 1;
   padding: 10px;
@@ -3735,6 +3749,8 @@ function renderSchedule() {
   const emptyEl = document.getElementById('schedule-empty');
   const doneEl = document.getElementById('schedule-all-done');
   const doneMsgEl = document.getElementById('schedule-done-msg');
+  const contentEl = document.getElementById('schedule-content');
+  const controlsEl = document.getElementById('schedule-parent-controls');
 
   if (!activeSchedule) {
     emptyEl.style.display = 'flex';
@@ -3742,6 +3758,8 @@ function renderSchedule() {
     doneEl.style.display = 'none';
     nameEl.textContent = '';
     progressEl.textContent = '';
+    contentEl.classList.add('state-idle');
+    emptyEl.appendChild(controlsEl);
     return;
   }
 
@@ -3756,12 +3774,16 @@ function renderSchedule() {
     nameEl.textContent = activeSchedule.templateName;
     progressEl.textContent = '';
     doneMsgEl.textContent = 'Great job finishing ' + activeSchedule.templateName + '!';
+    contentEl.classList.add('state-idle');
+    doneEl.appendChild(controlsEl);
     return;
   }
 
   emptyEl.style.display = 'none';
   stepsEl.style.display = '';
   doneEl.style.display = 'none';
+  contentEl.classList.remove('state-idle');
+  contentEl.appendChild(controlsEl);
   nameEl.textContent = activeSchedule.templateName;
   progressEl.textContent = 'Step ' + (doneCount + 1) + ' of ' + total;
 
@@ -4240,8 +4262,15 @@ async function initRewards() {
   renderRewards();
 }
 
+function revokeBlobURLs(el) {
+  el.querySelectorAll('img').forEach(img => {
+    if (img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+  });
+}
+
 function renderTaskImage(track) {
   const imgEl = document.getElementById('rewards-task-image');
+  revokeBlobURLs(imgEl);
   imgEl.innerHTML = '';
   imgEl.classList.remove('visible');
   imgEl.setAttribute('aria-label', '');
@@ -4384,6 +4413,7 @@ function handleTileTap(track) {
 
 function renderPath(track) {
   const pathEl = document.getElementById('rewards-path');
+  revokeBlobURLs(pathEl);
   pathEl.innerHTML = '';
   const cols = getGridCols(track.targetCount);
   pathEl.className = 'rewards-grid cols-' + cols;
@@ -4455,7 +4485,10 @@ function renderPath(track) {
 
 function renderRewardCard(track) {
   const cardEl = document.getElementById('rewards-reward-card');
+  revokeBlobURLs(cardEl);
   cardEl.innerHTML = '';
+  cardEl.onclick = null;
+  cardEl.style.cursor = '';
   cardEl.style.display = '';
   const allDone = track.currentCount >= track.targetCount;
   cardEl.className = 'reward-card' + (allDone ? ' unlocked' : ' locked');
@@ -4498,12 +4531,16 @@ function renderRewardCard(track) {
   cardEl.appendChild(info);
   cardEl.appendChild(lock);
 
+  cardEl.style.cursor = 'pointer';
   if (!allDone) {
-    cardEl.style.cursor = 'pointer';
-    cardEl.addEventListener('click', () => {
+    cardEl.onclick = () => {
       const remaining = track.targetCount - track.currentCount;
       speak(track.rewardLabel + ', but first you have to do ' + track.taskLabel + ' ' + remaining + ' more ' + (remaining === 1 ? 'time' : 'times') + '.');
-    });
+    };
+  } else {
+    cardEl.onclick = () => {
+      speak('You earned ' + track.rewardLabel + '!');
+    };
   }
 }
 
@@ -4537,6 +4574,7 @@ function renderRewardActive(track) {
 
   labelEl.textContent = track.rewardLabel + '!';
 
+  revokeBlobURLs(iconEl);
   iconEl.innerHTML = '';
   if (track.rewardImageKey) {
     loadImage(track.rewardImageKey).then(blob => {
@@ -4736,7 +4774,7 @@ function openRewardConfig(trackId) {
 }
 
 document.getElementById('stepper-minus').addEventListener('click', () => {
-  configStepperValue = Math.max(2, configStepperValue - 1);
+  configStepperValue = Math.max(1, configStepperValue - 1);
   document.getElementById('stepper-value').textContent = configStepperValue;
 });
 
