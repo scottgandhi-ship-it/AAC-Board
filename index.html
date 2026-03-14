@@ -489,6 +489,54 @@ body.grid-1 .cell .cell-big-text { font-size: clamp(4rem, 15vw, 7rem); }
   padding: 16px;
 }
 #word-picker-overlay.visible { display: flex; }
+
+/* ── Image Preview Overlay (long-press to enlarge) ── */
+#image-preview-overlay {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s;
+}
+#image-preview-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+#image-preview-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+#image-preview-img {
+  max-width: 90vw;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+#image-preview-label {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+body.sensory-reduced-motion #image-preview-overlay {
+  transition-duration: 0.01s;
+}
 #word-picker-modal {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -1036,6 +1084,129 @@ body.grid-1 .cell .cell-big-text { font-size: clamp(4rem, 15vw, 7rem); }
 .import-preview-value {
   font-weight: 700;
   font-size: 0.9rem;
+}
+
+/* ── Folder Selection (Bulk Export) ── */
+.folder-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+.folder-select-card {
+  border: 2px solid #ddd;
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: border-color 0.15s, background 0.15s;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+}
+.folder-select-card.selected {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+}
+.folder-select-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  background: #4CAF50;
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-size: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.folder-select-card .folder-select-icon {
+  font-size: 1.4rem;
+}
+.folder-select-card .folder-select-count {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 400;
+}
+.folder-select-actions {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+.folder-select-actions button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-md);
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.folder-select-actions button:active {
+  background: #f5f5f5;
+}
+
+/* ── Folder Import Conflict ── */
+.folder-import-item {
+  border: 1px solid #eee;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.folder-import-item.conflict {
+  border-color: #FFA000;
+  background: #fff8e1;
+}
+.folder-import-item h4 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+}
+.folder-import-item p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+.conflict-options {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.conflict-options label {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.conflict-options input[type="radio"] {
+  display: none;
+}
+.conflict-options input[type="radio"]:checked + span {
+  color: #1565C0;
+}
+.conflict-options label:has(input:checked) {
+  border-color: #1565C0;
+  background: #e3f2fd;
 }
 
 /* ── PWA Install Banner ── */
@@ -2033,6 +2204,27 @@ html.lang-es #search-results:empty::after {
   stroke-linejoin: round;
 }
 
+/* ── Folder Export Button (inline in message bar, parent mode only) ── */
+#btn-export-folder {
+  display: none;
+  background: linear-gradient(135deg, #1976D2, #42A5F5);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  min-width: 44px;
+  font-weight: 800;
+}
+#btn-export-folder:active {
+  background: linear-gradient(135deg, #1565C0, #1E88E5);
+  transform: scale(0.95);
+}
+#btn-export-folder svg {
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* ── Views ── */
 .view {
   display: none;
@@ -2594,6 +2786,9 @@ body.sensory-high-contrast .settings-btn {
     <button class="bar-btn" id="btn-back-nav" aria-label="Go back" style="display:none;">
       <svg viewBox="0 0 24 24" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
+    <button class="bar-btn" id="btn-export-folder" aria-label="Export this folder">
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </button>
     <div id="message-words"></div>
     <button class="bar-btn" id="btn-backspace" aria-label="Backspace"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
     <button class="bar-btn" id="btn-search" aria-label="Search words"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
@@ -3037,6 +3232,7 @@ body.sensory-high-contrast .settings-btn {
       <div class="settings-section">
         <h3>Data</h3>
         <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
+        <button class="settings-btn parent-mode-only" id="btn-export-folders" style="background:#e8f5e9;color:#2E7D32;">Export Folders</button>
         <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
         <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
         <button class="settings-btn parent-mode-only" id="btn-clear-symbol-cache" style="background:#fff3e0;color:#E65100;">Clear Symbol Cache</button>
@@ -3174,6 +3370,13 @@ body.sensory-high-contrast .settings-btn {
     <p class="coach-marks-body">Tap a few words to build a sentence. Try it now!</p>
     <p class="coach-marks-counter" id="coach-tap-counter"></p>
     <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+  </div>
+</div>
+
+<div id="image-preview-overlay" role="dialog" aria-modal="true" aria-label="Enlarged image preview" tabindex="-1">
+  <div id="image-preview-content">
+    <img id="image-preview-img" src="" alt="">
+    <span id="image-preview-label"></span>
   </div>
 </div>
 
@@ -6760,7 +6963,6 @@ function setupGridDelegation() {
   }
 
   function startHold(e) {
-    if (!parentMode) return;
     const cell = getCellFromEvent(e);
     if (!cell) return;
     _gridDidLongPress = false;
@@ -6768,28 +6970,32 @@ function setupGridDelegation() {
     _gridHoldTimer = setTimeout(() => {
       _gridDidLongPress = true;
       _gridHoldTimer = null;
-      const size = getGridSize();
-      if (isEarlyLearnerGrid(size)) {
-        const slotAttr = cell.getAttribute('data-slot');
-        const slotIndex = slotAttr !== null ? parseInt(slotAttr) : 0;
-        const currentIds = getEarlyLearnerWords(size);
-        const activityWords = activeActivity ? getActivityWords(activeActivity) : null;
-        openWordPicker(1, _gridHoldBtnId ? [_gridHoldBtnId] : [], (ids) => {
-          if (activeActivity) {
-            if (!_activitySlotOverrides) _activitySlotOverrides = {};
-            _activitySlotOverrides[slotIndex] = ids[0];
-            renderGrid();
-          } else {
-            const allIds = [...currentIds];
-            while (allIds.length <= slotIndex) allIds.push('');
-            allIds[slotIndex] = ids[0];
-            saveEarlyLearnerWords(size, allIds);
-            buttons = getTemplate(size);
-            renderGrid();
-          }
-        }, slotIndex, activityWords);
-      } else {
-        openEditModal(_gridHoldBtnId);
+      if (parentMode) {
+        const size = getGridSize();
+        if (isEarlyLearnerGrid(size)) {
+          const slotAttr = cell.getAttribute('data-slot');
+          const slotIndex = slotAttr !== null ? parseInt(slotAttr) : 0;
+          const currentIds = getEarlyLearnerWords(size);
+          const activityWords = activeActivity ? getActivityWords(activeActivity) : null;
+          openWordPicker(1, _gridHoldBtnId ? [_gridHoldBtnId] : [], (ids) => {
+            if (activeActivity) {
+              if (!_activitySlotOverrides) _activitySlotOverrides = {};
+              _activitySlotOverrides[slotIndex] = ids[0];
+              renderGrid();
+            } else {
+              const allIds = [...currentIds];
+              while (allIds.length <= slotIndex) allIds.push('');
+              allIds[slotIndex] = ids[0];
+              saveEarlyLearnerWords(size, allIds);
+              buttons = getTemplate(size);
+              renderGrid();
+            }
+          }, slotIndex, activityWords);
+        } else {
+          openEditModal(_gridHoldBtnId);
+        }
+      } else if (_gridHoldBtnId && isCustomImage(_gridHoldBtnId)) {
+        showImagePreview(_gridHoldBtnId);
       }
     }, 600);
   }
@@ -6835,6 +7041,51 @@ function setupGridDelegation() {
     speak(speakText);
     recordUsageEvent(btn.id, 'independent');
   });
+}
+
+// ── Image Preview (long-press to enlarge) ──
+let _imagePreviewTimer = null;
+let _imagePreviewBlobUrl = null;
+let _imagePreviewTriggerCell = null;
+
+function showImagePreview(buttonId) {
+  const btn = buttons.find(b => b.id === buttonId);
+  if (!btn) return;
+  _imagePreviewTriggerCell = document.querySelector('.cell[data-id="' + buttonId + '"]');
+  loadImage(buttonId).then(blob => {
+    if (!blob) return;
+    const overlay = document.getElementById('image-preview-overlay');
+    const img = document.getElementById('image-preview-img');
+    const label = document.getElementById('image-preview-label');
+    if (_imagePreviewBlobUrl) URL.revokeObjectURL(_imagePreviewBlobUrl);
+    _imagePreviewBlobUrl = URL.createObjectURL(blob);
+    img.src = _imagePreviewBlobUrl;
+    img.alt = btn.label;
+    label.textContent = getPrimaryLabel(btn);
+    overlay.classList.add('visible');
+    overlay.focus();
+    _imagePreviewTimer = setTimeout(hideImagePreview, 3000);
+    overlay.addEventListener('click', _imagePreviewClickHandler);
+    document.addEventListener('keydown', _imagePreviewKeyHandler);
+  }).catch(() => {});
+}
+
+function hideImagePreview() {
+  const overlay = document.getElementById('image-preview-overlay');
+  overlay.classList.remove('visible');
+  overlay.removeEventListener('click', _imagePreviewClickHandler);
+  if (_imagePreviewTimer) { clearTimeout(_imagePreviewTimer); _imagePreviewTimer = null; }
+  if (_imagePreviewBlobUrl) { URL.revokeObjectURL(_imagePreviewBlobUrl); _imagePreviewBlobUrl = null; }
+  document.removeEventListener('keydown', _imagePreviewKeyHandler);
+  if (_imagePreviewTriggerCell) { _imagePreviewTriggerCell.focus(); _imagePreviewTriggerCell = null; }
+}
+
+function _imagePreviewClickHandler() {
+  hideImagePreview();
+}
+
+function _imagePreviewKeyHandler(e) {
+  if (e.key === 'Escape') hideImagePreview();
 }
 
 // ── Message Bar ──
@@ -7033,17 +7284,36 @@ function updateBackButton() {
   const shouldShow = (activeTab === 'talk' && currentFolder !== null);
   backNavBtn.style.display = shouldShow ? 'flex' : 'none';
   backNavBtn.classList.toggle('visible', shouldShow);
+  // Show export folder button only in parent mode + inside a folder
+  const exportBtn = document.getElementById('btn-export-folder');
+  exportBtn.style.display = (shouldShow && parentMode) ? 'flex' : 'none';
 }
 
 backNavBtn.addEventListener('click', () => {
   if (activeTab !== 'talk') {
     switchTab('tab-talk');
   } else if (currentFolder !== null) {
-    // Inside a folder → go back to home grid
     currentFolder = null;
     renderGrid();
   }
   updateBackButton();
+});
+
+document.getElementById('btn-export-folder').addEventListener('click', async () => {
+  if (!currentFolder) return;
+  const exportBtn = document.getElementById('btn-export-folder');
+  exportBtn.disabled = true;
+  try {
+    const folderBtn = buttons.find(b => b.id === 'folder-' + currentFolder);
+    const folderLabel = folderBtn ? folderBtn.label : currentFolder;
+    const data = await buildFolderExportData([currentFolder], folderLabel);
+    await triggerExportDownload(data, folderLabel);
+    const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
+    showToast('Folder exported!' + skipMsg);
+  } catch (err) {
+    if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
+  }
+  exportBtn.disabled = false;
 });
 
 // Patch switchTab and renderGrid to keep back button in sync
@@ -7217,6 +7487,7 @@ document.getElementById('btn-close-settings').addEventListener('click', () => {
 });
 
 document.getElementById('btn-export-board').addEventListener('click', showExportModal);
+document.getElementById('btn-export-folders').addEventListener('click', showFolderSelectModal);
 document.getElementById('btn-import-board').addEventListener('click', startImport);
 document.getElementById('import-file-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -9051,7 +9322,7 @@ document.getElementById('quick-photo-input').addEventListener('change', async e 
 });
 
 // ── Export / Import Board ──
-const CURRENT_EXPORT_VERSION = 1;
+const CURRENT_EXPORT_VERSION = 2;
 const MAX_IMPORT_SIZE = 10 * 1024 * 1024;
 
 const EXPORTED_SETTINGS_KEYS = [
@@ -9174,6 +9445,68 @@ function showExportModal() {
   });
 }
 
+async function triggerExportDownload(data, name) {
+  const jsonStr = JSON.stringify(data);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const filename = safeName + '_' + dateStr + '.aacboard';
+  const file = new File([blob], filename, { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({ title: name, files: [file] });
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function buildFolderExportData(folderIds, boardName, onProgress) {
+  const allButtons = await loadButtons();
+  loadCustomImageCache();
+  const folders = [];
+  const images = {};
+  const allCustomIds = [];
+
+  for (const folderId of folderIds) {
+    const folderBtn = allButtons.find(b => b.id === 'folder-' + folderId);
+    const folderLabel = folderBtn ? folderBtn.label : folderId;
+    const folderButtons = allButtons.filter(b => b.folderId === folderId);
+    const exportButtons = folderBtn ? [folderBtn, ...folderButtons] : folderButtons;
+    folders.push({ folderId, folderLabel, buttons: exportButtons });
+    folderButtons.forEach(b => { if (isCustomImage(b.id)) allCustomIds.push(b.id); });
+    if (folderBtn && isCustomImage(folderBtn.id)) allCustomIds.push(folderBtn.id);
+  }
+
+  let skippedImages = 0;
+  for (let i = 0; i < allCustomIds.length; i++) {
+    try {
+      const blob = await loadImage(allCustomIds[i]);
+      if (blob) images[allCustomIds[i]] = await compressImage(blob);
+      else skippedImages++;
+    } catch { skippedImages++; }
+    if (onProgress) onProgress((i + 1) / allCustomIds.length);
+  }
+
+  return {
+    format: 'aac-board',
+    version: 2,
+    exportMode: folderIds.length === 1 ? 'folder' : 'folders',
+    exportDate: new Date().toISOString(),
+    boardName,
+    folders,
+    buttons: folders.flatMap(f => f.buttons),
+    settings: {},
+    images,
+    _skippedImages: skippedImages
+  };
+}
+
 async function buildExportData(mode, boardName, onProgress) {
   const allButtons = await loadButtons();
 
@@ -9237,6 +9570,130 @@ function compressImage(blob) {
   });
 }
 
+async function showFolderSelectModal() {
+  const allButtons = await loadButtons();
+  const folderBtns = allButtons.filter(b => b.type === 'folder');
+  if (folderBtns.length === 0) {
+    showToast('No folders to export.');
+    return;
+  }
+
+  const selectedIds = new Set();
+
+  let cardsHtml = '';
+  for (const fb of folderBtns) {
+    const folderId = fb.id.replace('folder-', '');
+    const wordCount = allButtons.filter(b => b.folderId === folderId).length;
+    const icon = typeof FOLDER_ICONS !== 'undefined' ? (FOLDER_ICONS[folderId] || '') : '';
+    cardsHtml += '<div class="folder-select-card" data-folder-id="' + escapeHtml(folderId) + '" tabindex="0" role="checkbox" aria-checked="false">'
+      + '<span class="folder-select-icon">' + icon + '</span>'
+      + '<span>' + escapeHtml(fb.label) + '</span>'
+      + '<span class="folder-select-count">' + wordCount + ' words</span>'
+      + '</div>';
+  }
+
+  const html = '<h2>Export Folders</h2>'
+    + '<p style="font-size:0.85rem;color:#888;margin:0 0 8px;">Tap folders to select, then export with all custom images.</p>'
+    + '<div class="folder-select-actions">'
+    + '<button id="btn-folder-select-all">Select All</button>'
+    + '<button id="btn-folder-select-none">Clear</button>'
+    + '</div>'
+    + '<div class="folder-select-grid">' + cardsHtml + '</div>'
+    + '<div class="export-progress" id="folder-export-progress" style="display:none;">'
+    + '<div class="export-progress-bar" id="folder-export-progress-bar" style="width:0%"></div>'
+    + '</div>'
+    + '<div id="folder-export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>'
+    + '<button class="settings-btn" id="btn-do-folder-export" style="background:#ccc;color:#fff;font-weight:700;margin-top:12px;" disabled>Select folders to export</button>'
+    + '<button class="settings-btn" id="btn-cancel-folder-export">Cancel</button>';
+
+  showExportImportPanel(html);
+
+  function updateExportButton() {
+    const btn = document.getElementById('btn-do-folder-export');
+    if (selectedIds.size > 0) {
+      btn.disabled = false;
+      btn.style.background = '#4CAF50';
+      btn.textContent = 'Export ' + selectedIds.size + ' Folder' + (selectedIds.size > 1 ? 's' : '');
+    } else {
+      btn.disabled = true;
+      btn.style.background = '#ccc';
+      btn.textContent = 'Select folders to export';
+    }
+  }
+
+  const cards = document.querySelectorAll('.folder-select-card');
+  cards.forEach(card => {
+    const toggle = () => {
+      const fid = card.getAttribute('data-folder-id');
+      if (selectedIds.has(fid)) {
+        selectedIds.delete(fid);
+        card.classList.remove('selected');
+        card.setAttribute('aria-checked', 'false');
+      } else {
+        selectedIds.add(fid);
+        card.classList.add('selected');
+        card.setAttribute('aria-checked', 'true');
+      }
+      updateExportButton();
+    };
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }});
+  });
+
+  document.getElementById('btn-folder-select-all').addEventListener('click', () => {
+    cards.forEach(card => {
+      const fid = card.getAttribute('data-folder-id');
+      selectedIds.add(fid);
+      card.classList.add('selected');
+      card.setAttribute('aria-checked', 'true');
+    });
+    updateExportButton();
+  });
+
+  document.getElementById('btn-folder-select-none').addEventListener('click', () => {
+    selectedIds.clear();
+    cards.forEach(card => {
+      card.classList.remove('selected');
+      card.setAttribute('aria-checked', 'false');
+    });
+    updateExportButton();
+  });
+
+  document.getElementById('btn-cancel-folder-export').addEventListener('click', closeExportImportPanel);
+
+  document.getElementById('btn-do-folder-export').addEventListener('click', async () => {
+    if (selectedIds.size === 0) return;
+    const exportBtn = document.getElementById('btn-do-folder-export');
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Exporting...';
+    try {
+      const ids = [...selectedIds];
+      const name = ids.length === 1
+        ? (folderBtns.find(b => b.id === 'folder-' + ids[0])?.label || ids[0])
+        : 'AAC_Folders';
+      const data = await buildFolderExportData(ids, name, (progress) => {
+        const bar = document.getElementById('folder-export-progress');
+        const fill = document.getElementById('folder-export-progress-bar');
+        const status = document.getElementById('folder-export-status');
+        bar.style.display = 'block';
+        status.style.display = 'block';
+        fill.style.width = Math.round(progress * 100) + '%';
+        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
+      });
+      await triggerExportDownload(data, name);
+      closeExportImportPanel();
+      const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
+      showToast(ids.length + ' folder' + (ids.length > 1 ? 's' : '') + ' exported!' + skipMsg);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export ' + selectedIds.size + ' Folder' + (selectedIds.size > 1 ? 's' : '');
+        showToast('Export failed. Please try again.');
+      }
+    }
+  });
+}
+
 function startImport() {
   document.getElementById('import-file-input').click();
 }
@@ -9265,12 +9722,20 @@ function handleImportFile(file) {
       showToast('This board was created with a newer version of the app. Please update first.');
       return;
     }
-    if (!Array.isArray(data.buttons) || !data.settings) {
-      showToast("This file doesn't appear to be a valid AAC board.");
-      return;
-    }
 
-    showImportPreview(data);
+    if (data.exportMode === 'folder' || data.exportMode === 'folders') {
+      if (!Array.isArray(data.folders) || data.folders.length === 0) {
+        showToast("This file doesn't appear to be a valid folder export.");
+        return;
+      }
+      showFolderImportPreview(data);
+    } else {
+      if (!Array.isArray(data.buttons) || !data.settings) {
+        showToast("This file doesn't appear to be a valid AAC board.");
+        return;
+      }
+      showImportPreview(data);
+    }
   };
   reader.onerror = () => {
     showToast('Failed to read file. Please try again.');
@@ -9451,6 +9916,144 @@ async function applyImport(data) {
   localStorage.removeItem('aac-symbols-cached');
 
   await reloadBoard();
+}
+
+async function showFolderImportPreview(data) {
+  const existingButtons = await loadButtons();
+  const existingFolderIds = new Set(
+    existingButtons.filter(b => b.type === 'folder').map(b => b.id.replace('folder-', ''))
+  );
+
+  let itemsHtml = '';
+  const conflictFolders = [];
+  for (const folder of data.folders) {
+    const wordCount = folder.buttons.filter(b => b.type !== 'folder').length;
+    const imgCount = folder.buttons.filter(b => data.images && data.images[b.id]).length;
+    const hasConflict = existingFolderIds.has(folder.folderId);
+    if (hasConflict) conflictFolders.push(folder.folderId);
+
+    itemsHtml += '<div class="folder-import-item' + (hasConflict ? ' conflict' : '') + '">'
+      + '<h4>' + escapeHtml(folder.folderLabel) + '</h4>'
+      + '<p>' + wordCount + ' words' + (imgCount > 0 ? ', ' + imgCount + ' images' : '') + '</p>';
+
+    if (hasConflict) {
+      const name = 'conflict-' + folder.folderId;
+      itemsHtml += '<p style="color:#E65100;font-weight:600;font-size:0.8rem;margin-top:6px;">This folder already exists</p>'
+        + '<div class="conflict-options" role="radiogroup" aria-label="Conflict resolution for ' + escapeHtml(folder.folderLabel) + '">'
+        + '<label><input type="radio" name="' + name + '" value="replace" checked><span>Replace</span></label>'
+        + '<label><input type="radio" name="' + name + '" value="keep-both"><span>Keep Both</span></label>'
+        + '<label><input type="radio" name="' + name + '" value="skip"><span>Skip</span></label>'
+        + '</div>';
+    }
+    itemsHtml += '</div>';
+  }
+
+  const totalWords = data.folders.reduce((sum, f) => sum + f.buttons.filter(b => b.type !== 'folder').length, 0);
+  const totalImages = Object.keys(data.images || {}).length;
+  const dateDisplay = data.exportDate ? new Date(data.exportDate).toLocaleDateString() : 'Unknown';
+
+  const html = '<h2>Import Folders</h2>'
+    + '<div style="margin-bottom:12px;">'
+    + '<div class="import-preview-row"><span class="import-preview-label">Folders</span><span class="import-preview-value">' + data.folders.length + '</span></div>'
+    + '<div class="import-preview-row"><span class="import-preview-label">Total Words</span><span class="import-preview-value">' + totalWords + '</span></div>'
+    + (totalImages > 0 ? '<div class="import-preview-row"><span class="import-preview-label">Images</span><span class="import-preview-value">' + totalImages + '</span></div>' : '')
+    + '<div class="import-preview-row"><span class="import-preview-label">Exported</span><span class="import-preview-value">' + dateDisplay + '</span></div>'
+    + '</div>'
+    + itemsHtml
+    + '<button class="settings-btn" id="btn-do-folder-import" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Add to My Board</button>'
+    + '<button class="settings-btn" id="btn-cancel-folder-import">Cancel</button>';
+
+  showExportImportPanel(html);
+
+  document.getElementById('btn-cancel-folder-import').addEventListener('click', closeExportImportPanel);
+  document.getElementById('btn-do-folder-import').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-do-folder-import');
+    btn.disabled = true;
+    btn.textContent = 'Importing...';
+
+    const resolutions = {};
+    for (const fid of conflictFolders) {
+      const checked = document.querySelector('input[name="conflict-' + fid + '"]:checked');
+      resolutions[fid] = checked ? checked.value : 'replace';
+    }
+
+    try {
+      const result = await applyFolderImport(data, resolutions);
+      closeExportImportPanel();
+      document.getElementById('settings-overlay').classList.remove('open');
+      const added = data.folders.filter(f => resolutions[f.folderId] !== 'skip').length;
+      const skipMsg = result.skippedImages > 0 ? ' (' + result.skippedImages + ' images could not be restored)' : '';
+      showToast('Added ' + added + ' folder' + (added > 1 ? 's' : '') + '!' + skipMsg);
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Add to My Board';
+      showToast('Import failed: ' + (err.message || 'Please try again.'));
+    }
+  });
+}
+
+async function applyFolderImport(data, resolutions) {
+  const existingButtons = await loadButtons();
+  loadCustomImageCache();
+  const newCustomCache = { ...customImageCache };
+  let skippedImages = 0;
+
+  for (const folder of data.folders) {
+    const resolution = resolutions[folder.folderId] || 'add';
+
+    if (resolution === 'skip') continue;
+
+    if (resolution === 'replace') {
+      const toRemove = existingButtons.filter(b =>
+        b.id === 'folder-' + folder.folderId || b.folderId === folder.folderId
+      );
+      for (const b of toRemove) {
+        await deleteButton(b.id);
+        if (newCustomCache[b.id]) {
+          await deleteImage(b.id);
+          delete newCustomCache[b.id];
+        }
+      }
+    }
+
+    let folderIdToUse = folder.folderId;
+    let suffix = '';
+    if (resolution === 'keep-both') {
+      let counter = 2;
+      while (existingButtons.some(b => b.id === 'folder-' + folder.folderId + '-' + counter)) counter++;
+      suffix = '-' + counter;
+      folderIdToUse = folder.folderId + suffix;
+    }
+
+    for (const btn of folder.buttons) {
+      const newBtn = { ...btn };
+      if (suffix) {
+        if (newBtn.type === 'folder') {
+          newBtn.id = 'folder-' + folderIdToUse;
+          newBtn.label = folder.folderLabel + ' (' + suffix.replace('-', '') + ')';
+        } else {
+          newBtn.id = btn.id + suffix;
+          newBtn.folderId = folderIdToUse;
+        }
+      }
+      await saveButton(newBtn);
+
+      const origId = btn.id;
+      if (data.images && data.images[origId]) {
+        try {
+          const resp = await fetch(data.images[origId]);
+          const blob = await resp.blob();
+          await saveImage(newBtn.id, blob);
+          newCustomCache[newBtn.id] = true;
+        } catch { skippedImages++; }
+      }
+    }
+  }
+
+  localStorage.setItem('aac-custom-images', JSON.stringify(newCustomCache));
+  customImageCache = newCustomCache;
+  await reloadBoard();
+  return { skippedImages };
 }
 
 async function reloadBoard() {

@@ -5,23 +5,11 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 
 ## Active Features
 
-### Early Learner Grids (1x1 Explorer & 2x2 Chooser)
-- Plan: .project/features/EarlyLearnerGrids.md
-- Notes: .project/features/EarlyLearnerGrids_Notes.md
+### Folder Export with Images & Tile Image Preview
+- Plan: .project/features/FolderExportAndImagePreview.md
+- Notes: .project/features/FolderExportAndImagePreview_Notes.md
 - Status: PLANNING -- awaiting approval
-- Scope: 1x1 and 2x2 fixed grid modes, word picker UI, quick-swap, no folders, SLP-friendly
-
-### Onboarding Child Name Update
-- Plan: .project/features/OnboardingChildName.md
-- Notes: .project/features/OnboardingChildName_Notes.md
-- Status: PLANNING -- awaiting approval
-- Scope: Add child name step to existing 4-step onboarding, settings integration
-
-### Activities Expansion (6 features)
-- Plan: .project/features/ActivitiesExpansion.md
-- Notes: .project/features/ActivitiesExpansion_Notes.md
-- Status: PLANNING -- awaiting approval
-- Scope: Smart suggestions, schedule integration, activity insights, vocab levels, routines, expanded word limit
+- Scope: Per-folder and bulk folder export with embedded images, folder merge import, long-press image preview on tiles
 
 ### Marketing Website
 - Plan: .project/features/MarketingWebsite.md
@@ -35,6 +23,21 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Milestone 5: iOS + Android App Store Submissions
 
 ## Completed Features
+
+### Early Learner Grids (1x1, 2x1, 2x2)
+- Plan: .project/features/EarlyLearnerGrids.md
+- Notes: .project/features/EarlyLearnerGrids_Notes.md
+- Status: DONE -- deployed, cache v46
+
+### Onboarding Child Name
+- Plan: .project/features/OnboardingChildName.md
+- Notes: .project/features/OnboardingChildName_Notes.md
+- Status: DONE -- deployed
+
+### Activities Expansion (6 features)
+- Plan: .project/features/ActivitiesExpansion.md
+- Notes: .project/features/ActivitiesExpansion_Notes.md
+- Status: DONE -- deployed, cache v44
 
 ### Export/Share Boards (Milestone 4.4)
 - Plan: .project/features/ExportShareBoards.md
@@ -103,9 +106,6 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 ### Competitive Analysis
 - Plan: .project/features/CompetitiveAnalysis.md
 - Status: COMPLETE -- research delivered 2026-03-07
-
-## Next Up
-- Activities Expansion Phase 2 implementation (pending plan approval)
 
 ## Session History
 - 2026-02-28: Initialized .project workflow structure
