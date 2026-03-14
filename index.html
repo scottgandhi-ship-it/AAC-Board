@@ -247,6 +247,7 @@ body {
   color: rgba(0,0,0,0.6);
   line-height: 1;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 
 /* Folder buttons get a special card style */
@@ -408,7 +409,7 @@ body {
   line-height: 1.1;
 }
 .core-strip-btn:active { transform: scale(0.93); }
-.core-strip-btn .core-icon { font-size: 1.3em; }
+.core-strip-btn .core-icon { font-size: 1.3em; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }
 .core-strip-btn .core-label { font-size: 0.8em; }
 .core-strip-btn[data-color="yellow"] { background: linear-gradient(145deg, #FFF9C4, #FFD54F); }
 .core-strip-btn[data-color="green"]  { background: linear-gradient(145deg, #C8E6C9, #66BB6A); }
@@ -3242,7 +3243,6 @@ body.sensory-high-contrast .settings-btn {
       </div>
       <div class="settings-section">
         <h3>Symbols</h3>
-        <button class="settings-btn" id="btn-redownload-symbols" style="background:#e3f2fd;color:#1565C0;">Re-download symbols from ARASAAC</button>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
       </div>
     </div>
@@ -3304,7 +3304,6 @@ body.sensory-high-contrast .settings-btn {
     <div id="edit-image-btns">
       <button id="btn-edit-upload">Upload Image</button>
       <button id="btn-edit-camera">Take Photo</button>
-      <button id="btn-edit-symbols" style="background:#e3f2fd;color:#1565C0;">Browse Symbols</button>
       <button id="btn-edit-clear-img">Remove Image</button>
     </div>
     <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
@@ -3347,17 +3346,6 @@ body.sensory-high-contrast .settings-btn {
     <p class="reorder-hint">Drag folders to change their order on the home screen</p>
     <div id="reorder-list"></div>
     <button id="btn-reorder-reset" class="reorder-reset-btn">Reset to Default</button>
-  </div>
-</div>
-
-<!-- Symbol Search Overlay -->
-<div id="symbol-overlay">
-  <div id="symbol-panel">
-    <h2>Browse Symbols</h2>
-    <input type="text" id="symbol-search-input" autocomplete="off" aria-label="Search symbols">
-    <div id="symbol-results"></div>
-    <div id="symbol-status" style="text-align:center;color:#888;padding:16px;font-size:0.9rem;"></div>
-    <button id="btn-symbol-close" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:8px;font-size:1rem;background:#f5f5f5;cursor:pointer;">Cancel</button>
   </div>
 </div>
 
@@ -5760,9 +5748,7 @@ function finalizeInit() {
   updateSpeedDisplay();
   initSpeech();
 
-  setTimeout(() => downloadSymbolsForButtons().catch(e => {
-    showToast(t('toast.symbolFailed', 'Symbol download failed. Try again from Settings.'));
-  }), 2000);
+  // Custom photo images load per-cell via loadImage() in createCell()
 
 }
 
@@ -6366,7 +6352,7 @@ function renderGrid() {
 // Category emoji icons for folder buttons
 const FOLDER_ICONS = {
   'general': '🗣️', 'food': '🍎', 'drinks': '🧃', 'people': '👨‍👩‍👧‍👦',
-  'clothes': '👕', 'body': '🩺', 'feelings': '😊', 'actions': '🏃',
+  'clothes': '👕', 'body': '🧍', 'feelings': '😊', 'actions': '🏃',
   'toys': '🧸', 'places': '🏠', 'colors': '🌈', 'shapes': '🔷',
   '123': '🔢', 'abc': '🔤', 'questions': '❓', 'things': '🎒',
   'animals': '🐾', 'descriptors': '📏', 'time': '🕐', 'where': '📍',
@@ -6382,19 +6368,19 @@ const BUTTON_ICONS = {
   // 6x6 Talker extra words
   't-yes': '👍', 't-no': '👎', 't-stop': '🛑', 't-go': '▶️',
   't-like': '❤️', 't-need': '🙏', 't-you': '👉', 't-my': '🙋',
-  't-it': '👆', 't-is': '🔵', 't-please': '🙏', 't-hi': '👋',
-  't-bye': '👋', 't-big': '⬆️', 't-little': '⬇️', 't-dont': '🚫',
+  't-it': '👆', 't-is': '🟰', 't-please': '🙏', 't-hi': '👋',
+  't-bye': '🫡', 't-big': '⬆️', 't-little': '⬇️', 't-dont': '🚫',
   't-eat': '🍽️', 't-drink': '🥤', 't-play': '🎮', 't-open': '📂',
   // General
   'gen-i': '🙋', 'gen-want': '👉', 'gen-dont-want': '🚫', 'gen-need': '🙏',
   'gen-help': '🆘', 'gen-dont-know': '🤷', 'gen-yes': '👍', 'gen-no': '👎',
   'gen-ok': '👌', 'gen-im-fine': '😊', 'gen-please': '🙏', 'gen-thank-you': '💕',
-  'gen-hi': '👋', 'gen-bye': '👋', 'gen-more': '➕', 'gen-stop': '🛑',
+  'gen-hi': '👋', 'gen-bye': '🫡', 'gen-more': '➕', 'gen-stop': '🛑',
   'gen-go': '▶️', 'gen-like': '❤️', 'gen-all-done': '✅', 'gen-wait': '⏳',
-  'gen-look': '👀', 'gen-my-turn': '🙋', 'gen-sorry': '💙', 'gen-excuse-me': '🙋',
-  'gen-hello': '👋', 'gen-good-morning': '🌅', 'gen-goodnight': '🌙', 'gen-see-you': '👋',
+  'gen-look': '👀', 'gen-my-turn': '🙋', 'gen-sorry': '💙', 'gen-excuse-me': '🙋‍♂️',
+  'gen-hello': '👋', 'gen-good-morning': '🌅', 'gen-goodnight': '🌙', 'gen-see-you': '👀',
   'gen-yr-welcome': '😊', 'gen-no-thank-you': '🙅', 'gen-cool': '😎', 'gen-awesome': '🌟',
-  'gen-thats-funny': '😄', 'gen-me-too': '🤝', 'gen-wow': '😮', 'gen-i-did-it': '🎉',
+  'gen-thats-funny': '😂', 'gen-me-too': '🤝', 'gen-wow': '😮', 'gen-i-did-it': '🎉',
   'gen-i-like-it': '👍', 'gen-want-play': '🎮', 'gen-your-turn': '👉', 'gen-tell-me': '👂',
   // Food
   'food-apple': '🍎', 'food-banana': '🍌', 'food-cookie': '🍪', 'food-crackers': '🍘',
@@ -6403,13 +6389,13 @@ const BUTTON_ICONS = {
   'food-yogurt': '🥛', 'food-fruit-snk': '🍬', 'food-ice-cream': '🍦', 'food-cereal': '🥣',
   'food-soup': '🍲', 'food-bread': '🍞', 'food-cheese': '🧀', 'food-strawberry': '🍓',
   'food-grapes': '🍇', 'food-eggs': '🥚', 'food-cake': '🎂', 'food-hungry': '😋',
-  'food-yummy': '😋',
+  'food-yummy': '🤤',
   'food-blueberry': '🫐', 'food-watermelon': '🍉', 'food-orange': '🍊',
   'food-pineapple': '🍍', 'food-mango': '🥭', 'food-peach': '🍑', 'food-pear': '🍐',
   'food-broccoli': '🥦', 'food-carrots': '🥕', 'food-corn': '🌽',
   'food-peas': '🫛', 'food-green-beans': '🫘', 'food-potatoes': '🥔',
   'food-tomato': '🍅', 'food-cucumber': '🥒',
-  'food-popcorn': '🍿', 'food-chips': '🍟', 'food-pretzels': '🥨',
+  'food-popcorn': '🍿', 'food-chips': '🥔', 'food-pretzels': '🥨',
   'food-granola': '🍫', 'food-goldfish': '🐟',
   'food-peanut-butter': '🥜', 'food-jelly': '🍇', 'food-applesauce': '🍎',
   'food-mac-cheese': '🧀', 'food-hot-dog': '🌭',
@@ -6423,9 +6409,9 @@ const BUTTON_ICONS = {
   // People
   'ppl-mom': '👩', 'ppl-dad': '👨', 'ppl-sister': '👧', 'ppl-brother': '👦',
   'ppl-grandma': '👵', 'ppl-grandpa': '👴', 'ppl-teacher': '👩‍🏫', 'ppl-friend': '🤝',
-  'ppl-baby': '👶', 'ppl-dog': '🐕', 'ppl-cat': '🐈‍⬛', 'ppl-doctor': '👨‍⚕️',
+  'ppl-baby': '👶', 'ppl-dog': '🐕', 'ppl-cat': '🐈', 'ppl-doctor': '👨‍⚕️',
   'ppl-me': '🙋', 'ppl-you': '👉',
-  'ppl-aunt': '👩', 'ppl-uncle': '👨', 'ppl-cousin': '🧒', 'ppl-neighbor': '🏠', 'ppl-therapist': '🧑‍⚕️',
+  'ppl-aunt': '👩‍🦰', 'ppl-uncle': '👨‍🦱', 'ppl-cousin': '🧒', 'ppl-neighbor': '🏠', 'ppl-therapist': '🧑‍⚕️',
   // Clothes
   'clo-shirt': '👕', 'clo-pants': '👖', 'clo-shoes': '👟', 'clo-socks': '🧦',
   'clo-underwear': '🩲', 'clo-jacket': '🧥', 'clo-hat': '🧢', 'clo-pajamas': '😴',
@@ -6440,7 +6426,7 @@ const BUTTON_ICONS = {
   'body-too-bright': '☀️', 'body-allergic': '🤧',
   'body-wash-hands': '🧼', 'body-brush-teeth': '🪥', 'body-go-potty': '🚽',
   'body-take-bath': '🛁', 'body-get-dressed': '👕', 'body-put-on': '👕',
-  'body-take-off': '👗', 'body-dry-off': '🧻', 'body-comb-hair': '🧒', 'body-flush': '🚽',
+  'body-take-off': '👗', 'body-dry-off': '🧻', 'body-comb-hair': '💇', 'body-flush': '🚽',
   // Feelings
   'feel-happy': '😊', 'feel-sad': '😢', 'feel-angry': '😠', 'feel-scared': '😨',
   'feel-tired': '😴', 'feel-excited': '🤩', 'feel-frustrated': '😤', 'feel-calm': '😌',
@@ -6454,8 +6440,8 @@ const BUTTON_ICONS = {
   'act-close': '📪', 'act-push': '👐', 'act-pull': '🫳', 'act-give': '🎁',
   'act-listen': '👂', 'act-draw': '✏️', 'act-sing': '🎤', 'act-dance': '💃',
   'act-hug': '🤗', 'act-throw': '🏐', 'act-share': '🤝', 'act-build': '🏗️',
-  'act-chase': '🏃‍♂️', 'act-hide': '🙈', 'act-find': '🔎', 'act-catch': '🤞',
-  'act-tickle': '🤣', 'act-climb': '🧗', 'act-dig': '🧰', 'act-pour': '🫗',
+  'act-chase': '🏃‍♂️', 'act-hide': '🙈', 'act-find': '🔎', 'act-catch': '🤲',
+  'act-tickle': '🤣', 'act-climb': '🧗', 'act-dig': '⛏️', 'act-pour': '🫗',
   'act-blow': '💨', 'act-say': '💬', 'act-tell': '🗣️', 'act-show': '👉',
   'act-ask': '❓', 'act-cook': '🍳', 'act-taste': '😋', 'act-cut': '✂️',
   'act-stir': '🥄', 'act-bite': '🦷',
@@ -6494,11 +6480,11 @@ const BUTTON_ICONS = {
   'ani-pig': '🐷', 'ani-chicken': '🐔', 'ani-snake': '🐍', 'ani-turtle': '🐢',
   // Descriptors
   'desc-hot': '🔥', 'desc-cold': '❄️', 'desc-wet': '💦', 'desc-dry': '🏜️',
-  'desc-fast': '⚡', 'desc-slow': '🐌', 'desc-loud': '📢', 'desc-quiet': '🤐',
+  'desc-fast': '⚡', 'desc-slow': '🐌', 'desc-loud': '📢', 'desc-quiet': '🤫',
   'desc-soft': '☁️', 'desc-hard': '🪨', 'desc-tall': '⬆️', 'desc-short': '⬇️',
   'desc-long': '➡️', 'desc-heavy': '🏋️', 'desc-light': '🪶',
   'desc-full': '📦', 'desc-empty': '📭', 'desc-clean': '✨', 'desc-dirty': '💩',
-  'desc-new': '🆕', 'desc-old': '📜', 'desc-same': '🤝', 'desc-different': '↔️',
+  'desc-new': '🆕', 'desc-old': '📜', 'desc-same': '🟰', 'desc-different': '↔️',
   'desc-broken': '💔', 'desc-yucky': '🤢', 'desc-nice': '😊',
   // Time
   'time-first': '1️⃣', 'time-then': '➡️', 'time-next': '⏭️',
@@ -6519,7 +6505,7 @@ const BUTTON_ICONS = {
   'nat-rock': '🪨', 'nat-water': '🌊', 'nat-sky': '🌤️',
   'nat-moon': '🌙', 'nat-stars': '⭐',
   // School
-  'sch-circle-time': '⭕', 'sch-line-up': '🧍', 'sch-recess': '🏖️',
+  'sch-circle-time': '⭕', 'sch-line-up': '🧍', 'sch-recess': '🛝',
   'sch-art': '🎨', 'sch-music': '🎵', 'sch-story': '📖',
   'sch-lunch': '🍱', 'sch-snack': '🍪', 'sch-paint': '🖌️',
   'sch-glue': '📎', 'sch-marker': '🖍️', 'sch-backpack': '🎒',
@@ -6540,7 +6526,7 @@ const BUTTON_ICONS = {
   'ent-watch': '👀', 'ent-movie': '🎬', 'ent-show': '📺', 'ent-video': '▶️',
   'ent-cartoon': '🎨', 'ent-music': '🎵', 'ent-song': '🎶', 'ent-remote': '🎮',
   'ent-turn-on': '🔛', 'ent-turn-off': '📴', 'ent-pause': '⏸️',
-  'ent-again': '🔄', 'ent-funny': '😄', 'ent-scary': '😨', 'ent-favorite': '⭐',
+  'ent-again': '🔄', 'ent-funny': '😂', 'ent-scary': '😨', 'ent-favorite': '⭐',
   'ent-this-one': '👆', 'ent-that-one': '👉', 'ent-different': '↔️'
 };
 
@@ -7889,11 +7875,9 @@ function updateChildNamePhrase() {
 
     BUTTON_ICONS[QP_ID] = '\u{1F44B}';
     getLangEs().labels[QP_ID] = `me llamo ${name}`;
-    getSymbolKeywords()[QP_ID] = 'name hello wave';
   } else {
     delete BUTTON_ICONS[QP_ID];
     delete getLangEs().labels[QP_ID];
-    delete getSymbolKeywords()[QP_ID];
   }
 }
 
@@ -9034,239 +9018,9 @@ document.getElementById('btn-import-activity').addEventListener('click', () => {
   document.getElementById('import-activity-input').click();
 });
 
-// ── Symbol Library (ARASAAC) ──
-let _symbolKeywordsCache = null;
-function getSymbolKeywords() {
-  if (!_symbolKeywordsCache) _symbolKeywordsCache = _buildSymbolKeywords();
-  return _symbolKeywordsCache;
-}
-function _buildSymbolKeywords() { return {
-  // Folders
-  'folder-general': 'talk', 'folder-food': 'food', 'folder-drinks': 'drink',
-  'folder-people': 'family', 'folder-feelings': 'feelings', 'folder-actions': 'run',
-  'folder-toys': 'toy', 'folder-body': 'body', 'folder-animals': 'animal',
-  'folder-clothes': 'clothes', 'folder-places': 'house', 'folder-colors': 'color',
-  'folder-shapes': 'shape', 'folder-123': 'number', 'folder-abc': 'alphabet',
-  'folder-questions': 'question', 'folder-things': 'object',
-  'folder-descriptors': 'big', 'folder-time': 'clock', 'folder-where': 'where',
-  'folder-nature': 'nature', 'folder-school': 'school',
-  'folder-senses': 'senses', 'folder-quick': 'talk', 'folder-entertainment': 'television',
-  // Core words
-  'core-i': 'I', 'core-want': 'want', 'core-dont-want': 'don\'t want', 'core-help': 'help', 'core-more': 'more',
-  // 6x6 extras
-  't-yes': 'yes', 't-no': 'no', 't-stop': 'stop', 't-go': 'go', 't-like': 'like', 't-need': 'need',
-  't-you': 'you', 't-my': 'my', 't-it': 'it', 't-is': 'is', 't-please': 'please', 't-hi': 'hello',
-  't-bye': 'goodbye', 't-big': 'big', 't-little': 'small', 't-dont': 'don\'t', 't-eat': 'eat',
-  't-drink': 'drink', 't-play': 'play', 't-open': 'open',
-  // Social
-  'gen-i': 'I', 'gen-want': 'want', 'gen-dont-want': 'don\'t want', 'gen-need': 'need', 'gen-help': 'help',
-  'gen-dont-know': 'don\'t know', 'gen-yes': 'yes', 'gen-no': 'no', 'gen-ok': 'ok', 'gen-im-fine': 'fine',
-  'gen-please': 'please', 'gen-thank-you': 'thank you', 'gen-hi': 'hello', 'gen-bye': 'goodbye',
-  'gen-more': 'more', 'gen-stop': 'stop', 'gen-go': 'go', 'gen-like': 'like', 'gen-all-done': 'finished',
-  'gen-wait': 'wait', 'gen-look': 'look', 'gen-my-turn': 'my turn', 'gen-sorry': 'sorry',
-  'gen-excuse-me': 'excuse me', 'gen-hello': 'hello', 'gen-good-morning': 'good morning',
-  'gen-goodnight': 'goodnight', 'gen-see-you': 'see you later', 'gen-yr-welcome': 'you\'re welcome',
-  'gen-no-thank-you': 'no thank you', 'gen-cool': 'cool', 'gen-awesome': 'awesome',
-  'gen-thats-funny': 'funny', 'gen-me-too': 'me too', 'gen-wow': 'surprise',
-  'gen-i-did-it': 'proud', 'gen-i-like-it': 'like', 'gen-want-play': 'play',
-  'gen-your-turn': 'your turn', 'gen-tell-me': 'tell me',
-  // Food
-  'food-apple': 'apple', 'food-banana': 'banana', 'food-cookie': 'cookie', 'food-crackers': 'crackers',
-  'food-pizza': 'pizza', 'food-nuggets': 'chicken nuggets', 'food-pasta': 'pasta', 'food-sandwich': 'sandwich',
-  'food-rice': 'rice', 'food-fries': 'french fries', 'food-grilled-ch': 'grilled cheese',
-  'food-pancakes': 'pancakes', 'food-yogurt': 'yogurt', 'food-fruit-snk': 'fruit snack',
-  'food-ice-cream': 'ice cream', 'food-cereal': 'cereal', 'food-soup': 'soup', 'food-bread': 'bread',
-  'food-cheese': 'cheese', 'food-strawberry': 'strawberry', 'food-grapes': 'grapes', 'food-eggs': 'egg',
-  'food-cake': 'cake', 'food-hungry': 'hungry', 'food-yummy': 'delicious',
-  // Drinks
-  'drink-water': 'water', 'drink-milk': 'milk', 'drink-choc-milk': 'chocolate milk',
-  'drink-apple-juice': 'apple juice', 'drink-orange-juice': 'orange juice', 'drink-lemonade': 'lemonade',
-  'drink-hot-choc': 'hot chocolate', 'drink-smoothie': 'smoothie', 'drink-thirsty': 'thirsty',
-  'drink-grape-juice': 'grape juice', 'drink-straw-milk': 'strawberry milk',
-  'drink-tea': 'tea', 'drink-soda': 'soda',
-  // People
-  'ppl-mom': 'mother', 'ppl-dad': 'father', 'ppl-sister': 'sister', 'ppl-brother': 'brother',
-  'ppl-grandma': 'grandmother', 'ppl-grandpa': 'grandfather', 'ppl-teacher': 'teacher',
-  'ppl-friend': 'friend', 'ppl-baby': 'baby',
-  'ppl-doctor': 'doctor', 'ppl-me': 'me', 'ppl-you': 'you',
-  'ppl-aunt': 'aunt', 'ppl-uncle': 'uncle', 'ppl-cousin': 'cousin',
-  'ppl-neighbor': 'neighbor', 'ppl-therapist': 'therapist',
-  // Clothes
-  'clo-shirt': 'shirt', 'clo-pants': 'pants', 'clo-shoes': 'shoes', 'clo-socks': 'socks',
-  'clo-underwear': 'underwear', 'clo-jacket': 'jacket', 'clo-hat': 'hat', 'clo-pajamas': 'pajamas',
-  'clo-dress': 'dress', 'clo-shorts': 'shorts', 'clo-boots': 'boots', 'clo-gloves': 'gloves',
-  'clo-coat': 'coat', 'clo-swimsuit': 'swimsuit', 'clo-diaper': 'diaper', 'clo-scarf': 'scarf',
-  // Body
-  'body-head': 'head', 'body-tummy': 'stomach', 'body-arm': 'arm', 'body-leg': 'leg',
-  'body-hand': 'hand', 'body-foot': 'foot', 'body-eyes': 'eye', 'body-ears': 'ear',
-  'body-mouth': 'mouth', 'body-nose': 'nose', 'body-teeth': 'tooth', 'body-back': 'back',
-  'body-hurts': 'pain', 'body-sick': 'sick', 'body-fever': 'fever', 'body-medicine': 'medicine',
-  'body-bathroom': 'bathroom', 'body-itchy': 'scratch', 'body-dizzy': 'dizzy',
-  'body-too-loud': 'loud', 'body-too-bright': 'sun', 'body-allergic': 'allergy',
-  'body-wash-hands': 'wash hands', 'body-brush-teeth': 'brush teeth', 'body-go-potty': 'toilet',
-  'body-take-bath': 'bath', 'body-get-dressed': 'dress', 'body-put-on': 'put on',
-  'body-take-off': 'take off', 'body-dry-off': 'dry', 'body-comb-hair': 'comb hair',
-  'body-flush': 'flush',
-  // Feelings
-  'feel-happy': 'happy', 'feel-sad': 'sad', 'feel-angry': 'angry', 'feel-scared': 'scared',
-  'feel-tired': 'tired', 'feel-excited': 'excited', 'feel-frustrated': 'angry', 'feel-calm': 'calm',
-  'feel-nervous': 'nervous', 'feel-silly': 'silly', 'feel-proud': 'proud', 'feel-bored': 'bored',
-  'feel-confused': 'confused', 'feel-love': 'love', 'feel-worried': 'worried',
-  'feel-overwhelmed': 'dizzy', 'feel-lonely': 'lonely', 'feel-shy': 'shy',
-  'feel-safe': 'safe', 'feel-need-break': 'break',
-  // Actions
-  'act-eat': 'eat', 'act-drink': 'drink', 'act-play': 'play', 'act-read': 'read',
-  'act-run': 'run', 'act-jump': 'jump', 'act-sit': 'sit', 'act-stand': 'stand',
-  'act-walk': 'walk', 'act-sleep': 'sleep', 'act-wash': 'wash', 'act-open': 'open',
-  'act-close': 'close', 'act-push': 'push', 'act-pull': 'pull', 'act-give': 'give',
-  'act-listen': 'listen', 'act-draw': 'draw', 'act-sing': 'sing', 'act-dance': 'dance',
-  'act-hug': 'hug', 'act-throw': 'throw', 'act-share': 'share', 'act-build': 'build',
-  'act-chase': 'chase', 'act-hide': 'hide', 'act-find': 'find', 'act-catch': 'catch',
-  'act-tickle': 'tickle', 'act-climb': 'climb', 'act-dig': 'dig', 'act-pour': 'pour',
-  'act-blow': 'blow', 'act-say': 'say', 'act-tell': 'tell', 'act-show': 'show',
-  'act-ask': 'ask', 'act-cook': 'cook', 'act-taste': 'taste', 'act-cut': 'cut',
-  'act-stir': 'stir', 'act-bite': 'bite',
-  // Toys
-  'toy-ball': 'ball', 'toy-blocks': 'blocks', 'toy-doll': 'doll', 'toy-car': 'car',
-  'toy-train': 'train', 'toy-puzzle': 'puzzle', 'toy-bubbles': 'bubbles', 'toy-crayons': 'crayons',
-  'toy-book': 'book', 'toy-tablet': 'tablet', 'toy-swing': 'swing', 'toy-slide': 'slide',
-  'toy-bike': 'bicycle', 'toy-teddy': 'teddy bear', 'toy-playdoh': 'clay', 'toy-stickers': 'sticker',
-  'toy-lego': 'construction', 'toy-game': 'game', 'toy-balloon': 'balloon', 'toy-trampoline': 'trampoline',
-  // Places
-  'plc-home': 'house', 'plc-school': 'school', 'plc-bathroom': 'bathroom', 'plc-park': 'park',
-  'plc-outside': 'outside', 'plc-inside': 'inside', 'plc-store': 'store', 'plc-car': 'car',
-  'plc-bedroom': 'bedroom', 'plc-kitchen': 'kitchen', 'plc-playground': 'playground',
-  'plc-hospital': 'hospital', 'plc-library': 'library', 'plc-pool': 'swimming pool',
-  // Animals
-  'ani-fish': 'fish', 'ani-bird': 'bird', 'ani-horse': 'horse', 'ani-bunny': 'rabbit',
-  'ani-bear': 'bear', 'ani-frog': 'frog', 'ani-butterfly': 'butterfly', 'ani-dinosaur': 'dinosaur',
-  'ani-elephant': 'elephant', 'ani-monkey': 'monkey', 'ani-duck': 'duck', 'ani-cow': 'cow',
-  'ani-pig': 'pig', 'ani-chicken': 'chicken', 'ani-snake': 'snake', 'ani-turtle': 'turtle',
-  // Descriptors
-  'desc-hot': 'hot', 'desc-cold': 'cold', 'desc-wet': 'wet', 'desc-dry': 'dry',
-  'desc-fast': 'fast', 'desc-slow': 'slow', 'desc-loud': 'loud', 'desc-quiet': 'quiet',
-  'desc-soft': 'soft', 'desc-hard': 'hard', 'desc-tall': 'tall', 'desc-short': 'short',
-  'desc-long': 'long', 'desc-heavy': 'heavy', 'desc-light': 'light',
-  'desc-full': 'full', 'desc-empty': 'empty', 'desc-clean': 'clean', 'desc-dirty': 'dirty',
-  'desc-new': 'new', 'desc-old': 'old', 'desc-same': 'same', 'desc-different': 'different',
-  'desc-broken': 'broken', 'desc-yucky': 'disgusting', 'desc-nice': 'nice',
-  // Time
-  'time-first': 'first', 'time-then': 'then', 'time-next': 'next', 'time-last': 'last',
-  'time-before': 'before', 'time-after': 'after', 'time-now': 'now', 'time-later': 'later',
-  'time-soon': 'soon', 'time-today': 'today', 'time-tomorrow': 'tomorrow', 'time-yesterday': 'yesterday',
-  'time-morning': 'morning', 'time-afternoon': 'afternoon', 'time-night': 'night',
-  // Where
-  'where-in': 'in', 'where-on': 'on', 'where-under': 'under', 'where-behind': 'behind',
-  'where-next-to': 'next to', 'where-up': 'up', 'where-down': 'down', 'where-out': 'out',
-  'where-off': 'off', 'where-over': 'over', 'where-here': 'here', 'where-there': 'there',
-  'where-away': 'away', 'where-between': 'between',
-  // Nature
-  'nat-sun': 'sun', 'nat-rain': 'rain', 'nat-snow': 'snow', 'nat-cloud': 'cloud',
-  'nat-wind': 'wind', 'nat-tree': 'tree', 'nat-flower': 'flower', 'nat-grass': 'grass',
-  'nat-bug': 'bug', 'nat-rock': 'rock', 'nat-water': 'water', 'nat-sky': 'sky',
-  'nat-moon': 'moon', 'nat-stars': 'star',
-  // School
-  'sch-circle-time': 'circle time', 'sch-line-up': 'line up', 'sch-recess': 'recess',
-  'sch-art': 'art', 'sch-music': 'music', 'sch-story': 'story time', 'sch-lunch': 'lunch',
-  'sch-snack': 'snack', 'sch-paint': 'paint', 'sch-glue': 'glue', 'sch-marker': 'marker',
-  'sch-backpack': 'backpack', 'sch-paper': 'paper', 'sch-helper': 'helper',
-  // I Feel (Sensory/Regulation)
-  'sense-hungry': 'hungry', 'sense-thirsty': 'thirsty', 'sense-hot': 'hot',
-  'sense-cold': 'cold', 'sense-tight': 'tight', 'sense-shaky': 'shaky',
-  'sense-too-fast': 'fast', 'sense-too-close': 'close', 'sense-too-much': 'too much',
-  'sense-stinky': 'smell', 'sense-need-squeeze': 'squeeze hug',
-  'sense-need-quiet': 'quiet silence', 'sense-need-space': 'space alone',
-  'sense-want-hug': 'hug embrace', 'sense-want-blanket': 'blanket',
-  'sense-cover-ears': 'ears cover', 'sense-close-eyes': 'eyes close',
-  'sense-deep-breath': 'breath breathe',
-  // Quick Phrases
-  'qp-potty': 'bathroom toilet', 'qp-hurts': 'pain hurt stomach',
-  'qp-dont-like': 'dislike', 'qp-stop-it': 'stop',
-  'qp-scared': 'scared afraid fear', 'qp-more-please': 'more please',
-  'qp-help-me': 'help', 'qp-want-that': 'want point',
-  'qp-all-done': 'done finished', 'qp-go-home': 'home go',
-  'qp-thank-you': 'thank you thanks', 'qp-love-you': 'love heart',
-  'qp-play-with-me': 'play friend', 'qp-need-break': 'break rest',
-  'qp-too-loud': 'loud noise volume',
-  // Things
-  'thg-cup': 'cup', 'thg-plate': 'plate', 'thg-spoon': 'spoon', 'thg-fork': 'fork',
-  'thg-napkin': 'napkin', 'thg-blanket': 'blanket', 'thg-pillow': 'pillow', 'thg-toothbrush': 'toothbrush',
-  'thg-towel': 'towel', 'thg-backpack': 'backpack', 'thg-scissors': 'scissors', 'thg-phone': 'phone',
-  'thg-tv': 'television', 'thg-headphones': 'headphones', 'thg-tissue': 'tissue', 'thg-soap': 'soap',
-  'thg-pencil': 'pencil', 'thg-paper': 'paper', 'thg-light': 'light', 'thg-fan': 'fan',
-  // Questions
-  'q-what': 'what', 'q-where': 'where', 'q-when': 'when', 'q-who': 'who',
-  'q-why': 'why', 'q-how': 'how', 'q-can-i': 'can I', 'q-is-it': 'is it',
-  'q-do-you': 'do you', 'q-which': 'which',
-  // Colors
-  'clr-red': 'red color', 'clr-blue': 'blue color', 'clr-green': 'green color',
-  'clr-yellow': 'yellow color', 'clr-orange': 'orange color', 'clr-purple': 'purple color',
-  'clr-pink': 'pink color', 'clr-black': 'black color', 'clr-white': 'white color',
-  'clr-brown': 'brown color', 'clr-gray': 'gray color', 'clr-rainbow': 'rainbow',
-  // Shapes
-  'shp-circle': 'circle', 'shp-square': 'square', 'shp-triangle': 'triangle',
-  'shp-rectangle': 'rectangle', 'shp-star': 'star shape', 'shp-heart': 'heart shape',
-  'shp-diamond': 'diamond shape', 'shp-oval': 'oval',
-  // Animals (moved from People)
-  'ppl-cat': 'cat', 'ppl-dog': 'dog',
-  // Expanded Food (fruits, vegetables, snacks, meals, breakfast)
-  'food-blueberry': 'blueberry', 'food-watermelon': 'watermelon', 'food-orange': 'orange fruit',
-  'food-pineapple': 'pineapple', 'food-mango': 'mango', 'food-peach': 'peach',
-  'food-pear': 'pear', 'food-broccoli': 'broccoli', 'food-carrots': 'carrot',
-  'food-corn': 'corn', 'food-peas': 'peas', 'food-green-beans': 'green beans',
-  'food-potatoes': 'potato', 'food-tomato': 'tomato', 'food-cucumber': 'cucumber',
-  'food-popcorn': 'popcorn', 'food-chips': 'chips', 'food-pretzels': 'pretzel',
-  'food-granola': 'cereal bar', 'food-goldfish': 'crackers', 'food-peanut-butter': 'peanut butter',
-  'food-jelly': 'jam', 'food-applesauce': 'applesauce', 'food-mac-cheese': 'macaroni',
-  'food-hot-dog': 'hot dog', 'food-hamburger': 'hamburger', 'food-taco': 'taco',
-  'food-meatballs': 'meatball', 'food-toast': 'toast bread', 'food-oatmeal': 'oatmeal',
-  'food-waffle': 'waffle',
-  // Entertainment
-  'ent-watch': 'watch see', 'ent-movie': 'movie film', 'ent-show': 'television',
-  'ent-video': 'video', 'ent-cartoon': 'cartoon', 'ent-music': 'music',
-  'ent-song': 'song', 'ent-remote': 'remote control', 'ent-turn-on': 'turn on',
-  'ent-turn-off': 'turn off', 'ent-pause': 'pause', 'ent-again': 'again repeat',
-  'ent-funny': 'funny laugh', 'ent-scary': 'scared', 'ent-favorite': 'favorite',
-  'ent-this-one': 'this', 'ent-that-one': 'that', 'ent-different': 'different',
-}; }
-
-// Add activity word symbol keywords dynamically (deferred until first access)
-let _activityKwAdded = false;
-function ensureActivityKeywords() {
-  if (_activityKwAdded) return;
-  _activityKwAdded = true;
-  const kw = getSymbolKeywords();
-  const es = getLangEs();
-  ACTIVITY_BUNDLES.forEach(activity => {
-    activity.words.forEach(w => {
-      kw[w.id] = w.symbolKw;
-      es.symbolKeywords[w.id] = w.labelEs;
-    });
-  });
-}
-
-const ARASAAC_API = 'https://api.arasaac.org/v1';
-
-async function searchArasaac(keyword) {
-  const arasaacLang = currentLang === 'en' ? 'en' : 'es';
-  const url = `${ARASAAC_API}/pictograms/${arasaacLang}/search/${encodeURIComponent(keyword)}`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data) ? data.slice(0, 20) : [];
-}
-
-function getArasaacImageUrl(pictoId, resolution) {
-  return `${ARASAAC_API}/pictograms/${pictoId}?resolution=${resolution || 500}&download=false`;
-}
-
-async function fetchSymbolBlob(pictoId) {
-  const res = await fetch(getArasaacImageUrl(pictoId, 500));
-  if (!res.ok) return null;
-  return await res.blob();
-}
-
-// Track which images are user-uploaded vs library-fetched
+// ── Custom Image Tracking ──
+// Track which images are user-uploaded (custom photos)
+// (ARASAAC symbol library removed -- app uses device emoji + custom photos)
 let customImageCache = null;
 
 function loadCustomImageCache() {
@@ -9287,139 +9041,6 @@ function isCustomImage(buttonId) {
   if (!customImageCache) loadCustomImageCache();
   return !!customImageCache[buttonId];
 }
-
-async function downloadSymbolsForButtons() {
-  const SYMBOL_VERSION = '6';
-  if (localStorage.getItem('aac-symbols-cached') === SYMBOL_VERSION) return;
-  if (!navigator.onLine) return;
-
-  ensureActivityKeywords();
-  const kwMap = currentLang !== 'en' ? { ...getSymbolKeywords(), ...getLangEs().symbolKeywords } : getSymbolKeywords();
-  const entries = Object.entries(kwMap);
-  let completed = 0;
-  const total = entries.length;
-  // Show progress via toast
-  showToast(t('toast.downloading', 'Downloading symbols...') + ` 0/${total}`);
-
-  const batchSize = 5;
-  for (let i = 0; i < entries.length; i += batchSize) {
-    const batch = entries.slice(i, i + batchSize);
-    await Promise.allSettled(batch.map(async ([btnId, keyword]) => {
-      if (isCustomImage(btnId)) { completed++; return; }
-      const existing = await loadImage(btnId);
-      if (existing) { completed++; return; }
-      try {
-        const results = await searchArasaac(keyword);
-        if (results.length > 0) {
-          const blob = await fetchSymbolBlob(results[0]._id);
-          if (blob) await saveImage(btnId, blob);
-        }
-      } catch (e) { /* skip failed symbols */ }
-      completed++;
-    }));
-    // Update progress
-    if (completed < total) {
-      showToast(t('toast.downloading', 'Downloading symbols...') + ` ${completed}/${total}`);
-    }
-  }
-
-  localStorage.setItem('aac-symbols-cached', SYMBOL_VERSION);
-  showToast(t('toast.symbolsReady', 'Symbols ready!'));
-  renderGrid();
-}
-
-// Symbol picker in edit modal
-document.getElementById('btn-edit-symbols').addEventListener('click', () => {
-  document.getElementById('symbol-overlay').classList.add('open');
-  const input = document.getElementById('symbol-search-input');
-  input.value = '';
-  document.getElementById('symbol-results').innerHTML = '';
-  document.getElementById('symbol-status').textContent = t('symbol.searchHint', 'Search for a symbol by name');
-  input.focus();
-});
-
-document.getElementById('btn-symbol-close').addEventListener('click', () => {
-  document.getElementById('symbol-overlay').classList.remove('open');
-});
-
-document.getElementById('symbol-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) {
-    document.getElementById('symbol-overlay').classList.remove('open');
-  }
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('symbol-overlay').classList.contains('open')) {
-    document.getElementById('symbol-overlay').classList.remove('open');
-  }
-});
-
-let symbolSearchTimer = null;
-document.getElementById('symbol-search-input').addEventListener('input', e => {
-  clearTimeout(symbolSearchTimer);
-  const query = e.target.value.trim();
-  if (!query) {
-    document.getElementById('symbol-results').innerHTML = '';
-    document.getElementById('symbol-status').textContent = t('symbol.searchHint', 'Search for a symbol by name');
-    return;
-  }
-  document.getElementById('symbol-status').textContent = 'Searching...';
-  symbolSearchTimer = setTimeout(async () => {
-    try {
-      const results = await searchArasaac(query);
-      const container = document.getElementById('symbol-results');
-      container.innerHTML = '';
-      if (results.length === 0) {
-        document.getElementById('symbol-status').textContent = 'No symbols found';
-        return;
-      }
-      document.getElementById('symbol-status').textContent = '';
-      results.forEach(picto => {
-        const cell = document.createElement('button');
-        cell.className = 'symbol-cell';
-        const img = document.createElement('img');
-        img.src = getArasaacImageUrl(picto._id, 100);
-        img.alt = picto.keywords ? picto.keywords.map(k => k.keyword).join(', ') : query;
-        img.loading = 'lazy';
-        cell.appendChild(img);
-        const label = document.createElement('span');
-        label.textContent = picto.keywords && picto.keywords[0] ? picto.keywords[0].keyword : '';
-        cell.appendChild(label);
-        const symbolLabel = picto.keywords && picto.keywords[0] ? picto.keywords[0].keyword : 'symbol';
-        cell.setAttribute('aria-label', `Select ${symbolLabel} symbol`);
-        cell.addEventListener('click', async () => {
-          document.getElementById('symbol-status').textContent = 'Saving...';
-          try {
-            const blob = await fetchSymbolBlob(picto._id);
-            if (blob && editingButtonId) {
-              await saveImage(editingButtonId, blob);
-              const preview = document.getElementById('edit-image-preview');
-              preview.src = URL.createObjectURL(blob);
-              preview.style.display = 'block';
-              document.getElementById('symbol-overlay').classList.remove('open');
-              showToast('Symbol saved');
-            } else {
-              document.getElementById('symbol-status').textContent = 'Failed to load symbol. Try another.';
-            }
-          } catch (err) {
-            document.getElementById('symbol-status').textContent = 'Save failed. Check your connection.';
-          }
-        });
-        container.appendChild(cell);
-      });
-    } catch (err) {
-      document.getElementById('symbol-status').textContent = 'Search failed. Check your internet connection.';
-    }
-  }, 400);
-});
-
-// Add "Re-download Symbols" to settings
-// Settings section for symbol management
-document.getElementById('btn-redownload-symbols').addEventListener('click', async () => {
-  localStorage.removeItem('aac-symbols-cached');
-  showToast('Re-downloading symbols...');
-  await downloadSymbolsForButtons();
-});
 
 // ── Folder Reorder ──
 (function() {
@@ -10390,7 +10011,6 @@ async function reloadBoard() {
   currentFolder = null;
   switchTab('talk');
 
-  setTimeout(() => downloadSymbolsForButtons().catch(() => {}), 1000);
 }
 
 // ── Toast ──

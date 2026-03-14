@@ -30,25 +30,25 @@ PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer a
 ## Implementation Checklist
 
 ### Phase A: Repo Prep and AAC Board Capacitor Setup
-- [ ] A0: Update .gitignore (FIRST)
-- [ ] A1: Service worker detection in AAC Board index.html
-- [ ] A2: Viewport and safe area CSS audit
-- [ ] A3: Initialize npm and Capacitor (pin version, webDir: "www")
-- [ ] A4: Add iOS platform, sync, verify www/ contents
+- [x] A0: Update .gitignore (FIRST)
+- [x] A1: Service worker detection in AAC Board index.html
+- [x] A2: Viewport and safe area CSS audit (already had viewport-fit=cover + safe area CSS)
+- [x] A3: Initialize npm and Capacitor (pinned 8.2.0, webDir: "www")
+- [x] A4: Add iOS platform, sync, verified www/ contents clean
 - [ ] A5: Configure iOS project + PrivacyInfo.xcprivacy (mandatory)
 - [ ] A6: Apple Developer provisioning (App ID, profiles, signing)
-- [ ] A7: Native haptic feedback (@capacitor/haptics)
+- [x] A7: Native haptic feedback (@capacitor/haptics)
 - [ ] A8: App icons (generate from SVG, all sizes)
 - [ ] A9: Splash screen (purple theme)
 
 ### Phase B: Guiding Steps Capacitor Setup
-- [ ] B1: Service worker detection in Guiding Steps index.html
-- [ ] B2: Viewport and safe area CSS audit
-- [ ] B3: Initialize npm and Capacitor
-- [ ] B4: Add iOS platform, sync, verify
+- [x] B1: Service worker detection in Guiding Steps index.html
+- [x] B2: Viewport and safe area CSS audit (added viewport-fit=cover, safe area CSS existed)
+- [x] B3: Initialize npm and Capacitor (pinned 8.2.0)
+- [x] B4: Add iOS platform, sync, verified clean
 - [ ] B5: Configure iOS project + PrivacyInfo.xcprivacy
 - [ ] B6: Apple Developer provisioning
-- [ ] B7: Native haptic feedback
+- [x] B7: Native haptic feedback
 - [ ] B8: App icons
 - [ ] B9: Splash screen
 
@@ -60,7 +60,22 @@ PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer a
 - [ ] C5: Pre-submission checklist
 
 ## Issues and Resolutions
-(none yet)
+
+### ARASAAC API resolution change (RESOLVED)
+- ARASAAC API dropped resolution=300, now only allows 500 or 2500
+- All symbol fetches returned 400 Bad Request silently
+- Fix: Changed default resolution to 500
+
+### WKWebView Blob URL rendering (RESOLVED)
+- Capacitor 8 native HTTP bridge corrupts Blob data round-trip through IndexedDB
+- Symbols stored as Blobs could not render via URL.createObjectURL()
+- Fix: Convert Blobs to base64 data URLs before storing in IndexedDB
+
+### Missing ARASAAC keywords (RESOLVED)
+- Folders had no symbol keyword mappings -- showed emoji fallback (broken in simulator)
+- Expanded food (31 items) and entertainment (18 items) had no keyword mappings
+- 4 buttons had keywords with no ARASAAC results (frustrated, overwhelmed, itchy, too-bright)
+- Fix: Added keywords for all folders, all expanded food/entertainment, used synonym keywords
 
 ## Validation Progress
 (pending implementation)

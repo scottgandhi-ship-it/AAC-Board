@@ -5,6 +5,12 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 
 ## Active Features
 
+### iOS App Conversion (Milestone 5)
+- Plan: .project/features/iOSAppConversion.md
+- Notes: .project/features/iOSAppConversion_Notes.md
+- Status: IN PROGRESS -- Phase A/B complete (Capacitor setup, builds, simulator tested)
+- Remaining: A5/B5 PrivacyInfo.xcprivacy, A6/B6 Apple Developer provisioning, A8/B8 app icons, A9/B9 splash screens, Phase C testing
+
 ### Folder Export with Images & Tile Image Preview
 - Plan: .project/features/FolderExportAndImagePreview.md
 - Notes: .project/features/FolderExportAndImagePreview_Notes.md
