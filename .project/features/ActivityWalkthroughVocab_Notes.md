@@ -1,6 +1,6 @@
 # Activity Walkthrough & Smart Vocabulary Surfacing -- Notes
 
-## Status: IN PROGRESS -- Phase C complete, Phase D next
+## Status: COMPLETE -- All 4 phases done (A/B/C/D)
 
 ## Implementation Checklist
 
@@ -35,10 +35,10 @@
 - [x] C5: Early learner grid integration (starter filtering feeds into slot slicing, existing long-press override preserved)
 
 ### Phase D: Enhanced Activity Management
-- [ ] D1: Edit walkthrough
-- [ ] D2: Duplicate activity
-- [ ] D3: Export/import templates
-- [ ] D4: Usage insights integration
+- [x] D1: Edit walkthrough (in-place editing with editingActivityId, walkthrough steps restored, "Edit" label for custom activities)
+- [x] D2: Duplicate activity (new "Duplicate" button in preview, creates copy with "(Copy)" suffix)
+- [x] D3: Export/import templates (v2 format with walkthrough data and word tiers, backward-compatible import)
+- [x] D4: Usage insights integration (word coverage %, template match display in activity insights)
 
 ## Architecture Decisions
 - VOCAB_WORD_POOL: flat object keyed by word label, not nested graph
@@ -51,6 +51,10 @@
 - Existing words keep positions when activity is edited; new words fill empty slots
 - Grid columns scale adaptively: <=9 words -> 3col, <=16 -> 4col, <=30 -> 5col, >30 -> 6col
 - Max activity words: 64 (up from 32)
+- Edit mode: editingActivityId tracks in-place editing; Save updates existing activity instead of creating new
+- Duplicate: creates copy via openCreateActivityModal(activity, false) -- no editingActivityId
+- Export v2: includes walkthrough steps, template match, word tiers; backward-compatible with v1 import
+- Insights: word coverage = % of activity words actually tapped by child
 
 ## Issues & Resolutions
 (none yet)
@@ -60,3 +64,4 @@
 - 2026-03-15: Phase A complete -- vocabulary graph, 19 activity templates, expansion map, synonyms, helper functions
 - 2026-03-15: Phase B complete -- walkthrough toggle, step inputs, surface words, categorized review, word toggles, Add All, Quick Start enhanced suggestions, walkthrough metadata saved with activity, full Spanish support, cache v53
 - 2026-03-15: Phase C complete -- position allocation algorithm, renderGrid integration, adaptive grid columns, max words 64, smart starter tier assignment, cache v54
+- 2026-03-15: Phase D complete -- in-place editing, duplicate button, export v2 with walkthrough data, usage insights with word coverage, cache v55

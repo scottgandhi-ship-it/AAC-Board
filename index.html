@@ -2938,6 +2938,7 @@ body.sensory-high-contrast .settings-btn {
     <div id="activity-preview-actions">
       <button id="btn-activity-cancel">Cancel</button>
       <button id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
+      <button id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
       <button id="btn-activity-customize">Customize</button>
       <button id="btn-activity-start">Start Activity</button>
     </div>
@@ -7799,6 +7800,17 @@ function getActivityInsights() {
         });
       const totalWords = Object.values(data.wordCounts).reduce((s, c) => s + c, 0);
       const avgMin = data.sessions > 0 ? Math.round((data.totalMs / data.sessions) / 60000) : 0;
+      var walkthroughInfo = null;
+      if (act && act.walkthrough) {
+        var usedWordIds = new Set(Object.keys(data.wordCounts));
+        var totalActivityWords = act.words ? act.words.length : 0;
+        var wordsUsed = act.words ? act.words.filter(function(w) { return usedWordIds.has(w.id); }).length : 0;
+        walkthroughInfo = {
+          templateMatch: act.walkthrough.templateMatch || null,
+          stepsCount: act.walkthrough.steps ? act.walkthrough.steps.length : 0,
+          wordCoverage: totalActivityWords > 0 ? Math.round((wordsUsed / totalActivityWords) * 100) : 0,
+        };
+      }
       return {
         activityId: id,
         name: act ? act.name : id,
@@ -7807,6 +7819,7 @@ function getActivityInsights() {
         totalWords,
         avgMinutes: avgMin,
         topWords,
+        walkthrough: walkthroughInfo,
       };
     })
     .sort((a, b) => b.sessions - a.sessions);
@@ -7935,6 +7948,13 @@ function renderInsights() {
           ai.topWords.map(w => '<span style="background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:2px 6px;font-size:0.75rem;">' + escapeHtml(w.label) + ' <strong>' + w.count + '</strong></span>').join('') +
           '</div>';
       }
+      var walkthroughHtml = '';
+      if (ai.walkthrough) {
+        walkthroughHtml = '<div style="margin-top:4px;font-size:0.75rem;color:#7E57C2;">' +
+          (ai.walkthrough.templateMatch ? 'Template: ' + escapeHtml(ai.walkthrough.templateMatch) + ' | ' : '') +
+          ai.walkthrough.wordCoverage + '% word coverage' +
+          '</div>';
+      }
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
         '<span style="font-size:1.3rem;">' + ai.icon + '</span>' +
@@ -7945,6 +7965,7 @@ function renderInsights() {
         '<span>' + ai.totalWords + ' words</span>' +
         (ai.avgMinutes > 0 ? '<span>~' + ai.avgMinutes + ' min avg</span>' : '') +
         '</div>' +
+        walkthroughHtml +
         topWordsHtml;
       actList.appendChild(card);
     }
@@ -9276,6 +9297,10 @@ function openActivityPreview(activityId) {
   title.innerHTML = `<span>${activity.icon}</span> ${currentLang === 'es' ? activity.nameEs : activity.name}`;
   desc.textContent = `${activity.words.length} words`;
   document.getElementById('btn-activity-delete').style.display = activity.custom ? '' : 'none';
+  document.getElementById('btn-activity-duplicate').style.display = activity.custom ? '' : 'none';
+  document.getElementById('btn-activity-customize').textContent = activity.custom
+    ? (currentLang === 'es' ? 'Editar' : 'Edit')
+    : (currentLang === 'es' ? 'Personalizar' : 'Customize');
   wordsContainer.innerHTML = '';
 
   activity.words.forEach(w => {
@@ -9313,7 +9338,15 @@ document.getElementById('btn-activity-customize').addEventListener('click', () =
   const activityId = overlay.dataset.activityId;
   const activity = getAllActivities().find(a => a.id === activityId);
   overlay.classList.remove('open');
-  if (activity) openCreateActivityModal(activity);
+  if (activity) openCreateActivityModal(activity, activity.custom ? true : false);
+});
+
+document.getElementById('btn-activity-duplicate').addEventListener('click', () => {
+  const overlay = document.getElementById('activity-preview-overlay');
+  const activityId = overlay.dataset.activityId;
+  const activity = getAllActivities().find(a => a.id === activityId);
+  overlay.classList.remove('open');
+  if (activity) openCreateActivityModal(activity, false);
 });
 
 document.getElementById('btn-activity-start').addEventListener('click', () => {
@@ -9586,6 +9619,7 @@ const CREATE_ACTIVITY_COLORS = ['#FF9800','#29B6F6','#66BB6A','#5C6BC0','#AB47BC
 let createActivitySelectedWords = [];
 let createActivityIcon = '';
 let createActivityColor = '';
+let editingActivityId = null;
 
 // ── Smart Word Suggestions ──
 const ACTIVITY_KEYWORD_MAP = {
@@ -9911,17 +9945,22 @@ document.getElementById('btn-walkthrough-add-all').addEventListener('click', fun
   }
 });
 
-function openCreateActivityModal(prefillActivity) {
+function openCreateActivityModal(prefillActivity, editMode) {
+  editingActivityId = (editMode && prefillActivity) ? prefillActivity.id : null;
+
   if (prefillActivity) {
-    createActivitySelectedWords = prefillActivity.words.map(w => ({
-      label: w.label,
-      labelEs: w.labelEs || w.label,
-      color: w.color,
-      icon: w.icon || '',
-    }));
+    createActivitySelectedWords = prefillActivity.words
+      .filter(function(w) { return !ACTIVITY_CORE_WORDS.some(function(cw) { return cw.label === w.label; }); })
+      .map(w => ({
+        label: w.label,
+        labelEs: w.labelEs || w.label,
+        color: w.color,
+        icon: w.icon || '',
+        symbolKw: w.symbolKw || w.label,
+      }));
     createActivityIcon = prefillActivity.icon || CREATE_ACTIVITY_ICONS[0];
     createActivityColor = prefillActivity.color || CREATE_ACTIVITY_COLORS[0];
-    document.getElementById('create-activity-name').value = prefillActivity.name + ' (Copy)';
+    document.getElementById('create-activity-name').value = editMode ? prefillActivity.name : prefillActivity.name + ' (Copy)';
   } else {
     createActivitySelectedWords = [];
     createActivityIcon = CREATE_ACTIVITY_ICONS[0];
@@ -9930,8 +9969,30 @@ function openCreateActivityModal(prefillActivity) {
   }
   document.getElementById('create-activity-word-search').value = '';
 
+  var saveBtn = document.getElementById('btn-create-activity-save');
+  saveBtn.textContent = editingActivityId
+    ? (currentLang === 'es' ? 'Guardar Cambios' : 'Save Changes')
+    : (currentLang === 'es' ? 'Guardar Actividad' : 'Save Activity');
+  document.querySelector('#create-activity-panel h3').textContent = editingActivityId
+    ? (currentLang === 'es' ? 'Editar Actividad' : 'Edit Activity')
+    : (currentLang === 'es' ? 'Crear Actividad' : 'Create Activity');
+
   resetWalkthrough();
-  document.getElementById('walkthrough-section').style.display = prefillActivity ? 'none' : 'block';
+  var showWalkthrough = !prefillActivity || editMode;
+  document.getElementById('walkthrough-section').style.display = showWalkthrough ? 'block' : 'none';
+
+  if (editMode && prefillActivity && prefillActivity.walkthrough && prefillActivity.walkthrough.steps) {
+    var toggle = document.getElementById('btn-walkthrough-toggle');
+    toggle.classList.add('active');
+    toggle.textContent = currentLang === 'es' ? 'Ocultar descripcion' : 'Hide description';
+    document.getElementById('walkthrough-steps').style.display = 'block';
+    prefillActivity.walkthrough.steps.forEach(function(stepText, i) {
+      if (i === 0 && prefillActivity.name && stepText === prefillActivity.name) return;
+      addWalkthroughStep();
+      var inputs = document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-input');
+      inputs[inputs.length - 1].value = stepText;
+    });
+  }
 
   const iconsContainer = document.getElementById('create-activity-icons');
   iconsContainer.innerHTML = '';
@@ -10068,7 +10129,7 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
   if (!name) { showToast('Enter an activity name'); return; }
   if (createActivitySelectedWords.length < 3) { showToast('Select at least 3 words'); return; }
 
-  const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const id = editingActivityId || ('custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6));
 
   const selectedLabels = new Set(createActivitySelectedWords.map(w => w.label.toLowerCase()));
   const coreToAdd = ACTIVITY_CORE_WORDS.filter(cw => !selectedLabels.has(cw.label.toLowerCase()));
@@ -10103,14 +10164,29 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
   };
 
   const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
-  custom.push(activity);
+  if (editingActivityId) {
+    const idx = custom.findIndex(a => a.id === editingActivityId);
+    if (idx !== -1) {
+      custom[idx] = activity;
+    } else {
+      custom.push(activity);
+    }
+  } else {
+    custom.push(activity);
+  }
   localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
   invalidateActivitiesCache();
 
+  if (editingActivityId && activeActivity && activeActivity.id === editingActivityId) {
+    activeActivity = activity;
+  }
+
+  var wasEditing = !!editingActivityId;
   document.getElementById('create-activity-overlay').classList.remove('open');
+  editingActivityId = null;
   renderActivitiesTab();
   renderActivityCards();
-  showToast(`${activity.icon} ${activity.name} created`);
+  showToast(`${activity.icon} ${activity.name} ${wasEditing ? 'updated' : 'created'}`);
 });
 
 // ── Export / Import Activities ──
@@ -10118,18 +10194,20 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
 function exportActivity(activity) {
   const template = {
     format: 'aac-activity-template',
-    version: 1,
+    version: 2,
     activity: {
       name: activity.name,
       nameEs: activity.nameEs || activity.name,
       icon: activity.icon,
       color: activity.color,
+      walkthrough: activity.walkthrough || null,
       words: activity.words.map(w => ({
         label: w.label,
         labelEs: w.labelEs || w.label,
         color: w.color,
         icon: w.icon || '',
         symbolKw: w.symbolKw || w.label,
+        tier: w.tier || 'expanded',
       })),
     },
   };
@@ -10177,6 +10255,7 @@ function importActivityFromFile(file) {
         icon: act.icon || '🎯',
         color: act.color || '#FF9800',
         custom: true,
+        walkthrough: act.walkthrough || null,
         words: act.words.map((w, i) => ({
           id: id + '-' + i,
           label: w.label,
@@ -10184,6 +10263,7 @@ function importActivityFromFile(file) {
           color: w.color || 'orange',
           icon: w.icon || '',
           symbolKw: w.symbolKw || w.label,
+          tier: w.tier || (i < 6 ? 'starter' : 'expanded'),
         })),
       };
 
