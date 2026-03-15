@@ -2149,6 +2149,40 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 .helper-nav .editor-secondary-btn { flex: 1; }
 .helper-nav .editor-primary-btn { flex: 2; margin-top: 0; }
 
+.describe-step-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.describe-step-item { display: flex; align-items: flex-start; gap: 8px; }
+.describe-step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--chrome-primary);
+  color: #fff; font-size: 0.8rem; font-weight: 700; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; margin-top: 10px;
+}
+.describe-step-body { flex: 1; }
+.describe-step-label {
+  font-size: 0.8rem; color: #999; margin-bottom: 4px; font-weight: 600;
+}
+.describe-step-input {
+  width: 100%; padding: 12px; border: 2px solid var(--chrome-border);
+  border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem; box-sizing: border-box;
+}
+.describe-step-remove {
+  width: 36px; height: 36px; border: none; background: none;
+  color: #ccc; font-size: 1.3rem; cursor: pointer; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 6px;
+}
+.describe-step-remove:hover { color: #D32F2F; background: #ffebee; }
+.describe-add-btn {
+  width: 100%; padding: 10px; border: 2px dashed var(--chrome-border);
+  border-radius: var(--radius-sm); background: none; font-family: inherit;
+  font-size: 0.9rem; color: #999; cursor: pointer; margin-bottom: 8px;
+  min-height: 44px;
+}
+.describe-add-btn:hover { border-color: var(--chrome-primary); color: var(--chrome-primary); }
+.describe-advanced-btn {
+  width: 100%; padding: 10px; border: none; background: none;
+  font-family: inherit; font-size: 0.8rem; color: #aaa; cursor: pointer;
+  text-decoration: underline; margin-top: 8px;
+}
+
 .helper-add-step {
   padding: 10px 16px; border: 2px dashed var(--chrome-border);
   border-radius: var(--radius-sm); background: none; font-size: 0.9rem;
@@ -2393,6 +2427,15 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         </div>
       </div>
       <button id="editor-setup-next" class="editor-primary-btn">Next</button>
+    </div>
+    <!-- Step 1b: Describe Steps -->
+    <div id="editor-step-describe" class="editor-step" style="display:none">
+      <div class="helper-step-title">Describe what will happen</div>
+      <div class="helper-coaching">Tell us what happens step by step. We will create the story for you.</div>
+      <div id="describe-step-list" class="describe-step-list"></div>
+      <button id="btn-describe-add" class="describe-add-btn">+ Add another step</button>
+      <button id="btn-describe-generate" class="editor-primary-btn">Create Story</button>
+      <button id="btn-describe-advanced" class="describe-advanced-btn">Use detailed wizard instead</button>
     </div>
     <!-- Step 2: Story Helper Wizard -->
     <div id="editor-step-helper" class="editor-step" style="display:none">
@@ -3604,6 +3647,175 @@ const STORY_SVGS = {
   'coping-squeeze': '<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="55" rx="25" ry="30" fill="#FFCCBC" stroke="#E65100" stroke-width="2"/><circle cx="52" cy="45" r="4" fill="#5D4037"/><circle cx="68" cy="45" r="4" fill="#5D4037"/><circle cx="53" cy="48" r="1.5" fill="#fff"/><circle cx="69" cy="48" r="1.5" fill="#fff"/><path d="M30 60 Q25 55 28 50" stroke="#E65100" stroke-width="2" fill="none"/><path d="M90 60 Q95 55 92 50" stroke="#E65100" stroke-width="2" fill="none"/></svg>',
   'generic-positive': '<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="55" r="30" fill="#C8E6C9" stroke="#43A047" stroke-width="2.5"/><circle cx="48" cy="48" r="3" fill="#2E7D32"/><circle cx="72" cy="48" r="3" fill="#2E7D32"/><path d="M45 62 Q52 72 60 70 Q68 72 75 62" stroke="#2E7D32" stroke-width="2" fill="none"/></svg>'
 };
+
+// -- Auto Story Generation Constants --
+const SENSORY_TRIGGERS = {
+  auditory: { keywords: ['loud', 'noise', 'buzz', 'beep', 'ring', 'siren', 'music', 'clippers', 'drill', 'alarm', 'bark', 'honk', 'cry', 'yell', 'scream'], prep: 'It might be loud. That is okay. {name} can cover {poss} ears if {name} {verb2} to.' },
+  tactile: { keywords: ['touch', 'poke', 'stick', 'needle', 'cut', 'wash', 'brush', 'cold', 'wet', 'sticky', 'squeeze', 'rub', 'scratch', 'sting', 'tickle', 'shot'], prep: 'Someone might touch {obj}. It might feel different. It will not hurt for long.' },
+  visual: { keywords: ['bright', 'flash', 'dark', 'lights', 'strobe', 'sparkle'], prep: 'The lights might be bright. {name} can look away or close {poss} eyes for a moment.' },
+  vestibular: { keywords: ['spin', 'swing', 'ride', 'fast', 'high', 'elevator', 'escalator', 'slide'], prep: 'It might feel like moving fast. {name} can hold on tight and it will be okay.' }
+};
+
+const EMOTION_CUES = {
+  medical: { keywords: ['doctor', 'dentist', 'shot', 'checkup', 'hospital', 'nurse', 'medicine', 'needle', 'x-ray', 'exam'], feeling: 'nervous or unsure', coping: 'squeeze {parent}\'s hand or hold a favorite toy' },
+  social: { keywords: ['party', 'friends', 'new people', 'class', 'school', 'playdate', 'meeting', 'birthday', 'kids'], feeling: 'shy or excited', coping: 'stay close to {parent} until feeling ready' },
+  routine_change: { keywords: ['new', 'first time', 'different', 'move', 'change', 'start', 'begin', 'unfamiliar'], feeling: 'unsure about something new', coping: 'take deep breaths and remember it will be okay' },
+  separation: { keywords: ['drop off', 'leave', 'say goodbye', 'without', 'stay', 'wave bye', 'pick up'], feeling: 'worried', coping: 'remember that {parent} will come back' },
+  sensory: { keywords: ['haircut', 'loud', 'crowded', 'bright', 'noisy', 'busy', 'messy'], feeling: 'overwhelmed', coping: 'take a break in a quiet spot' }
+};
+
+const STEP_IMAGE_HINTS = {
+  'doctor': 'doctor-building', 'dentist': 'dentist-building', 'haircut': 'haircut-shop',
+  'school': 'school-building', 'classroom': 'school-classroom', 'class': 'school-classroom',
+  'party': 'party-invite', 'birthday': 'party-cake', 'cake': 'party-cake',
+  'store': 'grocery-store', 'grocery': 'grocery-store', 'shop': 'grocery-store',
+  'cart': 'grocery-cart', 'list': 'grocery-list',
+  'wait': 'doctor-waiting', 'waiting': 'doctor-waiting',
+  'car': 'relatives-car', 'drive': 'relatives-car', 'ride': 'relatives-car',
+  'house': 'relatives-house', 'home': 'school-home',
+  'check': 'doctor-checkup', 'examine': 'doctor-checkup',
+  'chair': 'dentist-chair', 'sit': 'dentist-chair',
+  'cut': 'haircut-scissors', 'scissors': 'haircut-scissors', 'cape': 'haircut-cape',
+  'mirror': 'dentist-mirror', 'teeth': 'dentist-mirror',
+  'friends': 'school-friends', 'kids': 'party-kids', 'children': 'party-kids',
+  'brave': 'doctor-brave', 'proud': 'doctor-brave', 'done': 'generic-positive',
+  'goodbye': 'relatives-goodbye', 'bye': 'relatives-goodbye', 'leave': 'relatives-goodbye',
+  'alarm': 'fire-alarm', 'fire': 'fire-alarm', 'line': 'fire-line',
+  'safe': 'fire-safe', 'family': 'relatives-people', 'people': 'relatives-people',
+  'nervous': 'feelings-nervous', 'scared': 'feelings-nervous', 'worried': 'feelings-nervous',
+  'squeeze': 'coping-squeeze', 'hug': 'coping-squeeze', 'hold': 'coping-squeeze'
+};
+
+const TEMPLATE_STEPS = {
+  'doctor': ['We will drive to the doctor\'s office', 'We will check in and wait in the waiting room', 'A nurse might check my height, weight, and temperature', 'The doctor will look at my body to make sure I am healthy', 'The doctor might use tools to listen to my heart and look in my ears', 'When the checkup is done, we will leave'],
+  'dentist': ['We will go to the dentist\'s office', 'I will sit in a special chair that goes up and down', 'The dentist will count my teeth with a small mirror', 'They might clean my teeth with a special toothbrush', 'When my teeth are clean, we will leave'],
+  'haircut': ['We will go to the place where they cut hair', 'I will sit in a special chair and wear a cape', 'Someone will use scissors or clippers to cut my hair', 'The scissors might make snipping sounds and the clippers might buzz', 'When my haircut is done, my hair will look great'],
+  'school': ['We will get ready and go to school', 'I will go into my classroom', 'A teacher will be there to help everyone', 'There will be other kids in the class', 'We will do activities and learn new things', 'At the end of the day, someone will come to take me home'],
+  'fire-drill': ['Sometimes at school a loud alarm will ring', 'The alarm means it is time to practice going outside', 'It is not a real fire, just practice', 'Everyone will walk in a line to go outside', 'We will wait outside until the teacher says we can go back in'],
+  'birthday-party': ['We will go to a birthday party', 'There will be other kids at the party', 'There might be music, games, and decorations', 'We will sing happy birthday and eat cake', 'When the party is over, we will go home'],
+  'grocery-store': ['We will drive to the grocery store', 'Inside the store there are bright lights and many shelves', 'We will push a cart and find the things we need', 'I can help by putting things in the cart', 'When we have everything, we will pay and go home'],
+  'visiting-relatives': ['We will drive to visit family', 'We will go to their house', 'Family might want to hug or talk to me', 'We will spend time together', 'When it is time to go, we will say goodbye and go home']
+};
+
+function detectSensory(stepText) {
+  var lower = stepText.toLowerCase();
+  var matches = [];
+  for (var category in SENSORY_TRIGGERS) {
+    var data = SENSORY_TRIGGERS[category];
+    if (data.keywords.some(function(kw) { return lower.includes(kw); })) {
+      matches.push({ category: category, prep: data.prep });
+    }
+  }
+  return matches;
+}
+
+function inferEmotion(allStepsText) {
+  var lower = allStepsText.toLowerCase();
+  var bestMatch = null;
+  var bestScore = 0;
+  for (var key in EMOTION_CUES) {
+    var data = EMOTION_CUES[key];
+    var score = data.keywords.filter(function(kw) { return lower.includes(kw); }).length;
+    if (score > bestScore) { bestScore = score; bestMatch = data; }
+  }
+  return bestMatch || EMOTION_CUES.routine_change;
+}
+
+function matchStockImage(pageText) {
+  var lower = pageText.toLowerCase();
+  for (var keyword in STEP_IMAGE_HINTS) {
+    if (lower.includes(keyword) && STORY_SVGS[STEP_IMAGE_HINTS[keyword]]) return STEP_IMAGE_HINTS[keyword];
+  }
+  return null;
+}
+
+function generateStoryFromSteps(steps, story) {
+  var validSteps = steps.filter(function(s) { return s.trim().length >= 2; });
+  if (validSteps.length < 2) return null;
+
+  var pages = [];
+  var allText = validSteps.join(' ');
+  var sensoryAdded = {};
+
+  validSteps.forEach(function(step) {
+    var trimmed = step.trim();
+    var text = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    if (!text.endsWith('.')) text += '.';
+
+    pages.push({
+      text: text,
+      sentenceType: 'descriptive',
+      imageType: 'stock',
+      stockKey: matchStockImage(step),
+      customImageKey: null
+    });
+
+    var sensoryMatches = detectSensory(step);
+    sensoryMatches.forEach(function(match) {
+      if (!sensoryAdded[match.category] && pages.length < 11) {
+        sensoryAdded[match.category] = true;
+        pages.push({
+          text: match.prep,
+          sentenceType: 'perspective',
+          imageType: 'stock',
+          stockKey: matchStockImage(match.prep) || 'feelings-nervous',
+          customImageKey: null
+        });
+      }
+    });
+  });
+
+  var emotion = inferEmotion(allText);
+  if (pages.length < 11) {
+    pages.push({
+      text: '{name} might feel ' + emotion.feeling + '. That is okay.',
+      sentenceType: 'perspective',
+      imageType: 'stock',
+      stockKey: 'feelings-nervous',
+      customImageKey: null
+    });
+  }
+
+  if (pages.length < 11) {
+    pages.push({
+      text: 'If {name} {verb} feeling worried, {name} can ' + emotion.coping + '. {parent} will be there to help.',
+      sentenceType: 'cooperative',
+      imageType: 'stock',
+      stockKey: 'coping-squeeze',
+      customImageKey: null
+    });
+  }
+
+  pages.push({
+    text: 'When it is all done, {name} did it! {name} can feel proud.',
+    sentenceType: 'affirmative',
+    imageType: 'stock',
+    stockKey: 'generic-positive',
+    customImageKey: null
+  });
+
+  var config = getAgeConfig(story);
+  if (config) {
+    var softLimit = config.wordLimits.soft;
+    for (var i = pages.length - 1; i >= 0; i--) {
+      if (pages.length >= 12) break;
+      var wc = countStoryWords(story, pages[i].text);
+      if (wc > softLimit) {
+        var parts = splitTextAtSentenceBoundary(pages[i].text);
+        if (parts[0] && parts[1]) {
+          pages[i].text = parts[0];
+          pages.splice(i + 1, 0, {
+            text: parts[1], sentenceType: pages[i].sentenceType,
+            imageType: 'stock', stockKey: null, customImageKey: null
+          });
+        }
+      }
+    }
+  }
+
+  while (pages.length > 12) pages.pop();
+  return pages;
+}
 
 // -- Social Story Templates --
 const DEFAULT_STORY_TEMPLATES = [
@@ -5556,6 +5768,8 @@ document.getElementById('template-picker').addEventListener('click', e => {
 document.getElementById('btn-new-story').addEventListener('click', openTemplatePicker);
 document.getElementById('stories-empty-new').addEventListener('click', openTemplatePicker);
 
+var pendingTemplateSteps = null;
+
 function createStoryFromTemplate(tmpl) {
   const globalName = getGlobalChildName();
   const story = {
@@ -5571,19 +5785,17 @@ function createStoryFromTemplate(tmpl) {
     lastReadAt: null,
     isTemplate: true,
     templateKey: tmpl.key,
-    pages: tmpl.pages.map(p => ({
-      text: p.text,
-      sentenceType: p.sentenceType,
-      imageType: 'stock',
-      stockKey: p.stockKey,
-      customImageKey: null
-    }))
+    pages: [
+      { text: '', sentenceType: 'descriptive', imageType: 'stock', stockKey: null, customImageKey: null }
+    ]
   };
+  pendingTemplateSteps = TEMPLATE_STEPS[tmpl.key] || null;
   openStoryEditor(story);
 }
 
 // -- Story Editor --
 function openStoryEditor(story) {
+  if (!story) pendingTemplateSteps = null;
   const globalName = getGlobalChildName();
   editingStory = story || {
     id: generateId(),
@@ -5625,6 +5837,8 @@ function openStoryEditor(story) {
 
   document.getElementById('editor-step-setup').style.display = '';
   document.getElementById('editor-step-pages').style.display = 'none';
+  document.getElementById('editor-step-describe').style.display = 'none';
+  document.getElementById('editor-step-helper').style.display = 'none';
   document.getElementById('editor-title').textContent = editingStory.title ? 'Edit Story' : 'New Story';
 
   document.getElementById('story-editor').classList.add('open');
@@ -5640,19 +5854,27 @@ function updateSetupNextState() {
 document.getElementById('editor-back').addEventListener('click', () => {
   const setupVisible = document.getElementById('editor-step-setup').style.display !== 'none';
   const helperVisible = document.getElementById('editor-step-helper').style.display !== 'none';
+  const describeVisible = document.getElementById('editor-step-describe').style.display !== 'none';
   if (setupVisible) {
     document.getElementById('story-editor').classList.remove('open');
+  } else if (describeVisible) {
+    saveDescribeStepsDraft();
+    document.getElementById('editor-step-describe').style.display = 'none';
+    document.getElementById('editor-step-setup').style.display = '';
+    document.getElementById('editor-title').textContent = editingStory.title ? 'Edit Story' : 'New Story';
   } else if (helperVisible) {
     if (helperStep > 0) {
       setHelperStep(helperStep - 1);
     } else {
       document.getElementById('editor-step-helper').style.display = 'none';
-      document.getElementById('editor-step-setup').style.display = '';
+      document.getElementById('editor-step-describe').style.display = '';
+      document.getElementById('editor-title').textContent = 'Describe Steps';
     }
   } else {
     document.getElementById('editor-step-setup').style.display = '';
     document.getElementById('editor-step-pages').style.display = 'none';
     document.getElementById('editor-step-helper').style.display = 'none';
+    document.getElementById('editor-step-describe').style.display = 'none';
   }
 });
 
@@ -5698,8 +5920,168 @@ document.getElementById('editor-setup-next').addEventListener('click', () => {
     editingPageIdx = 0;
     renderEditorPage();
   } else {
-    openStoryHelper();
+    openDescribeSteps();
   }
+});
+
+// -- Describe Steps (auto-generation input) --
+const DESCRIBE_STEP_LABELS = [
+  'What happens first?',
+  'Then what?',
+  'What happens next?',
+  'And then?',
+  'What happens after that?',
+  'Then what happens?',
+  'What comes next?',
+  'And after that?'
+];
+
+var describeStepCount = 0;
+
+function openDescribeSteps(prefillSteps) {
+  document.getElementById('editor-step-setup').style.display = 'none';
+  document.getElementById('editor-step-pages').style.display = 'none';
+  document.getElementById('editor-step-helper').style.display = 'none';
+  document.getElementById('editor-step-describe').style.display = '';
+  document.getElementById('editor-title').textContent = 'Describe Steps';
+
+  var list = document.getElementById('describe-step-list');
+  list.innerHTML = '';
+  describeStepCount = 0;
+
+  var steps = prefillSteps || null;
+  if (!steps && pendingTemplateSteps) {
+    steps = pendingTemplateSteps;
+    pendingTemplateSteps = null;
+  }
+  if (!steps) steps = loadDescribeStepsDraft() || [];
+  var count = Math.max(steps.length, 3);
+  for (var i = 0; i < count; i++) {
+    addDescribeStep(steps[i] || '');
+  }
+}
+
+function addDescribeStep(value) {
+  if (describeStepCount >= 8) { showToast('Maximum 8 steps'); return; }
+  var list = document.getElementById('describe-step-list');
+  var idx = describeStepCount;
+  describeStepCount++;
+
+  var item = document.createElement('div');
+  item.className = 'describe-step-item';
+
+  var num = document.createElement('div');
+  num.className = 'describe-step-num';
+  num.textContent = describeStepCount;
+  item.appendChild(num);
+
+  var body = document.createElement('div');
+  body.className = 'describe-step-body';
+
+  var label = document.createElement('div');
+  label.className = 'describe-step-label';
+  label.textContent = DESCRIBE_STEP_LABELS[idx] || DESCRIBE_STEP_LABELS[idx % DESCRIBE_STEP_LABELS.length];
+  body.appendChild(label);
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'describe-step-input';
+  input.setAttribute('aria-label', 'Step ' + describeStepCount);
+  input.value = value || '';
+  body.appendChild(input);
+
+  item.appendChild(body);
+
+  if (describeStepCount > 3) {
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'describe-step-remove';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.setAttribute('aria-label', 'Remove step');
+    removeBtn.addEventListener('click', function() {
+      item.remove();
+      describeStepCount--;
+      renumberDescribeSteps();
+    });
+    item.appendChild(removeBtn);
+  }
+
+  list.appendChild(item);
+  if (value === '' && describeStepCount > 1) input.focus();
+}
+
+function renumberDescribeSteps() {
+  var items = document.querySelectorAll('#describe-step-list .describe-step-item');
+  items.forEach(function(item, i) {
+    item.querySelector('.describe-step-num').textContent = i + 1;
+    item.querySelector('.describe-step-label').textContent = DESCRIBE_STEP_LABELS[i] || DESCRIBE_STEP_LABELS[i % DESCRIBE_STEP_LABELS.length];
+    item.querySelector('.describe-step-input').setAttribute('aria-label', 'Step ' + (i + 1));
+    var removeBtn = item.querySelector('.describe-step-remove');
+    if (i < 3 && removeBtn) removeBtn.remove();
+  });
+}
+
+function collectDescribeSteps() {
+  var inputs = document.querySelectorAll('#describe-step-list .describe-step-input');
+  var steps = [];
+  inputs.forEach(function(input) { steps.push(input.value); });
+  return steps;
+}
+
+function saveDescribeStepsDraft() {
+  try {
+    var steps = collectDescribeSteps();
+    if (steps.some(function(s) { return s.trim(); })) {
+      localStorage.setItem('gs-story-draft-steps', JSON.stringify(steps));
+    }
+  } catch (e) {}
+}
+
+function loadDescribeStepsDraft() {
+  try {
+    var raw = localStorage.getItem('gs-story-draft-steps');
+    if (raw) {
+      var steps = JSON.parse(raw);
+      if (Array.isArray(steps) && steps.length >= 1) return steps;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function clearDescribeStepsDraft() {
+  try { localStorage.removeItem('gs-story-draft-steps'); } catch (e) {}
+}
+
+document.getElementById('btn-describe-add').addEventListener('click', function() {
+  addDescribeStep('');
+});
+
+document.getElementById('btn-describe-generate').addEventListener('click', function() {
+  var steps = collectDescribeSteps().filter(function(s) { return s.trim().length >= 2; });
+  if (steps.length < 3) {
+    showToast('Please describe at least 3 steps');
+    return;
+  }
+
+  var pages = generateStoryFromSteps(steps, editingStory);
+  if (!pages) {
+    showToast('Could not generate story. Try adding more detail.');
+    return;
+  }
+
+  editingStory.pages = pages;
+  clearDescribeStepsDraft();
+  document.getElementById('editor-step-describe').style.display = 'none';
+  document.getElementById('editor-step-pages').style.display = '';
+  document.getElementById('editor-title').textContent = 'Edit Story';
+  editingPageIdx = 0;
+  renderEditorPage();
+  showToast('Story created -- review and edit your pages');
+});
+
+document.getElementById('btn-describe-advanced').addEventListener('click', function() {
+  saveDescribeStepsDraft();
+  document.getElementById('editor-step-describe').style.display = 'none';
+  openStoryHelper();
 });
 
 function renderEditorPage() {
@@ -5962,6 +6344,7 @@ document.getElementById('editor-save').addEventListener('click', async () => {
     return;
   }
   await saveStory(editingStory);
+  clearDescribeStepsDraft();
   const existing = stories.find(s => s.id === editingStory.id);
   if (existing) { Object.assign(existing, editingStory); } else { stories.push(editingStory); }
   document.getElementById('story-editor').classList.remove('open');
