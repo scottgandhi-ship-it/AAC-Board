@@ -1,7 +1,7 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor alignment
+Activity system enhancements complete (walkthrough + guided stories). Next priorities: iOS app completion, marketing, investor alignment.
 
 ## Active Features
 
@@ -29,6 +29,16 @@ Phase 2 (Enhance) -- Deep Vocabulary complete, next priorities from investor ali
 - Milestone 5: iOS + Android App Store Submissions
 
 ## Completed Features
+
+### Activity Walkthrough & Smart Vocabulary Surfacing
+- Plan: .project/features/ActivityWalkthroughVocab.md
+- Notes: .project/features/ActivityWalkthroughVocab_Notes.md
+- Status: DONE -- All 4 phases (A/B/C/D), cache v55
+
+### Guided Vocabulary Stories
+- Plan: .project/features/GuidedVocabStories.md
+- Notes: .project/features/GuidedVocabStories_Notes.md
+- Status: DONE -- All 4 phases (A/B/C/D), cache v56
 
 ### Early Learner Grids (1x1, 2x1, 2x2)
 - Plan: .project/features/EarlyLearnerGrids.md
