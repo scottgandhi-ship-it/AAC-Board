@@ -3729,6 +3729,136 @@ function matchStockImage(pageText) {
   return null;
 }
 
+// Sentence builder: transforms parent shorthand into complete social story sentences
+var STEP_TRANSITIONS = [
+  'Today, ',
+  'When {name} {verb2} there, ',
+  'Then, ',
+  'Next, ',
+  'After that, ',
+  'Then, ',
+  'Next, ',
+  'After that, '
+];
+
+// Patterns that indicate someone else doing something TO the child
+var THIRD_PARTY_PATTERNS = [
+  { re: /^(the |a )?(doctor|dentist|nurse|teacher|barber|stylist|hygienist|therapist|vet)\b/i, who: null },
+  { re: /^(someone|they|he|she|the person|a person|the lady|the man|a lady|a man)\b/i, who: null },
+  { re: /^(mom|dad|mommy|daddy|mama|papa|parent|grandma|grandpa|nana|poppy)\b/i, who: null }
+];
+
+// Patterns that indicate going/traveling somewhere
+var GOING_PATTERNS = [
+  /^(go |going |drive |driving |ride |riding |walk |walking |head |heading |travel )(to |into |over |toward )/i,
+  /^(car ride|bus ride|drive|ride|walk|trip) (to |over |toward )/i,
+  /^(get |arrive |show up |pull up )(to |at |into )/i
+];
+
+// Patterns that indicate waiting
+var WAITING_PATTERNS = [
+  /\b(wait|waiting|sit and wait|hang out)\b/i
+];
+
+// Patterns that indicate the step is already a complete sentence
+var COMPLETE_SENTENCE_PATTERNS = [
+  /^(I |we |{name} |there |a |an |my |our |it |this |that |sometimes |maybe |finally |when |at |everyone |if |after )/i
+];
+
+function buildSentence(step, stepIndex, totalSteps) {
+  var raw = step.trim();
+  // Only strip leading filler for shorthand input; leave full sentences intact
+  var stripped = raw;
+  var isAlreadyComplete = COMPLETE_SENTENCE_PATTERNS.some(function(re) { return re.test(raw); });
+  if (!isAlreadyComplete) {
+    stripped = raw
+      .replace(/^(I |we )?(will |am going to |are going to |might |can |should |need to )?/i, '')
+      .replace(/^(then |next |first |after that |finally )?[,.]?\s*/i, '')
+      .trim();
+    if (!stripped) stripped = raw;
+  }
+
+  var lower = stripped.toLowerCase();
+  var transition = '';
+
+  // First step gets "Today" framing
+  if (stepIndex === 0) {
+    transition = STEP_TRANSITIONS[0];
+  } else if (stepIndex < STEP_TRANSITIONS.length) {
+    transition = STEP_TRANSITIONS[stepIndex];
+  } else {
+    transition = STEP_TRANSITIONS[stepIndex % 4 + 2];
+  }
+
+  // Detect if a third party is the subject (doctor, nurse, teacher, etc.)
+  var thirdPartyMatch = null;
+  for (var p = 0; p < THIRD_PARTY_PATTERNS.length; p++) {
+    if (THIRD_PARTY_PATTERNS[p].re.test(stripped) || THIRD_PARTY_PATTERNS[p].re.test(raw)) {
+      thirdPartyMatch = true;
+      break;
+    }
+  }
+
+  // Detect if it's about going somewhere
+  var isGoing = !isAlreadyComplete && GOING_PATTERNS.some(function(re) { return re.test(stripped); });
+
+  // Detect waiting (only for shorthand, not full sentences)
+  var isWaiting = !isAlreadyComplete && WAITING_PATTERNS.some(function(re) { return re.test(lower); });
+
+  // Detect if it already looks like a complete sentence
+  var isComplete = COMPLETE_SENTENCE_PATTERNS.some(function(re) { return re.test(raw); });
+
+  var sentence = '';
+
+  if (thirdPartyMatch) {
+    // Third party doing something: "doctor checks ears" -> "The doctor will check ears."
+    var thirdText = isAlreadyComplete ? raw : stripped;
+    if (!/\b(will|might|can|is going to|are going to)\b/i.test(thirdText)) {
+      thirdText = thirdText.replace(/^(The |A )?([\w]+)\s+([\w]+)/i, function(match, article, subject, verb) {
+        var baseVerb = verb.replace(/([^s])s$/i, '$1').replace(/ies$/i, 'y').replace(/([sc]h)es$/i, '$1');
+        return (article || 'The ') + subject.toLowerCase() + ' will ' + baseVerb.toLowerCase();
+      });
+    }
+    sentence = transition + thirdText.charAt(0).toLowerCase() + thirdText.slice(1);
+    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  } else if (isGoing) {
+    // Going somewhere: "car ride to dentist" -> "{name} {verb} going to take a car ride to the dentist."
+    var dest = stripped.replace(/^(go |going |drive |driving |ride |riding |walk |walking |head |heading |travel |get |arrive |show up |pull up )(to |into |over |toward |at )?/i, '').trim();
+    if (/^(car ride|bus ride|drive|ride|walk|trip)/i.test(stripped)) {
+      sentence = transition + '{name} {verb} going to take a ' + lower + '.';
+    } else {
+      sentence = transition + '{name} {verb} going to go ' + stripped.replace(/^(go |going )/i, '') + '.';
+    }
+    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  } else if (isWaiting) {
+    // Waiting: "wait in the lobby" -> "{name} will wait in the lobby. Waiting is okay."
+    sentence = transition + '{name} will ' + lower + '. Waiting is okay.';
+    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  } else if (isComplete) {
+    // Already a complete sentence -- add transition but don't restructure
+    var cleanRaw = raw.charAt(0).toUpperCase() + raw.slice(1);
+    if (stepIndex > 0) {
+      sentence = transition + cleanRaw.charAt(0).toLowerCase() + cleanRaw.slice(1);
+      sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    } else {
+      sentence = cleanRaw;
+    }
+  } else {
+    // Default: child doing something -- "{name} will [action]"
+    // Clean up: remove leading "to " if present
+    var action = stripped.replace(/^to /i, '');
+    sentence = transition + '{name} will ' + action.charAt(0).toLowerCase() + action.slice(1);
+    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  }
+
+  // Ensure proper ending
+  if (!sentence.endsWith('.') && !sentence.endsWith('!') && !sentence.endsWith('?')) {
+    sentence += '.';
+  }
+
+  return sentence;
+}
+
 function generateStoryFromSteps(steps, story) {
   var validSteps = steps.filter(function(s) { return s.trim().length >= 2; });
   if (validSteps.length < 2) return null;
@@ -3737,10 +3867,8 @@ function generateStoryFromSteps(steps, story) {
   var allText = validSteps.join(' ');
   var sensoryAdded = {};
 
-  validSteps.forEach(function(step) {
-    var trimmed = step.trim();
-    var text = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-    if (!text.endsWith('.')) text += '.';
+  validSteps.forEach(function(step, idx) {
+    var text = buildSentence(step, idx, validSteps.length);
 
     pages.push({
       text: text,
