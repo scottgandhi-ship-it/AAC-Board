@@ -1650,6 +1650,90 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   font-family: inherit;
 }
 
+/* Walkthrough UI */
+.walkthrough-toggle-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--chrome-primary);
+  cursor: pointer;
+  text-align: left;
+}
+.walkthrough-toggle-btn.active {
+  border-color: var(--chrome-primary);
+  border-style: solid;
+  background: rgba(108,99,255,0.04);
+}
+.walkthrough-step-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.walkthrough-step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--chrome-primary);
+  min-width: 18px;
+  text-align: center;
+}
+.walkthrough-step-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.walkthrough-step-input:focus {
+  border-color: var(--chrome-primary);
+  outline: none;
+}
+.walkthrough-step-remove {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #ccc;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.walkthrough-step-remove:hover { color: #e53935; }
+.walkthrough-category {
+  margin-bottom: 10px;
+}
+.walkthrough-category-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.walkthrough-category-label[data-cat="core"] { background: #e8f5e9; color: #2E7D32; }
+.walkthrough-category-label[data-cat="actions"] { background: #e8f5e9; color: #2E7D32; }
+.walkthrough-category-label[data-cat="objects"] { background: #fff3e0; color: #E65100; }
+.walkthrough-category-label[data-cat="descriptors"] { background: #e3f2fd; color: #1565C0; }
+.walkthrough-category-label[data-cat="social"] { background: #fce4ec; color: #C62828; }
+.walkthrough-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
 /* Activity preview overlay */
 #activity-preview-overlay {
   display: none;
@@ -2923,6 +3007,22 @@ body.sensory-high-contrast .settings-btn {
     <div style="margin-bottom:12px;">
       <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Activity Name</label>
       <input type="text" id="create-activity-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div id="walkthrough-section" style="display:none;margin-bottom:12px;">
+      <button id="btn-walkthrough-toggle" class="walkthrough-toggle-btn">Describe this activity</button>
+      <div id="walkthrough-steps" style="display:none;">
+        <p style="font-size:0.8rem;color:#888;margin:8px 0 10px;">Describe what happens step by step. The app will suggest vocabulary your child needs.</p>
+        <div id="walkthrough-step-inputs"></div>
+        <button id="btn-walkthrough-add-step" style="padding:6px 12px;border:1px dashed #ccc;border-radius:8px;background:transparent;font-family:inherit;font-size:0.8rem;color:#999;cursor:pointer;width:100%;margin-top:6px;">+ Add another step</button>
+        <button id="btn-walkthrough-surface" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;width:100%;">Show Suggested Words</button>
+      </div>
+    </div>
+    <div id="walkthrough-review" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <label style="font-weight:600;font-size:0.9rem;color:#555;">Suggested Vocabulary</label>
+        <button id="btn-walkthrough-add-all" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
+      </div>
+      <div id="walkthrough-review-categories"></div>
     </div>
     <div id="create-activity-suggestions" style="display:none;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -9461,7 +9561,15 @@ function renderActivitySuggestions() {
   const container = document.getElementById('create-activity-suggestions');
   const chipsEl = document.getElementById('create-activity-suggestion-chips');
 
-  const suggestions = matchActivitySuggestions(name);
+  // Use walkthrough engine for smarter name-based suggestions (Quick Start path)
+  var suggestions;
+  if (name && typeof walkthroughSurfaceWords === 'function') {
+    suggestions = walkthroughSurfaceWords([name], 16).map(function(w) {
+      return { label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon };
+    });
+  } else {
+    suggestions = matchActivitySuggestions(name);
+  }
   const filtered = suggestions.filter(s =>
     !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
   );
@@ -9479,7 +9587,7 @@ function renderActivitySuggestions() {
     chip.className = 'create-word-chip';
     chip.setAttribute('data-color', s.color);
     chip.style.borderStyle = 'dashed';
-    chip.textContent = (s.icon ? s.icon + ' ' : '') + s.label;
+    chip.textContent = (s.icon ? s.icon + ' ' : '') + (currentLang === 'es' && s.labelEs ? s.labelEs : s.label);
     chip.addEventListener('click', () => {
       if (createActivitySelectedWords.length >= 32) {
         showToast('Maximum 32 words per activity');
@@ -9500,7 +9608,14 @@ document.getElementById('create-activity-name').addEventListener('input', () => 
 
 document.getElementById('btn-add-all-suggestions').addEventListener('click', () => {
   const name = document.getElementById('create-activity-name').value.trim();
-  const suggestions = matchActivitySuggestions(name);
+  var suggestions;
+  if (name && typeof walkthroughSurfaceWords === 'function') {
+    suggestions = walkthroughSurfaceWords([name], 16).map(function(w) {
+      return { label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon };
+    });
+  } else {
+    suggestions = matchActivitySuggestions(name);
+  }
   const filtered = suggestions.filter(s =>
     !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
   );
@@ -9518,6 +9633,198 @@ document.getElementById('btn-add-all-suggestions').addEventListener('click', () 
     renderCreateSelectedWords();
     renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
     showToast(added + ' words added');
+  }
+});
+
+// ── Walkthrough UI (Phase B) ──
+
+let walkthroughStepCount = 0;
+let walkthroughSuggestedWords = [];
+
+function resetWalkthrough() {
+  walkthroughStepCount = 0;
+  walkthroughSuggestedWords = [];
+  var isEs = currentLang === 'es';
+  var toggle = document.getElementById('btn-walkthrough-toggle');
+  toggle.classList.remove('active');
+  toggle.textContent = isEs ? 'Describir esta actividad' : 'Describe this activity';
+  document.getElementById('walkthrough-steps').style.display = 'none';
+  document.getElementById('walkthrough-step-inputs').innerHTML = '';
+  document.getElementById('walkthrough-steps').querySelector('p').textContent = isEs
+    ? 'Describe lo que pasa paso a paso. La app sugerira vocabulario que tu hijo necesita.'
+    : 'Describe what happens step by step. The app will suggest vocabulary your child needs.';
+  document.getElementById('btn-walkthrough-add-step').textContent = isEs ? '+ Agregar otro paso' : '+ Add another step';
+  document.getElementById('btn-walkthrough-surface').textContent = isEs ? 'Mostrar Palabras Sugeridas' : 'Show Suggested Words';
+  document.getElementById('walkthrough-review').style.display = 'none';
+  document.getElementById('walkthrough-review-categories').innerHTML = '';
+  document.getElementById('walkthrough-review').querySelector('label').textContent = isEs ? 'Vocabulario Sugerido' : 'Suggested Vocabulary';
+  document.getElementById('btn-walkthrough-add-all').textContent = isEs ? 'Agregar Todo' : 'Add All';
+}
+
+function addWalkthroughStep() {
+  walkthroughStepCount++;
+  const container = document.getElementById('walkthrough-step-inputs');
+  const row = document.createElement('div');
+  row.className = 'walkthrough-step-row';
+  const label = document.createElement('span');
+  label.className = 'walkthrough-step-label';
+  label.textContent = walkthroughStepCount;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'walkthrough-step-input';
+  input.setAttribute('aria-label', (currentLang === 'es' ? 'Paso ' : 'Step ') + walkthroughStepCount);
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'walkthrough-step-remove';
+  removeBtn.innerHTML = '&times;';
+  removeBtn.setAttribute('aria-label', 'Remove step');
+  removeBtn.addEventListener('click', function() {
+    row.remove();
+    renumberWalkthroughSteps();
+  });
+  row.appendChild(label);
+  row.appendChild(input);
+  row.appendChild(removeBtn);
+  container.appendChild(row);
+  input.focus();
+}
+
+function renumberWalkthroughSteps() {
+  const rows = document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-row');
+  walkthroughStepCount = rows.length;
+  rows.forEach(function(row, i) {
+    row.querySelector('.walkthrough-step-label').textContent = i + 1;
+    row.querySelector('.walkthrough-step-input').setAttribute('aria-label', 'Step ' + (i + 1));
+  });
+}
+
+function collectWalkthroughTexts() {
+  var texts = [];
+  var name = document.getElementById('create-activity-name').value.trim();
+  if (name) texts.push(name);
+  document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-input').forEach(function(input) {
+    var val = input.value.trim();
+    if (val) texts.push(val);
+  });
+  return texts;
+}
+
+function renderWalkthroughReview(words) {
+  walkthroughSuggestedWords = words;
+  var reviewEl = document.getElementById('walkthrough-review');
+  var catContainer = document.getElementById('walkthrough-review-categories');
+  catContainer.innerHTML = '';
+
+  if (words.length === 0) {
+    reviewEl.style.display = 'none';
+    showToast(currentLang === 'es' ? 'No se encontraron palabras. Intenta describir mas.' : 'No words found. Try describing more details.');
+    return;
+  }
+
+  reviewEl.style.display = 'block';
+  var categorized = categorizeWalkthroughWords(words);
+  var catLabels = {
+    core: currentLang === 'es' ? 'Palabras Clave' : 'Core Words',
+    actions: currentLang === 'es' ? 'Acciones' : 'Actions',
+    objects: currentLang === 'es' ? 'Objetos' : 'Things',
+    descriptors: currentLang === 'es' ? 'Descriptores' : 'Describing Words',
+    social: currentLang === 'es' ? 'Social' : 'Social'
+  };
+
+  ['core', 'actions', 'objects', 'descriptors', 'social'].forEach(function(cat) {
+    var catWords = categorized[cat];
+    if (!catWords || catWords.length === 0) return;
+    var section = document.createElement('div');
+    section.className = 'walkthrough-category';
+    var labelEl = document.createElement('div');
+    labelEl.className = 'walkthrough-category-label';
+    labelEl.setAttribute('data-cat', cat);
+    labelEl.textContent = catLabels[cat];
+    section.appendChild(labelEl);
+    var chipsEl = document.createElement('div');
+    chipsEl.className = 'walkthrough-category-chips';
+    catWords.forEach(function(w) {
+      var chip = document.createElement('button');
+      var isAlreadySelected = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+      chip.className = 'create-word-chip' + (isAlreadySelected ? ' selected' : '');
+      chip.setAttribute('data-color', w.color);
+      chip.textContent = (w.icon ? w.icon + ' ' : '') + (currentLang === 'es' && w.labelEs ? w.labelEs : w.label);
+      chip.addEventListener('click', function() {
+        var alreadyIn = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+        if (alreadyIn) {
+          createActivitySelectedWords = createActivitySelectedWords.filter(function(s) { return s.label !== w.label; });
+          chip.classList.remove('selected');
+        } else {
+          if (createActivitySelectedWords.length >= 32) {
+            showToast('Maximum 32 words per activity');
+            return;
+          }
+          createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
+          chip.classList.add('selected');
+        }
+        renderCreateSelectedWords();
+        renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+      });
+      chipsEl.appendChild(chip);
+    });
+    section.appendChild(chipsEl);
+    catContainer.appendChild(section);
+  });
+}
+
+document.getElementById('btn-walkthrough-toggle').addEventListener('click', function() {
+  var stepsEl = document.getElementById('walkthrough-steps');
+  var toggle = document.getElementById('btn-walkthrough-toggle');
+  var isOpen = stepsEl.style.display !== 'none';
+  if (isOpen) {
+    stepsEl.style.display = 'none';
+    toggle.classList.remove('active');
+    toggle.textContent = currentLang === 'es' ? 'Describir esta actividad' : 'Describe this activity';
+  } else {
+    stepsEl.style.display = 'block';
+    toggle.classList.add('active');
+    toggle.textContent = currentLang === 'es' ? 'Ocultar descripcion' : 'Hide description';
+    if (walkthroughStepCount === 0) {
+      addWalkthroughStep();
+      addWalkthroughStep();
+      addWalkthroughStep();
+    }
+  }
+});
+
+document.getElementById('btn-walkthrough-add-step').addEventListener('click', function() {
+  if (walkthroughStepCount >= 10) {
+    showToast('Maximum 10 steps');
+    return;
+  }
+  addWalkthroughStep();
+});
+
+document.getElementById('btn-walkthrough-surface').addEventListener('click', function() {
+  var texts = collectWalkthroughTexts();
+  if (texts.length === 0 || texts.every(function(t) { return t.length < 2; })) {
+    showToast(currentLang === 'es' ? 'Describe los pasos de la actividad primero' : 'Describe the activity steps first');
+    return;
+  }
+  var words = walkthroughSurfaceWords(texts, 24);
+  renderWalkthroughReview(words);
+});
+
+document.getElementById('btn-walkthrough-add-all').addEventListener('click', function() {
+  if (walkthroughSuggestedWords.length === 0) return;
+  var added = 0;
+  walkthroughSuggestedWords.forEach(function(w) {
+    var alreadyIn = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+    if (!alreadyIn) {
+      if (createActivitySelectedWords.length >= 32) return;
+      createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
+      added++;
+    }
+  });
+  if (added > 0) {
+    renderCreateSelectedWords();
+    renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+    renderWalkthroughReview(walkthroughSuggestedWords);
+    showToast(added + (currentLang === 'es' ? ' palabras agregadas' : ' words added'));
   }
 });
 
@@ -9539,6 +9846,9 @@ function openCreateActivityModal(prefillActivity) {
     document.getElementById('create-activity-name').value = '';
   }
   document.getElementById('create-activity-word-search').value = '';
+
+  resetWalkthrough();
+  document.getElementById('walkthrough-section').style.display = prefillActivity ? 'none' : 'block';
 
   const iconsContainer = document.getElementById('create-activity-icons');
   iconsContainer.innerHTML = '';
@@ -9681,6 +9991,12 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
   const coreToAdd = ACTIVITY_CORE_WORDS.filter(cw => !selectedLabels.has(cw.label.toLowerCase()));
   const allWords = [...coreToAdd, ...createActivitySelectedWords];
 
+  const walkthroughTexts = collectWalkthroughTexts();
+  const walkthroughData = walkthroughStepCount > 0 ? {
+    steps: walkthroughTexts,
+    templateMatch: matchWalkthroughToTemplate(walkthroughTexts),
+  } : null;
+
   const activity = {
     id: id,
     name: name,
@@ -9688,6 +10004,7 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
     icon: createActivityIcon,
     color: createActivityColor,
     custom: true,
+    walkthrough: walkthroughData,
     words: allWords.map((w, i) => ({
       id: id + '-' + i,
       label: w.label,

@@ -1,6 +1,6 @@
 # Activity Walkthrough & Smart Vocabulary Surfacing -- Notes
 
-## Status: IN PROGRESS -- Phase A complete, Phase B next
+## Status: IN PROGRESS -- Phase B complete, Phase C next
 
 ## Implementation Checklist
 
@@ -18,14 +18,14 @@
 - [x] JS syntax validated
 
 ### Phase B: Parent Walkthrough UX
-- [ ] B1: "New Activity" button in Activities tab
-- [ ] B2: Quick Start path
-- [ ] B3: Guided Walkthrough path
-- [ ] B4: Keyword extraction engine
-- [ ] B5: Vocabulary suggestion review screen
-- [ ] B6: Word toggle UI
-- [ ] B7: Save custom activity with graph data
-- [ ] B8: Spanish language support
+- [x] B1: Walkthrough section in Create Activity modal (toggle button, step inputs, surface button)
+- [x] B2: Quick Start path (enhanced name-based suggestions using walkthroughSurfaceWords)
+- [x] B3: Guided Walkthrough path (step-by-step description, 3 initial steps, add/remove, max 10)
+- [x] B4: Keyword extraction wired to walkthroughSurfaceWords() from step inputs
+- [x] B5: Vocabulary suggestion review screen with categorized display (core/actions/things/descriptors/social)
+- [x] B6: Word toggle UI (individual chip toggle, Add All button, integrates with selected words)
+- [x] B7: Save walkthrough metadata (steps, template match) with custom activity
+- [x] B8: Spanish language support (all labels, buttons, toasts, category names, word display)
 
 ### Phase C: Smart Surfacing & Position Stability
 - [ ] C1: Word scoring algorithm
@@ -54,3 +54,4 @@
 ## Session Log
 - 2026-03-15: Plan created, awaiting approval
 - 2026-03-15: Phase A complete -- vocabulary graph, 19 activity templates, expansion map, synonyms, helper functions
+- 2026-03-15: Phase B complete -- walkthrough toggle, step inputs, surface words, categorized review, word toggles, Add All, Quick Start enhanced suggestions, walkthrough metadata saved with activity, full Spanish support, cache v53
