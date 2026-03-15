@@ -5527,6 +5527,73 @@ function matchWalkthroughToTemplate(textInputs) {
   return bestMatch;
 }
 
+// ── Position Allocation (Motor Planning Stability) ──
+
+function activityWordPositionHash(wordLabel, activityId) {
+  var str = activityId + ':' + wordLabel;
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function allocateActivityPositions(words, activityId, gridCols) {
+  if (!activityId || !words || words.length === 0) return words;
+  var positionKey = 'aac-activity-positions-' + activityId;
+  var savedPositions = null;
+  try { savedPositions = JSON.parse(localStorage.getItem(positionKey)); } catch(e) {}
+
+  if (savedPositions && typeof savedPositions === 'object') {
+    var positioned = new Array(words.length);
+    var unplaced = [];
+    var occupied = new Set();
+
+    words.forEach(function(w) {
+      var pos = savedPositions[w.label];
+      if (pos !== undefined && pos < words.length && !occupied.has(pos)) {
+        positioned[pos] = w;
+        occupied.add(pos);
+      } else {
+        unplaced.push(w);
+      }
+    });
+
+    var idx = 0;
+    unplaced.forEach(function(w) {
+      while (occupied.has(idx)) idx++;
+      positioned[idx] = w;
+      savedPositions[w.label] = idx;
+      occupied.add(idx);
+      idx++;
+    });
+
+    localStorage.setItem(positionKey, JSON.stringify(savedPositions));
+    return positioned.filter(Boolean);
+  }
+
+  var slots = words.length;
+  var positioned = new Array(slots);
+  var occupied = new Set();
+  var newPositions = {};
+
+  words.forEach(function(w) {
+    var hash = activityWordPositionHash(w.label, activityId);
+    var pos = hash % slots;
+    var tries = 0;
+    while (occupied.has(pos) && tries < slots) {
+      pos = (pos + 1) % slots;
+      tries++;
+    }
+    positioned[pos] = w;
+    occupied.add(pos);
+    newPositions[w.label] = pos;
+  });
+
+  localStorage.setItem(positionKey, JSON.stringify(newPositions));
+  return positioned.filter(Boolean);
+}
+
 // ── Activity Overlays ──
 let activeActivity = null; // null when no activity is active
 let _activitySlotOverrides = null;
@@ -7155,7 +7222,10 @@ function renderGrid() {
   // Activity overlay mode: show activity-specific words instead of the main grid
   if (activeActivity) {
     folderLabel.style.display = 'none';
-    const allWords = getActivityWords(activeActivity);
+    var allWords = getActivityWords(activeActivity);
+    if (activeActivity.custom) {
+      allWords = allocateActivityPositions(allWords, activeActivity.id, getGridSize());
+    }
     const gridSize = getGridSize();
     const earlyLearner = isEarlyLearnerGrid(gridSize);
     const totalSlots = earlyLearner ? (EARLY_LEARNER_SLOTS[gridSize] || 1) : allWords.length;
@@ -7223,10 +7293,23 @@ function renderGrid() {
       grid.appendChild(cell);
     });
 
-    const cols = earlyLearner ? (gridSize === 1 ? 1 : 2) : gridSize;
-    const rows = earlyLearner ? (gridSize === 2 ? 2 : 1) : Math.ceil(wordsToShow.length / cols);
-    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    grid.style.flex = '1';
+    let actCols;
+    if (earlyLearner) {
+      actCols = gridSize === 1 ? 1 : 2;
+    } else {
+      // Scale columns based on word count for better fit
+      let wc = wordsToShow.length;
+      if (wc <= 9) actCols = 3;
+      else if (wc <= 16) actCols = 4;
+      else if (wc <= 30) actCols = 5;
+      else actCols = 6;
+      // Never fewer than user's grid size preference for smaller sets
+      if (wc <= gridSize * gridSize) actCols = gridSize;
+    }
+    const actRows = earlyLearner ? (gridSize === 2 ? 2 : 1) : Math.ceil(wordsToShow.length / actCols);
+    grid.style.gridTemplateColumns = `repeat(${actCols}, 1fr)`;
+    grid.style.gridTemplateRows = actRows <= 6 ? `repeat(${actRows}, 1fr)` : `repeat(${actRows}, minmax(60px, 1fr))`;
+    grid.style.flex = actRows <= 6 ? '1' : '';
 
     return;
   }
@@ -9589,8 +9672,8 @@ function renderActivitySuggestions() {
     chip.style.borderStyle = 'dashed';
     chip.textContent = (s.icon ? s.icon + ' ' : '') + (currentLang === 'es' && s.labelEs ? s.labelEs : s.label);
     chip.addEventListener('click', () => {
-      if (createActivitySelectedWords.length >= 32) {
-        showToast('Maximum 32 words per activity');
+      if (createActivitySelectedWords.length >= 64) {
+        showToast('Maximum 64 words per activity');
         return;
       }
       createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
@@ -9621,8 +9704,8 @@ document.getElementById('btn-add-all-suggestions').addEventListener('click', () 
   );
   let added = 0;
   for (const s of filtered) {
-    if (createActivitySelectedWords.length >= 32) {
-      showToast('Maximum 32 words reached');
+    if (createActivitySelectedWords.length >= 64) {
+      showToast('Maximum 64 words reached');
       break;
     }
     createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
@@ -9754,8 +9837,8 @@ function renderWalkthroughReview(words) {
           createActivitySelectedWords = createActivitySelectedWords.filter(function(s) { return s.label !== w.label; });
           chip.classList.remove('selected');
         } else {
-          if (createActivitySelectedWords.length >= 32) {
-            showToast('Maximum 32 words per activity');
+          if (createActivitySelectedWords.length >= 64) {
+            showToast('Maximum 64 words per activity');
             return;
           }
           createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
@@ -9815,7 +9898,7 @@ document.getElementById('btn-walkthrough-add-all').addEventListener('click', fun
   walkthroughSuggestedWords.forEach(function(w) {
     var alreadyIn = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
     if (!alreadyIn) {
-      if (createActivitySelectedWords.length >= 32) return;
+      if (createActivitySelectedWords.length >= 64) return;
       createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
       added++;
     }
@@ -9917,8 +10000,8 @@ function renderCreateWordPicker(filter) {
       if (isSelected) {
         createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
       } else {
-        if (createActivitySelectedWords.length >= 32) {
-          showToast('Maximum 32 words per activity');
+        if (createActivitySelectedWords.length >= 64) {
+          showToast('Maximum 64 words per activity');
           return;
         }
         createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon });
@@ -10005,15 +10088,18 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
     color: createActivityColor,
     custom: true,
     walkthrough: walkthroughData,
-    words: allWords.map((w, i) => ({
-      id: id + '-' + i,
-      label: w.label,
-      labelEs: w.labelEs || w.label,
-      color: w.color,
-      icon: w.icon || '',
-      symbolKw: w.symbolKw || w.label,
-      tier: i < 6 ? 'starter' : 'expanded',
-    })),
+    words: allWords.map((w, i) => {
+      var isCore = ACTIVITY_CORE_WORDS.some(function(cw) { return cw.label === w.label; });
+      return {
+        id: id + '-' + i,
+        label: w.label,
+        labelEs: w.labelEs || w.label,
+        color: w.color,
+        icon: w.icon || '',
+        symbolKw: w.symbolKw || w.label,
+        tier: (isCore || i < 6) ? 'starter' : 'expanded',
+      };
+    }),
   };
 
   const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');

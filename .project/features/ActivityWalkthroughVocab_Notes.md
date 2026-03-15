@@ -1,6 +1,6 @@
 # Activity Walkthrough & Smart Vocabulary Surfacing -- Notes
 
-## Status: IN PROGRESS -- Phase B complete, Phase C next
+## Status: IN PROGRESS -- Phase C complete, Phase D next
 
 ## Implementation Checklist
 
@@ -28,11 +28,11 @@
 - [x] B8: Spanish language support (all labels, buttons, toasts, category names, word display)
 
 ### Phase C: Smart Surfacing & Position Stability
-- [ ] C1: Word scoring algorithm
-- [ ] C2: Position allocation algorithm
-- [ ] C3: renderGrid() integration
-- [ ] C4: Vocabulary level support
-- [ ] C5: Early learner grid integration
+- [x] C1: Max activity words increased from 32 to 64 (all 5 cap checks updated)
+- [x] C2: Position allocation algorithm (deterministic hash-based, persisted to localStorage per activity)
+- [x] C3: renderGrid() integration (position allocation for custom activities, adaptive column scaling for large word sets)
+- [x] C4: Vocabulary level support (core words always get starter tier, smart tier assignment on save)
+- [x] C5: Early learner grid integration (starter filtering feeds into slot slicing, existing long-press override preserved)
 
 ### Phase D: Enhanced Activity Management
 - [ ] D1: Edit walkthrough
@@ -47,6 +47,10 @@
 - ACTIVITY_BUNDLES: unchanged format, 6 new entries added directly
 - Removed EXTRA_SUGGESTION_WORDS/EXTRA_KEYWORD_MAP -- swimming and haircut are now proper bundles
 - walkthroughSurfaceWords() scoring: core words +1.5, direct match +1.0, expansion +0.7, template match +0.6
+- Position allocation: hash-based deterministic positions per activity, saved to localStorage as aac-activity-positions-{id}
+- Existing words keep positions when activity is edited; new words fill empty slots
+- Grid columns scale adaptively: <=9 words -> 3col, <=16 -> 4col, <=30 -> 5col, >30 -> 6col
+- Max activity words: 64 (up from 32)
 
 ## Issues & Resolutions
 (none yet)
@@ -55,3 +59,4 @@
 - 2026-03-15: Plan created, awaiting approval
 - 2026-03-15: Phase A complete -- vocabulary graph, 19 activity templates, expansion map, synonyms, helper functions
 - 2026-03-15: Phase B complete -- walkthrough toggle, step inputs, surface words, categorized review, word toggles, Add All, Quick Start enhanced suggestions, walkthrough metadata saved with activity, full Spanish support, cache v53
+- 2026-03-15: Phase C complete -- position allocation algorithm, renderGrid integration, adaptive grid columns, max words 64, smart starter tier assignment, cache v54
