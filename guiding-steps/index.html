@@ -227,6 +227,18 @@ body {
   font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
   background: var(--bar-bg); color: #fff; margin-top: 8px;
 }
+.settings-accordion-btn {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; padding: 4px 0; cursor: pointer; font-family: inherit;
+}
+.settings-accordion-btn:active { opacity: 0.7; }
+.accordion-chevron {
+  font-size: 0.8rem; color: #999; transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
+}
+.settings-accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
+.accordion-details { display: none; margin-top: 8px; }
+.accordion-details.open { display: block; }
+.accordion-summary { flex: 1; text-align: left; }
 
 /* ── Reward Tracker ── */
 #rewards-content {
@@ -1667,6 +1679,7 @@ body {
   z-index: 200;
   justify-content: center;
   align-items: center;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 #tmpl-list-overlay.open { display: flex; }
@@ -2677,44 +2690,56 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <input type="text" id="settings-child-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
     </div>
     <div class="settings-section">
-      <h3>Kids Mode</h3>
-      <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Hides editing controls for child use</p>
-      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
+      <label style="display:flex;align-items:center;gap:10px;padding:4px 0;font-size:0.95rem;cursor:pointer;">
         <input type="checkbox" id="toggle-kids-mode" class="settings-checkbox"> Enable Kids Mode
       </label>
     </div>
     <div class="settings-section">
-      <h3>Sensory Preferences</h3>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
-      <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-        <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
-      </label>
-      <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and celebration effects.</p>
+      <button type="button" id="sensory-toggle" class="settings-accordion-btn" aria-expanded="false">
+        <span style="font-size:1rem;font-weight:700;color:#555;">Sensory Preferences</span>
+        <span class="accordion-summary" id="sensory-summary" style="font-size:0.8rem;color:#888;"></span>
+        <span class="accordion-chevron">&#9660;</span>
+      </button>
+      <div id="sensory-details" class="accordion-details">
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+          <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
+        </label>
+      </div>
     </div>
     <div class="settings-section parent-only">
-      <h3>Schedule</h3>
-      <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:8px;">Steps shown at a time</label>
-      <div class="seg-group" id="visible-steps-group" role="radiogroup" aria-label="Number of visible schedule steps">
-        <button class="seg-btn" role="radio" aria-checked="false" data-value="2">2</button>
-        <button class="seg-btn" role="radio" aria-checked="false" data-value="3">3</button>
-        <button class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
-        <button class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
-        <button class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
+      <button type="button" id="schedule-toggle" class="settings-accordion-btn" aria-expanded="false">
+        <span style="font-size:1rem;font-weight:700;color:#555;">Schedule</span>
+        <span class="accordion-summary" id="schedule-summary" style="font-size:0.8rem;color:#888;"></span>
+        <span class="accordion-chevron">&#9660;</span>
+      </button>
+      <div id="schedule-details" class="accordion-details">
+        <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:8px;">Steps shown at a time</label>
+        <div class="seg-group" id="visible-steps-group" role="radiogroup" aria-label="Number of visible schedule steps">
+          <button class="seg-btn" role="radio" aria-checked="false" data-value="2">2</button>
+          <button class="seg-btn" role="radio" aria-checked="false" data-value="3">3</button>
+          <button class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
+          <button class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
+          <button class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
+        </div>
       </div>
-      <p style="font-size:0.8rem;color:#888;margin-top:6px;">How many steps your child sees at once. Default is 3 (recommended).</p>
     </div>
     <div class="settings-section">
-      <h3>Voice</h3>
-      <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
-      <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
-      <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+      <button type="button" id="voice-toggle" class="settings-accordion-btn" aria-expanded="false">
+        <span style="font-size:1rem;font-weight:700;color:#555;">Voice</span>
+        <span class="accordion-summary" id="voice-summary" style="font-size:0.8rem;color:#888;"></span>
+        <span class="accordion-chevron">&#9660;</span>
+      </button>
+      <div id="voice-details" class="accordion-details">
+        <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
+        <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
+        <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+      </div>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
@@ -3263,10 +3288,17 @@ document.querySelectorAll('.tab-btn').forEach(tab => {
 
 // -- Settings Modal --
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  updateSensorySummary();
+  updateScheduleSummary();
+  updateVoiceSummary();
   document.getElementById('settings-overlay').classList.add('open');
 });
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
+  ['sensory', 'schedule', 'voice'].forEach(key => {
+    document.getElementById(key + '-toggle').setAttribute('aria-expanded', 'false');
+    document.getElementById(key + '-details').classList.remove('open');
+  });
 });
 document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('settings-overlay').classList.remove('open');
@@ -3335,8 +3367,38 @@ SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
     const on = e.target.checked;
     document.body.classList.toggle(bodyClass, on);
     localStorage.setItem(storageKey, String(on));
+    updateSensorySummary();
   });
 });
+
+function updateSensorySummary() {
+  const labels = [];
+  if (document.getElementById('sensory-reduced-motion').checked) labels.push('Reduce motion');
+  if (document.getElementById('sensory-high-contrast').checked) labels.push('High contrast');
+  if (document.getElementById('sensory-quiet').checked) labels.push('Quiet mode');
+  document.getElementById('sensory-summary').textContent = labels.length ? labels.join(', ') : 'All off';
+}
+
+['sensory', 'schedule', 'voice'].forEach(key => {
+  document.getElementById(key + '-toggle').addEventListener('click', () => {
+    const btn = document.getElementById(key + '-toggle');
+    const details = document.getElementById(key + '-details');
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    details.classList.toggle('open', !expanded);
+  });
+});
+
+function updateScheduleSummary() {
+  const active = document.querySelector('#visible-steps-group .seg-btn[aria-checked="true"]');
+  document.getElementById('schedule-summary').textContent = active ? active.dataset.value + ' steps' : '';
+}
+
+function updateVoiceSummary() {
+  const sel = document.getElementById('voice-select');
+  const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+  document.getElementById('voice-summary').textContent = name ? name.split(' ').slice(0, 3).join(' ') : '';
+}
 
 // -- Visible Steps Setting --
 function applyVisibleStepsSetting() {
