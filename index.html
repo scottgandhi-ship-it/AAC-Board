@@ -1650,6 +1650,90 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   font-family: inherit;
 }
 
+/* Walkthrough UI */
+.walkthrough-toggle-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--chrome-primary);
+  cursor: pointer;
+  text-align: left;
+}
+.walkthrough-toggle-btn.active {
+  border-color: var(--chrome-primary);
+  border-style: solid;
+  background: rgba(108,99,255,0.04);
+}
+.walkthrough-step-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.walkthrough-step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--chrome-primary);
+  min-width: 18px;
+  text-align: center;
+}
+.walkthrough-step-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.walkthrough-step-input:focus {
+  border-color: var(--chrome-primary);
+  outline: none;
+}
+.walkthrough-step-remove {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #ccc;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.walkthrough-step-remove:hover { color: #e53935; }
+.walkthrough-category {
+  margin-bottom: 10px;
+}
+.walkthrough-category-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.walkthrough-category-label[data-cat="core"] { background: #e8f5e9; color: #2E7D32; }
+.walkthrough-category-label[data-cat="actions"] { background: #e8f5e9; color: #2E7D32; }
+.walkthrough-category-label[data-cat="objects"] { background: #fff3e0; color: #E65100; }
+.walkthrough-category-label[data-cat="descriptors"] { background: #e3f2fd; color: #1565C0; }
+.walkthrough-category-label[data-cat="social"] { background: #fce4ec; color: #C62828; }
+.walkthrough-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
 /* Activity preview overlay */
 #activity-preview-overlay {
   display: none;
@@ -2854,6 +2938,7 @@ body.sensory-high-contrast .settings-btn {
     <div id="activity-preview-actions">
       <button id="btn-activity-cancel">Cancel</button>
       <button id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
+      <button id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
       <button id="btn-activity-customize">Customize</button>
       <button id="btn-activity-start">Start Activity</button>
     </div>
@@ -2923,6 +3008,22 @@ body.sensory-high-contrast .settings-btn {
     <div style="margin-bottom:12px;">
       <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Activity Name</label>
       <input type="text" id="create-activity-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+    </div>
+    <div id="walkthrough-section" style="display:none;margin-bottom:12px;">
+      <button id="btn-walkthrough-toggle" class="walkthrough-toggle-btn">Describe this activity</button>
+      <div id="walkthrough-steps" style="display:none;">
+        <p style="font-size:0.8rem;color:#888;margin:8px 0 10px;">Describe what happens step by step. The app will suggest vocabulary your child needs.</p>
+        <div id="walkthrough-step-inputs"></div>
+        <button id="btn-walkthrough-add-step" style="padding:6px 12px;border:1px dashed #ccc;border-radius:8px;background:transparent;font-family:inherit;font-size:0.8rem;color:#999;cursor:pointer;width:100%;margin-top:6px;">+ Add another step</button>
+        <button id="btn-walkthrough-surface" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;width:100%;">Show Suggested Words</button>
+      </div>
+    </div>
+    <div id="walkthrough-review" style="display:none;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <label style="font-weight:600;font-size:0.9rem;color:#555;">Suggested Vocabulary</label>
+        <button id="btn-walkthrough-add-all" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
+      </div>
+      <div id="walkthrough-review-categories"></div>
     </div>
     <div id="create-activity-suggestions" style="display:none;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -4738,6 +4839,762 @@ let speechRate = 0.85;
 let speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
 let activeTab = 'talk';
 
+// ── Vocabulary Graph for Smart Activity Surfacing ──
+// Powers the parent walkthrough: parents describe an activity, the graph
+// surfaces clinically-appropriate vocabulary via keyword matching and
+// word-to-word expansion. All client-side, works offline.
+
+const VOCAB_CORE_WORDS = ['I', 'want', 'more', 'help', 'stop', 'all done', 'no'];
+
+const VOCAB_WORD_POOL = {
+  'I':          { labelEs: 'yo',          color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+  'my':         { labelEs: 'mi',          color: 'yellow', icon: '🙋',  symbolKw: 'my' },
+  'it':         { labelEs: 'eso',         color: 'yellow', icon: '👆',  symbolKw: 'it' },
+  'this one':   { labelEs: 'este',        color: 'yellow', icon: '👆',  symbolKw: 'this' },
+  'that':       { labelEs: 'eso',         color: 'yellow', icon: '👆',  symbolKw: 'that' },
+  'where':      { labelEs: 'donde',       color: 'yellow', icon: '❓',  symbolKw: 'where' },
+  'want':       { labelEs: 'quiero',      color: 'green',  icon: '👉',  symbolKw: 'want' },
+  "don't want": { labelEs: 'no quiero',   color: 'red',    icon: '🚫',  symbolKw: 'no want' },
+  'more':       { labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
+  'help':       { labelEs: 'ayuda',       color: 'green',  icon: '🆘',  symbolKw: 'help' },
+  'stop':       { labelEs: 'para',        color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+  'all done':   { labelEs: 'ya termine',  color: 'green',  icon: '✅',  symbolKw: 'finished' },
+  'no':         { labelEs: 'no',          color: 'pink',   icon: '👎',  symbolKw: 'no' },
+  'yes':        { labelEs: 'si',          color: 'green',  icon: '👍',  symbolKw: 'yes' },
+  'again':      { labelEs: 'otra vez',    color: 'blue',   icon: '🔄',  symbolKw: 'again' },
+  'my turn':    { labelEs: 'mi turno',    color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
+  'your turn':  { labelEs: 'tu turno',    color: 'pink',   icon: '👉',  symbolKw: 'your turn' },
+  'please':     { labelEs: 'por favor',   color: 'pink',   icon: '🙏',  symbolKw: 'please' },
+  'thank you':  { labelEs: 'gracias',     color: 'pink',   icon: '🙏',  symbolKw: 'thank you' },
+  'hi':         { labelEs: 'hola',        color: 'pink',   icon: '👋',  symbolKw: 'hello' },
+  'bye':        { labelEs: 'adios',       color: 'pink',   icon: '👋',  symbolKw: 'goodbye' },
+  'uh oh':      { labelEs: 'uy',          color: 'pink',   icon: '😯',  symbolKw: 'surprise' },
+  'good job':   { labelEs: 'buen trabajo', color: 'pink',  icon: '⭐',  symbolKw: 'good job' },
+  'sorry':      { labelEs: 'perdon',      color: 'pink',   icon: '😔',  symbolKw: 'sorry' },
+  'wait':       { labelEs: 'espera',      color: 'green',  icon: '⏳',  symbolKw: 'wait' },
+  'share':      { labelEs: 'compartir',   color: 'green',  icon: '🤝',  symbolKw: 'share' },
+  'goodnight':  { labelEs: 'buenas noches', color: 'pink', icon: '🌙',  symbolKw: 'goodnight' },
+  'love you':   { labelEs: 'te quiero',   color: 'pink',   icon: '❤️',  symbolKw: 'love' },
+  'I did it':   { labelEs: 'lo hice',     color: 'pink',   icon: '🎉',  symbolKw: 'success' },
+  "it's okay":  { labelEs: 'esta bien',   color: 'pink',   icon: '👌',  symbolKw: 'okay' },
+  'almost done': { labelEs: 'casi listo', color: 'pink',   icon: '⏳',  symbolKw: 'almost' },
+  'watch me':   { labelEs: 'mirame',      color: 'pink',   icon: '👀',  symbolKw: 'watch me' },
+  'eat':        { labelEs: 'comer',       color: 'green',  icon: '🍽️',  symbolKw: 'eat' },
+  'drink':      { labelEs: 'beber',       color: 'green',  icon: '🥤',  symbolKw: 'drink' },
+  'wash':       { labelEs: 'lavar',       color: 'green',  icon: '🧼',  symbolKw: 'wash' },
+  'pour':       { labelEs: 'verter',      color: 'green',  icon: '🫗',  symbolKw: 'pour' },
+  'splash':     { labelEs: 'salpicar',    color: 'green',  icon: '💦',  symbolKw: 'splash' },
+  'play':       { labelEs: 'jugar',       color: 'green',  icon: '🎮',  symbolKw: 'play' },
+  'dry':        { labelEs: 'secar',       color: 'green',  icon: '🧻',  symbolKw: 'dry' },
+  'put on':     { labelEs: 'poner',       color: 'green',  icon: '👕',  symbolKw: 'put on' },
+  'take off':   { labelEs: 'quitar',      color: 'green',  icon: '👗',  symbolKw: 'take off' },
+  'rinse':      { labelEs: 'enjuagar',    color: 'green',  icon: '🚿',  symbolKw: 'rinse' },
+  'squeeze':    { labelEs: 'apretar',     color: 'green',  icon: '🤜',  symbolKw: 'squeeze' },
+  'rub':        { labelEs: 'frotar',      color: 'green',  icon: '🤲',  symbolKw: 'rub' },
+  'go':         { labelEs: 'ir',          color: 'green',  icon: '▶️',  symbolKw: 'go' },
+  'push':       { labelEs: 'empujar',     color: 'green',  icon: '🤲',  symbolKw: 'push' },
+  'pull':       { labelEs: 'jalar',       color: 'green',  icon: '🤏',  symbolKw: 'pull' },
+  'slide':      { labelEs: 'resbalar',    color: 'green',  icon: '🛝',  symbolKw: 'slide' },
+  'swing':      { labelEs: 'columpio',    color: 'green',  icon: '🎠',  symbolKw: 'swing' },
+  'climb':      { labelEs: 'trepar',      color: 'green',  icon: '🧗',  symbolKw: 'climb' },
+  'run':        { labelEs: 'correr',      color: 'green',  icon: '🏃',  symbolKw: 'run' },
+  'jump':       { labelEs: 'saltar',      color: 'green',  icon: '🤸',  symbolKw: 'jump' },
+  'throw':      { labelEs: 'lanzar',      color: 'green',  icon: '🏐',  symbolKw: 'throw' },
+  'catch':      { labelEs: 'atrapar',     color: 'green',  icon: '🤲',  symbolKw: 'catch' },
+  'kick':       { labelEs: 'patear',      color: 'green',  icon: '🦶',  symbolKw: 'kick' },
+  'read':       { labelEs: 'leer',        color: 'green',  icon: '📖',  symbolKw: 'read' },
+  'hug':        { labelEs: 'abrazo',      color: 'green',  icon: '🤗',  symbolKw: 'hug' },
+  'kiss':       { labelEs: 'beso',        color: 'green',  icon: '😘',  symbolKw: 'kiss' },
+  'sleep':      { labelEs: 'dormir',      color: 'green',  icon: '😴',  symbolKw: 'sleep' },
+  'sing':       { labelEs: 'cantar',      color: 'green',  icon: '🎵',  symbolKw: 'sing' },
+  'listen':     { labelEs: 'escuchar',    color: 'green',  icon: '👂',  symbolKw: 'listen' },
+  'look':       { labelEs: 'mira',        color: 'green',  icon: '👀',  symbolKw: 'look' },
+  'touch':      { labelEs: 'tocar',       color: 'green',  icon: '✋',  symbolKw: 'touch' },
+  'sit':        { labelEs: 'sentarse',    color: 'green',  icon: '🪑',  symbolKw: 'sit' },
+  'stand':      { labelEs: 'pararse',     color: 'green',  icon: '🧍',  symbolKw: 'stand' },
+  'walk':       { labelEs: 'caminar',     color: 'green',  icon: '🚶',  symbolKw: 'walk' },
+  'draw':       { labelEs: 'dibujar',     color: 'green',  icon: '✏️',  symbolKw: 'draw' },
+  'cut':        { labelEs: 'cortar',      color: 'green',  icon: '✂️',  symbolKw: 'cut' },
+  'glue':       { labelEs: 'pegar',       color: 'green',  icon: '🧴',  symbolKw: 'glue' },
+  'paint':      { labelEs: 'pintar',      color: 'green',  icon: '🎨',  symbolKw: 'paint' },
+  'color':      { labelEs: 'colorear',    color: 'green',  icon: '🌈',  symbolKw: 'color' },
+  'get':        { labelEs: 'agarrar',     color: 'green',  icon: '🤲',  symbolKw: 'get' },
+  'put':        { labelEs: 'poner',       color: 'green',  icon: '📥',  symbolKw: 'put' },
+  'open':       { labelEs: 'abrir',       color: 'green',  icon: '📂',  symbolKw: 'open' },
+  'close':      { labelEs: 'cerrar',      color: 'green',  icon: '📁',  symbolKw: 'close' },
+  'give':       { labelEs: 'dar',         color: 'green',  icon: '🤲',  symbolKw: 'give' },
+  'take':       { labelEs: 'tomar',       color: 'green',  icon: '✊',  symbolKw: 'take' },
+  'turn':       { labelEs: 'voltear',     color: 'green',  icon: '📄',  symbolKw: 'turn' },
+  'watch':      { labelEs: 'ver',         color: 'green',  icon: '👀',  symbolKw: 'watch' },
+  'swim':       { labelEs: 'nadar',       color: 'green',  icon: '🏊',  symbolKw: 'swim' },
+  'float':      { labelEs: 'flotar',      color: 'green',  icon: '🛟',  symbolKw: 'float' },
+  'blow':       { labelEs: 'soplar',      color: 'green',  icon: '🌬️',  symbolKw: 'blow' },
+  'hold':       { labelEs: 'sostener',    color: 'green',  icon: '🤝',  symbolKw: 'hold' },
+  'brush':      { labelEs: 'cepillar',    color: 'green',  icon: '🪥',  symbolKw: 'brush' },
+  'spit':       { labelEs: 'escupir',     color: 'green',  icon: '💦',  symbolKw: 'spit' },
+  'build':      { labelEs: 'construir',   color: 'green',  icon: '🧱',  symbolKw: 'build' },
+  'hide':       { labelEs: 'esconder',    color: 'green',  icon: '🫣',  symbolKw: 'hide' },
+  'find':       { labelEs: 'encontrar',   color: 'green',  icon: '🔍',  symbolKw: 'find' },
+  'chase':      { labelEs: 'perseguir',   color: 'green',  icon: '🏃',  symbolKw: 'chase' },
+  'dance':      { labelEs: 'bailar',      color: 'green',  icon: '💃',  symbolKw: 'dance' },
+  'clap':       { labelEs: 'aplaudir',    color: 'green',  icon: '👏',  symbolKw: 'clap' },
+  'wave':       { labelEs: 'saludar',     color: 'green',  icon: '👋',  symbolKw: 'wave' },
+  'drive':      { labelEs: 'manejar',     color: 'green',  icon: '🚗',  symbolKw: 'drive' },
+  'buckle':     { labelEs: 'abrochar',    color: 'green',  icon: '🔒',  symbolKw: 'buckle' },
+  'stir':       { labelEs: 'revolver',    color: 'green',  icon: '🥄',  symbolKw: 'stir' },
+  'bite':       { labelEs: 'morder',      color: 'green',  icon: '😬',  symbolKw: 'bite' },
+  'chew':       { labelEs: 'masticar',    color: 'green',  icon: '😋',  symbolKw: 'chew' },
+  'try':        { labelEs: 'intentar',    color: 'green',  icon: '💪',  symbolKw: 'try' },
+  'reach':      { labelEs: 'alcanzar',    color: 'green',  icon: '🙌',  symbolKw: 'reach' },
+  'shake':      { labelEs: 'agitar',      color: 'green',  icon: '🫨',  symbolKw: 'shake' },
+  'smell':      { labelEs: 'oler',        color: 'green',  icon: '👃',  symbolKw: 'smell' },
+  'mix':        { labelEs: 'mezclar',     color: 'green',  icon: '🥣',  symbolKw: 'mix' },
+  'press':      { labelEs: 'presionar',   color: 'green',  icon: '👇',  symbolKw: 'press' },
+  'zip':        { labelEs: 'cerrar zipper', color: 'green', icon: '🔗', symbolKw: 'zip' },
+  'button':     { labelEs: 'abotonar',    color: 'green',  icon: '⚫',  symbolKw: 'button' },
+  'breathe':    { labelEs: 'respirar',    color: 'green',  icon: '🌬️',  symbolKw: 'breathe' },
+  'point':      { labelEs: 'senalar',     color: 'green',  icon: '👉',  symbolKw: 'point' },
+  'pick':       { labelEs: 'escoger',     color: 'green',  icon: '👆',  symbolKw: 'pick' },
+  'carry':      { labelEs: 'cargar',      color: 'green',  icon: '🏋️',  symbolKw: 'carry' },
+  'pause':      { labelEs: 'pausa',       color: 'green',  icon: '⏸️',  symbolKw: 'pause' },
+  'turn on':    { labelEs: 'prender',     color: 'green',  icon: '🔛',  symbolKw: 'turn on' },
+  'turn off':   { labelEs: 'apagar',      color: 'green',  icon: '📴',  symbolKw: 'turn off' },
+  'spray':      { labelEs: 'rociar',      color: 'green',  icon: '💨',  symbolKw: 'spray' },
+  'comb':       { labelEs: 'peinar',      color: 'green',  icon: '💇',  symbolKw: 'comb' },
+  'water':      { labelEs: 'agua',        color: 'orange', icon: '💧',  symbolKw: 'water' },
+  'soap':       { labelEs: 'jabon',       color: 'orange', icon: '🧼',  symbolKw: 'soap' },
+  'bubbles':    { labelEs: 'burbujas',    color: 'orange', icon: '🫧',  symbolKw: 'bubbles' },
+  'towel':      { labelEs: 'toalla',      color: 'orange', icon: '🧴',  symbolKw: 'towel' },
+  'duck':       { labelEs: 'pato',        color: 'orange', icon: '🦆',  symbolKw: 'duck' },
+  'hair':       { labelEs: 'pelo',        color: 'orange', icon: '💇',  symbolKw: 'hair' },
+  'body':       { labelEs: 'cuerpo',      color: 'orange', icon: '🧍',  symbolKw: 'body' },
+  'tub':        { labelEs: 'tina',        color: 'orange', icon: '🛁',  symbolKw: 'tub' },
+  'pajamas':    { labelEs: 'pijama',      color: 'orange', icon: '👕',  symbolKw: 'pajamas' },
+  'spoon':      { labelEs: 'cuchara',     color: 'orange', icon: '🥄',  symbolKw: 'spoon' },
+  'fork':       { labelEs: 'tenedor',     color: 'orange', icon: '🍴',  symbolKw: 'fork' },
+  'cup':        { labelEs: 'vaso',        color: 'orange', icon: '🥤',  symbolKw: 'cup' },
+  'plate':      { labelEs: 'plato',       color: 'orange', icon: '🍽️',  symbolKw: 'plate' },
+  'napkin':     { labelEs: 'servilleta',  color: 'orange', icon: '🧻',  symbolKw: 'napkin' },
+  'bowl':       { labelEs: 'tazon',       color: 'orange', icon: '🥣',  symbolKw: 'bowl' },
+  'food':       { labelEs: 'comida',      color: 'orange', icon: '🍎',  symbolKw: 'food' },
+  'snack':      { labelEs: 'merienda',    color: 'orange', icon: '🍪',  symbolKw: 'snack' },
+  'car':        { labelEs: 'carro',       color: 'orange', icon: '🚗',  symbolKw: 'car' },
+  'seat':       { labelEs: 'asiento',     color: 'orange', icon: '💺',  symbolKw: 'seat' },
+  'window':     { labelEs: 'ventana',     color: 'orange', icon: '🪟',  symbolKw: 'window' },
+  'music':      { labelEs: 'musica',      color: 'orange', icon: '🎵',  symbolKw: 'music' },
+  'home':       { labelEs: 'casa',        color: 'orange', icon: '🏠',  symbolKw: 'home' },
+  'shirt':      { labelEs: 'camisa',      color: 'orange', icon: '👕',  symbolKw: 'shirt' },
+  'pants':      { labelEs: 'pantalones',  color: 'orange', icon: '👖',  symbolKw: 'pants' },
+  'shoes':      { labelEs: 'zapatos',     color: 'orange', icon: '👟',  symbolKw: 'shoes' },
+  'socks':      { labelEs: 'calcetines',  color: 'orange', icon: '🧦',  symbolKw: 'socks' },
+  'underwear':  { labelEs: 'ropa interior', color: 'orange', icon: '🩲', symbolKw: 'underwear' },
+  'jacket':     { labelEs: 'chaqueta',    color: 'orange', icon: '🧥',  symbolKw: 'jacket' },
+  'hat':        { labelEs: 'gorro',       color: 'orange', icon: '🧢',  symbolKw: 'hat' },
+  'zipper':     { labelEs: 'cierre',      color: 'orange', icon: '🔗',  symbolKw: 'zipper' },
+  'song':       { labelEs: 'cancion',     color: 'orange', icon: '🎶',  symbolKw: 'song' },
+  'book':       { labelEs: 'libro',       color: 'orange', icon: '📚',  symbolKw: 'book' },
+  'page':       { labelEs: 'pagina',      color: 'orange', icon: '📄',  symbolKw: 'page' },
+  'blanket':    { labelEs: 'cobija',      color: 'orange', icon: '🛏️',  symbolKw: 'blanket' },
+  'pillow':     { labelEs: 'almohada',    color: 'orange', icon: '🛌',  symbolKw: 'pillow' },
+  'teddy':      { labelEs: 'osito',       color: 'orange', icon: '🧸',  symbolKw: 'teddy bear' },
+  'light':      { labelEs: 'luz',         color: 'orange', icon: '💡',  symbolKw: 'light' },
+  'doctor':     { labelEs: 'doctor',      color: 'orange', icon: '👨‍⚕️', symbolKw: 'doctor' },
+  'sticker':    { labelEs: 'sticker',     color: 'orange', icon: '⭐',  symbolKw: 'sticker' },
+  'band-aid':   { labelEs: 'curita',      color: 'orange', icon: '🩹',  symbolKw: 'bandage' },
+  'arm':        { labelEs: 'brazo',       color: 'orange', icon: '💪',  symbolKw: 'arm' },
+  'mouth':      { labelEs: 'boca',        color: 'orange', icon: '👄',  symbolKw: 'mouth' },
+  'ears':       { labelEs: 'orejas',      color: 'orange', icon: '👂',  symbolKw: 'ear' },
+  'eyes':       { labelEs: 'ojos',        color: 'orange', icon: '👁️',  symbolKw: 'eye' },
+  'tummy':      { labelEs: 'pancita',     color: 'orange', icon: '🤰',  symbolKw: 'stomach' },
+  'cart':       { labelEs: 'carrito',     color: 'orange', icon: '🛒',  symbolKw: 'cart' },
+  'bag':        { labelEs: 'bolsa',       color: 'orange', icon: '🛍️',  symbolKw: 'bag' },
+  'paper':      { labelEs: 'papel',       color: 'orange', icon: '📄',  symbolKw: 'paper' },
+  'crayon':     { labelEs: 'crayon',      color: 'orange', icon: '🖍️',  symbolKw: 'crayon' },
+  'marker':     { labelEs: 'marcador',    color: 'orange', icon: '🖍️',  symbolKw: 'marker' },
+  'scissors':   { labelEs: 'tijeras',     color: 'orange', icon: '✂️',  symbolKw: 'scissors' },
+  'sand':       { labelEs: 'arena',       color: 'orange', icon: '🏖️',  symbolKw: 'sand' },
+  'play dough': { labelEs: 'plastilina',  color: 'orange', icon: '🟡',  symbolKw: 'clay' },
+  'slime':      { labelEs: 'slime',       color: 'orange', icon: '🟢',  symbolKw: 'slime' },
+  'pool':       { labelEs: 'piscina',     color: 'orange', icon: '🏊',  symbolKw: 'pool' },
+  'goggles':    { labelEs: 'gafas',       color: 'orange', icon: '🥽',  symbolKw: 'goggles' },
+  'swimsuit':   { labelEs: 'traje de bano', color: 'orange', icon: '👙', symbolKw: 'swimsuit' },
+  'sunscreen':  { labelEs: 'protector solar', color: 'orange', icon: '🧴', symbolKw: 'sunscreen' },
+  'toothbrush': { labelEs: 'cepillo de dientes', color: 'orange', icon: '🪥', symbolKw: 'toothbrush' },
+  'toothpaste': { labelEs: 'pasta de dientes', color: 'orange', icon: '🦷', symbolKw: 'toothpaste' },
+  'teeth':      { labelEs: 'dientes',     color: 'orange', icon: '🦷',  symbolKw: 'teeth' },
+  'tongue':     { labelEs: 'lengua',      color: 'orange', icon: '👅',  symbolKw: 'tongue' },
+  'friend':     { labelEs: 'amigo',       color: 'orange', icon: '👫',  symbolKw: 'friend' },
+  'toy':        { labelEs: 'juguete',     color: 'orange', icon: '🧸',  symbolKw: 'toy' },
+  'game':       { labelEs: 'juego',       color: 'orange', icon: '🎲',  symbolKw: 'game' },
+  'ball':       { labelEs: 'pelota',      color: 'orange', icon: '⚽',  symbolKw: 'ball' },
+  'mat':        { labelEs: 'tapete',      color: 'orange', icon: '🧘',  symbolKw: 'mat' },
+  'chair':      { labelEs: 'silla',       color: 'orange', icon: '🪑',  symbolKw: 'chair' },
+  'puzzle':     { labelEs: 'rompecabezas', color: 'orange', icon: '🧩', symbolKw: 'puzzle' },
+  'blocks':     { labelEs: 'bloques',     color: 'orange', icon: '🧱',  symbolKw: 'blocks' },
+  'table':      { labelEs: 'mesa',        color: 'orange', icon: '🪑',  symbolKw: 'table' },
+  'show':       { labelEs: 'programa',    color: 'orange', icon: '📺',  symbolKw: 'show' },
+  'movie':      { labelEs: 'pelicula',    color: 'orange', icon: '🎬',  symbolKw: 'movie' },
+  'cape':       { labelEs: 'capa',        color: 'orange', icon: '🦸',  symbolKw: 'cape' },
+  'mirror':     { labelEs: 'espejo',      color: 'orange', icon: '🪞',  symbolKw: 'mirror' },
+  'potty':      { labelEs: 'bano',        color: 'orange', icon: '🚽',  symbolKw: 'toilet' },
+  'sink':       { labelEs: 'lavabo',      color: 'orange', icon: '🚰',  symbolKw: 'sink' },
+  'noodle':     { labelEs: 'flotador',    color: 'orange', icon: '🏊',  symbolKw: 'pool noodle' },
+  'teacher':    { labelEs: 'maestra',     color: 'orange', icon: '👩‍🏫', symbolKw: 'teacher' },
+  'calendar':   { labelEs: 'calendario',  color: 'orange', icon: '📅',  symbolKw: 'calendar' },
+  'breakfast':  { labelEs: 'desayuno',    color: 'orange', icon: '🥞',  symbolKw: 'breakfast' },
+  'clothes':    { labelEs: 'ropa',        color: 'orange', icon: '👕',  symbolKw: 'clothes' },
+  'pop':        { labelEs: 'reventar',    color: 'green',  icon: '💥',  symbolKw: 'pop' },
+  'careful':    { labelEs: 'cuidado',     color: 'blue',   icon: '⚠️',  symbolKw: 'careful' },
+  'patient':    { labelEs: 'paciente',    color: 'blue',   icon: '⏳',  symbolKw: 'patient' },
+  'hold me':    { labelEs: 'sostenme',    color: 'pink',   icon: '🤗',  symbolKw: 'hold me' },
+  'are we there': { labelEs: 'ya llegamos', color: 'pink', icon: '❓',  symbolKw: 'are we there' },
+  'hot':        { labelEs: 'caliente',    color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
+  'cold':       { labelEs: 'frio',        color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+  'wet':        { labelEs: 'mojado',      color: 'blue',   icon: '💧',  symbolKw: 'wet' },
+  'clean':      { labelEs: 'limpio',      color: 'blue',   icon: '✨',  symbolKw: 'clean' },
+  'dirty':      { labelEs: 'sucio',       color: 'blue',   icon: '🟤',  symbolKw: 'dirty' },
+  'warm':       { labelEs: 'tibio',       color: 'blue',   icon: '🌡️',  symbolKw: 'warm' },
+  'yummy':      { labelEs: 'rico',        color: 'blue',   icon: '😋',  symbolKw: 'delicious' },
+  'yucky':      { labelEs: 'feo',         color: 'blue',   icon: '🤢',  symbolKw: 'disgusting' },
+  'hungry':     { labelEs: 'hambre',      color: 'blue',   icon: '😋',  symbolKw: 'hungry' },
+  'full':       { labelEs: 'lleno',       color: 'blue',   icon: '😊',  symbolKw: 'full' },
+  'fast':       { labelEs: 'rapido',      color: 'blue',   icon: '⚡',  symbolKw: 'fast' },
+  'slow':       { labelEs: 'lento',       color: 'blue',   icon: '🐢',  symbolKw: 'slow' },
+  'big':        { labelEs: 'grande',      color: 'blue',   icon: '⬆️',  symbolKw: 'big' },
+  'little':     { labelEs: 'pequeno',     color: 'blue',   icon: '⬇️',  symbolKw: 'little' },
+  'loud':       { labelEs: 'fuerte',      color: 'blue',   icon: '🔊',  symbolKw: 'loud' },
+  'quiet':      { labelEs: 'silencio',    color: 'blue',   icon: '🤫',  symbolKw: 'quiet' },
+  'soft':       { labelEs: 'suave',       color: 'blue',   icon: '🧸',  symbolKw: 'soft' },
+  'hard':       { labelEs: 'duro',        color: 'blue',   icon: '🪨',  symbolKw: 'hard' },
+  'heavy':      { labelEs: 'pesado',      color: 'blue',   icon: '🏋️',  symbolKw: 'heavy' },
+  'sticky':     { labelEs: 'pegajoso',    color: 'blue',   icon: '🍯',  symbolKw: 'sticky' },
+  'squishy':    { labelEs: 'blandito',    color: 'blue',   icon: '🫧',  symbolKw: 'squishy' },
+  'smooth':     { labelEs: 'liso',        color: 'blue',   icon: '🧈',  symbolKw: 'smooth' },
+  'bumpy':      { labelEs: 'con baches',  color: 'blue',   icon: '〰️', symbolKw: 'bumpy' },
+  'slippery':   { labelEs: 'resbaloso',   color: 'blue',   icon: '🧊',  symbolKw: 'slippery' },
+  'tired':      { labelEs: 'cansado',     color: 'blue',   icon: '😴',  symbolKw: 'tired' },
+  'scared':     { labelEs: 'asustado',    color: 'blue',   icon: '😨',  symbolKw: 'scared' },
+  'brave':      { labelEs: 'valiente',    color: 'blue',   icon: '🦸',  symbolKw: 'brave' },
+  'hurt':       { labelEs: 'duele',       color: 'blue',   icon: '🤕',  symbolKw: 'pain' },
+  'gentle':     { labelEs: 'suave',       color: 'blue',   icon: '🤲',  symbolKw: 'gentle' },
+  'funny':      { labelEs: 'gracioso',    color: 'blue',   icon: '😄',  symbolKw: 'funny' },
+  'silly':      { labelEs: 'tonto',       color: 'blue',   icon: '🤪',  symbolKw: 'silly' },
+  'scary':      { labelEs: 'da miedo',    color: 'blue',   icon: '😨',  symbolKw: 'scary' },
+  'fun':        { labelEs: 'divertido',   color: 'blue',   icon: '🎉',  symbolKw: 'fun' },
+  'boring':     { labelEs: 'aburrido',    color: 'blue',   icon: '😑',  symbolKw: 'boring' },
+  'tight':      { labelEs: 'apretado',    color: 'blue',   icon: '😣',  symbolKw: 'tight' },
+  'itchy':      { labelEs: 'pica',        color: 'blue',   icon: '😖',  symbolKw: 'itchy' },
+  'nice':       { labelEs: 'bonito',      color: 'blue',   icon: '😊',  symbolKw: 'nice' },
+  'pretty':     { labelEs: 'bonito',      color: 'blue',   icon: '🌸',  symbolKw: 'pretty' },
+  'messy':      { labelEs: 'desordenado', color: 'blue',   icon: '🤷',  symbolKw: 'messy' },
+  'dark':       { labelEs: 'oscuro',      color: 'blue',   icon: '🌑',  symbolKw: 'dark' },
+  'cozy':       { labelEs: 'acogedor',    color: 'blue',   icon: '🛋️',  symbolKw: 'cozy' },
+  'deep':       { labelEs: 'profundo',    color: 'blue',   icon: '🌊',  symbolKw: 'deep' },
+  'high':       { labelEs: 'alto',        color: 'blue',   icon: '⬆️',  symbolKw: 'high' },
+  'low':        { labelEs: 'bajo',        color: 'blue',   icon: '⬇️',  symbolKw: 'low' },
+  'minty':      { labelEs: 'mentolado',   color: 'blue',   icon: '🌿',  symbolKw: 'minty' },
+  'tickly':     { labelEs: 'cosquillas',  color: 'blue',   icon: '🤭',  symbolKw: 'tickly' },
+  'okay':       { labelEs: 'bien',        color: 'blue',   icon: '👌',  symbolKw: 'okay' },
+  'sick':       { labelEs: 'enfermo',     color: 'blue',   icon: '🤒',  symbolKw: 'sick' },
+  'better':     { labelEs: 'mejor',       color: 'blue',   icon: '💪',  symbolKw: 'better' },
+  'strong':     { labelEs: 'fuerte',      color: 'blue',   icon: '💪',  symbolKw: 'strong' },
+  'ready':      { labelEs: 'listo',       color: 'blue',   icon: '✅',  symbolKw: 'ready' },
+  'favorite':   { labelEs: 'favorito',    color: 'blue',   icon: '⭐',  symbolKw: 'favorite' },
+  'same':       { labelEs: 'igual',       color: 'blue',   icon: '🟰',  symbolKw: 'same' },
+  'different':  { labelEs: 'diferente',   color: 'blue',   icon: '↔️',  symbolKw: 'different' },
+  'up':         { labelEs: 'arriba',      color: 'purple', icon: '⬆️',  symbolKw: 'up' },
+  'down':       { labelEs: 'abajo',       color: 'purple', icon: '⬇️',  symbolKw: 'down' },
+  'in':         { labelEs: 'adentro',     color: 'purple', icon: '📥',  symbolKw: 'in' },
+  'out':        { labelEs: 'afuera',      color: 'purple', icon: '📤',  symbolKw: 'out' },
+  'on':         { labelEs: 'encima',      color: 'purple', icon: '⬆️',  symbolKw: 'on' },
+  'off':        { labelEs: 'apagado',     color: 'purple', icon: '⬇️',  symbolKw: 'off' },
+};
+
+// Word-to-word expansion: when parent mentions a keyword, these related
+// words should also be suggested. Enables the "magic moment" where the
+// app surfaces words the parent didn't think of.
+const WORD_EXPANSION = {
+  'wash':     ['soap', 'water', 'towel', 'clean', 'wet', 'dirty', 'rinse', 'bubbles', 'dry'],
+  'eat':      ['food', 'spoon', 'fork', 'plate', 'cup', 'hungry', 'yummy', 'yucky', 'bite', 'chew', 'bowl'],
+  'drink':    ['cup', 'water', 'pour', 'stir', 'hot', 'cold'],
+  'bath':     ['wash', 'water', 'soap', 'bubbles', 'towel', 'wet', 'pour', 'splash', 'duck', 'dry', 'warm', 'cold', 'slippery'],
+  'splash':   ['water', 'wet', 'pour', 'fun', 'play'],
+  'pour':     ['water', 'cup', 'wet', 'in', 'out'],
+  'play':     ['fun', 'toy', 'ball', 'my turn', 'your turn', 'share', 'go', 'game', 'friend'],
+  'run':      ['fast', 'slow', 'go', 'stop', 'fun', 'tired'],
+  'jump':     ['up', 'down', 'high', 'fun', 'play'],
+  'climb':    ['up', 'down', 'high', 'help', 'scared', 'fun'],
+  'slide':    ['down', 'fast', 'fun', 'my turn', 'again'],
+  'swing':    ['push', 'high', 'fast', 'slow', 'my turn', 'again', 'fun'],
+  'read':     ['book', 'page', 'turn', 'look', 'funny', 'again', 'where'],
+  'sleep':    ['tired', 'blanket', 'pillow', 'dark', 'quiet', 'goodnight', 'cozy'],
+  'hug':      ['love you', 'nice', 'please', 'soft'],
+  'sing':     ['song', 'music', 'loud', 'quiet', 'clap', 'dance', 'again'],
+  'listen':   ['quiet', 'music', 'song', 'look'],
+  'look':     ['where', 'find', 'eyes', 'point'],
+  'touch':    ['soft', 'hard', 'sticky', 'wet', 'squishy', 'smooth', 'bumpy'],
+  'sit':      ['chair', 'down', 'wait'],
+  'draw':     ['paper', 'crayon', 'marker', 'color', 'big', 'pretty'],
+  'paint':    ['paper', 'color', 'brush', 'wet', 'messy', 'mix'],
+  'cut':      ['scissors', 'paper', 'help', 'careful'],
+  'dress':    ['shirt', 'pants', 'shoes', 'socks', 'put on', 'take off', 'jacket', 'hat', 'zipper'],
+  'drive':    ['car', 'go', 'stop', 'fast', 'slow', 'buckle', 'seat', 'window'],
+  'swim':     ['water', 'pool', 'kick', 'splash', 'float', 'cold', 'deep', 'fun', 'towel', 'goggles'],
+  'brush':    ['teeth', 'toothbrush', 'toothpaste', 'mouth', 'spit', 'rinse', 'clean', 'open'],
+  'wait':     ['my turn', 'your turn', 'sit', 'patient'],
+  'share':    ['my turn', 'your turn', 'friend', 'give', 'please', 'nice'],
+  'doctor':   ['wait', 'sit', 'hurt', 'scared', 'brave', 'gentle', 'sticker', 'band-aid', 'okay', 'better'],
+  'food':     ['eat', 'hungry', 'yummy', 'yucky', 'hot', 'cold', 'spoon', 'fork', 'plate', 'cup'],
+  'water':    ['pour', 'wet', 'cold', 'hot', 'splash', 'drink', 'cup', 'wash'],
+  'book':     ['read', 'page', 'turn', 'look', 'funny', 'again'],
+  'music':    ['sing', 'song', 'dance', 'loud', 'quiet', 'listen', 'clap'],
+  'snack':    ['eat', 'want', 'yummy', 'more', 'cup', 'water', 'all done'],
+  'car':      ['drive', 'go', 'stop', 'seat', 'buckle', 'window', 'music', 'home'],
+  'teeth':    ['brush', 'toothbrush', 'toothpaste', 'open', 'spit', 'rinse', 'clean'],
+  'hair':     ['wash', 'comb', 'brush', 'wet', 'dry', 'gentle', 'spray'],
+  'shoes':    ['put on', 'take off', 'socks', 'walk', 'go'],
+  'clothes':  ['shirt', 'pants', 'shoes', 'socks', 'put on', 'take off', 'dress'],
+  'potty':    ['sit', 'wash', 'clean', 'all done', 'help', 'water', 'sink'],
+  'bed':      ['sleep', 'tired', 'blanket', 'pillow', 'read', 'goodnight', 'dark', 'quiet'],
+  'park':     ['play', 'slide', 'swing', 'climb', 'run', 'fun', 'ball', 'friend', 'shoes'],
+  'store':    ['cart', 'push', 'get', 'put', 'bag', 'food', 'help', 'walk', 'heavy'],
+  'art':      ['draw', 'paint', 'cut', 'glue', 'paper', 'color', 'crayon', 'marker', 'messy', 'pretty'],
+  'sand':     ['touch', 'pour', 'wet', 'dry', 'play', 'build'],
+  'bubbles':  ['blow', 'pop', 'wet', 'fun', 'more', 'again'],
+  'friend':   ['hi', 'bye', 'play', 'share', 'my turn', 'your turn', 'fun', 'nice', 'hug'],
+  'movie':    ['watch', 'pause', 'funny', 'scary', 'again', 'more'],
+  'tv':       ['watch', 'turn on', 'turn off', 'pause', 'show', 'movie', 'more', 'again'],
+};
+
+// Activity templates: categorized vocabulary sets for each activity type.
+// Used by the walkthrough to surface words, and to generate new ACTIVITY_BUNDLES entries.
+const ACTIVITY_TEMPLATES = {
+  bathtime: {
+    name: 'Bath Time', nameEs: 'Hora del bano', icon: '🛁', color: '#29B6F6',
+    keywords: ['bath', 'wash', 'shower', 'tub', 'bathe', 'shampoo'],
+    steps: ['undress', 'run water', 'add bubbles', 'wash body', 'wash hair', 'rinse', 'play', 'dry off', 'get dressed'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'all done', 'no', 'my turn'],
+    actions: ['wash', 'pour', 'splash', 'play', 'dry', 'put on', 'take off', 'rinse', 'squeeze', 'rub'],
+    objects: ['water', 'soap', 'bubbles', 'towel', 'duck', 'hair', 'body', 'tub', 'pajamas'],
+    descriptors: ['hot', 'cold', 'wet', 'clean', 'dirty', 'slippery', 'warm', 'soft'],
+    social: ['uh oh', 'yucky', 'nice', 'again', 'gentle'],
+  },
+  mealtime: {
+    name: 'Mealtime', nameEs: 'Hora de comer', icon: '🍽️', color: '#FF9800',
+    keywords: ['meal', 'food', 'eat', 'lunch', 'dinner', 'breakfast', 'snack', 'feeding'],
+    steps: ['sit down', 'choose food', 'serve', 'eat', 'drink', 'ask for more', 'all done'],
+    core: ['I', 'want', "don't want", 'more', 'help', 'stop', 'all done', 'no'],
+    actions: ['eat', 'drink', 'cut', 'pour', 'stir', 'blow', 'bite', 'chew', 'open', 'give'],
+    objects: ['plate', 'cup', 'spoon', 'fork', 'napkin', 'bowl', 'food', 'water', 'snack'],
+    descriptors: ['hungry', 'full', 'yummy', 'yucky', 'hot', 'cold', 'big', 'little', 'more'],
+    social: ['please', 'thank you', 'my turn', 'wait', 'share'],
+  },
+  playground: {
+    name: 'Playground', nameEs: 'Parque', icon: '🛝', color: '#66BB6A',
+    keywords: ['play', 'park', 'playground', 'outside', 'recess', 'yard'],
+    steps: ['put on shoes', 'go outside', 'choose equipment', 'play', 'take turns', 'snack', 'go home'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'all done', 'go', 'my turn'],
+    actions: ['run', 'jump', 'climb', 'slide', 'swing', 'push', 'pull', 'throw', 'catch', 'kick'],
+    objects: ['swing', 'slide', 'ball', 'sand', 'shoes', 'hat', 'water'],
+    descriptors: ['fast', 'slow', 'high', 'low', 'big', 'fun', 'scary', 'hot', 'tired'],
+    social: ['my turn', 'your turn', 'wait', 'share', 'watch me', 'again'],
+  },
+  bedtime: {
+    name: 'Bedtime', nameEs: 'Hora de dormir', icon: '🌙', color: '#5C6BC0',
+    keywords: ['bed', 'sleep', 'nap', 'night', 'bedtime', 'goodnight'],
+    steps: ['put on pajamas', 'brush teeth', 'pick book', 'read story', 'lights out', 'goodnight'],
+    core: ['I', 'want', 'more', 'help', 'no', 'all done', "don't want"],
+    actions: ['read', 'brush', 'put on', 'hug', 'kiss', 'sleep', 'sing', 'close', 'turn off'],
+    objects: ['book', 'pajamas', 'toothbrush', 'blanket', 'pillow', 'light', 'teddy', 'water'],
+    descriptors: ['tired', 'dark', 'quiet', 'soft', 'scary', 'cozy', 'warm'],
+    social: ['goodnight', 'love you', 'again', 'uh oh'],
+  },
+  dressing: {
+    name: 'Getting Dressed', nameEs: 'Vestirse', icon: '👕', color: '#AB47BC',
+    keywords: ['dress', 'clothes', 'shirt', 'shoes', 'outfit', 'change', 'undress'],
+    steps: ['choose clothes', 'put on underwear', 'shirt', 'pants', 'socks', 'shoes'],
+    core: ['I', 'want', 'help', 'no', "don't want", 'more', 'all done'],
+    actions: ['put on', 'take off', 'zip', 'button', 'pull', 'push', 'pick'],
+    objects: ['shirt', 'pants', 'socks', 'shoes', 'underwear', 'jacket', 'hat', 'zipper'],
+    descriptors: ['big', 'little', 'tight', 'itchy', 'soft', 'wet', 'cold', 'hot'],
+    social: ['this one', 'I did it', 'help', 'my turn'],
+  },
+  circletime: {
+    name: 'Circle Time', nameEs: 'Hora del circulo', icon: '🎶', color: '#EC407A',
+    keywords: ['circle', 'sing', 'song', 'music', 'dance', 'group', 'class'],
+    steps: ['sit in circle', 'sing songs', 'calendar', 'story', 'movement activity'],
+    core: ['I', 'want', 'more', 'help', 'all done', 'my turn'],
+    actions: ['sit', 'sing', 'clap', 'dance', 'listen', 'watch', 'stand', 'wave', 'read', 'look'],
+    objects: ['song', 'book', 'friend', 'teacher', 'calendar', 'mat'],
+    descriptors: ['loud', 'quiet', 'fast', 'slow', 'fun', 'silly'],
+    social: ['hi', 'bye', 'my turn', 'your turn', 'please', 'thank you'],
+  },
+  carride: {
+    name: 'Car Ride', nameEs: 'En el carro', icon: '🚗', color: '#26A69A',
+    keywords: ['car', 'ride', 'drive', 'trip', 'travel', 'road'],
+    steps: ['get in car', 'buckle up', 'drive', 'listen to music', 'arrive'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'no', 'all done', 'go'],
+    actions: ['go', 'stop', 'drive', 'buckle', 'listen', 'look', 'sing', 'wait'],
+    objects: ['car', 'seat', 'window', 'music', 'snack', 'toy', 'book', 'home'],
+    descriptors: ['fast', 'slow', 'loud', 'quiet', 'bumpy', 'hot', 'cold', 'fun'],
+    social: ['please', 'again', 'are we there'],
+  },
+  sensoryplay: {
+    name: 'Sensory Play', nameEs: 'Juego sensorial', icon: '🎨', color: '#7E57C2',
+    keywords: ['sensory', 'playdoh', 'sand', 'slime', 'texture', 'messy play'],
+    steps: ['set up materials', 'explore textures', 'play', 'create', 'clean up'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'all done', 'no'],
+    actions: ['touch', 'squeeze', 'pour', 'mix', 'press', 'pull', 'push', 'shake', 'smell'],
+    objects: ['sand', 'water', 'slime', 'play dough', 'bubbles'],
+    descriptors: ['soft', 'hard', 'wet', 'sticky', 'squishy', 'cold', 'warm', 'bumpy', 'smooth'],
+    social: ['my turn', 'uh oh', 'yucky', 'nice', 'again'],
+  },
+  booktime: {
+    name: 'Book Time', nameEs: 'Hora del cuento', icon: '📚', color: '#8D6E63',
+    keywords: ['book', 'read', 'story', 'library', 'reading'],
+    steps: ['choose book', 'sit down', 'open book', 'read pages', 'turn pages', 'done'],
+    core: ['I', 'want', 'more', 'help', 'all done', 'no'],
+    actions: ['read', 'look', 'turn', 'point', 'open', 'close', 'find', 'listen'],
+    objects: ['book', 'page'],
+    descriptors: ['funny', 'silly', 'scary', 'same', 'different', 'big', 'little'],
+    social: ['again', 'uh oh', 'where', 'watch me'],
+  },
+  doctor: {
+    name: 'Doctor Visit', nameEs: 'Visita al doctor', icon: '🩺', color: '#EF5350',
+    keywords: ['doctor', 'dentist', 'hospital', 'clinic', 'checkup', 'appointment', 'therapy'],
+    steps: ['drive to office', 'wait in lobby', 'see doctor', 'exam', 'possibly shots', 'leave'],
+    core: ['I', 'want', 'help', 'stop', 'no', 'all done', "don't want"],
+    actions: ['wait', 'sit', 'look', 'open', 'breathe', 'listen', 'point', 'touch'],
+    objects: ['doctor', 'sticker', 'band-aid', 'arm', 'mouth', 'ears', 'eyes', 'tummy'],
+    descriptors: ['scared', 'brave', 'gentle', 'cold', 'hurt', 'okay', 'sick', 'better'],
+    social: ['hi', 'please', 'good job', "it's okay", 'almost done'],
+  },
+  arttime: {
+    name: 'Art Time', nameEs: 'Hora del arte', icon: '🎨', color: '#FF7043',
+    keywords: ['art', 'draw', 'paint', 'color', 'craft', 'coloring'],
+    steps: ['get supplies', 'choose colors', 'draw or paint', 'create', 'clean up'],
+    core: ['I', 'want', 'more', 'help', 'all done', 'no'],
+    actions: ['draw', 'paint', 'cut', 'glue', 'color', 'mix', 'press', 'squeeze', 'wash'],
+    objects: ['paper', 'crayon', 'paint', 'marker', 'scissors', 'glue'],
+    descriptors: ['big', 'little', 'pretty', 'messy', 'wet', 'sticky'],
+    social: ['look', 'my turn', 'I did it', 'nice'],
+  },
+  grocery: {
+    name: 'Grocery Store', nameEs: 'Supermercado', icon: '🛒', color: '#42A5F5',
+    keywords: ['store', 'shop', 'grocery', 'market', 'shopping'],
+    steps: ['get cart', 'walk aisles', 'pick items', 'put in cart', 'checkout', 'leave'],
+    core: ['I', 'want', 'more', 'help', 'no', 'all done', "don't want"],
+    actions: ['push', 'pick', 'put', 'carry', 'walk', 'wait', 'open', 'give', 'get'],
+    objects: ['cart', 'bag', 'food', 'water', 'snack'],
+    descriptors: ['heavy', 'big', 'little', 'yummy', 'cold'],
+    social: ['please', 'thank you', 'my turn', 'this one', 'that'],
+  },
+  screentime: {
+    name: 'Screen Time', nameEs: 'Tiempo de pantalla', icon: '📺', color: '#5C6BC0',
+    keywords: ['tv', 'screen', 'watch', 'movie', 'show', 'video', 'youtube', 'ipad', 'tablet', 'cartoon'],
+    steps: ['choose show or game', 'sit down', 'watch or play', 'break time', 'all done'],
+    core: ['I', 'want', "don't want", 'more', 'help', 'stop', 'all done', 'no'],
+    actions: ['watch', 'play', 'pause', 'turn on', 'turn off', 'pick', 'listen'],
+    objects: ['show', 'movie', 'game'],
+    descriptors: ['funny', 'scary', 'loud', 'quiet', 'fun', 'boring', 'favorite'],
+    social: ['again', 'this one', 'please'],
+  },
+  swimming: {
+    name: 'Swimming', nameEs: 'Nadar', icon: '🏊', color: '#00ACC1',
+    keywords: ['swim', 'pool', 'beach', 'water park', 'splash pad'],
+    steps: ['change into swimsuit', 'put on sunscreen', 'enter water', 'play', 'swim', 'dry off'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'all done', 'no', 'go'],
+    actions: ['swim', 'splash', 'kick', 'jump', 'float', 'blow', 'hold', 'dry'],
+    objects: ['water', 'pool', 'towel', 'goggles', 'swimsuit', 'noodle', 'sunscreen'],
+    descriptors: ['cold', 'warm', 'deep', 'wet', 'fun', 'scary', 'fast', 'slow'],
+    social: ['my turn', 'watch me', 'again', 'hold me'],
+  },
+  haircut: {
+    name: 'Haircut', nameEs: 'Corte de pelo', icon: '💇', color: '#78909C',
+    keywords: ['haircut', 'barber', 'hair', 'salon', 'trim'],
+    steps: ['go to salon', 'sit in chair', 'cape on', 'cut hair', 'wash', 'dry', 'done'],
+    core: ['I', 'want', 'help', 'stop', 'no', 'all done', "don't want"],
+    actions: ['sit', 'cut', 'wash', 'dry', 'spray', 'comb', 'wait', 'hold'],
+    objects: ['chair', 'cape', 'mirror', 'hair', 'water'],
+    descriptors: ['scared', 'brave', 'gentle', 'loud', 'wet', 'tickly', 'short'],
+    social: ['please', 'good job', "it's okay", 'almost done'],
+  },
+  teethbrushing: {
+    name: 'Teeth Brushing', nameEs: 'Cepillarse los dientes', icon: '🪥', color: '#4DB6AC',
+    keywords: ['teeth', 'brush', 'toothbrush', 'dental', 'oral'],
+    steps: ['get toothbrush', 'add paste', 'brush teeth', 'spit', 'rinse', 'done'],
+    core: ['I', 'want', 'help', 'no', 'all done', 'more', 'open'],
+    actions: ['brush', 'spit', 'rinse', 'open', 'close', 'squeeze', 'pour'],
+    objects: ['toothbrush', 'toothpaste', 'cup', 'water', 'mouth', 'teeth', 'tongue'],
+    descriptors: ['minty', 'yucky', 'clean', 'wet', 'gentle', 'tickly'],
+    social: ['good job', 'all done', 'I did it'],
+  },
+  playdate: {
+    name: 'Playdate', nameEs: 'Jugar con amigos', icon: '👫', color: '#FF8A65',
+    keywords: ['playdate', 'friend', 'visit', 'play together', 'social'],
+    steps: ['friend arrives', 'greet', 'choose activity', 'play together', 'share', 'snack', 'goodbye'],
+    core: ['I', 'want', 'more', 'help', 'no', 'my turn', 'stop'],
+    actions: ['play', 'share', 'give', 'take', 'build', 'chase', 'hide', 'find', 'hug'],
+    objects: ['friend', 'toy', 'game', 'snack', 'ball', 'blocks'],
+    descriptors: ['fun', 'silly', 'same', 'different', 'nice'],
+    social: ['hi', 'bye', 'my turn', 'your turn', 'share', 'please', 'thank you', 'sorry'],
+  },
+  morningroutine: {
+    name: 'Morning Routine', nameEs: 'Rutina de la manana', icon: '🌅', color: '#FFA726',
+    keywords: ['morning', 'wake', 'routine', 'get ready', 'wake up'],
+    steps: ['wake up', 'potty', 'wash hands and face', 'get dressed', 'eat breakfast', 'brush teeth'],
+    core: ['I', 'want', 'help', 'no', 'all done', 'more', 'go'],
+    actions: ['go', 'wash', 'eat', 'drink', 'brush', 'put on', 'sit', 'walk'],
+    objects: ['potty', 'sink', 'water', 'soap', 'towel', 'clothes', 'breakfast', 'toothbrush'],
+    descriptors: ['tired', 'hungry', 'cold', 'warm', 'wet', 'clean', 'ready'],
+    social: ['good job', 'I did it', 'help', 'all done'],
+  },
+  therapysession: {
+    name: 'Therapy Session', nameEs: 'Sesion de terapia', icon: '🧩', color: '#7E57C2',
+    keywords: ['therapy', 'OT', 'speech', 'PT', 'session', 'therapist'],
+    steps: ['arrive', 'greet therapist', 'warm up', 'activities', 'practice', 'cool down', 'goodbye'],
+    core: ['I', 'want', 'more', 'help', 'stop', 'all done', 'no', 'my turn'],
+    actions: ['sit', 'stand', 'walk', 'jump', 'climb', 'hold', 'push', 'pull', 'reach', 'try'],
+    objects: ['ball', 'mat', 'swing', 'puzzle', 'blocks', 'table', 'chair', 'sticker'],
+    descriptors: ['hard', 'fun', 'heavy', 'fast', 'slow', 'tired', 'strong'],
+    social: ['my turn', 'again', 'good job', 'I did it', 'watch me'],
+  },
+};
+
+// Maps casual parent language to canonical keywords for matching
+const PARENT_SYNONYMS = {
+  'bathe': 'bath', 'bathing': 'bath', 'tub': 'bath', 'shower': 'bath', 'shampoo': 'bath',
+  'pjs': 'pajamas', 'jammies': 'pajamas', 'nightgown': 'pajamas',
+  'bathroom': 'potty', 'toilet': 'potty', 'restroom': 'potty',
+  'supper': 'dinner', 'munch': 'snack', 'feeding': 'eat',
+  'automobile': 'car', 'vehicle': 'car', 'van': 'car', 'truck': 'car',
+  'playground': 'park', 'recess': 'park', 'yard': 'park', 'backyard': 'park',
+  'nap': 'sleep', 'naptime': 'sleep', 'bedtime': 'bed', 'sleepy': 'sleep',
+  'outfit': 'dress', 'change': 'dress', 'undress': 'dress', 'costume': 'dress',
+  'class': 'circle', 'school': 'circle', 'preschool': 'circle',
+  'salon': 'haircut', 'barber': 'haircut', 'trim': 'haircut',
+  'pool': 'swim', 'beach': 'swim', 'ocean': 'swim', 'splash pad': 'swim',
+  'dental': 'teeth', 'oral': 'teeth', 'floss': 'teeth',
+  'pal': 'friend', 'buddy': 'friend', 'visitor': 'friend',
+  'craft': 'art', 'coloring': 'art', 'painting': 'art', 'drawing': 'art',
+  'messy play': 'sensory', 'texture': 'sensory', 'playdoh': 'sensory',
+  'ipad': 'tv', 'tablet': 'tv', 'youtube': 'tv', 'cartoon': 'tv', 'video': 'tv',
+  'shopping': 'store', 'errand': 'store', 'market': 'store', 'supermarket': 'store',
+  'PT': 'therapy', 'OT': 'therapy', 'speech': 'therapy', 'therapist': 'therapy',
+  'wakeup': 'morning', 'getting ready': 'morning', 'get ready': 'morning',
+};
+
+// Stop words removed from parent descriptions before keyword matching
+const WALKTHROUGH_STOP_WORDS = new Set([
+  'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'we', 'she', 'he', 'they', 'it', 'i', 'you', 'my', 'our', 'his', 'her', 'their',
+  'then', 'and', 'or', 'but', 'with', 'to', 'in', 'on', 'at', 'for', 'of',
+  'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may',
+  'have', 'has', 'had', 'gets', 'got', 'goes', 'going',
+  'first', 'next', 'after', 'before', 'finally', 'usually', 'sometimes', 'always',
+  'into', 'onto', 'from', 'about', 'some', 'all',
+  'very', 'really', 'just', 'also', 'so', 'too', 'like', 'when', 'while',
+]);
+
+function walkthroughSurfaceWords(textInputs, maxWords) {
+  maxWords = maxWords || 24;
+  const allTokens = [];
+
+  textInputs.forEach(function(text) {
+    const normalized = text.toLowerCase().replace(/[^\w\s'-]/g, '').trim();
+    const words = normalized.split(/\s+/).filter(Boolean);
+    words.forEach(function(w) {
+      const synonym = PARENT_SYNONYMS[w];
+      if (synonym) allTokens.push(synonym);
+      if (!WALKTHROUGH_STOP_WORDS.has(w)) allTokens.push(w);
+    });
+  });
+
+  var scores = {};
+  var wordsSeen = new Set();
+
+  VOCAB_CORE_WORDS.forEach(function(w) {
+    scores[w] = (scores[w] || 0) + 1.5;
+    wordsSeen.add(w);
+  });
+
+  allTokens.forEach(function(token) {
+    // Direct match in word pool
+    if (VOCAB_WORD_POOL[token]) {
+      scores[token] = (scores[token] || 0) + 1.0;
+      wordsSeen.add(token);
+    }
+
+    // Match against activity template keywords -> surface that activity's words
+    Object.keys(ACTIVITY_TEMPLATES).forEach(function(actId) {
+      var tmpl = ACTIVITY_TEMPLATES[actId];
+      var matchesKeyword = tmpl.keywords.some(function(kw) {
+        return kw === token || (token.length >= 4 && (kw.startsWith(token) || token.startsWith(kw)));
+      });
+      if (matchesKeyword) {
+        var allTmplWords = [].concat(tmpl.core, tmpl.actions, tmpl.objects, tmpl.descriptors, tmpl.social);
+        allTmplWords.forEach(function(w) {
+          scores[w] = (scores[w] || 0) + 0.6;
+          wordsSeen.add(w);
+        });
+      }
+    });
+
+    // Word expansion: one hop in the relationship graph
+    var expansions = WORD_EXPANSION[token];
+    if (expansions) {
+      expansions.forEach(function(w) {
+        scores[w] = (scores[w] || 0) + 0.7;
+        wordsSeen.add(w);
+      });
+    }
+  });
+
+  // Build scored list, only include words that exist in the pool
+  var scored = [];
+  wordsSeen.forEach(function(w) {
+    if (VOCAB_WORD_POOL[w] && scores[w]) {
+      scored.push({ label: w, score: scores[w] });
+    }
+  });
+
+  scored.sort(function(a, b) { return b.score - a.score; });
+
+  var results = scored.slice(0, maxWords).map(function(item) {
+    var def = VOCAB_WORD_POOL[item.label];
+    return {
+      label: item.label,
+      labelEs: def.labelEs,
+      color: def.color,
+      icon: def.icon,
+      symbolKw: def.symbolKw,
+      score: item.score,
+    };
+  });
+
+  return results;
+}
+
+function categorizeWalkthroughWords(words) {
+  var categories = { core: [], actions: [], objects: [], descriptors: [], social: [] };
+  words.forEach(function(w) {
+    if (VOCAB_CORE_WORDS.indexOf(w.label) !== -1) {
+      categories.core.push(w);
+    } else if (w.color === 'green') {
+      categories.actions.push(w);
+    } else if (w.color === 'orange') {
+      categories.objects.push(w);
+    } else if (w.color === 'blue') {
+      categories.descriptors.push(w);
+    } else if (w.color === 'pink' || w.color === 'red') {
+      categories.social.push(w);
+    } else {
+      categories.objects.push(w);
+    }
+  });
+  return categories;
+}
+
+function matchWalkthroughToTemplate(textInputs) {
+  var allTokens = [];
+  textInputs.forEach(function(text) {
+    var words = text.toLowerCase().replace(/[^\w\s'-]/g, '').split(/\s+/).filter(Boolean);
+    words.forEach(function(w) {
+      var syn = PARENT_SYNONYMS[w];
+      if (syn) allTokens.push(syn);
+      if (!WALKTHROUGH_STOP_WORDS.has(w)) allTokens.push(w);
+    });
+  });
+
+  var bestMatch = null;
+  var bestScore = 0;
+
+  Object.keys(ACTIVITY_TEMPLATES).forEach(function(actId) {
+    var tmpl = ACTIVITY_TEMPLATES[actId];
+    var matchCount = 0;
+    allTokens.forEach(function(token) {
+      if (tmpl.keywords.some(function(kw) {
+        return kw === token || (token.length >= 4 && (kw.startsWith(token) || token.startsWith(kw)));
+      })) {
+        matchCount++;
+      }
+    });
+    if (matchCount > bestScore) {
+      bestScore = matchCount;
+      bestMatch = actId;
+    }
+  });
+
+  return bestMatch;
+}
+
+// ── Position Allocation (Motor Planning Stability) ──
+
+function activityWordPositionHash(wordLabel, activityId) {
+  var str = activityId + ':' + wordLabel;
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function allocateActivityPositions(words, activityId, gridCols) {
+  if (!activityId || !words || words.length === 0) return words;
+  var positionKey = 'aac-activity-positions-' + activityId;
+  var savedPositions = null;
+  try { savedPositions = JSON.parse(localStorage.getItem(positionKey)); } catch(e) {}
+
+  if (savedPositions && typeof savedPositions === 'object') {
+    var positioned = new Array(words.length);
+    var unplaced = [];
+    var occupied = new Set();
+
+    words.forEach(function(w) {
+      var pos = savedPositions[w.label];
+      if (pos !== undefined && pos < words.length && !occupied.has(pos)) {
+        positioned[pos] = w;
+        occupied.add(pos);
+      } else {
+        unplaced.push(w);
+      }
+    });
+
+    var idx = 0;
+    unplaced.forEach(function(w) {
+      while (occupied.has(idx)) idx++;
+      positioned[idx] = w;
+      savedPositions[w.label] = idx;
+      occupied.add(idx);
+      idx++;
+    });
+
+    localStorage.setItem(positionKey, JSON.stringify(savedPositions));
+    return positioned.filter(Boolean);
+  }
+
+  var slots = words.length;
+  var positioned = new Array(slots);
+  var occupied = new Set();
+  var newPositions = {};
+
+  words.forEach(function(w) {
+    var hash = activityWordPositionHash(w.label, activityId);
+    var pos = hash % slots;
+    var tries = 0;
+    while (occupied.has(pos) && tries < slots) {
+      pos = (pos + 1) % slots;
+      tries++;
+    }
+    positioned[pos] = w;
+    occupied.add(pos);
+    newPositions[w.label] = pos;
+  });
+
+  localStorage.setItem(positionKey, JSON.stringify(newPositions));
+  return positioned.filter(Boolean);
+}
+
 // ── Activity Overlays ──
 let activeActivity = null; // null when no activity is active
 let _activitySlotOverrides = null;
@@ -4761,7 +5618,13 @@ const STARTER_WORDS = {
   doctor:      ['I', 'want', 'help', 'stop', 'hurt', 'scared'],
   arttime:     ['I', 'want', 'draw', 'help', 'all done', 'more'],
   grocery:     ['I', 'want', 'get', 'help', 'all done', 'more'],
-  screentime:  ['I', 'want', 'watch', 'help', 'more', 'again'],
+  screentime:      ['I', 'want', 'watch', 'help', 'more', 'again'],
+  swimming:        ['I', 'want', 'swim', 'help', 'all done', 'more'],
+  haircut:         ['I', 'want', 'help', 'stop', 'all done', 'scared'],
+  teethbrushing:   ['I', 'want', 'brush', 'help', 'all done', 'open'],
+  playdate:        ['I', 'want', 'play', 'help', 'my turn', 'share'],
+  morningroutine:  ['I', 'want', 'help', 'go', 'all done', 'eat'],
+  therapysession:  ['I', 'want', 'help', 'try', 'all done', 'my turn'],
 };
 
 function getActivityWords(activity) {
@@ -5062,6 +5925,138 @@ const ACTIVITY_BUNDLES = [
       { id: 'act-screen-scary',     label: 'scary',          labelEs: 'da miedo',        color: 'blue',   icon: '😨',  symbolKw: 'scary' },
       { id: 'act-screen-this-one',  label: 'this one',       labelEs: 'este',            color: 'yellow', icon: '👆',  symbolKw: 'this' },
       { id: 'act-screen-all-done',  label: 'all done',       labelEs: 'ya termine',      color: 'green',  icon: '✅',  symbolKw: 'finished' },
+    ]
+  },
+  {
+    id: 'swimming', name: 'Swimming', nameEs: 'Nadar', icon: '🏊',
+    color: '#00ACC1',
+    words: [
+      { id: 'act-swim-i',        label: 'I',        labelEs: 'yo',              color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-swim-want',     label: 'want',     labelEs: 'quiero',          color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-swim-swim',     label: 'swim',     labelEs: 'nadar',           color: 'green',  icon: '🏊',  symbolKw: 'swim' },
+      { id: 'act-swim-splash',   label: 'splash',   labelEs: 'salpicar',        color: 'green',  icon: '💦',  symbolKw: 'splash' },
+      { id: 'act-swim-kick',     label: 'kick',     labelEs: 'patear',          color: 'green',  icon: '🦶',  symbolKw: 'kick' },
+      { id: 'act-swim-jump',     label: 'jump',     labelEs: 'saltar',          color: 'green',  icon: '🤸',  symbolKw: 'jump' },
+      { id: 'act-swim-help',     label: 'help',     labelEs: 'ayuda',           color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-swim-stop',     label: 'stop',     labelEs: 'para',            color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-swim-all-done', label: 'all done', labelEs: 'ya termine',      color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-swim-cold',     label: 'cold',     labelEs: 'frio',            color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+      { id: 'act-swim-deep',     label: 'deep',     labelEs: 'profundo',        color: 'blue',   icon: '🌊',  symbolKw: 'deep' },
+      { id: 'act-swim-fun',      label: 'fun',      labelEs: 'divertido',       color: 'blue',   icon: '🎉',  symbolKw: 'fun' },
+      { id: 'act-swim-water',    label: 'water',    labelEs: 'agua',            color: 'orange', icon: '💧',  symbolKw: 'water' },
+      { id: 'act-swim-towel',    label: 'towel',    labelEs: 'toalla',          color: 'orange', icon: '🧴',  symbolKw: 'towel' },
+      { id: 'act-swim-more',     label: 'more',     labelEs: 'mas',             color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-swim-no',       label: 'no',       labelEs: 'no',              color: 'pink',   icon: '👎',  symbolKw: 'no' },
+    ]
+  },
+  {
+    id: 'haircut', name: 'Haircut', nameEs: 'Corte de pelo', icon: '💇',
+    color: '#78909C',
+    words: [
+      { id: 'act-hair-i',          label: 'I',          labelEs: 'yo',           color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-hair-want',       label: 'want',       labelEs: 'quiero',       color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-hair-sit',        label: 'sit',        labelEs: 'sentarse',     color: 'green',  icon: '🪑',  symbolKw: 'sit' },
+      { id: 'act-hair-wait',       label: 'wait',       labelEs: 'espera',       color: 'green',  icon: '⏳',  symbolKw: 'wait' },
+      { id: 'act-hair-help',       label: 'help',       labelEs: 'ayuda',        color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-hair-stop',       label: 'stop',       labelEs: 'para',         color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-hair-all-done',   label: 'all done',   labelEs: 'ya termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-hair-scared',     label: 'scared',     labelEs: 'asustado',     color: 'blue',   icon: '😨',  symbolKw: 'scared' },
+      { id: 'act-hair-brave',      label: 'brave',      labelEs: 'valiente',     color: 'blue',   icon: '🦸',  symbolKw: 'brave' },
+      { id: 'act-hair-gentle',     label: 'gentle',     labelEs: 'suave',        color: 'blue',   icon: '🤲',  symbolKw: 'gentle' },
+      { id: 'act-hair-loud',       label: 'loud',       labelEs: 'fuerte',       color: 'blue',   icon: '🔊',  symbolKw: 'loud' },
+      { id: 'act-hair-mirror',     label: 'mirror',     labelEs: 'espejo',       color: 'orange', icon: '🪞',  symbolKw: 'mirror' },
+      { id: 'act-hair-chair',      label: 'chair',      labelEs: 'silla',        color: 'orange', icon: '🪑',  symbolKw: 'chair' },
+      { id: 'act-hair-please',     label: 'please',     labelEs: 'por favor',    color: 'pink',   icon: '🙏',  symbolKw: 'please' },
+      { id: 'act-hair-more',       label: 'more',       labelEs: 'mas',          color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-hair-no',         label: 'no',         labelEs: 'no',           color: 'pink',   icon: '👎',  symbolKw: 'no' },
+    ]
+  },
+  {
+    id: 'teethbrushing', name: 'Teeth Brushing', nameEs: 'Cepillarse los dientes', icon: '🪥',
+    color: '#4DB6AC',
+    words: [
+      { id: 'act-teeth-i',          label: 'I',           labelEs: 'yo',                    color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-teeth-want',       label: 'want',        labelEs: 'quiero',                color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-teeth-brush',      label: 'brush',       labelEs: 'cepillar',              color: 'green',  icon: '🪥',  symbolKw: 'brush' },
+      { id: 'act-teeth-open',       label: 'open',        labelEs: 'abrir',                 color: 'green',  icon: '📂',  symbolKw: 'open' },
+      { id: 'act-teeth-spit',       label: 'spit',        labelEs: 'escupir',               color: 'green',  icon: '💦',  symbolKw: 'spit' },
+      { id: 'act-teeth-rinse',      label: 'rinse',       labelEs: 'enjuagar',              color: 'green',  icon: '🚿',  symbolKw: 'rinse' },
+      { id: 'act-teeth-help',       label: 'help',        labelEs: 'ayuda',                 color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-teeth-all-done',   label: 'all done',    labelEs: 'ya termine',            color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-teeth-yucky',      label: 'yucky',       labelEs: 'feo',                   color: 'blue',   icon: '🤢',  symbolKw: 'disgusting' },
+      { id: 'act-teeth-minty',      label: 'minty',       labelEs: 'mentolado',             color: 'blue',   icon: '🌿',  symbolKw: 'minty' },
+      { id: 'act-teeth-clean',      label: 'clean',       labelEs: 'limpio',                color: 'blue',   icon: '✨',  symbolKw: 'clean' },
+      { id: 'act-teeth-toothbrush', label: 'toothbrush',  labelEs: 'cepillo de dientes',    color: 'orange', icon: '🪥',  symbolKw: 'toothbrush' },
+      { id: 'act-teeth-toothpaste', label: 'toothpaste',  labelEs: 'pasta de dientes',      color: 'orange', icon: '🦷',  symbolKw: 'toothpaste' },
+      { id: 'act-teeth-water',      label: 'water',       labelEs: 'agua',                  color: 'orange', icon: '💧',  symbolKw: 'water' },
+      { id: 'act-teeth-more',       label: 'more',        labelEs: 'mas',                   color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-teeth-no',         label: 'no',          labelEs: 'no',                    color: 'pink',   icon: '👎',  symbolKw: 'no' },
+    ]
+  },
+  {
+    id: 'playdate', name: 'Playdate', nameEs: 'Jugar con amigos', icon: '👫',
+    color: '#FF8A65',
+    words: [
+      { id: 'act-pd-i',         label: 'I',         labelEs: 'yo',          color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-pd-want',      label: 'want',      labelEs: 'quiero',      color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-pd-play',      label: 'play',      labelEs: 'jugar',       color: 'green',  icon: '🎮',  symbolKw: 'play' },
+      { id: 'act-pd-share',     label: 'share',     labelEs: 'compartir',   color: 'green',  icon: '🤝',  symbolKw: 'share' },
+      { id: 'act-pd-help',      label: 'help',      labelEs: 'ayuda',       color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-pd-hug',       label: 'hug',       labelEs: 'abrazo',      color: 'green',  icon: '🤗',  symbolKw: 'hug' },
+      { id: 'act-pd-stop',      label: 'stop',      labelEs: 'para',        color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-pd-my-turn',   label: 'my turn',   labelEs: 'mi turno',    color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
+      { id: 'act-pd-your-turn', label: 'your turn', labelEs: 'tu turno',    color: 'pink',   icon: '👉',  symbolKw: 'your turn' },
+      { id: 'act-pd-hi',        label: 'hi',        labelEs: 'hola',        color: 'pink',   icon: '👋',  symbolKw: 'hello' },
+      { id: 'act-pd-bye',       label: 'bye',       labelEs: 'adios',       color: 'pink',   icon: '👋',  symbolKw: 'goodbye' },
+      { id: 'act-pd-sorry',     label: 'sorry',     labelEs: 'perdon',      color: 'pink',   icon: '😔',  symbolKw: 'sorry' },
+      { id: 'act-pd-friend',    label: 'friend',    labelEs: 'amigo',       color: 'orange', icon: '👫',  symbolKw: 'friend' },
+      { id: 'act-pd-toy',       label: 'toy',       labelEs: 'juguete',     color: 'orange', icon: '🧸',  symbolKw: 'toy' },
+      { id: 'act-pd-more',      label: 'more',      labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-pd-no',        label: 'no',        labelEs: 'no',          color: 'pink',   icon: '👎',  symbolKw: 'no' },
+    ]
+  },
+  {
+    id: 'morningroutine', name: 'Morning Routine', nameEs: 'Rutina de la manana', icon: '🌅',
+    color: '#FFA726',
+    words: [
+      { id: 'act-morn-i',         label: 'I',          labelEs: 'yo',           color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-morn-want',      label: 'want',       labelEs: 'quiero',       color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-morn-go',        label: 'go',         labelEs: 'ir',           color: 'green',  icon: '▶️',  symbolKw: 'go' },
+      { id: 'act-morn-wash',      label: 'wash',       labelEs: 'lavar',        color: 'green',  icon: '🧼',  symbolKw: 'wash' },
+      { id: 'act-morn-eat',       label: 'eat',        labelEs: 'comer',        color: 'green',  icon: '🍽️',  symbolKw: 'eat' },
+      { id: 'act-morn-brush',     label: 'brush',      labelEs: 'cepillar',     color: 'green',  icon: '🪥',  symbolKw: 'brush' },
+      { id: 'act-morn-put-on',    label: 'put on',     labelEs: 'poner',        color: 'green',  icon: '👕',  symbolKw: 'put on' },
+      { id: 'act-morn-help',      label: 'help',       labelEs: 'ayuda',        color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-morn-all-done',  label: 'all done',   labelEs: 'ya termine',   color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-morn-tired',     label: 'tired',      labelEs: 'cansado',      color: 'blue',   icon: '😴',  symbolKw: 'tired' },
+      { id: 'act-morn-hungry',    label: 'hungry',     labelEs: 'hambre',       color: 'blue',   icon: '😋',  symbolKw: 'hungry' },
+      { id: 'act-morn-ready',     label: 'ready',      labelEs: 'listo',        color: 'blue',   icon: '✅',  symbolKw: 'ready' },
+      { id: 'act-morn-potty',     label: 'potty',      labelEs: 'bano',         color: 'orange', icon: '🚽',  symbolKw: 'toilet' },
+      { id: 'act-morn-clothes',   label: 'shirt',      labelEs: 'camisa',       color: 'orange', icon: '👕',  symbolKw: 'shirt' },
+      { id: 'act-morn-more',      label: 'more',       labelEs: 'mas',          color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-morn-no',        label: 'no',         labelEs: 'no',           color: 'pink',   icon: '👎',  symbolKw: 'no' },
+    ]
+  },
+  {
+    id: 'therapysession', name: 'Therapy Session', nameEs: 'Sesion de terapia', icon: '🧩',
+    color: '#7E57C2',
+    words: [
+      { id: 'act-ther-i',        label: 'I',         labelEs: 'yo',            color: 'yellow', icon: '🙋',  symbolKw: 'I' },
+      { id: 'act-ther-want',     label: 'want',      labelEs: 'quiero',        color: 'green',  icon: '👉',  symbolKw: 'want' },
+      { id: 'act-ther-try',      label: 'try',       labelEs: 'intentar',      color: 'green',  icon: '💪',  symbolKw: 'try' },
+      { id: 'act-ther-jump',     label: 'jump',      labelEs: 'saltar',        color: 'green',  icon: '🤸',  symbolKw: 'jump' },
+      { id: 'act-ther-push',     label: 'push',      labelEs: 'empujar',       color: 'green',  icon: '🤲',  symbolKw: 'push' },
+      { id: 'act-ther-help',     label: 'help',      labelEs: 'ayuda',         color: 'green',  icon: '🆘',  symbolKw: 'help' },
+      { id: 'act-ther-stop',     label: 'stop',      labelEs: 'para',          color: 'green',  icon: '🛑',  symbolKw: 'stop' },
+      { id: 'act-ther-all-done', label: 'all done',  labelEs: 'ya termine',    color: 'green',  icon: '✅',  symbolKw: 'finished' },
+      { id: 'act-ther-hard',     label: 'hard',      labelEs: 'dificil',       color: 'blue',   icon: '🪨',  symbolKw: 'hard' },
+      { id: 'act-ther-fun',      label: 'fun',       labelEs: 'divertido',     color: 'blue',   icon: '🎉',  symbolKw: 'fun' },
+      { id: 'act-ther-tired',    label: 'tired',     labelEs: 'cansado',       color: 'blue',   icon: '😴',  symbolKw: 'tired' },
+      { id: 'act-ther-ball',     label: 'ball',      labelEs: 'pelota',        color: 'orange', icon: '⚽',  symbolKw: 'ball' },
+      { id: 'act-ther-puzzle',   label: 'puzzle',    labelEs: 'rompecabezas',  color: 'orange', icon: '🧩',  symbolKw: 'puzzle' },
+      { id: 'act-ther-my-turn',  label: 'my turn',   labelEs: 'mi turno',      color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
+      { id: 'act-ther-more',     label: 'more',      labelEs: 'mas',           color: 'blue',   icon: '➕',  symbolKw: 'more' },
+      { id: 'act-ther-no',       label: 'no',        labelEs: 'no',            color: 'pink',   icon: '👎',  symbolKw: 'no' },
     ]
   },
 ];
@@ -6228,7 +7223,10 @@ function renderGrid() {
   // Activity overlay mode: show activity-specific words instead of the main grid
   if (activeActivity) {
     folderLabel.style.display = 'none';
-    const allWords = getActivityWords(activeActivity);
+    var allWords = getActivityWords(activeActivity);
+    if (activeActivity.custom) {
+      allWords = allocateActivityPositions(allWords, activeActivity.id, getGridSize());
+    }
     const gridSize = getGridSize();
     const earlyLearner = isEarlyLearnerGrid(gridSize);
     const totalSlots = earlyLearner ? (EARLY_LEARNER_SLOTS[gridSize] || 1) : allWords.length;
@@ -6296,10 +7294,23 @@ function renderGrid() {
       grid.appendChild(cell);
     });
 
-    const cols = earlyLearner ? (gridSize === 1 ? 1 : 2) : gridSize;
-    const rows = earlyLearner ? (gridSize === 2 ? 2 : 1) : Math.ceil(wordsToShow.length / cols);
-    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    grid.style.flex = '1';
+    let actCols;
+    if (earlyLearner) {
+      actCols = gridSize === 1 ? 1 : 2;
+    } else {
+      // Scale columns based on word count for better fit
+      let wc = wordsToShow.length;
+      if (wc <= 9) actCols = 3;
+      else if (wc <= 16) actCols = 4;
+      else if (wc <= 30) actCols = 5;
+      else actCols = 6;
+      // Never fewer than user's grid size preference for smaller sets
+      if (wc <= gridSize * gridSize) actCols = gridSize;
+    }
+    const actRows = earlyLearner ? (gridSize === 2 ? 2 : 1) : Math.ceil(wordsToShow.length / actCols);
+    grid.style.gridTemplateColumns = `repeat(${actCols}, 1fr)`;
+    grid.style.gridTemplateRows = actRows <= 6 ? `repeat(${actRows}, 1fr)` : `repeat(${actRows}, minmax(60px, 1fr))`;
+    grid.style.flex = actRows <= 6 ? '1' : '';
 
     return;
   }
@@ -6789,6 +7800,17 @@ function getActivityInsights() {
         });
       const totalWords = Object.values(data.wordCounts).reduce((s, c) => s + c, 0);
       const avgMin = data.sessions > 0 ? Math.round((data.totalMs / data.sessions) / 60000) : 0;
+      var walkthroughInfo = null;
+      if (act && act.walkthrough) {
+        var usedWordIds = new Set(Object.keys(data.wordCounts));
+        var totalActivityWords = act.words ? act.words.length : 0;
+        var wordsUsed = act.words ? act.words.filter(function(w) { return usedWordIds.has(w.id); }).length : 0;
+        walkthroughInfo = {
+          templateMatch: act.walkthrough.templateMatch || null,
+          stepsCount: act.walkthrough.steps ? act.walkthrough.steps.length : 0,
+          wordCoverage: totalActivityWords > 0 ? Math.round((wordsUsed / totalActivityWords) * 100) : 0,
+        };
+      }
       return {
         activityId: id,
         name: act ? act.name : id,
@@ -6797,6 +7819,7 @@ function getActivityInsights() {
         totalWords,
         avgMinutes: avgMin,
         topWords,
+        walkthrough: walkthroughInfo,
       };
     })
     .sort((a, b) => b.sessions - a.sessions);
@@ -6925,6 +7948,13 @@ function renderInsights() {
           ai.topWords.map(w => '<span style="background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:2px 6px;font-size:0.75rem;">' + escapeHtml(w.label) + ' <strong>' + w.count + '</strong></span>').join('') +
           '</div>';
       }
+      var walkthroughHtml = '';
+      if (ai.walkthrough) {
+        walkthroughHtml = '<div style="margin-top:4px;font-size:0.75rem;color:#7E57C2;">' +
+          (ai.walkthrough.templateMatch ? 'Template: ' + escapeHtml(ai.walkthrough.templateMatch) + ' | ' : '') +
+          ai.walkthrough.wordCoverage + '% word coverage' +
+          '</div>';
+      }
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
         '<span style="font-size:1.3rem;">' + ai.icon + '</span>' +
@@ -6935,6 +7965,7 @@ function renderInsights() {
         '<span>' + ai.totalWords + ' words</span>' +
         (ai.avgMinutes > 0 ? '<span>~' + ai.avgMinutes + ' min avg</span>' : '') +
         '</div>' +
+        walkthroughHtml +
         topWordsHtml;
       actList.appendChild(card);
     }
@@ -8266,6 +9297,10 @@ function openActivityPreview(activityId) {
   title.innerHTML = `<span>${activity.icon}</span> ${currentLang === 'es' ? activity.nameEs : activity.name}`;
   desc.textContent = `${activity.words.length} words`;
   document.getElementById('btn-activity-delete').style.display = activity.custom ? '' : 'none';
+  document.getElementById('btn-activity-duplicate').style.display = activity.custom ? '' : 'none';
+  document.getElementById('btn-activity-customize').textContent = activity.custom
+    ? (currentLang === 'es' ? 'Editar' : 'Edit')
+    : (currentLang === 'es' ? 'Personalizar' : 'Customize');
   wordsContainer.innerHTML = '';
 
   activity.words.forEach(w => {
@@ -8303,7 +9338,15 @@ document.getElementById('btn-activity-customize').addEventListener('click', () =
   const activityId = overlay.dataset.activityId;
   const activity = getAllActivities().find(a => a.id === activityId);
   overlay.classList.remove('open');
-  if (activity) openCreateActivityModal(activity);
+  if (activity) openCreateActivityModal(activity, activity.custom ? true : false);
+});
+
+document.getElementById('btn-activity-duplicate').addEventListener('click', () => {
+  const overlay = document.getElementById('activity-preview-overlay');
+  const activityId = overlay.dataset.activityId;
+  const activity = getAllActivities().find(a => a.id === activityId);
+  overlay.classList.remove('open');
+  if (activity) openCreateActivityModal(activity, false);
 });
 
 document.getElementById('btn-activity-start').addEventListener('click', () => {
@@ -8576,6 +9619,7 @@ const CREATE_ACTIVITY_COLORS = ['#FF9800','#29B6F6','#66BB6A','#5C6BC0','#AB47BC
 let createActivitySelectedWords = [];
 let createActivityIcon = '';
 let createActivityColor = '';
+let editingActivityId = null;
 
 // ── Smart Word Suggestions ──
 const ACTIVITY_KEYWORD_MAP = {
@@ -8591,43 +9635,13 @@ const ACTIVITY_KEYWORD_MAP = {
   doctor:      ['doctor', 'dentist', 'hospital', 'clinic', 'checkup', 'appointment'],
   arttime:     ['art', 'draw', 'paint', 'color', 'craft', 'coloring'],
   grocery:     ['store', 'shop', 'grocery', 'market', 'shopping'],
-  screentime:  ['tv', 'screen', 'watch', 'movie', 'show', 'video', 'youtube', 'ipad', 'tablet', 'cartoon'],
-};
-
-const EXTRA_SUGGESTION_WORDS = {
-  swimming: [
-    { label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋' },
-    { label: 'swim',     labelEs: 'nadar',     color: 'green',  icon: '🏊' },
-    { label: 'splash',   labelEs: 'salpicar',  color: 'green',  icon: '💦' },
-    { label: 'kick',     labelEs: 'patear',    color: 'green',  icon: '🦶' },
-    { label: 'jump',     labelEs: 'saltar',    color: 'green',  icon: '🤸' },
-    { label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘' },
-    { label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅' },
-    { label: 'cold',     labelEs: 'frio',      color: 'blue',   icon: '🥶' },
-    { label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕' },
-    { label: 'water',    labelEs: 'agua',      color: 'orange', icon: '💧' },
-    { label: 'towel',    labelEs: 'toalla',    color: 'orange', icon: '🧴' },
-    { label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎' },
-  ],
-  haircut: [
-    { label: 'I',        labelEs: 'yo',        color: 'yellow', icon: '🙋' },
-    { label: 'wait',     labelEs: 'espera',    color: 'green',  icon: '⏳' },
-    { label: 'sit',      labelEs: 'sentarse',  color: 'green',  icon: '🪑' },
-    { label: 'help',     labelEs: 'ayuda',     color: 'green',  icon: '🆘' },
-    { label: 'stop',     labelEs: 'para',      color: 'green',  icon: '🛑' },
-    { label: 'all done', labelEs: 'termine',   color: 'green',  icon: '✅' },
-    { label: 'scared',   labelEs: 'asustado',  color: 'blue',   icon: '😨' },
-    { label: 'gentle',   labelEs: 'suave',     color: 'blue',   icon: '🤲' },
-    { label: 'loud',     labelEs: 'fuerte',    color: 'blue',   icon: '🔊' },
-    { label: 'more',     labelEs: 'mas',       color: 'blue',   icon: '➕' },
-    { label: 'please',   labelEs: 'por favor', color: 'pink',   icon: '🙏' },
-    { label: 'no',       labelEs: 'no',        color: 'pink',   icon: '👎' },
-  ],
-};
-
-const EXTRA_KEYWORD_MAP = {
-  swimming: ['swim', 'pool', 'beach', 'water park'],
-  haircut:  ['haircut', 'barber', 'hair', 'salon'],
+  screentime:      ['tv', 'screen', 'watch', 'movie', 'show', 'video', 'youtube', 'ipad', 'tablet', 'cartoon'],
+  swimming:        ['swim', 'pool', 'beach', 'water park', 'splash pad'],
+  haircut:         ['haircut', 'barber', 'hair', 'salon', 'trim'],
+  teethbrushing:   ['teeth', 'brush', 'toothbrush', 'dental', 'oral'],
+  playdate:        ['playdate', 'friend', 'visit', 'play together', 'social'],
+  morningroutine:  ['morning', 'wake', 'routine', 'get ready', 'wake up'],
+  therapysession:  ['therapy', 'OT', 'speech', 'PT', 'session', 'therapist'],
 };
 
 function matchActivitySuggestions(name) {
@@ -8656,12 +9670,6 @@ function matchActivitySuggestions(name) {
     }
   }
 
-  for (const [extraId, keywords] of Object.entries(EXTRA_KEYWORD_MAP)) {
-    if (tokens.some(t => keywords.some(kw => kwMatch(t, kw)))) {
-      addWords(EXTRA_SUGGESTION_WORDS[extraId]);
-    }
-  }
-
   return matchedWords;
 }
 
@@ -8670,7 +9678,15 @@ function renderActivitySuggestions() {
   const container = document.getElementById('create-activity-suggestions');
   const chipsEl = document.getElementById('create-activity-suggestion-chips');
 
-  const suggestions = matchActivitySuggestions(name);
+  // Use walkthrough engine for smarter name-based suggestions (Quick Start path)
+  var suggestions;
+  if (name && typeof walkthroughSurfaceWords === 'function') {
+    suggestions = walkthroughSurfaceWords([name], 16).map(function(w) {
+      return { label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon };
+    });
+  } else {
+    suggestions = matchActivitySuggestions(name);
+  }
   const filtered = suggestions.filter(s =>
     !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
   );
@@ -8688,10 +9704,10 @@ function renderActivitySuggestions() {
     chip.className = 'create-word-chip';
     chip.setAttribute('data-color', s.color);
     chip.style.borderStyle = 'dashed';
-    chip.textContent = (s.icon ? s.icon + ' ' : '') + s.label;
+    chip.textContent = (s.icon ? s.icon + ' ' : '') + (currentLang === 'es' && s.labelEs ? s.labelEs : s.label);
     chip.addEventListener('click', () => {
-      if (createActivitySelectedWords.length >= 32) {
-        showToast('Maximum 32 words per activity');
+      if (createActivitySelectedWords.length >= 64) {
+        showToast('Maximum 64 words per activity');
         return;
       }
       createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
@@ -8709,14 +9725,21 @@ document.getElementById('create-activity-name').addEventListener('input', () => 
 
 document.getElementById('btn-add-all-suggestions').addEventListener('click', () => {
   const name = document.getElementById('create-activity-name').value.trim();
-  const suggestions = matchActivitySuggestions(name);
+  var suggestions;
+  if (name && typeof walkthroughSurfaceWords === 'function') {
+    suggestions = walkthroughSurfaceWords([name], 16).map(function(w) {
+      return { label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon };
+    });
+  } else {
+    suggestions = matchActivitySuggestions(name);
+  }
   const filtered = suggestions.filter(s =>
     !createActivitySelectedWords.some(w => w.label.toLowerCase() === s.label.toLowerCase())
   );
   let added = 0;
   for (const s of filtered) {
-    if (createActivitySelectedWords.length >= 32) {
-      showToast('Maximum 32 words reached');
+    if (createActivitySelectedWords.length >= 64) {
+      showToast('Maximum 64 words reached');
       break;
     }
     createActivitySelectedWords.push({ label: s.label, labelEs: s.labelEs, color: s.color, icon: s.icon });
@@ -8730,17 +9753,214 @@ document.getElementById('btn-add-all-suggestions').addEventListener('click', () 
   }
 });
 
-function openCreateActivityModal(prefillActivity) {
+// ── Walkthrough UI (Phase B) ──
+
+let walkthroughStepCount = 0;
+let walkthroughSuggestedWords = [];
+
+function resetWalkthrough() {
+  walkthroughStepCount = 0;
+  walkthroughSuggestedWords = [];
+  var isEs = currentLang === 'es';
+  var toggle = document.getElementById('btn-walkthrough-toggle');
+  toggle.classList.remove('active');
+  toggle.textContent = isEs ? 'Describir esta actividad' : 'Describe this activity';
+  document.getElementById('walkthrough-steps').style.display = 'none';
+  document.getElementById('walkthrough-step-inputs').innerHTML = '';
+  document.getElementById('walkthrough-steps').querySelector('p').textContent = isEs
+    ? 'Describe lo que pasa paso a paso. La app sugerira vocabulario que tu hijo necesita.'
+    : 'Describe what happens step by step. The app will suggest vocabulary your child needs.';
+  document.getElementById('btn-walkthrough-add-step').textContent = isEs ? '+ Agregar otro paso' : '+ Add another step';
+  document.getElementById('btn-walkthrough-surface').textContent = isEs ? 'Mostrar Palabras Sugeridas' : 'Show Suggested Words';
+  document.getElementById('walkthrough-review').style.display = 'none';
+  document.getElementById('walkthrough-review-categories').innerHTML = '';
+  document.getElementById('walkthrough-review').querySelector('label').textContent = isEs ? 'Vocabulario Sugerido' : 'Suggested Vocabulary';
+  document.getElementById('btn-walkthrough-add-all').textContent = isEs ? 'Agregar Todo' : 'Add All';
+}
+
+function addWalkthroughStep() {
+  walkthroughStepCount++;
+  const container = document.getElementById('walkthrough-step-inputs');
+  const row = document.createElement('div');
+  row.className = 'walkthrough-step-row';
+  const label = document.createElement('span');
+  label.className = 'walkthrough-step-label';
+  label.textContent = walkthroughStepCount;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'walkthrough-step-input';
+  input.setAttribute('aria-label', (currentLang === 'es' ? 'Paso ' : 'Step ') + walkthroughStepCount);
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'walkthrough-step-remove';
+  removeBtn.innerHTML = '&times;';
+  removeBtn.setAttribute('aria-label', 'Remove step');
+  removeBtn.addEventListener('click', function() {
+    row.remove();
+    renumberWalkthroughSteps();
+  });
+  row.appendChild(label);
+  row.appendChild(input);
+  row.appendChild(removeBtn);
+  container.appendChild(row);
+  input.focus();
+}
+
+function renumberWalkthroughSteps() {
+  const rows = document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-row');
+  walkthroughStepCount = rows.length;
+  rows.forEach(function(row, i) {
+    row.querySelector('.walkthrough-step-label').textContent = i + 1;
+    row.querySelector('.walkthrough-step-input').setAttribute('aria-label', 'Step ' + (i + 1));
+  });
+}
+
+function collectWalkthroughTexts() {
+  var texts = [];
+  var name = document.getElementById('create-activity-name').value.trim();
+  if (name) texts.push(name);
+  document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-input').forEach(function(input) {
+    var val = input.value.trim();
+    if (val) texts.push(val);
+  });
+  return texts;
+}
+
+function renderWalkthroughReview(words) {
+  walkthroughSuggestedWords = words;
+  var reviewEl = document.getElementById('walkthrough-review');
+  var catContainer = document.getElementById('walkthrough-review-categories');
+  catContainer.innerHTML = '';
+
+  if (words.length === 0) {
+    reviewEl.style.display = 'none';
+    showToast(currentLang === 'es' ? 'No se encontraron palabras. Intenta describir mas.' : 'No words found. Try describing more details.');
+    return;
+  }
+
+  reviewEl.style.display = 'block';
+  var categorized = categorizeWalkthroughWords(words);
+  var catLabels = {
+    core: currentLang === 'es' ? 'Palabras Clave' : 'Core Words',
+    actions: currentLang === 'es' ? 'Acciones' : 'Actions',
+    objects: currentLang === 'es' ? 'Objetos' : 'Things',
+    descriptors: currentLang === 'es' ? 'Descriptores' : 'Describing Words',
+    social: currentLang === 'es' ? 'Social' : 'Social'
+  };
+
+  ['core', 'actions', 'objects', 'descriptors', 'social'].forEach(function(cat) {
+    var catWords = categorized[cat];
+    if (!catWords || catWords.length === 0) return;
+    var section = document.createElement('div');
+    section.className = 'walkthrough-category';
+    var labelEl = document.createElement('div');
+    labelEl.className = 'walkthrough-category-label';
+    labelEl.setAttribute('data-cat', cat);
+    labelEl.textContent = catLabels[cat];
+    section.appendChild(labelEl);
+    var chipsEl = document.createElement('div');
+    chipsEl.className = 'walkthrough-category-chips';
+    catWords.forEach(function(w) {
+      var chip = document.createElement('button');
+      var isAlreadySelected = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+      chip.className = 'create-word-chip' + (isAlreadySelected ? ' selected' : '');
+      chip.setAttribute('data-color', w.color);
+      chip.textContent = (w.icon ? w.icon + ' ' : '') + (currentLang === 'es' && w.labelEs ? w.labelEs : w.label);
+      chip.addEventListener('click', function() {
+        var alreadyIn = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+        if (alreadyIn) {
+          createActivitySelectedWords = createActivitySelectedWords.filter(function(s) { return s.label !== w.label; });
+          chip.classList.remove('selected');
+        } else {
+          if (createActivitySelectedWords.length >= 64) {
+            showToast('Maximum 64 words per activity');
+            return;
+          }
+          createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
+          chip.classList.add('selected');
+        }
+        renderCreateSelectedWords();
+        renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+      });
+      chipsEl.appendChild(chip);
+    });
+    section.appendChild(chipsEl);
+    catContainer.appendChild(section);
+  });
+}
+
+document.getElementById('btn-walkthrough-toggle').addEventListener('click', function() {
+  var stepsEl = document.getElementById('walkthrough-steps');
+  var toggle = document.getElementById('btn-walkthrough-toggle');
+  var isOpen = stepsEl.style.display !== 'none';
+  if (isOpen) {
+    stepsEl.style.display = 'none';
+    toggle.classList.remove('active');
+    toggle.textContent = currentLang === 'es' ? 'Describir esta actividad' : 'Describe this activity';
+  } else {
+    stepsEl.style.display = 'block';
+    toggle.classList.add('active');
+    toggle.textContent = currentLang === 'es' ? 'Ocultar descripcion' : 'Hide description';
+    if (walkthroughStepCount === 0) {
+      addWalkthroughStep();
+      addWalkthroughStep();
+      addWalkthroughStep();
+    }
+  }
+});
+
+document.getElementById('btn-walkthrough-add-step').addEventListener('click', function() {
+  if (walkthroughStepCount >= 10) {
+    showToast('Maximum 10 steps');
+    return;
+  }
+  addWalkthroughStep();
+});
+
+document.getElementById('btn-walkthrough-surface').addEventListener('click', function() {
+  var texts = collectWalkthroughTexts();
+  if (texts.length === 0 || texts.every(function(t) { return t.length < 2; })) {
+    showToast(currentLang === 'es' ? 'Describe los pasos de la actividad primero' : 'Describe the activity steps first');
+    return;
+  }
+  var words = walkthroughSurfaceWords(texts, 24);
+  renderWalkthroughReview(words);
+});
+
+document.getElementById('btn-walkthrough-add-all').addEventListener('click', function() {
+  if (walkthroughSuggestedWords.length === 0) return;
+  var added = 0;
+  walkthroughSuggestedWords.forEach(function(w) {
+    var alreadyIn = createActivitySelectedWords.some(function(s) { return s.label === w.label; });
+    if (!alreadyIn) {
+      if (createActivitySelectedWords.length >= 64) return;
+      createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon, symbolKw: w.symbolKw });
+      added++;
+    }
+  });
+  if (added > 0) {
+    renderCreateSelectedWords();
+    renderCreateWordPicker(document.getElementById('create-activity-word-search').value);
+    renderWalkthroughReview(walkthroughSuggestedWords);
+    showToast(added + (currentLang === 'es' ? ' palabras agregadas' : ' words added'));
+  }
+});
+
+function openCreateActivityModal(prefillActivity, editMode) {
+  editingActivityId = (editMode && prefillActivity) ? prefillActivity.id : null;
+
   if (prefillActivity) {
-    createActivitySelectedWords = prefillActivity.words.map(w => ({
-      label: w.label,
-      labelEs: w.labelEs || w.label,
-      color: w.color,
-      icon: w.icon || '',
-    }));
+    createActivitySelectedWords = prefillActivity.words
+      .filter(function(w) { return !ACTIVITY_CORE_WORDS.some(function(cw) { return cw.label === w.label; }); })
+      .map(w => ({
+        label: w.label,
+        labelEs: w.labelEs || w.label,
+        color: w.color,
+        icon: w.icon || '',
+        symbolKw: w.symbolKw || w.label,
+      }));
     createActivityIcon = prefillActivity.icon || CREATE_ACTIVITY_ICONS[0];
     createActivityColor = prefillActivity.color || CREATE_ACTIVITY_COLORS[0];
-    document.getElementById('create-activity-name').value = prefillActivity.name + ' (Copy)';
+    document.getElementById('create-activity-name').value = editMode ? prefillActivity.name : prefillActivity.name + ' (Copy)';
   } else {
     createActivitySelectedWords = [];
     createActivityIcon = CREATE_ACTIVITY_ICONS[0];
@@ -8748,6 +9968,31 @@ function openCreateActivityModal(prefillActivity) {
     document.getElementById('create-activity-name').value = '';
   }
   document.getElementById('create-activity-word-search').value = '';
+
+  var saveBtn = document.getElementById('btn-create-activity-save');
+  saveBtn.textContent = editingActivityId
+    ? (currentLang === 'es' ? 'Guardar Cambios' : 'Save Changes')
+    : (currentLang === 'es' ? 'Guardar Actividad' : 'Save Activity');
+  document.querySelector('#create-activity-panel h3').textContent = editingActivityId
+    ? (currentLang === 'es' ? 'Editar Actividad' : 'Edit Activity')
+    : (currentLang === 'es' ? 'Crear Actividad' : 'Create Activity');
+
+  resetWalkthrough();
+  var showWalkthrough = !prefillActivity || editMode;
+  document.getElementById('walkthrough-section').style.display = showWalkthrough ? 'block' : 'none';
+
+  if (editMode && prefillActivity && prefillActivity.walkthrough && prefillActivity.walkthrough.steps) {
+    var toggle = document.getElementById('btn-walkthrough-toggle');
+    toggle.classList.add('active');
+    toggle.textContent = currentLang === 'es' ? 'Ocultar descripcion' : 'Hide description';
+    document.getElementById('walkthrough-steps').style.display = 'block';
+    prefillActivity.walkthrough.steps.forEach(function(stepText, i) {
+      if (i === 0 && prefillActivity.name && stepText === prefillActivity.name) return;
+      addWalkthroughStep();
+      var inputs = document.getElementById('walkthrough-step-inputs').querySelectorAll('.walkthrough-step-input');
+      inputs[inputs.length - 1].value = stepText;
+    });
+  }
 
   const iconsContainer = document.getElementById('create-activity-icons');
   iconsContainer.innerHTML = '';
@@ -8816,8 +10061,8 @@ function renderCreateWordPicker(filter) {
       if (isSelected) {
         createActivitySelectedWords = createActivitySelectedWords.filter(s => s.label !== w.label);
       } else {
-        if (createActivitySelectedWords.length >= 32) {
-          showToast('Maximum 32 words per activity');
+        if (createActivitySelectedWords.length >= 64) {
+          showToast('Maximum 64 words per activity');
           return;
         }
         createActivitySelectedWords.push({ label: w.label, labelEs: w.labelEs, color: w.color, icon: w.icon });
@@ -8884,11 +10129,17 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
   if (!name) { showToast('Enter an activity name'); return; }
   if (createActivitySelectedWords.length < 3) { showToast('Select at least 3 words'); return; }
 
-  const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const id = editingActivityId || ('custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6));
 
   const selectedLabels = new Set(createActivitySelectedWords.map(w => w.label.toLowerCase()));
   const coreToAdd = ACTIVITY_CORE_WORDS.filter(cw => !selectedLabels.has(cw.label.toLowerCase()));
   const allWords = [...coreToAdd, ...createActivitySelectedWords];
+
+  const walkthroughTexts = collectWalkthroughTexts();
+  const walkthroughData = walkthroughStepCount > 0 ? {
+    steps: walkthroughTexts,
+    templateMatch: matchWalkthroughToTemplate(walkthroughTexts),
+  } : null;
 
   const activity = {
     id: id,
@@ -8897,26 +10148,45 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
     icon: createActivityIcon,
     color: createActivityColor,
     custom: true,
-    words: allWords.map((w, i) => ({
-      id: id + '-' + i,
-      label: w.label,
-      labelEs: w.labelEs || w.label,
-      color: w.color,
-      icon: w.icon || '',
-      symbolKw: w.symbolKw || w.label,
-      tier: i < 6 ? 'starter' : 'expanded',
-    })),
+    walkthrough: walkthroughData,
+    words: allWords.map((w, i) => {
+      var isCore = ACTIVITY_CORE_WORDS.some(function(cw) { return cw.label === w.label; });
+      return {
+        id: id + '-' + i,
+        label: w.label,
+        labelEs: w.labelEs || w.label,
+        color: w.color,
+        icon: w.icon || '',
+        symbolKw: w.symbolKw || w.label,
+        tier: (isCore || i < 6) ? 'starter' : 'expanded',
+      };
+    }),
   };
 
   const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
-  custom.push(activity);
+  if (editingActivityId) {
+    const idx = custom.findIndex(a => a.id === editingActivityId);
+    if (idx !== -1) {
+      custom[idx] = activity;
+    } else {
+      custom.push(activity);
+    }
+  } else {
+    custom.push(activity);
+  }
   localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
   invalidateActivitiesCache();
 
+  if (editingActivityId && activeActivity && activeActivity.id === editingActivityId) {
+    activeActivity = activity;
+  }
+
+  var wasEditing = !!editingActivityId;
   document.getElementById('create-activity-overlay').classList.remove('open');
+  editingActivityId = null;
   renderActivitiesTab();
   renderActivityCards();
-  showToast(`${activity.icon} ${activity.name} created`);
+  showToast(`${activity.icon} ${activity.name} ${wasEditing ? 'updated' : 'created'}`);
 });
 
 // ── Export / Import Activities ──
@@ -8924,18 +10194,20 @@ document.getElementById('btn-create-activity-save').addEventListener('click', ()
 function exportActivity(activity) {
   const template = {
     format: 'aac-activity-template',
-    version: 1,
+    version: 2,
     activity: {
       name: activity.name,
       nameEs: activity.nameEs || activity.name,
       icon: activity.icon,
       color: activity.color,
+      walkthrough: activity.walkthrough || null,
       words: activity.words.map(w => ({
         label: w.label,
         labelEs: w.labelEs || w.label,
         color: w.color,
         icon: w.icon || '',
         symbolKw: w.symbolKw || w.label,
+        tier: w.tier || 'expanded',
       })),
     },
   };
@@ -8983,6 +10255,7 @@ function importActivityFromFile(file) {
         icon: act.icon || '🎯',
         color: act.color || '#FF9800',
         custom: true,
+        walkthrough: act.walkthrough || null,
         words: act.words.map((w, i) => ({
           id: id + '-' + i,
           label: w.label,
@@ -8990,6 +10263,7 @@ function importActivityFromFile(file) {
           color: w.color || 'orange',
           icon: w.icon || '',
           symbolKw: w.symbolKw || w.label,
+          tier: w.tier || (i < 6 ? 'starter' : 'expanded'),
         })),
       };
 
