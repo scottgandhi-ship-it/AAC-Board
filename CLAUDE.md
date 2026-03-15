@@ -407,6 +407,7 @@ When a project uses a single-file architecture (everything in index.html):
 - Use CSS animations over JS where possible
 - Lazy load images and heavy content below the fold
 - Avoid layout thrashing (read then write, not interleaved)
+- **Never set inline styles without clearing them**: Any render function that sets `element.style.*` must clear those properties at the top of the function (set to `''`). Inline styles override CSS classes and variables, causing stale layout bugs across renders.
 
 ### Git & Deployment
 
@@ -590,6 +591,7 @@ If you see me doing any of these, immediately stop me:
 - Using cache-first in a service worker
 - Introducing build tools or frameworks to a single-file app without approval
 - Silently swallowing errors without user feedback
+- Setting inline styles (grid.style.*) without clearing them at the start of the render function -- inline styles override CSS variables and class-based rules, causing layout bugs on subsequent renders
 
 Response: Remind me to follow the workflow and return to the appropriate phase.
 
