@@ -4941,10 +4941,15 @@ const VOCAB_WORD_POOL = {
   'teacher':    { labelEs: 'maestra',     color: 'orange', icon: '👩‍🏫', symbolKw: 'teacher' },
   'calendar':   { labelEs: 'calendario',  color: 'orange', icon: '📅',  symbolKw: 'calendar' },
   'breakfast':  { labelEs: 'desayuno',    color: 'orange', icon: '🥞',  symbolKw: 'breakfast' },
+  'clothes':    { labelEs: 'ropa',        color: 'orange', icon: '👕',  symbolKw: 'clothes' },
+  'pop':        { labelEs: 'reventar',    color: 'green',  icon: '💥',  symbolKw: 'pop' },
+  'careful':    { labelEs: 'cuidado',     color: 'blue',   icon: '⚠️',  symbolKw: 'careful' },
+  'patient':    { labelEs: 'paciente',    color: 'blue',   icon: '⏳',  symbolKw: 'patient' },
+  'hold me':    { labelEs: 'sostenme',    color: 'pink',   icon: '🤗',  symbolKw: 'hold me' },
+  'are we there': { labelEs: 'ya llegamos', color: 'pink', icon: '❓',  symbolKw: 'are we there' },
   'hot':        { labelEs: 'caliente',    color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
   'cold':       { labelEs: 'frio',        color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
   'wet':        { labelEs: 'mojado',      color: 'blue',   icon: '💧',  symbolKw: 'wet' },
-  'dry':        { labelEs: 'seco',        color: 'blue',   icon: '☀️',  symbolKw: 'dry' },
   'clean':      { labelEs: 'limpio',      color: 'blue',   icon: '✨',  symbolKw: 'clean' },
   'dirty':      { labelEs: 'sucio',       color: 'blue',   icon: '🟤',  symbolKw: 'dirty' },
   'warm':       { labelEs: 'tibio',       color: 'blue',   icon: '🌡️',  symbolKw: 'warm' },
@@ -5214,7 +5219,7 @@ const ACTIVITY_TEMPLATES = {
     social: ['please', 'good job', "it's okay", 'almost done'],
   },
   teethbrushing: {
-    name: 'Teeth Brushing', nameEs: 'Cepillarse los dientes', icon: '🪥', color: '#26A69A',
+    name: 'Teeth Brushing', nameEs: 'Cepillarse los dientes', icon: '🪥', color: '#4DB6AC',
     keywords: ['teeth', 'brush', 'toothbrush', 'dental', 'oral'],
     steps: ['get toothbrush', 'add paste', 'brush teeth', 'spit', 'rinse', 'done'],
     core: ['I', 'want', 'help', 'no', 'all done', 'more', 'open'],
@@ -5259,7 +5264,7 @@ const ACTIVITY_TEMPLATES = {
 const PARENT_SYNONYMS = {
   'bathe': 'bath', 'bathing': 'bath', 'tub': 'bath', 'shower': 'bath', 'shampoo': 'bath',
   'pjs': 'pajamas', 'jammies': 'pajamas', 'nightgown': 'pajamas',
-  'potty': 'potty', 'bathroom': 'potty', 'toilet': 'potty', 'restroom': 'potty',
+  'bathroom': 'potty', 'toilet': 'potty', 'restroom': 'potty',
   'supper': 'dinner', 'munch': 'snack', 'feeding': 'eat',
   'automobile': 'car', 'vehicle': 'car', 'van': 'car', 'truck': 'car',
   'playground': 'park', 'recess': 'park', 'yard': 'park', 'backyard': 'park',
@@ -5284,9 +5289,9 @@ const WALKTHROUGH_STOP_WORDS = new Set([
   'we', 'she', 'he', 'they', 'it', 'i', 'you', 'my', 'our', 'his', 'her', 'their',
   'then', 'and', 'or', 'but', 'with', 'to', 'in', 'on', 'at', 'for', 'of',
   'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may',
-  'have', 'has', 'had', 'get', 'gets', 'got', 'go', 'goes', 'going',
+  'have', 'has', 'had', 'gets', 'got', 'goes', 'going',
   'first', 'next', 'after', 'before', 'finally', 'usually', 'sometimes', 'always',
-  'up', 'out', 'off', 'into', 'onto', 'from', 'about', 'some', 'all',
+  'into', 'onto', 'from', 'about', 'some', 'all',
   'very', 'really', 'just', 'also', 'so', 'too', 'like', 'when', 'while',
 ]);
 
@@ -5800,7 +5805,7 @@ const ACTIVITY_BUNDLES = [
   },
   {
     id: 'teethbrushing', name: 'Teeth Brushing', nameEs: 'Cepillarse los dientes', icon: '🪥',
-    color: '#26A69A',
+    color: '#4DB6AC',
     words: [
       { id: 'act-teeth-i',          label: 'I',           labelEs: 'yo',                    color: 'yellow', icon: '🙋',  symbolKw: 'I' },
       { id: 'act-teeth-want',       label: 'want',        labelEs: 'quiero',                color: 'green',  icon: '👉',  symbolKw: 'want' },
