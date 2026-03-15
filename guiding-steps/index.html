@@ -3933,16 +3933,6 @@ function generateStoryFromSteps(steps, story) {
   var pages = [];
   var allText = validSteps.join(' ');
   var sensoryAdded = {};
-  var sensoryCount = 0;
-
-  // Age-gate sensory prep: younger children get fewer sensory pages
-  var childAge = (story && story.childAge) ? parseInt(story.childAge) : null;
-  var maxSensoryPages = 3;
-  if (childAge !== null) {
-    if (childAge <= 2) maxSensoryPages = 1;
-    else if (childAge <= 3) maxSensoryPages = 1;
-    else if (childAge <= 4) maxSensoryPages = 2;
-  }
 
   validSteps.forEach(function(step, idx) {
     var text = buildSentence(step, idx, validSteps.length);
@@ -3957,9 +3947,8 @@ function generateStoryFromSteps(steps, story) {
 
     var sensoryMatches = detectSensory(step);
     sensoryMatches.forEach(function(match) {
-      if (!sensoryAdded[match.category] && sensoryCount < maxSensoryPages && pages.length < 11) {
+      if (!sensoryAdded[match.category] && pages.length < 11) {
         sensoryAdded[match.category] = true;
-        sensoryCount++;
         pages.push({
           text: match.prep,
           sentenceType: 'perspective',
