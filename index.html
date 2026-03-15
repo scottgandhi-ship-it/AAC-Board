@@ -1734,6 +1734,146 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   margin-top: 4px;
 }
 
+/* Guided Vocabulary Stories overlay */
+.activity-banner-guide {
+  padding: 4px 12px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 32px;
+}
+.activity-banner-guide:hover { background: rgba(255,255,255,0.25); }
+#guided-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.97);
+  border-radius: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  gap: 10px;
+  overflow-y: auto;
+}
+#guided-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+}
+.guided-nav-btn {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bar-bg);
+  font-weight: 700;
+}
+.guided-nav-btn:hover { background: #f5f3ff; border-color: var(--bar-bg); }
+.guided-nav-btn:disabled { opacity: 0.3; cursor: default; }
+#guided-step-indicator {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+}
+#guided-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.guided-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  transition: background 0.2s, transform 0.2s;
+}
+.guided-dot.active { background: var(--bar-bg); transform: scale(1.3); }
+.guided-dot.completed { background: #A5D6A7; }
+#guided-step-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #333;
+  text-align: center;
+  text-transform: capitalize;
+}
+#guided-sensory-note {
+  font-size: 0.75rem;
+  color: #E65100;
+  background: #FFF3E0;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+#guided-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0;
+}
+#guided-words .guided-word-chip {
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  min-width: 64px;
+  min-height: 48px;
+  text-align: center;
+  transition: transform 0.1s;
+}
+#guided-words .guided-word-chip:active { transform: scale(0.95); }
+#guided-words .guided-word-chip[data-color="green"] { background: #E8F5E9; color: #2E7D32; border-color: #A5D6A7; }
+#guided-words .guided-word-chip[data-color="orange"] { background: #FFF3E0; color: #E65100; border-color: #FFCC80; }
+#guided-words .guided-word-chip[data-color="blue"] { background: #E3F2FD; color: #1565C0; border-color: #90CAF9; }
+#guided-words .guided-word-chip[data-color="yellow"] { background: #FFFDE7; color: #F9A825; border-color: #FFF176; }
+#guided-words .guided-word-chip[data-color="pink"] { background: #FCE4EC; color: #C62828; border-color: #F48FB1; }
+#guided-words .guided-word-chip[data-color="red"] { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
+#guided-words .guided-word-chip[data-color="purple"] { background: #F3E5F5; color: #6A1B9A; border-color: #CE93D8; }
+#guided-prompt {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #666;
+  text-align: center;
+  padding: 4px 16px;
+  max-width: 320px;
+  line-height: 1.4;
+}
+#guided-actions {
+  margin-top: 4px;
+}
+.guided-action-btn {
+  padding: 8px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+.guided-action-btn:hover { border-color: var(--bar-bg); color: var(--bar-bg); }
+
 /* Activity preview overlay */
 #activity-preview-overlay {
   display: none;
@@ -2912,10 +3052,26 @@ body.sensory-high-contrast .settings-btn {
       <span class="activity-banner-icon" id="activity-banner-icon"></span>
       <span id="activity-banner-label"></span>
     </span>
+    <button id="btn-guided-mode" class="activity-banner-guide" aria-label="Start guided mode" style="display:none;">Guide</button>
     <button class="activity-banner-close" id="btn-activity-close" aria-label="End activity">&times;</button>
   </div>
   <div id="grid-container">
     <div id="folder-label"></div>
+    <div id="guided-overlay" style="display:none;" role="region" aria-label="Guided vocabulary" aria-live="polite">
+      <div id="guided-nav">
+        <button id="btn-guided-prev" class="guided-nav-btn" aria-label="Previous step">&larr;</button>
+        <span id="guided-step-indicator"></span>
+        <button id="btn-guided-next" class="guided-nav-btn" aria-label="Next step">&rarr;</button>
+      </div>
+      <div id="guided-dots"></div>
+      <div id="guided-step-name"></div>
+      <div id="guided-sensory-note" style="display:none;"></div>
+      <div id="guided-words"></div>
+      <div id="guided-prompt"></div>
+      <div id="guided-actions">
+        <button id="btn-guided-exit" class="guided-action-btn">Full Board</button>
+      </div>
+    </div>
     <div id="grid"></div>
     </div>
   </div>
@@ -5361,6 +5517,168 @@ const ACTIVITY_TEMPLATES = {
   },
 };
 
+// ── Step Vocabulary Map (Guided Vocabulary Stories) ──
+// Per-step word lists and modeling prompts for each activity template.
+// Each step maps to 3-5 words (core + fringe) and a natural-language prompt.
+
+const STEP_VOCAB_MAP = {
+  bathtime: {
+    'undress': { words: ['take off', 'help', 'clothes'], prompt: 'Take off clothes. Help me!', promptEs: 'Quitar la ropa. Ayudame!' },
+    'run water': { words: ['water', 'hot', 'cold', 'pour'], prompt: 'Pour water. Hot or cold?', promptEs: 'Echar agua. Caliente o fria?' },
+    'add bubbles': { words: ['bubbles', 'more', 'pour', 'squeeze'], prompt: 'More bubbles! Squeeze and pour.', promptEs: 'Mas burbujas! Apretar y echar.' },
+    'wash body': { words: ['wash', 'soap', 'body', 'rub', 'gentle'], prompt: 'Wash body with soap. Gentle!', promptEs: 'Lavar el cuerpo con jabon. Suave!' },
+    'wash hair': { words: ['wash', 'hair', 'water', 'gentle'], prompt: 'Wash hair. Pour water. Gentle!', promptEs: 'Lavar el pelo. Echar agua. Suave!' },
+    'rinse': { words: ['rinse', 'water', 'pour', 'all done'], prompt: 'Rinse off! Pour more water.', promptEs: 'Enjuagar! Echar mas agua.' },
+    'play': { words: ['play', 'splash', 'duck', 'fun', 'my turn'], prompt: 'Play time! Splash! My turn!', promptEs: 'A jugar! Salpicar! Mi turno!' },
+    'dry off': { words: ['dry', 'towel', 'all done', 'warm'], prompt: 'Dry off with towel. All done!', promptEs: 'Secar con toalla. Ya termine!' },
+    'get dressed': { words: ['put on', 'pajamas', 'help', 'all done'], prompt: 'Put on pajamas. All done!', promptEs: 'Ponerse la pijama. Ya termine!' },
+  },
+  mealtime: {
+    'sit down': { words: ['sit', 'chair', 'help', 'ready'], prompt: 'Sit down. Are you ready?', promptEs: 'Sentarse. Estas listo?' },
+    'choose food': { words: ['want', 'food', 'this one', 'yummy'], prompt: 'What do you want? This one!', promptEs: 'Que quieres? Este!' },
+    'serve': { words: ['give', 'plate', 'pour', 'more'], prompt: 'Give me food. Pour more.', promptEs: 'Dame comida. Echa mas.' },
+    'eat': { words: ['eat', 'bite', 'yummy', 'more'], prompt: 'Eat! Take a bite. Yummy! More?', promptEs: 'Comer! Dale un mordisco. Rico! Mas?' },
+    'drink': { words: ['drink', 'water', 'cup', 'more'], prompt: 'Drink water. More water?', promptEs: 'Tomar agua. Mas agua?' },
+    'ask for more': { words: ['more', 'want', 'please', 'again'], prompt: 'Want more? More please!', promptEs: 'Quieres mas? Mas por favor!' },
+    'all done': { words: ['all done', 'full', 'napkin', 'clean'], prompt: 'All done! Clean up with napkin.', promptEs: 'Ya termine! Limpiar con servilleta.' },
+  },
+  playground: {
+    'put on shoes': { words: ['put on', 'shoes', 'help', 'go'], prompt: 'Put on shoes. Let\'s go!', promptEs: 'Ponte los zapatos. Vamos!' },
+    'go outside': { words: ['go', 'outside', 'run', 'fun'], prompt: 'Go outside! Let\'s run!', promptEs: 'Ir afuera! A correr!' },
+    'choose equipment': { words: ['want', 'swing', 'slide', 'this one'], prompt: 'What do you want? Swing or slide?', promptEs: 'Que quieres? Columpio o tobogan?' },
+    'play': { words: ['play', 'fun', 'more', 'fast'], prompt: 'Play! So much fun! More!', promptEs: 'Jugar! Que divertido! Mas!' },
+    'take turns': { words: ['my turn', 'your turn', 'wait', 'share'], prompt: 'My turn! Your turn! Wait.', promptEs: 'Mi turno! Tu turno! Espera.' },
+    'snack': { words: ['eat', 'water', 'want', 'more'], prompt: 'Snack time. Want water? More?', promptEs: 'Hora de la merienda. Quieres agua? Mas?' },
+    'go home': { words: ['go', 'home', 'all done', 'tired'], prompt: 'All done! Go home. Tired.', promptEs: 'Ya termine! Ir a casa. Cansado.' },
+  },
+  bedtime: {
+    'put on pajamas': { words: ['put on', 'pajamas', 'help'], prompt: 'Put on pajamas. Need help?', promptEs: 'Ponerse la pijama. Necesitas ayuda?' },
+    'brush teeth': { words: ['brush', 'toothbrush', 'open', 'all done'], prompt: 'Brush teeth! Open wide. All done!', promptEs: 'Cepillar los dientes! Abre grande. Ya termine!' },
+    'pick book': { words: ['want', 'book', 'this one', 'read'], prompt: 'Pick a book. This one! Read!', promptEs: 'Escoge un libro. Este! Leer!' },
+    'read story': { words: ['read', 'more', 'turn', 'look'], prompt: 'Read the story. Turn the page. Look!', promptEs: 'Lee el cuento. Pasa la pagina. Mira!' },
+    'lights out': { words: ['turn off', 'light', 'dark', 'cozy'], prompt: 'Turn off the light. Dark and cozy.', promptEs: 'Apagar la luz. Oscuro y acogedor.' },
+    'goodnight': { words: ['goodnight', 'love you', 'hug', 'sleep'], prompt: 'Goodnight! Love you. Hug. Sleep time.', promptEs: 'Buenas noches! Te quiero. Abrazo. A dormir.' },
+  },
+  dressing: {
+    'choose clothes': { words: ['want', 'pick', 'this one'], prompt: 'Pick your clothes. This one!', promptEs: 'Escoge tu ropa. Este!' },
+    'put on underwear': { words: ['put on', 'underwear', 'help'], prompt: 'Put on underwear. Need help?', promptEs: 'Ponerse la ropa interior. Necesitas ayuda?' },
+    'shirt': { words: ['put on', 'shirt', 'pull', 'help'], prompt: 'Put on shirt. Pull it down!', promptEs: 'Ponerse la camisa. Jalala!' },
+    'pants': { words: ['put on', 'pants', 'pull', 'help'], prompt: 'Put on pants. Pull them up!', promptEs: 'Ponerse los pantalones. Subirlos!' },
+    'socks': { words: ['put on', 'socks', 'help', 'soft'], prompt: 'Put on socks. So soft!', promptEs: 'Ponerse los calcetines. Que suaves!' },
+    'shoes': { words: ['put on', 'shoes', 'all done', 'I did it'], prompt: 'Put on shoes. I did it! All done!', promptEs: 'Ponerse los zapatos. Yo lo hice! Ya termine!' },
+  },
+  circletime: {
+    'sit in circle': { words: ['sit', 'mat', 'friend', 'hi'], prompt: 'Sit on mat. Hi friends!', promptEs: 'Sentarse en el tapete. Hola amigos!' },
+    'sing songs': { words: ['sing', 'song', 'clap', 'more'], prompt: 'Sing a song! Clap your hands! More!', promptEs: 'Cantar una cancion! Aplaudir! Mas!' },
+    'calendar': { words: ['look', 'today', 'listen', 'point'], prompt: 'Look at calendar. Listen! Point.', promptEs: 'Mira el calendario. Escucha! Senal.' },
+    'story': { words: ['read', 'book', 'look', 'more'], prompt: 'Read the story. Look! More!', promptEs: 'Leer el cuento. Mira! Mas!' },
+    'movement activity': { words: ['dance', 'jump', 'stand', 'fun'], prompt: 'Dance and jump! Stand up! Fun!', promptEs: 'Bailar y saltar! Levantarse! Divertido!' },
+  },
+  carride: {
+    'get in car': { words: ['go', 'car', 'help', 'in'], prompt: 'Get in the car. Let\'s go!', promptEs: 'Subir al carro. Vamos!' },
+    'buckle up': { words: ['buckle', 'seat', 'help', 'click'], prompt: 'Buckle up! Click! Need help?', promptEs: 'Abrochar el cinturon! Click! Necesitas ayuda?' },
+    'drive': { words: ['go', 'fast', 'look', 'window'], prompt: 'Go! Look out the window. Fast!', promptEs: 'Ir! Mira por la ventana. Rapido!' },
+    'listen to music': { words: ['music', 'sing', 'more', 'loud'], prompt: 'Listen to music! Sing! More!', promptEs: 'Escuchar musica! Cantar! Mas!' },
+    'arrive': { words: ['stop', 'all done', 'go', 'home'], prompt: 'We\'re here! All done driving.', promptEs: 'Llegamos! Terminamos de manejar.' },
+  },
+  sensoryplay: {
+    'set up materials': { words: ['want', 'touch', 'help', 'ready'], prompt: 'Want to touch? Get ready!', promptEs: 'Quieres tocar? Preparate!' },
+    'explore textures': { words: ['touch', 'soft', 'squishy', 'cold'], prompt: 'Touch it! Soft? Squishy? Cold?', promptEs: 'Tocalo! Suave? Blando? Frio?' },
+    'play': { words: ['squeeze', 'pour', 'mix', 'more'], prompt: 'Squeeze! Pour! Mix! More!', promptEs: 'Apretar! Echar! Mezclar! Mas!' },
+    'create': { words: ['make', 'press', 'push', 'I did it'], prompt: 'Make something! Press and push! I did it!', promptEs: 'Hacer algo! Presionar y empujar! Yo lo hice!' },
+    'clean up': { words: ['all done', 'wash', 'clean', 'help'], prompt: 'All done! Clean up. Wash hands.', promptEs: 'Ya termine! Limpiar. Lavar las manos.' },
+  },
+  booktime: {
+    'choose book': { words: ['want', 'book', 'this one'], prompt: 'Which book? I want this one!', promptEs: 'Cual libro? Yo quiero este!' },
+    'sit down': { words: ['sit', 'help', 'ready'], prompt: 'Sit down. Ready to read!', promptEs: 'Sentarse. Listo para leer!' },
+    'open book': { words: ['open', 'book', 'look', 'read'], prompt: 'Open the book! Look! Read!', promptEs: 'Abrir el libro! Mira! Leer!' },
+    'read pages': { words: ['read', 'look', 'point', 'where'], prompt: 'Look at the picture. Point! Where?', promptEs: 'Mira el dibujo. Senal! Donde?' },
+    'turn pages': { words: ['turn', 'more', 'again', 'next'], prompt: 'Turn the page! More! Next!', promptEs: 'Pasar la pagina! Mas! Siguiente!' },
+    'done': { words: ['all done', 'again', 'more', 'bye'], prompt: 'All done! Read it again?', promptEs: 'Ya termine! Leerlo otra vez?' },
+  },
+  doctor: {
+    'drive to office': { words: ['go', 'car', 'doctor', 'wait'], prompt: 'Go to the doctor. Wait in car.', promptEs: 'Ir al doctor. Esperar en el carro.', sensory: true },
+    'wait in lobby': { words: ['wait', 'sit', 'book', 'scared'], prompt: 'Sit and wait. It\'s okay to feel scared.', promptEs: 'Sentarse y esperar. Esta bien tener miedo.', sensory: true },
+    'see doctor': { words: ['hi', 'doctor', 'look', 'gentle'], prompt: 'Hi doctor! Look. Be gentle.', promptEs: 'Hola doctor! Mira. Se gentil.', sensory: true },
+    'exam': { words: ['open', 'breathe', 'gentle', 'brave'], prompt: 'Open your mouth. Breathe. So brave!', promptEs: 'Abre la boca. Respira. Que valiente!', sensory: true },
+    'possibly shots': { words: ['stop', 'hurt', 'brave', 'almost done'], prompt: 'Almost done! So brave! Stop if it hurts.', promptEs: 'Ya casi! Que valiente! Para si duele.', sensory: true },
+    'leave': { words: ['all done', 'sticker', 'good job', 'go'], prompt: 'All done! Good job! Get a sticker!', promptEs: 'Ya termine! Buen trabajo! Toma una calcamania!' },
+  },
+  arttime: {
+    'get supplies': { words: ['want', 'help', 'get', 'paper'], prompt: 'Get paper. What do you want?', promptEs: 'Buscar papel. Que quieres?' },
+    'choose colors': { words: ['want', 'pick', 'color', 'this one'], prompt: 'Pick a color! This one!', promptEs: 'Escoge un color! Este!' },
+    'draw or paint': { words: ['draw', 'paint', 'more', 'big'], prompt: 'Draw! Paint! Big or little?', promptEs: 'Dibujar! Pintar! Grande o pequeno?' },
+    'create': { words: ['make', 'look', 'pretty', 'I did it'], prompt: 'Look what I made! Pretty! I did it!', promptEs: 'Mira lo que hice! Bonito! Yo lo hice!' },
+    'clean up': { words: ['all done', 'wash', 'clean', 'help'], prompt: 'All done! Clean up. Wash hands.', promptEs: 'Ya termine! Limpiar. Lavar las manos.' },
+  },
+  grocery: {
+    'get cart': { words: ['push', 'cart', 'help', 'go'], prompt: 'Push the cart! Let\'s go!', promptEs: 'Empujar el carrito! Vamos!' },
+    'walk aisles': { words: ['walk', 'look', 'want', 'that'], prompt: 'Walk and look. I want that!', promptEs: 'Caminar y mirar. Yo quiero eso!' },
+    'pick items': { words: ['pick', 'want', 'this one', 'get'], prompt: 'Pick it up! I want this one!', promptEs: 'Agarralo! Yo quiero este!' },
+    'put in cart': { words: ['put', 'in', 'help', 'heavy'], prompt: 'Put it in the cart. Heavy!', promptEs: 'Ponlo en el carrito. Pesado!' },
+    'checkout': { words: ['wait', 'give', 'please', 'thank you'], prompt: 'Wait in line. Give money. Thank you!', promptEs: 'Esperar en la fila. Dar dinero. Gracias!' },
+    'leave': { words: ['go', 'all done', 'carry', 'help'], prompt: 'All done! Go to car. Help carry!', promptEs: 'Ya termine! Ir al carro. Ayudar a cargar!' },
+  },
+  screentime: {
+    'choose show or game': { words: ['want', 'pick', 'this one', 'please'], prompt: 'Pick a show. I want this one!', promptEs: 'Escoge un programa. Yo quiero este!' },
+    'sit down': { words: ['sit', 'ready', 'watch', 'play'], prompt: 'Sit down. Ready to watch!', promptEs: 'Sentarse. Listo para ver!' },
+    'watch or play': { words: ['watch', 'funny', 'look', 'more'], prompt: 'Watch! So funny! Look! More!', promptEs: 'Mira! Que gracioso! Mira! Mas!' },
+    'break time': { words: ['stop', 'break', 'wait', 'stretch'], prompt: 'Time for a break. Stop and stretch!', promptEs: 'Hora de un descanso. Parar y estirarse!' },
+    'all done': { words: ['all done', 'turn off', 'no', 'again'], prompt: 'All done! Turn off. Want it again?', promptEs: 'Ya termine! Apagar. Lo quieres otra vez?' },
+  },
+  swimming: {
+    'change into swimsuit': { words: ['put on', 'swimsuit', 'help', 'change'], prompt: 'Put on swimsuit! Need help?', promptEs: 'Ponerse el traje de bano! Necesitas ayuda?' },
+    'put on sunscreen': { words: ['rub', 'sunscreen', 'help', 'cold'], prompt: 'Rub on sunscreen. Cold! Help!', promptEs: 'Poner protector solar. Frio! Ayuda!' },
+    'enter water': { words: ['go', 'water', 'cold', 'jump'], prompt: 'Go in water! Cold! Jump in!', promptEs: 'Ir al agua! Frio! Saltar!' },
+    'play': { words: ['splash', 'fun', 'more', 'my turn'], prompt: 'Splash! So fun! My turn! More!', promptEs: 'Salpicar! Divertido! Mi turno! Mas!' },
+    'swim': { words: ['swim', 'kick', 'float', 'help'], prompt: 'Swim! Kick your legs! Float!', promptEs: 'Nadar! Patear las piernas! Flotar!' },
+    'dry off': { words: ['dry', 'towel', 'all done', 'cold'], prompt: 'Dry off with towel. Cold! All done.', promptEs: 'Secar con toalla. Frio! Ya termine.' },
+  },
+  haircut: {
+    'go to salon': { words: ['go', 'car', 'wait', 'scared'], prompt: 'Go to haircut. It\'s okay to feel nervous.', promptEs: 'Ir al corte de pelo. Esta bien sentirse nervioso.', sensory: true },
+    'sit in chair': { words: ['sit', 'chair', 'help', 'wait'], prompt: 'Sit in the big chair. Wait.', promptEs: 'Sentarse en la silla grande. Esperar.', sensory: true },
+    'cape on': { words: ['put on', 'cape', 'tickly', 'help'], prompt: 'Put on the cape. Tickly!', promptEs: 'Ponerse la capa. Hace cosquillas!', sensory: true },
+    'cut hair': { words: ['cut', 'hair', 'gentle', 'brave'], prompt: 'Cut hair. Gentle! So brave!', promptEs: 'Cortar el pelo. Suave! Que valiente!', sensory: true },
+    'wash': { words: ['wash', 'water', 'wet', 'warm'], prompt: 'Wash hair with water. Warm!', promptEs: 'Lavar el pelo con agua. Tibio!' },
+    'dry': { words: ['dry', 'loud', 'all done', 'brave'], prompt: 'Dry hair. Loud! Almost done!', promptEs: 'Secar el pelo. Fuerte! Ya casi!', sensory: true },
+    'done': { words: ['all done', 'good job', 'look', 'short'], prompt: 'All done! Look! Good job!', promptEs: 'Ya termine! Mira! Buen trabajo!' },
+  },
+  teethbrushing: {
+    'get toothbrush': { words: ['get', 'toothbrush', 'want', 'help'], prompt: 'Get the toothbrush! Need help?', promptEs: 'Buscar el cepillo de dientes! Necesitas ayuda?' },
+    'add paste': { words: ['squeeze', 'toothpaste', 'help', 'more'], prompt: 'Squeeze toothpaste. More!', promptEs: 'Apretar la pasta de dientes. Mas!' },
+    'brush teeth': { words: ['brush', 'teeth', 'open', 'gentle'], prompt: 'Brush teeth! Open wide! Gentle.', promptEs: 'Cepillar los dientes! Abre grande! Suave.', sensory: true },
+    'spit': { words: ['spit', 'yucky', 'good job'], prompt: 'Spit it out! Good job!', promptEs: 'Escupir! Buen trabajo!' },
+    'rinse': { words: ['rinse', 'water', 'cup', 'pour'], prompt: 'Rinse with water. Pour in cup.', promptEs: 'Enjuagar con agua. Echar en el vaso.' },
+    'done': { words: ['all done', 'clean', 'I did it', 'good job'], prompt: 'All done! Teeth are clean! I did it!', promptEs: 'Ya termine! Los dientes estan limpios! Yo lo hice!' },
+  },
+  playdate: {
+    'friend arrives': { words: ['hi', 'friend', 'come', 'play'], prompt: 'Hi friend! Come play!', promptEs: 'Hola amigo! Ven a jugar!' },
+    'greet': { words: ['hi', 'hug', 'nice', 'happy'], prompt: 'Say hi! Give a hug!', promptEs: 'Di hola! Dale un abrazo!' },
+    'choose activity': { words: ['want', 'play', 'this one', 'pick'], prompt: 'What do you want to play? Pick!', promptEs: 'Que quieres jugar? Escoge!' },
+    'play together': { words: ['play', 'fun', 'build', 'chase'], prompt: 'Play together! Build! Chase! Fun!', promptEs: 'Jugar juntos! Construir! Perseguir! Divertido!' },
+    'share': { words: ['share', 'my turn', 'your turn', 'give'], prompt: 'Share! My turn. Your turn.', promptEs: 'Compartir! Mi turno. Tu turno.' },
+    'snack': { words: ['eat', 'want', 'more', 'yummy'], prompt: 'Snack time! Want more? Yummy!', promptEs: 'Hora de la merienda! Quieres mas? Rico!' },
+    'goodbye': { words: ['bye', 'hug', 'fun', 'again'], prompt: 'Bye friend! That was fun! Come again!', promptEs: 'Adios amigo! Fue divertido! Ven otra vez!' },
+  },
+  morningroutine: {
+    'wake up': { words: ['wake up', 'tired', 'good morning', 'go'], prompt: 'Good morning! Wake up! Time to go!', promptEs: 'Buenos dias! Despertar! Hora de ir!' },
+    'potty': { words: ['go', 'potty', 'help', 'all done'], prompt: 'Go potty. Need help? All done!', promptEs: 'Ir al bano. Necesitas ayuda? Ya termine!' },
+    'wash hands and face': { words: ['wash', 'water', 'soap', 'clean'], prompt: 'Wash hands and face. Soap and water!', promptEs: 'Lavar manos y cara. Jabon y agua!' },
+    'get dressed': { words: ['put on', 'clothes', 'help', 'pick'], prompt: 'Put on clothes. Pick what to wear!', promptEs: 'Ponerse la ropa. Escoge que ponerte!' },
+    'eat breakfast': { words: ['eat', 'hungry', 'want', 'more'], prompt: 'Eat breakfast! Hungry? Want more?', promptEs: 'Desayunar! Tienes hambre? Quieres mas?' },
+    'brush teeth': { words: ['brush', 'teeth', 'open', 'all done'], prompt: 'Brush teeth! Open wide! All done!', promptEs: 'Cepillar los dientes! Abre grande! Ya termine!' },
+  },
+  therapysession: {
+    'arrive': { words: ['go', 'help', 'hi', 'ready'], prompt: 'We\'re here! Say hi! Ready?', promptEs: 'Llegamos! Di hola! Listo?' },
+    'greet therapist': { words: ['hi', 'wave', 'sit', 'look'], prompt: 'Hi! Wave hello. Sit and look.', promptEs: 'Hola! Saluda con la mano. Sentarse y mirar.' },
+    'warm up': { words: ['walk', 'jump', 'push', 'pull'], prompt: 'Walk and jump! Push and pull!', promptEs: 'Caminar y saltar! Empujar y jalar!' },
+    'activities': { words: ['try', 'want', 'my turn', 'help'], prompt: 'Try it! My turn! Need help?', promptEs: 'Intentalo! Mi turno! Necesitas ayuda?' },
+    'practice': { words: ['more', 'again', 'hard', 'I did it'], prompt: 'Practice more! Hard but I did it!', promptEs: 'Practicar mas! Dificil pero lo hice!' },
+    'cool down': { words: ['sit', 'slow', 'breathe', 'tired'], prompt: 'Sit down. Slow and breathe. Tired.', promptEs: 'Sentarse. Lento y respirar. Cansado.' },
+    'goodbye': { words: ['bye', 'good job', 'sticker', 'all done'], prompt: 'Goodbye! Good job! Get a sticker!', promptEs: 'Adios! Buen trabajo! Toma una calcamania!' },
+  },
+};
+
 // Maps casual parent language to canonical keywords for matching
 const PARENT_SYNONYMS = {
   'bathe': 'bath', 'bathing': 'bath', 'tub': 'bath', 'shower': 'bath', 'shampoo': 'bath',
@@ -5526,6 +5844,87 @@ function matchWalkthroughToTemplate(textInputs) {
   });
 
   return bestMatch;
+}
+
+// ── Guided Vocabulary Stories Helpers ──
+
+function stepVocabForActivity(activityId, stepIndex) {
+  var tmpl = ACTIVITY_TEMPLATES[activityId];
+  if (!tmpl || !tmpl.steps || stepIndex >= tmpl.steps.length) return null;
+  var stepName = tmpl.steps[stepIndex];
+  var stepMap = STEP_VOCAB_MAP[activityId];
+  if (!stepMap || !stepMap[stepName]) return null;
+  var entry = stepMap[stepName];
+  var wordObjects = entry.words.map(function(label) {
+    var def = VOCAB_WORD_POOL[label];
+    if (def) return { label: label, labelEs: def.labelEs, color: def.color, icon: def.icon, symbolKw: def.symbolKw };
+    var bundleWord = null;
+    var bundle = ACTIVITY_BUNDLES.find(function(b) { return b.id === activityId; });
+    if (bundle) bundleWord = bundle.words.find(function(w) { return w.label.toLowerCase() === label.toLowerCase(); });
+    if (bundleWord) return { label: bundleWord.label, labelEs: bundleWord.labelEs, color: bundleWord.color, icon: bundleWord.icon, symbolKw: bundleWord.symbolKw };
+    return { label: label, labelEs: label, color: 'orange', icon: '', symbolKw: label };
+  });
+  return {
+    step: stepName,
+    words: wordObjects,
+    prompt: entry.prompt,
+    promptEs: entry.promptEs || entry.prompt,
+    sensory: entry.sensory || false,
+  };
+}
+
+function generateStepVocab(stepText, activityWords) {
+  var surfaced = walkthroughSurfaceWords([stepText], 5);
+  var words = surfaced.map(function(w) { return w.label; });
+  if (words.length < 3 && activityWords) {
+    var coreLabels = ['I', 'want', 'more', 'help', 'all done'];
+    for (var i = 0; i < coreLabels.length && words.length < 3; i++) {
+      if (words.indexOf(coreLabels[i]) === -1) words.push(coreLabels[i]);
+    }
+  }
+  return words.slice(0, 5);
+}
+
+function generateModelingPrompt(stepText, wordLabels) {
+  if (!wordLabels || wordLabels.length === 0) return stepText;
+  var phrases = wordLabels.slice(0, 3).map(function(w) {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  });
+  return phrases.join('! ') + '!';
+}
+
+function getGuidedSteps(activity) {
+  if (!activity) return null;
+  var tmpl = ACTIVITY_TEMPLATES[activity.id];
+  if (tmpl && STEP_VOCAB_MAP[activity.id]) {
+    return tmpl.steps.map(function(stepName, i) {
+      return stepVocabForActivity(activity.id, i);
+    }).filter(Boolean);
+  }
+  if (activity.walkthrough && activity.walkthrough.steps && activity.walkthrough.steps.length > 0) {
+    var stepsText = activity.walkthrough.steps;
+    if (activity.custom && activity.stepVocab) return activity.stepVocab;
+    var generated = stepsText.map(function(text) {
+      if (text === activity.name) return null;
+      var wordLabels = generateStepVocab(text, activity.words);
+      var wordObjects = wordLabels.map(function(label) {
+        var def = VOCAB_WORD_POOL[label];
+        if (def) return { label: label, labelEs: def.labelEs, color: def.color, icon: def.icon, symbolKw: def.symbolKw };
+        var aw = activity.words ? activity.words.find(function(w) { return w.label.toLowerCase() === label.toLowerCase(); }) : null;
+        if (aw) return { label: aw.label, labelEs: aw.labelEs, color: aw.color, icon: aw.icon, symbolKw: aw.symbolKw };
+        return { label: label, labelEs: label, color: 'orange', icon: '', symbolKw: label };
+      });
+      return {
+        step: text,
+        words: wordObjects,
+        prompt: generateModelingPrompt(text, wordLabels),
+        promptEs: generateModelingPrompt(text, wordLabels),
+        sensory: false,
+      };
+    }).filter(Boolean);
+    return generated.length > 0 ? generated : null;
+  }
+  return null;
 }
 
 // ── Position Allocation (Motor Planning Stability) ──
@@ -7728,6 +8127,7 @@ function recordUsageEvent(btnId, source) {
   if (!btnId) return;
   const evt = { v: 1, btnId, ts: Date.now(), source: source || 'independent' };
   if (activeActivity) evt.activityId = activeActivity.id;
+  if (guidedActive && guidedSteps) evt.guidedStep = guidedCurrentStep;
   usageLog.push(evt);
 
   const dk = todayKey();
@@ -9387,6 +9787,11 @@ function startActivity(activityId) {
   document.getElementById('activity-banner-label').textContent = currentLang === 'es' ? (activity.nameEs || activity.name) : activity.name;
   banner.classList.add('active');
 
+  var hasGuide = !!getGuidedSteps(activity);
+  document.getElementById('btn-guided-mode').style.display = hasGuide ? '' : 'none';
+  document.getElementById('btn-guided-mode').textContent = currentLang === 'es' ? 'Guia' : 'Guide';
+  closeGuidedMode();
+
   if (activeTab !== 'talk') switchTab('tab-talk');
 
   renderGrid();
@@ -9395,6 +9800,8 @@ function startActivity(activityId) {
 
 function endActivity() {
   if (!activeActivity) return;
+  closeGuidedMode();
+  document.getElementById('btn-guided-mode').style.display = 'none';
   endActivitySession();
   const name = activeActivity.name;
   const hadRoutine = !!activeRoutine;
@@ -9415,6 +9822,140 @@ function endActivity() {
 document.getElementById('btn-activity-close').addEventListener('click', () => {
   endActivity();
 });
+
+// ── Guided Vocabulary Stories ──
+
+let guidedSteps = null;
+let guidedCurrentStep = 0;
+let guidedActive = false;
+let guidedVisitedSteps = new Set();
+
+function openGuidedMode() {
+  if (!activeActivity) return;
+  guidedSteps = getGuidedSteps(activeActivity);
+  if (!guidedSteps || guidedSteps.length === 0) {
+    showToast(currentLang === 'es' ? 'No hay pasos guiados para esta actividad' : 'No guided steps for this activity');
+    return;
+  }
+  var savedStep = localStorage.getItem('aac-guided-step-' + activeActivity.id);
+  guidedCurrentStep = savedStep ? Math.min(parseInt(savedStep) || 0, guidedSteps.length - 1) : 0;
+  guidedActive = true;
+  guidedVisitedSteps = new Set();
+  guidedVisitedSteps.add(guidedCurrentStep);
+  document.getElementById('guided-overlay').style.display = 'flex';
+  document.getElementById('grid').style.display = 'none';
+  renderGuidedStep();
+}
+
+function closeGuidedMode() {
+  guidedActive = false;
+  document.getElementById('guided-overlay').style.display = 'none';
+  document.getElementById('grid').style.display = '';
+}
+
+function renderGuidedStep() {
+  if (!guidedSteps || !guidedActive) return;
+  var step = guidedSteps[guidedCurrentStep];
+  var isEs = currentLang === 'es';
+
+  document.getElementById('guided-step-indicator').textContent =
+    (isEs ? 'Paso ' : 'Step ') + (guidedCurrentStep + 1) + (isEs ? ' de ' : ' of ') + guidedSteps.length;
+
+  document.getElementById('guided-step-name').textContent = step.step;
+
+  var prevBtn = document.getElementById('btn-guided-prev');
+  var nextBtn = document.getElementById('btn-guided-next');
+  prevBtn.disabled = guidedCurrentStep === 0;
+  nextBtn.disabled = guidedCurrentStep === guidedSteps.length - 1;
+
+  var dotsEl = document.getElementById('guided-dots');
+  dotsEl.innerHTML = '';
+  guidedSteps.forEach(function(s, i) {
+    var dot = document.createElement('span');
+    dot.className = 'guided-dot' + (i === guidedCurrentStep ? ' active' : '') + (guidedVisitedSteps.has(i) && i !== guidedCurrentStep ? ' completed' : '');
+    dot.addEventListener('click', function() { navigateGuidedStep(i); });
+    dotsEl.appendChild(dot);
+  });
+
+  var sensoryNote = document.getElementById('guided-sensory-note');
+  if (step.sensory) {
+    sensoryNote.style.display = 'block';
+    sensoryNote.textContent = isEs
+      ? 'Este paso puede ser sensible. Ve despacio y ofrece apoyo.'
+      : 'This step may be sensory-sensitive. Go slow and offer support.';
+  } else {
+    sensoryNote.style.display = 'none';
+  }
+
+  var wordsEl = document.getElementById('guided-words');
+  wordsEl.innerHTML = '';
+  step.words.forEach(function(w) {
+    var chip = document.createElement('button');
+    chip.className = 'guided-word-chip';
+    chip.setAttribute('data-color', w.color);
+    var displayLabel = isEs && w.labelEs ? w.labelEs : w.label;
+    chip.textContent = (w.icon ? w.icon + ' ' : '') + displayLabel;
+    chip.addEventListener('click', function() {
+      var speakText = isEs && w.labelEs ? w.labelEs : w.label;
+      addWordToMessage(speakText, w.symbolKw || w.label);
+      speak(speakText);
+    });
+    wordsEl.appendChild(chip);
+  });
+
+  document.getElementById('guided-prompt').textContent = isEs ? step.promptEs : step.prompt;
+
+  document.getElementById('btn-guided-exit').textContent = isEs ? 'Tablero Completo' : 'Full Board';
+
+  localStorage.setItem('aac-guided-step-' + activeActivity.id, String(guidedCurrentStep));
+}
+
+function navigateGuidedStep(index) {
+  if (index < 0 || index >= guidedSteps.length) return;
+  guidedCurrentStep = index;
+  guidedVisitedSteps.add(index);
+  renderGuidedStep();
+}
+
+document.getElementById('btn-guided-mode').addEventListener('click', function() {
+  if (guidedActive) {
+    closeGuidedMode();
+  } else {
+    openGuidedMode();
+  }
+});
+
+document.getElementById('btn-guided-prev').addEventListener('click', function() {
+  navigateGuidedStep(guidedCurrentStep - 1);
+});
+
+document.getElementById('btn-guided-next').addEventListener('click', function() {
+  navigateGuidedStep(guidedCurrentStep + 1);
+});
+
+document.getElementById('btn-guided-exit').addEventListener('click', function() {
+  closeGuidedMode();
+});
+
+// Swipe support for guided mode
+(function() {
+  var overlay = document.getElementById('guided-overlay');
+  var startX = 0;
+  var startY = 0;
+  overlay.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  overlay.addEventListener('touchend', function(e) {
+    if (!guidedActive) return;
+    var dx = e.changedTouches[0].clientX - startX;
+    var dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) navigateGuidedStep(guidedCurrentStep + 1);
+      else navigateGuidedStep(guidedCurrentStep - 1);
+    }
+  }, { passive: true });
+})();
 
 // ── Activity Routines ──
 let routines = JSON.parse(localStorage.getItem('aac-routines') || '[]');
