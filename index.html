@@ -1012,6 +1012,20 @@ body.sensory-reduced-motion #image-preview-overlay {
 
 .settings-btn:active { background: #f0f0f0; }
 
+.settings-accordion-btn {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; border-bottom: 1px solid #eee;
+  padding: 4px 0 4px 0; cursor: pointer; font-family: inherit;
+}
+.settings-accordion-btn:active { opacity: 0.7; }
+.accordion-chevron {
+  font-size: 0.7rem; color: #999; transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
+}
+.settings-accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(90deg); }
+.accordion-details { display: none; margin-top: 8px; }
+.accordion-details.open { display: block; }
+.accordion-summary { flex: 1; text-align: left; }
+
 /* ── Export / Import Panel ── */
 .export-import-overlay {
   display: none;
@@ -3261,6 +3275,16 @@ body.sensory-high-contrast .settings-btn {
   <div id="settings-panel">
     <h2>Settings</h2>
 
+    <!-- Child Profile: always at top -->
+    <div class="settings-section">
+      <h3>Child's Name</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="child-name-input" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
+        <button class="settings-btn" id="btn-save-child-name" style="background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap;width:auto;margin-bottom:0;">Save</button>
+      </div>
+      <p id="child-name-status" style="font-size:0.8rem;color:#43A047;margin-top:4px;display:none;"></p>
+    </div>
+
     <!-- Top-level: always visible -->
     <div class="settings-section">
       <h3>Parent Mode</h3>
@@ -3386,15 +3410,6 @@ body.sensory-high-contrast .settings-btn {
     <!-- Category: Communication -->
     <div class="settings-category-content active" id="settings-cat-communication">
       <div class="settings-section">
-        <h3>Child's Name</h3>
-        <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Adds a "My name is ___" quick phrase so your child can introduce themselves with one tap.</p>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" id="child-name-input" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
-          <button class="settings-btn" id="btn-save-child-name" style="background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap;">Save</button>
-        </div>
-        <p id="child-name-status" style="font-size:0.8rem;color:#43A047;margin-top:4px;display:none;"></p>
-      </div>
-      <div class="settings-section">
         <h3>Grid Size</h3>
         <label for="settings-grid-select" class="visually-hidden">Grid size</label>
         <select id="settings-grid-select" class="grid-size-select">
@@ -3409,42 +3424,58 @@ body.sensory-high-contrast .settings-btn {
         <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="grid-size-hint">Changing grid size resets buttons to defaults for that layout.</p>
       </div>
       <div class="settings-section">
-        <h3 data-t="settings.language">Language</h3>
-        <div id="language-buttons" style="display:flex;gap:8px;margin-bottom:4px;">
-          <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
-          <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
-          <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+        <button type="button" class="settings-accordion-btn" id="language-toggle" aria-expanded="false">
+          <span style="font-size:1rem;font-weight:700;color:#555;" data-t="settings.language">Language</span>
+          <span class="accordion-summary" id="language-summary" style="font-size:0.8rem;color:#888;"></span>
+          <span class="accordion-chevron">&#9654;</span>
+        </button>
+        <div id="language-details" class="accordion-details">
+          <div id="language-buttons" style="display:flex;gap:8px;margin-top:8px;">
+            <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
+            <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
+            <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+          </div>
         </div>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;" data-t="settings.languageHint">Switch the board language. "Both" shows English and Spanish on every button.</p>
       </div>
       <div class="settings-section">
-        <h3>Voice</h3>
-        <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
-        <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
-        <div class="voice-slider-row">
-          <label for="voice-speed-slider">Speed</label>
-          <input type="range" id="voice-speed-slider" min="0.3" max="1.5" step="0.15" value="0.85">
-          <span class="voice-slider-value" id="voice-speed-display">normal</span>
+        <button type="button" class="settings-accordion-btn" id="aac-voice-toggle" aria-expanded="false">
+          <span style="font-size:1rem;font-weight:700;color:#555;">Voice</span>
+          <span class="accordion-summary" id="aac-voice-summary" style="font-size:0.8rem;color:#888;"></span>
+          <span class="accordion-chevron">&#9654;</span>
+        </button>
+        <div id="aac-voice-details" class="accordion-details">
+          <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;margin-top:8px;">Choose voice</label>
+          <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
+          <div class="voice-slider-row">
+            <label for="voice-speed-slider">Speed</label>
+            <input type="range" id="voice-speed-slider" min="0.3" max="1.5" step="0.15" value="0.85">
+            <span class="voice-slider-value" id="voice-speed-display">normal</span>
+          </div>
+          <div class="voice-slider-row">
+            <label for="voice-pitch-slider">Pitch</label>
+            <input type="range" id="voice-pitch-slider" min="0.5" max="2.0" step="0.2" value="1.0">
+            <span class="voice-slider-value" id="voice-pitch-display">normal</span>
+          </div>
+          <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
         </div>
-        <div class="voice-slider-row">
-          <label for="voice-pitch-slider">Pitch</label>
-          <input type="range" id="voice-pitch-slider" min="0.5" max="2.0" step="0.2" value="1.0">
-          <span class="voice-slider-value" id="voice-pitch-display">normal</span>
-        </div>
-        <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
       </div>
       <div class="settings-section">
-        <h3>Grammar Assistance</h3>
-        <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Grammar only affects spoken output. Button labels stay the same.</p>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="grammar-plurals" class="settings-checkbox"> Auto-plurals (more cookie -> more cookies)
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms (he want -> he wants)
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles (I want cookie -> I want a cookie)
-        </label>
+        <button type="button" class="settings-accordion-btn" id="grammar-toggle" aria-expanded="false">
+          <span style="font-size:1rem;font-weight:700;color:#555;">Grammar Assistance</span>
+          <span class="accordion-summary" id="grammar-summary" style="font-size:0.8rem;color:#888;"></span>
+          <span class="accordion-chevron">&#9654;</span>
+        </button>
+        <div id="grammar-details" class="accordion-details">
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="grammar-plurals" class="settings-checkbox"> Auto-plurals
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles
+          </label>
+        </div>
       </div>
       <div class="settings-section">
         <h3>Predictions</h3>
@@ -3460,19 +3491,22 @@ body.sensory-high-contrast .settings-btn {
     <!-- Category: Accessibility -->
     <div class="settings-category-content" id="settings-cat-accessibility">
       <div class="settings-section">
-        <h3>Sensory Preferences</h3>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
-        </label>
-        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Minimize animations and movement across the app.</p>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
-        </label>
-        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Bolder colors and borders for readability.</p>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
-          <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
-        </label>
-        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">Mute sounds and effects. Speech is not affected.</p>
+        <button type="button" class="settings-accordion-btn" id="aac-sensory-toggle" aria-expanded="false">
+          <span style="font-size:1rem;font-weight:700;color:#555;">Sensory Preferences</span>
+          <span class="accordion-summary" id="aac-sensory-summary" style="font-size:0.8rem;color:#888;"></span>
+          <span class="accordion-chevron">&#9654;</span>
+        </button>
+        <div id="aac-sensory-details" class="accordion-details">
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="sensory-reduced-motion" class="settings-checkbox"> Reduce motion
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="sensory-high-contrast" class="settings-checkbox"> High contrast
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
+            <input type="checkbox" id="sensory-quiet" class="settings-checkbox"> Quiet mode
+          </label>
+        </div>
       </div>
     </div>
 
@@ -3700,8 +3734,8 @@ body.sensory-high-contrast .settings-btn {
     <option value="1">First Words (1x1)</option>
     <option value="21">This or That (2x1)</option>
     <option value="2">My Picks (2x2)</option>
-    <option value="3">Let's Talk (3x3)</option>
-    <option value="4" selected>More to Say (4x4)</option>
+    <option value="3" selected>Let's Talk (3x3)</option>
+    <option value="4">More to Say (4x4)</option>
     <option value="5">Big Talker (5x5)</option>
     <option value="6">Chatterbox (6x6)</option>
   </select>
@@ -7247,6 +7281,7 @@ SENSORY_KEYS.forEach(({ id, storageKey, bodyClass }) => {
     const on = e.target.checked;
     document.body.classList.toggle(bodyClass, on);
     localStorage.setItem(storageKey, String(on));
+    updateAacSensorySummary();
   });
 });
 
@@ -9106,7 +9141,56 @@ document.getElementById('btn-toggle-parent-mode').addEventListener('click', () =
 });
 
 // ── Settings ──
+const AAC_ACCORDIONS = ['grammar', 'aac-voice', 'language', 'aac-sensory'];
+
+AAC_ACCORDIONS.forEach(key => {
+  document.getElementById(key + '-toggle').addEventListener('click', () => {
+    const btn = document.getElementById(key + '-toggle');
+    const details = document.getElementById(key + '-details');
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    details.classList.toggle('open', !expanded);
+  });
+});
+
+function updateGrammarSummary() {
+  const on = [];
+  if (document.getElementById('grammar-plurals').checked) on.push('Plurals');
+  if (document.getElementById('grammar-verbs').checked) on.push('Verbs');
+  if (document.getElementById('grammar-articles').checked) on.push('Articles');
+  document.getElementById('grammar-summary').textContent = on.length ? on.join(', ') : 'All off';
+}
+
+function updateAacVoiceSummary() {
+  const sel = document.getElementById('voice-select');
+  const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+  document.getElementById('aac-voice-summary').textContent = name ? name.split(' ').slice(0, 3).join(' ') : '';
+}
+
+function updateLanguageSummary() {
+  const active = document.querySelector('.lang-opt.active');
+  const lang = active ? active.dataset.lang : 'en';
+  const labels = { en: 'English', es: 'Español', both: 'Both' };
+  document.getElementById('language-summary').textContent = labels[lang] || 'English';
+}
+
+function updateAacSensorySummary() {
+  const on = [];
+  if (document.getElementById('sensory-reduced-motion').checked) on.push('Reduce motion');
+  if (document.getElementById('sensory-high-contrast').checked) on.push('High contrast');
+  if (document.getElementById('sensory-quiet').checked) on.push('Quiet mode');
+  document.getElementById('aac-sensory-summary').textContent = on.length ? on.join(', ') : 'All off';
+}
+
+function updateAllAccordionSummaries() {
+  updateGrammarSummary();
+  updateAacVoiceSummary();
+  updateLanguageSummary();
+  updateAacSensorySummary();
+}
+
 document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  updateAllAccordionSummaries();
   document.getElementById('settings-overlay').classList.add('open');
   updateGridSizeSelect();
 });
@@ -9184,6 +9268,7 @@ vocabLevelSelect.addEventListener('change', (e) => {
   el.checked = grammarEnabled(key);
   el.addEventListener('change', () => {
     localStorage.setItem('aac-grammar-' + key, el.checked ? '1' : '0');
+    updateGrammarSummary();
   });
 });
 
@@ -9205,6 +9290,10 @@ document.querySelectorAll('.picker-lang-opt').forEach(btn => {
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
+  AAC_ACCORDIONS.forEach(key => {
+    document.getElementById(key + '-toggle').setAttribute('aria-expanded', 'false');
+    document.getElementById(key + '-details').classList.remove('open');
+  });
 });
 
 document.getElementById('btn-export-board').addEventListener('click', showExportModal);
