@@ -2170,6 +2170,19 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 6px;
 }
 .describe-step-remove:hover { color: #D32F2F; background: #ffebee; }
+.describe-emotion-section { margin: 12px 0 4px; }
+.describe-emotion-toggle {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 0.9rem; color: #666; padding: 8px 0;
+}
+.describe-emotion-toggle input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--chrome-primary);
+}
+.describe-emotion-fields { margin-top: 8px; }
+.describe-emotion-field { margin-bottom: 10px; }
+.describe-emotion-field label {
+  display: block; font-size: 0.85rem; color: #555; margin-bottom: 4px; font-weight: 500;
+}
 .describe-add-btn {
   width: 100%; padding: 10px; border: 2px dashed var(--chrome-border);
   border-radius: var(--radius-sm); background: none; font-family: inherit;
@@ -2434,6 +2447,22 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div class="helper-coaching">Tell us what happens step by step. We will create the story for you.</div>
       <div id="describe-step-list" class="describe-step-list"></div>
       <button id="btn-describe-add" class="describe-add-btn">+ Add another step</button>
+      <div class="describe-emotion-section">
+        <label class="describe-emotion-toggle">
+          <input type="checkbox" id="describe-emotion-check">
+          <span>Add emotion prep pages</span>
+        </label>
+        <div id="describe-emotion-fields" style="display:none">
+          <div class="describe-emotion-field">
+            <label for="describe-emotion-feeling">How might your child feel?</label>
+            <input type="text" id="describe-emotion-feeling" class="describe-step-input">
+          </div>
+          <div class="describe-emotion-field">
+            <label for="describe-emotion-coping">What can they do to cope?</label>
+            <input type="text" id="describe-emotion-coping" class="describe-step-input">
+          </div>
+        </div>
+      </div>
       <button id="btn-describe-generate" class="editor-primary-btn">Create Story</button>
       <button id="btn-describe-advanced" class="describe-advanced-btn">Use detailed wizard instead</button>
     </div>
@@ -3729,6 +3758,40 @@ function matchStockImage(pageText) {
   return null;
 }
 
+// Irregular verb map: third-person present -> base form
+var IRREGULAR_VERBS = {
+  'is': 'be', 'are': 'be', 'am': 'be',
+  'has': 'have', 'does': 'do', 'goes': 'go',
+  'says': 'say', 'makes': 'make', 'takes': 'take',
+  'gives': 'give', 'comes': 'come', 'sees': 'see',
+  'puts': 'put', 'gets': 'get', 'lets': 'let',
+  'cuts': 'cut', 'sits': 'sit', 'runs': 'run',
+  'tells': 'tell', 'holds': 'hold', 'keeps': 'keep',
+  'brings': 'bring', 'shows': 'show', 'feels': 'feel',
+  'leaves': 'leave', 'moves': 'move', 'lives': 'live',
+  'uses': 'use', 'cleans': 'clean', 'looks': 'look',
+  'checks': 'check', 'listens': 'listen', 'touches': 'touch',
+  'brushes': 'brush', 'washes': 'wash', 'watches': 'watch',
+  'fixes': 'fix', 'mixes': 'mix', 'presses': 'press',
+  'pushes': 'push', 'pulls': 'pull', 'picks': 'pick',
+  'opens': 'open', 'closes': 'close', 'turns': 'turn',
+  'asks': 'ask', 'helps': 'help', 'plays': 'play',
+  'reads': 'read', 'writes': 'write', 'draws': 'draw',
+  'counts': 'count', 'measures': 'measure', 'weighs': 'weigh',
+  'pokes': 'poke', 'sticks': 'stick', 'squeezes': 'squeeze',
+  'shines': 'shine', 'sprays': 'spray', 'dries': 'dry',
+  'ties': 'tie', 'tries': 'try', 'carries': 'carry'
+};
+
+function getBaseVerb(verb) {
+  var lower = verb.toLowerCase();
+  if (IRREGULAR_VERBS[lower]) return IRREGULAR_VERBS[lower];
+  if (lower.endsWith('ies')) return lower.slice(0, -3) + 'y';
+  if (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('sses') || lower.endsWith('xes') || lower.endsWith('zes')) return lower.slice(0, -2);
+  if (lower.endsWith('s') && !lower.endsWith('ss')) return lower.slice(0, -1);
+  return lower;
+}
+
 // Sentence builder: transforms parent shorthand into complete social story sentences
 var STEP_TRANSITIONS = [
   'Today, ',
@@ -3762,7 +3825,8 @@ var WAITING_PATTERNS = [
 
 // Patterns that indicate the step is already a complete sentence
 var COMPLETE_SENTENCE_PATTERNS = [
-  /^(I |we |{name} |there |a |an |my |our |it |this |that |sometimes |maybe |finally |when |at |everyone |if |after )/i
+  /^(I |we |{name} |there |a |an |my |our |it |this |that |sometimes |maybe |finally |when |at |everyone |if |after )/i,
+  /^\w+ (might|could|should|would) /i
 ];
 
 function buildSentence(step, stepIndex, totalSteps) {
@@ -3815,8 +3879,11 @@ function buildSentence(step, stepIndex, totalSteps) {
     var thirdText = isAlreadyComplete ? raw : stripped;
     if (!/\b(will|might|can|is going to|are going to)\b/i.test(thirdText)) {
       thirdText = thirdText.replace(/^(The |A )?([\w]+)\s+([\w]+)/i, function(match, article, subject, verb) {
-        var baseVerb = verb.replace(/([^s])s$/i, '$1').replace(/ies$/i, 'y').replace(/([sc]h)es$/i, '$1');
-        return (article || 'The ') + subject.toLowerCase() + ' will ' + baseVerb.toLowerCase();
+        var subjectLower = subject.toLowerCase();
+        var isPronoun = /^(he|she|they|someone|it)$/i.test(subjectLower);
+        var prefix = isPronoun ? '' : (article || 'The ');
+        var displaySubject = isPronoun ? subjectLower : subjectLower;
+        return prefix + displaySubject + ' will ' + getBaseVerb(verb);
       });
     }
     sentence = transition + thirdText.charAt(0).toLowerCase() + thirdText.slice(1);
@@ -3866,6 +3933,16 @@ function generateStoryFromSteps(steps, story) {
   var pages = [];
   var allText = validSteps.join(' ');
   var sensoryAdded = {};
+  var sensoryCount = 0;
+
+  // Age-gate sensory prep: younger children get fewer sensory pages
+  var childAge = (story && story.childAge) ? parseInt(story.childAge) : null;
+  var maxSensoryPages = 3;
+  if (childAge !== null) {
+    if (childAge <= 2) maxSensoryPages = 1;
+    else if (childAge <= 3) maxSensoryPages = 1;
+    else if (childAge <= 4) maxSensoryPages = 2;
+  }
 
   validSteps.forEach(function(step, idx) {
     var text = buildSentence(step, idx, validSteps.length);
@@ -3880,8 +3957,9 @@ function generateStoryFromSteps(steps, story) {
 
     var sensoryMatches = detectSensory(step);
     sensoryMatches.forEach(function(match) {
-      if (!sensoryAdded[match.category] && pages.length < 11) {
+      if (!sensoryAdded[match.category] && sensoryCount < maxSensoryPages && pages.length < 11) {
         sensoryAdded[match.category] = true;
+        sensoryCount++;
         pages.push({
           text: match.prep,
           sentenceType: 'perspective',
@@ -3893,25 +3971,28 @@ function generateStoryFromSteps(steps, story) {
     });
   });
 
-  var emotion = inferEmotion(allText);
-  if (pages.length < 11) {
-    pages.push({
-      text: '{name} might feel ' + emotion.feeling + '. That is okay.',
-      sentenceType: 'perspective',
-      imageType: 'stock',
-      stockKey: 'feelings-nervous',
-      customImageKey: null
-    });
-  }
-
-  if (pages.length < 11) {
-    pages.push({
-      text: 'If {name} {verb} feeling worried, {name} can ' + emotion.coping + '. {parent} will be there to help.',
-      sentenceType: 'cooperative',
-      imageType: 'stock',
-      stockKey: 'coping-squeeze',
-      customImageKey: null
-    });
+  // Emotion pages are optional -- only added if parent provides custom emotion text
+  // or explicitly enables emotion prep via the UI toggle
+  if (story && story.emotionPrep) {
+    var ep = story.emotionPrep;
+    if (ep.feeling && pages.length < 11) {
+      pages.push({
+        text: '{name} might feel ' + ep.feeling + '. That is okay.',
+        sentenceType: 'perspective',
+        imageType: 'stock',
+        stockKey: 'feelings-nervous',
+        customImageKey: null
+      });
+    }
+    if (ep.coping && pages.length < 11) {
+      pages.push({
+        text: 'If {name} {verb} feeling worried, {name} can ' + ep.coping + '. {parent} will be there to help.',
+        sentenceType: 'cooperative',
+        imageType: 'stock',
+        stockKey: 'coping-squeeze',
+        customImageKey: null
+      });
+    }
   }
 
   pages.push({
@@ -6183,11 +6264,25 @@ document.getElementById('btn-describe-add').addEventListener('click', function()
   addDescribeStep('');
 });
 
+document.getElementById('describe-emotion-check').addEventListener('change', function() {
+  document.getElementById('describe-emotion-fields').style.display = this.checked ? '' : 'none';
+});
+
 document.getElementById('btn-describe-generate').addEventListener('click', function() {
   var steps = collectDescribeSteps().filter(function(s) { return s.trim().length >= 2; });
   if (steps.length < 3) {
     showToast('Please describe at least 3 steps');
     return;
+  }
+
+  if (document.getElementById('describe-emotion-check').checked) {
+    var feeling = document.getElementById('describe-emotion-feeling').value.trim();
+    var coping = document.getElementById('describe-emotion-coping').value.trim();
+    if (feeling || coping) {
+      editingStory.emotionPrep = { feeling: feeling || null, coping: coping || null };
+    }
+  } else {
+    delete editingStory.emotionPrep;
   }
 
   var pages = generateStoryFromSteps(steps, editingStory);
