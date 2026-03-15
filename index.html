@@ -7570,6 +7570,9 @@ function renderGrid() {
   const folderLabel = document.getElementById('folder-label');
   revokeActiveBlobUrls();
   grid.innerHTML = '';
+  grid.style.gridTemplateColumns = '';
+  grid.style.gridTemplateRows = '';
+  grid.style.flex = '';
   setupGridDelegation();
 
   const gridSize = getGridSize();
