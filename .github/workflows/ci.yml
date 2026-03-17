@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for console.log
+        run: bash .scripts/check-console-logs.sh
+
+      - name: Validate JS syntax
+        run: bash .scripts/check-html-syntax.sh
+
+      - name: HTML validation
+        run: |
+          npx html-validate --config '{"extends":["html-validate:recommended"],"rules":{"no-inline-style":"off","no-trailing-whitespace":"off","script-type":"off","tel-non-breaking":"off","long-title":"off","prefer-native-element":"off","wcag/h71":"off","element-permitted-content":"off","svg-focusable":"off"}}' index.html

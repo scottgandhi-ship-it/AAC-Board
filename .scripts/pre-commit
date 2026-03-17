@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: runs validation checks on index.html before commit
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Only run checks if index.html or guiding-steps/index.html is staged
+staged=$(git diff --cached --name-only)
+if ! echo "$staged" | grep -qE '(^|\/)index\.html$'; then
+  exit 0
+fi
+
+echo "=== Pre-commit: Running validation checks ==="
+
+# Check for console.log -- blocks commit
+echo ""
+echo "--- Checking for console.log statements ---"
+if ! bash .scripts/check-console-logs.sh; then
+  echo ""
+  echo "COMMIT BLOCKED: Remove console.log statements before committing."
+  exit 1
+fi
+
+# Check JS syntax -- blocks commit
+echo ""
+echo "--- Checking JS syntax ---"
+if ! bash .scripts/check-html-syntax.sh; then
+  echo ""
+  echo "COMMIT BLOCKED: Fix JS syntax errors before committing."
+  exit 1
+fi
+
+# Check www/ sync -- warn only (www/ is gitignored)
+echo ""
+echo "--- Checking www/ sync ---"
+bash .scripts/check-www-sync.sh || true
+
+echo ""
+echo "=== Pre-commit checks passed ==="
+exit 0

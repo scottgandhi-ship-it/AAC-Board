@@ -1,7 +1,7 @@
 # iOS App Conversion -- Notes
 
 ## Current Status
-PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer approval
+IN PROGRESS -- A6/B6 blocked on Apple Developer enrollment (PENDING on ReganL2018@gmail.com, paid 2026-03-14)
 
 ## Review Feedback Incorporated
 - [x] Steve: webDir changed from "." to "www/" with sync script (prevents bundle bloat)
@@ -25,7 +25,7 @@ PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer a
 - [x] npm 11.11.0 installed
 - [x] CocoaPods 1.16.2 installed
 - [x] Xcode license accepted
-- [ ] Apple Developer account confirmed
+- [ ] Apple Developer account confirmed -- enrollment PENDING on ReganL2018@gmail.com (paid 2026-03-14)
 
 ## Implementation Checklist
 
@@ -36,10 +36,12 @@ PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer a
 - [x] A3: Initialize npm and Capacitor (pinned 8.2.0, webDir: "www")
 - [x] A4: Add iOS platform, sync, verified www/ contents clean
 - [ ] A5: Configure iOS project + PrivacyInfo.xcprivacy (mandatory)
-- [ ] A6: Apple Developer provisioning (App ID, profiles, signing)
+- [ ] A6: Apple Developer provisioning -- BLOCKED (enrollment pending on ReganL2018@gmail.com)
+      Team set: SCOTT RYAN LUSSIER (Personal Team), ID: 2H6JBS4JF8
+      Deployment target bumped to iOS 16.0
 - [x] A7: Native haptic feedback (@capacitor/haptics)
-- [ ] A8: App icons (generate from SVG, all sizes)
-- [ ] A9: Splash screen (purple theme)
+- [x] A8: App icons (1024x1024 from aac-board-icon-1024.png, copied to AppIcon.appiconset)
+- [x] A9: Splash screen (2732x2732 from aac-board-splash-2732.png, background set to #7C74FF)
 
 ### Phase B: Guiding Steps Capacitor Setup
 - [x] B1: Service worker detection in Guiding Steps index.html
@@ -47,10 +49,11 @@ PLANNING -- plan updated with Steve/Robert review feedback, awaiting developer a
 - [x] B3: Initialize npm and Capacitor (pinned 8.2.0)
 - [x] B4: Add iOS platform, sync, verified clean
 - [ ] B5: Configure iOS project + PrivacyInfo.xcprivacy
-- [ ] B6: Apple Developer provisioning
+- [ ] B6: Apple Developer provisioning -- BLOCKED (same enrollment as A6)
+      Team set: 2H6JBS4JF8, deployment target bumped to iOS 16.0
 - [x] B7: Native haptic feedback
-- [ ] B8: App icons
-- [ ] B9: Splash screen
+- [x] B8: App icons (1024x1024 from guiding-steps-icon-1024.png, copied to AppIcon.appiconset)
+- [x] B9: Splash screen (2732x2732 from guiding-steps-splash-2732.png, background set to #7C74FF)
 
 ### Phase C: Build and Test
 - [ ] C1: Simulator testing (iPhone + iPad, both apps)
