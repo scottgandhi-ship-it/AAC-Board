@@ -2337,8 +2337,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="schedule-done-msg" style="font-size:1rem;color:#555;"></div>
     </div>
     <div id="schedule-parent-controls">
-      <button class="sched-parent-btn" id="btn-start-schedule">Start Schedule</button>
-      <button class="sched-parent-btn" id="btn-edit-templates">Edit Templates</button>
+      <button type="button" class="sched-parent-btn" id="btn-start-schedule">Start Schedule</button>
+      <button type="button" class="sched-parent-btn" id="btn-edit-templates">Edit Templates</button>
     </div>
   </div>
 </div>
@@ -2370,9 +2370,9 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="reward-timer-status"></div>
     </div>
     <div id="rewards-parent-controls">
-      <button class="rewards-parent-btn" id="btn-new-track">New Track</button>
-      <button class="rewards-parent-btn" id="btn-edit-track">Configure</button>
-      <button class="rewards-parent-btn" id="btn-reset-track">Reset</button>
+      <button type="button" class="rewards-parent-btn" id="btn-new-track">New Track</button>
+      <button type="button" class="rewards-parent-btn" id="btn-edit-track">Configure</button>
+      <button type="button" class="rewards-parent-btn" id="btn-reset-track">Reset</button>
     </div>
   </div>
 </div>
@@ -2383,47 +2383,47 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="stories-grid"></div>
     <div id="stories-empty">
       <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <button id="stories-empty-new">New Story</button>
+      <button type="button" id="stories-empty-new">New Story</button>
       <div style="font-size:0.85rem;">Social stories help prepare your child for new experiences</div>
     </div>
     <div id="stories-parent-controls">
-      <button class="stories-parent-btn" id="btn-new-story">New Story</button>
+      <button type="button" class="stories-parent-btn" id="btn-new-story">New Story</button>
     </div>
   </div>
 </div>
 
 <!-- Story Reader (Full-Screen Overlay) -->
 <div id="story-reader" aria-label="Story reader" role="dialog">
-  <button id="reader-close" aria-label="Close story">
+  <button type="button" id="reader-close" aria-label="Close story">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <div id="reader-image-area"></div>
   <div id="reader-text-area">
     <p id="reader-text"></p>
-    <button id="reader-speak" aria-label="Read this page aloud">
+    <button type="button" id="reader-speak" aria-label="Read this page aloud">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
     </button>
   </div>
   <div id="reader-nav">
-    <button id="reader-prev" aria-label="Previous page">
+    <button type="button" id="reader-prev" aria-label="Previous page">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <div id="reader-dots"></div>
-    <button id="reader-next" aria-label="Next page">
+    <button type="button" id="reader-next" aria-label="Next page">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
     </button>
   </div>
-  <button id="reader-again" style="display:none">Read Again</button>
+  <button type="button" id="reader-again" style="display:none">Read Again</button>
 </div>
 
 <!-- Story Editor Overlay -->
 <div id="story-editor" aria-label="Story editor" role="dialog">
   <div id="editor-header">
-    <button id="editor-back" aria-label="Go back">
+    <button type="button" id="editor-back" aria-label="Go back">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span id="editor-title">New Story</span>
-    <button id="editor-save">Save</button>
+    <button type="button" id="editor-save">Save</button>
   </div>
   <div id="editor-body">
     <!-- Step 1: Setup -->
@@ -2444,29 +2444,29 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div class="editor-field">
         <label>Child's Age (years)</label>
         <div class="age-pill-group" id="editor-child-age" role="radiogroup" aria-label="Child's age in years">
-          <button class="age-pill" role="radio" aria-checked="false" data-age="2">2</button>
-          <button class="age-pill" role="radio" aria-checked="false" data-age="3">3</button>
-          <button class="age-pill" role="radio" aria-checked="false" data-age="4">4</button>
-          <button class="age-pill" role="radio" aria-checked="false" data-age="5">5</button>
-          <button class="age-pill" role="radio" aria-checked="false" data-age="6">6</button>
+          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="2">2</button>
+          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="3">3</button>
+          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="4">4</button>
+          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="5">5</button>
+          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="6">6</button>
         </div>
         <div class="age-pill-prompt" id="age-pill-prompt">Select your child's age for page length guidance</div>
       </div>
       <div class="editor-field">
         <label>Perspective</label>
         <div class="seg-group" id="editor-person-mode" role="radiogroup" aria-label="Story perspective">
-          <button class="seg-btn" role="radio" aria-checked="true" data-value="first">I will...</button>
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="third">[Name] will...</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="true" data-value="first">I will...</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="third">[Name] will...</button>
         </div>
       </div>
-      <button id="editor-setup-next" class="editor-primary-btn">Next</button>
+      <button type="button" id="editor-setup-next" class="editor-primary-btn">Next</button>
     </div>
     <!-- Step 1b: Describe Steps -->
     <div id="editor-step-describe" class="editor-step" style="display:none">
       <div class="helper-step-title">Describe what will happen</div>
       <div class="helper-coaching">Tell us what happens step by step. We will create the story for you.</div>
       <div id="describe-step-list" class="describe-step-list"></div>
-      <button id="btn-describe-add" class="describe-add-btn">+ Add another step</button>
+      <button type="button" id="btn-describe-add" class="describe-add-btn">+ Add another step</button>
       <div class="describe-emotion-section">
         <label class="describe-emotion-toggle">
           <input type="checkbox" id="describe-emotion-check">
@@ -2483,8 +2483,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           </div>
         </div>
       </div>
-      <button id="btn-describe-generate" class="editor-primary-btn">Create Story</button>
-      <button id="btn-describe-advanced" class="describe-advanced-btn">Use detailed wizard instead</button>
+      <button type="button" id="btn-describe-generate" class="editor-primary-btn">Create Story</button>
+      <button type="button" id="btn-describe-advanced" class="describe-advanced-btn">Use detailed wizard instead</button>
     </div>
     <!-- Step 2: Story Helper Wizard -->
     <div id="editor-step-helper" class="editor-step" style="display:none">
@@ -2506,15 +2506,15 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         </div>
         <div class="helper-field-label">Or pick a category to get started</div>
         <div class="helper-chips" id="helper-sparks">
-          <button class="helper-chip" data-val="a new experience">A new experience</button>
-          <button class="helper-chip" data-val="something scary">Something scary</button>
-          <button class="helper-chip" data-val="a routine change">A routine change</button>
-          <button class="helper-chip" data-val="a social interaction">A social interaction</button>
-          <button class="helper-chip" data-val="a sensory challenge">A sensory challenge</button>
-          <button class="helper-chip" data-val="a transition">A transition</button>
+          <button type="button" class="helper-chip" data-val="a new experience">A new experience</button>
+          <button type="button" class="helper-chip" data-val="something scary">Something scary</button>
+          <button type="button" class="helper-chip" data-val="a routine change">A routine change</button>
+          <button type="button" class="helper-chip" data-val="a social interaction">A social interaction</button>
+          <button type="button" class="helper-chip" data-val="a sensory challenge">A sensory challenge</button>
+          <button type="button" class="helper-chip" data-val="a transition">A transition</button>
         </div>
         <div class="helper-nav">
-          <button class="editor-primary-btn" id="helper-next-0">Next</button>
+          <button type="button" class="editor-primary-btn" id="helper-next-0">Next</button>
         </div>
       </div>
 
@@ -2531,14 +2531,14 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         </div>
         <div class="helper-field-label">What senses might be involved?</div>
         <div class="helper-chips" id="helper-senses">
-          <button class="helper-chip" data-val="sights">What they'll see</button>
-          <button class="helper-chip" data-val="sounds">What they'll hear</button>
-          <button class="helper-chip" data-val="touch">What they'll feel or touch</button>
-          <button class="helper-chip" data-val="smells">What they'll smell</button>
+          <button type="button" class="helper-chip" data-val="sights">What they'll see</button>
+          <button type="button" class="helper-chip" data-val="sounds">What they'll hear</button>
+          <button type="button" class="helper-chip" data-val="touch">What they'll feel or touch</button>
+          <button type="button" class="helper-chip" data-val="smells">What they'll smell</button>
         </div>
         <div class="helper-nav">
-          <button class="editor-secondary-btn" id="helper-back-1">Back</button>
-          <button class="editor-primary-btn" id="helper-next-1">Next</button>
+          <button type="button" class="editor-secondary-btn" id="helper-back-1">Back</button>
+          <button type="button" class="editor-primary-btn" id="helper-next-1">Next</button>
         </div>
       </div>
 
@@ -2546,10 +2546,10 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <div class="helper-step-title">What happens?</div>
         <div class="helper-coaching">Break the event into simple steps. Spend extra time on the part that's most difficult.</div>
         <div class="helper-seq-list" id="helper-seq-list"></div>
-        <button class="helper-add-step" id="helper-add-seq">+ Add a step</button>
+        <button type="button" class="helper-add-step" id="helper-add-seq">+ Add a step</button>
         <div class="helper-nav">
-          <button class="editor-secondary-btn" id="helper-back-2">Back</button>
-          <button class="editor-primary-btn" id="helper-next-2">Next</button>
+          <button type="button" class="editor-secondary-btn" id="helper-back-2">Back</button>
+          <button type="button" class="editor-primary-btn" id="helper-next-2">Next</button>
         </div>
       </div>
 
@@ -2558,22 +2558,22 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <div class="helper-coaching">Naming hard feelings tells your child the emotion is normal and expected. It's okay to name the scary stuff.</div>
         <div class="helper-field-label">How might <span class="helper-child-name">your child</span> feel?</div>
         <div class="helper-chips" id="helper-feelings">
-          <button class="helper-chip" data-val="scared">Scared</button>
-          <button class="helper-chip" data-val="worried">Worried</button>
-          <button class="helper-chip" data-val="confused">Confused</button>
-          <button class="helper-chip" data-val="overwhelmed">Overwhelmed</button>
-          <button class="helper-chip" data-val="excited">Excited</button>
-          <button class="helper-chip" data-val="nervous">Nervous</button>
-          <button class="helper-chip" data-val="upset">Upset</button>
-          <button class="helper-chip" data-val="unsure">Unsure</button>
+          <button type="button" class="helper-chip" data-val="scared">Scared</button>
+          <button type="button" class="helper-chip" data-val="worried">Worried</button>
+          <button type="button" class="helper-chip" data-val="confused">Confused</button>
+          <button type="button" class="helper-chip" data-val="overwhelmed">Overwhelmed</button>
+          <button type="button" class="helper-chip" data-val="excited">Excited</button>
+          <button type="button" class="helper-chip" data-val="nervous">Nervous</button>
+          <button type="button" class="helper-chip" data-val="upset">Upset</button>
+          <button type="button" class="helper-chip" data-val="unsure">Unsure</button>
         </div>
         <div class="helper-field">
           <div class="helper-field-label">How might other people there be feeling? (optional)</div>
           <input type="text" id="helper-others-feelings" autocomplete="off">
         </div>
         <div class="helper-nav">
-          <button class="editor-secondary-btn" id="helper-back-3">Back</button>
-          <button class="editor-primary-btn" id="helper-next-3">Next</button>
+          <button type="button" class="editor-secondary-btn" id="helper-back-3">Back</button>
+          <button type="button" class="editor-primary-btn" id="helper-next-3">Next</button>
         </div>
       </div>
 
@@ -2582,14 +2582,14 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <div class="helper-coaching">Use strategies your child already knows. A social story isn't the place for brand-new coping skills -- use what's in their toolbox.</div>
         <div class="helper-field-label">What strategies help <span class="helper-child-name">your child</span> calm down?</div>
         <div class="helper-chips" id="helper-coping">
-          <button class="helper-chip" data-val="take deep breaths">Deep breaths</button>
-          <button class="helper-chip" data-val="squeeze a fidget">Squeeze a fidget</button>
-          <button class="helper-chip" data-val="hold {parent}'s hand">Hold my hand</button>
-          <button class="helper-chip" data-val="ask for a break">Ask for a break</button>
-          <button class="helper-chip" data-val="count to five">Count to five</button>
-          <button class="helper-chip" data-val="use my words">Use my words</button>
-          <button class="helper-chip" data-val="hug my stuffy">Hug my stuffy</button>
-          <button class="helper-chip" data-val="close my eyes">Close my eyes</button>
+          <button type="button" class="helper-chip" data-val="take deep breaths">Deep breaths</button>
+          <button type="button" class="helper-chip" data-val="squeeze a fidget">Squeeze a fidget</button>
+          <button type="button" class="helper-chip" data-val="hold {parent}'s hand">Hold my hand</button>
+          <button type="button" class="helper-chip" data-val="ask for a break">Ask for a break</button>
+          <button type="button" class="helper-chip" data-val="count to five">Count to five</button>
+          <button type="button" class="helper-chip" data-val="use my words">Use my words</button>
+          <button type="button" class="helper-chip" data-val="hug my stuffy">Hug my stuffy</button>
+          <button type="button" class="helper-chip" data-val="close my eyes">Close my eyes</button>
         </div>
         <div class="helper-field">
           <div class="helper-field-label">Any other strategies?</div>
@@ -2600,8 +2600,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           <input type="text" id="helper-who-helps" autocomplete="off">
         </div>
         <div class="helper-nav">
-          <button class="editor-secondary-btn" id="helper-back-4">Back</button>
-          <button class="editor-primary-btn" id="helper-next-4">Next</button>
+          <button type="button" class="editor-secondary-btn" id="helper-back-4">Back</button>
+          <button type="button" class="editor-primary-btn" id="helper-next-4">Next</button>
         </div>
       </div>
 
@@ -2614,14 +2614,14 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         </div>
         <div class="helper-field-label">Or pick a tone</div>
         <div class="helper-chips" id="helper-tone">
-          <button class="helper-chip" data-val="I was brave">I was brave</button>
-          <button class="helper-chip" data-val="I did it">I did it</button>
-          <button class="helper-chip" data-val="It was okay">It was okay</button>
-          <button class="helper-chip" data-val="I can try again next time">I can try again</button>
+          <button type="button" class="helper-chip" data-val="I was brave">I was brave</button>
+          <button type="button" class="helper-chip" data-val="I did it">I did it</button>
+          <button type="button" class="helper-chip" data-val="It was okay">It was okay</button>
+          <button type="button" class="helper-chip" data-val="I can try again next time">I can try again</button>
         </div>
         <div class="helper-nav">
-          <button class="editor-secondary-btn" id="helper-back-5">Back</button>
-          <button class="editor-primary-btn" id="helper-generate">Create Story</button>
+          <button type="button" class="editor-secondary-btn" id="helper-back-5">Back</button>
+          <button type="button" class="editor-primary-btn" id="helper-generate">Create Story</button>
         </div>
       </div>
     </div>
@@ -2631,8 +2631,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="editor-page-image-area">
         <div id="editor-page-image-preview"></div>
         <div id="editor-page-image-btns">
-          <button id="editor-page-upload" class="editor-secondary-btn">Upload Photo</button>
-          <button id="editor-page-remove-img" class="editor-secondary-btn" style="display:none">Remove</button>
+          <button type="button" id="editor-page-upload" class="editor-secondary-btn">Upload Photo</button>
+          <button type="button" id="editor-page-remove-img" class="editor-secondary-btn" style="display:none">Remove</button>
         </div>
       </div>
       <div class="editor-field">
@@ -2645,7 +2645,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         </div>
         <div id="editor-word-warning" class="word-counter-warning" style="display:none"></div>
         <div id="editor-split-wrap" style="display:none">
-          <button class="word-split-btn" id="editor-split-btn" aria-label="Split this page into two pages">Split into 2 pages</button>
+          <button type="button" class="word-split-btn" id="editor-split-btn" aria-label="Split this page into two pages">Split into 2 pages</button>
         </div>
       </div>
       <div class="editor-field">
@@ -2660,12 +2660,12 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       </div>
       <div id="editor-ratio-bar"></div>
       <div id="editor-page-nav">
-        <button id="editor-page-prev" class="editor-secondary-btn">Previous</button>
-        <button id="editor-page-add" class="editor-secondary-btn">+ Add Page</button>
-        <button id="editor-page-next" class="editor-secondary-btn">Next</button>
+        <button type="button" id="editor-page-prev" class="editor-secondary-btn">Previous</button>
+        <button type="button" id="editor-page-add" class="editor-secondary-btn">+ Add Page</button>
+        <button type="button" id="editor-page-next" class="editor-secondary-btn">Next</button>
       </div>
-      <button id="editor-page-delete" class="editor-danger-btn" style="margin-top:12px;">Remove This Page</button>
-      <button id="editor-preview-btn" class="editor-primary-btn" style="margin-top:8px;">Preview Story</button>
+      <button type="button" id="editor-page-delete" class="editor-danger-btn" style="margin-top:12px;">Remove This Page</button>
+      <button type="button" id="editor-preview-btn" class="editor-primary-btn" style="margin-top:8px;">Preview Story</button>
     </div>
   </div>
 </div>
@@ -2676,7 +2676,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <h2>Choose a Story</h2>
     <div id="story-picker-saved"></div>
     <div id="story-picker-templates"></div>
-    <button id="picker-close" style="width:100%;padding:10px;border:none;border-radius:10px;background:#999;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;min-height:44px;">Cancel</button>
+    <button type="button" id="picker-close" style="width:100%;padding:10px;border:none;border-radius:10px;background:#999;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;min-height:44px;">Cancel</button>
   </div>
 </div>
 
@@ -2721,11 +2721,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="schedule-details" class="accordion-details">
         <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:8px;">Steps shown at a time</label>
         <div class="seg-group" id="visible-steps-group" role="radiogroup" aria-label="Number of visible schedule steps">
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="2">2</button>
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="3">3</button>
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
-          <button class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="2">2</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="3">3</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
         </div>
       </div>
     </div>
@@ -2738,14 +2738,14 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="voice-details" class="accordion-details">
         <label for="voice-select" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Choose voice</label>
         <select id="voice-select" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:8px;"></select>
-        <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+        <button type="button" class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
       </div>
     </div>
     <div class="settings-section">
       <h3>Data</h3>
-      <button class="settings-btn danger parent-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
+      <button type="button" class="settings-btn danger parent-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
     </div>
-    <button id="btn-close-settings">Done</button>
+    <button type="button" id="btn-close-settings">Done</button>
   </div>
 </div>
 
@@ -2773,17 +2773,17 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <input type="file" id="task-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
     <label>Steps needed</label>
     <div class="stepper-row">
-      <button class="stepper-btn" id="stepper-minus" aria-label="Decrease steps">-</button>
+      <button type="button" class="stepper-btn" id="stepper-minus" aria-label="Decrease steps">-</button>
       <span id="stepper-value">5</span>
-      <button class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
+      <button type="button" class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
     </div>
     <label for="reward-label-input">Reward</label>
     <input type="text" id="reward-label-input">
     <label>Reward image</label>
     <img id="reward-image-preview" alt="Reward preview">
     <div id="reward-config-image-btns">
-      <button id="btn-reward-upload">Upload Image</button>
-      <button id="btn-reward-clear-img">Remove</button>
+      <button type="button" id="btn-reward-upload">Upload Image</button>
+      <button type="button" id="btn-reward-clear-img">Remove</button>
     </div>
     <input type="file" id="reward-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
     <label>Timer</label>
@@ -2806,11 +2806,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <option value="60">60 minutes</option>
       </select>
     </div>
-    <button id="btn-reward-save-template" style="display:none;width:100%;margin-top:12px;padding:10px;border:2px solid #7C74FF;border-radius:10px;background:#f3f0ff;color:#5A52D5;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;">Save as Template</button>
+    <button type="button" id="btn-reward-save-template" style="display:none;width:100%;margin-top:12px;padding:10px;border:2px solid #7C74FF;border-radius:10px;background:#f3f0ff;color:#5A52D5;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;">Save as Template</button>
     <div class="reward-config-btn-row">
-      <button id="btn-reward-cancel">Cancel</button>
-      <button id="btn-reward-delete" style="display:none">Delete</button>
-      <button id="btn-reward-save">Save</button>
+      <button type="button" id="btn-reward-cancel">Cancel</button>
+      <button type="button" id="btn-reward-delete" style="display:none">Delete</button>
+      <button type="button" id="btn-reward-save">Save</button>
     </div>
   </div>
 </div>
@@ -2820,8 +2820,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div style="background:#fff;border-radius:var(--radius-lg);max-width:400px;width:100%;max-height:80vh;overflow-y:auto;padding:20px;">
     <h2 style="font-size:1.1rem;font-weight:800;color:#333;margin-bottom:16px;">New Reward Track</h2>
     <div id="reward-tmpl-list"></div>
-    <button id="btn-reward-from-scratch" style="width:100%;padding:14px;border:2px dashed #ccc;border-radius:var(--radius-sm);background:none;font-size:0.95rem;font-weight:600;color:#888;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Start from Scratch</button>
-    <button id="btn-reward-tmpl-cancel" style="width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Cancel</button>
+    <button type="button" id="btn-reward-from-scratch" style="width:100%;padding:14px;border:2px dashed #ccc;border-radius:var(--radius-sm);background:none;font-size:0.95rem;font-weight:600;color:#888;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Start from Scratch</button>
+    <button type="button" id="btn-reward-tmpl-cancel" style="width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Cancel</button>
   </div>
 </div>
 
@@ -2831,7 +2831,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="tmpl-list-panel">
     <h2 id="tmpl-list-title">Choose Schedule</h2>
     <div id="tmpl-list-items"></div>
-    <button id="btn-close-tmpl-list">Cancel</button>
+    <button type="button" id="btn-close-tmpl-list">Cancel</button>
   </div>
 </div>
 
@@ -2844,11 +2844,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <input type="text" id="tmpl-name-input">
     <label>Steps</label>
     <div id="tmpl-steps-list"></div>
-    <button id="btn-tmpl-add-step">+ Add Step</button>
+    <button type="button" id="btn-tmpl-add-step">+ Add Step</button>
     <div class="tmpl-btn-row">
-      <button id="btn-tmpl-cancel">Cancel</button>
-      <button id="btn-tmpl-delete" style="display:none">Delete</button>
-      <button id="btn-tmpl-save">Save</button>
+      <button type="button" id="btn-tmpl-cancel">Cancel</button>
+      <button type="button" id="btn-tmpl-delete" style="display:none">Delete</button>
+      <button type="button" id="btn-tmpl-save">Save</button>
     </div>
   </div>
 </div>
@@ -2859,8 +2859,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="activity-picker-panel">
     <h2>Add Step</h2>
     <div class="picker-tabs">
-      <button class="picker-tab active" id="picker-tab-defaults">Defaults</button>
-      <button class="picker-tab" id="picker-tab-custom">Custom</button>
+      <button type="button" class="picker-tab active" id="picker-tab-defaults">Defaults</button>
+      <button type="button" class="picker-tab" id="picker-tab-custom">Custom</button>
     </div>
     <div id="defaults-section"></div>
     <div id="custom-step-section">
@@ -2869,13 +2869,13 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <label>Image</label>
       <img id="custom-step-preview" alt="Custom step preview">
       <div id="custom-step-image-btns">
-        <button id="btn-custom-step-upload">Upload Image</button>
-        <button id="btn-custom-step-clear">Remove</button>
+        <button type="button" id="btn-custom-step-upload">Upload Image</button>
+        <button type="button" id="btn-custom-step-clear">Remove</button>
       </div>
       <input type="file" id="custom-step-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
-      <button id="btn-add-custom-step">Add Step</button>
+      <button type="button" id="btn-add-custom-step">Add Step</button>
     </div>
-    <button id="btn-close-picker">Done</button>
+    <button type="button" id="btn-close-picker">Done</button>
   </div>
 </div>
 
@@ -2885,8 +2885,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="task-image-picker-panel">
     <h2>Choose Task Image</h2>
     <div class="picker-tabs">
-      <button class="picker-tab active" id="task-picker-tab-defaults">Defaults</button>
-      <button class="picker-tab" id="task-picker-tab-custom">Custom</button>
+      <button type="button" class="picker-tab active" id="task-picker-tab-defaults">Defaults</button>
+      <button type="button" class="picker-tab" id="task-picker-tab-custom">Custom</button>
     </div>
     <div id="task-defaults-section"></div>
     <div id="task-custom-section">
@@ -2898,25 +2898,25 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       </div>
       <button id="btn-task-custom-use" type="button" style="width:100%;padding:10px;border:none;border-radius:10px;background:#43A047;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;">Use This Image</button>
     </div>
-    <button id="btn-close-task-picker" style="width:100%;padding:10px;border:none;border-radius:10px;background:#999;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px;">Cancel</button>
+    <button type="button" id="btn-close-task-picker" style="width:100%;padding:10px;border:none;border-radius:10px;background:#999;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px;">Cancel</button>
   </div>
 </div>
 
 <!-- Tab Bar -->
 <nav id="tab-bar" role="tablist" aria-label="App navigation">
-  <button class="tab-btn active" id="tab-schedule" role="tab" aria-selected="true" aria-controls="view-schedule">
+  <button type="button" class="tab-btn active" id="tab-schedule" role="tab" aria-selected="true" aria-controls="view-schedule">
     <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     <span class="tab-label">Schedule</span>
   </button>
-  <button class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
+  <button type="button" class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
     <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     <span class="tab-label">Rewards</span>
   </button>
-  <button class="tab-btn" id="tab-stories" role="tab" aria-selected="false" aria-controls="view-stories">
+  <button type="button" class="tab-btn" id="tab-stories" role="tab" aria-selected="false" aria-controls="view-stories">
     <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     <span class="tab-label">Stories</span>
   </button>
-  <button class="tab-btn" id="btn-parent-settings" aria-label="Settings">
+  <button type="button" class="tab-btn" id="btn-parent-settings" aria-label="Settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span class="tab-label">Settings</span>
   </button>
@@ -2928,8 +2928,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div class="gs-onboarding-content">
       <h1 class="gs-onboarding-headline">Every day is a little easier when your child knows what's next.</h1>
       <p class="gs-onboarding-subhead">Guiding Steps helps your child follow routines, earn rewards, and understand social situations.</p>
-      <button class="gs-onboarding-btn" id="gs-btn-start">Get Started</button>
-      <button class="gs-onboarding-skip" id="gs-btn-skip-1">Skip</button>
+      <button type="button" class="gs-onboarding-btn" id="gs-btn-start">Get Started</button>
+      <button type="button" class="gs-onboarding-skip" id="gs-btn-skip-1">Skip</button>
     </div>
     <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
@@ -2939,8 +2939,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <p class="gs-onboarding-body">We'll use their name to make stories and schedules feel personal.</p>
       <label for="gs-onboarding-child-name" style="display:block;font-size:0.9rem;color:#666;margin-bottom:6px;text-align:left;">Child's name</label>
       <input type="text" id="gs-onboarding-child-name" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:14px;border:2px solid #ddd;border-radius:12px;font-size:1.1rem;font-family:inherit;box-sizing:border-box;margin-bottom:16px;">
-      <button class="gs-onboarding-btn" id="gs-btn-name-next">Next</button>
-      <button class="gs-onboarding-skip" id="gs-btn-name-skip">Skip for now</button>
+      <button type="button" class="gs-onboarding-btn" id="gs-btn-name-next">Next</button>
+      <button type="button" class="gs-onboarding-skip" id="gs-btn-name-skip">Skip for now</button>
     </div>
     <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
@@ -2976,7 +2976,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           </div>
         </div>
       </div>
-      <button class="gs-onboarding-btn" id="gs-btn-tour-done">Let's Go</button>
+      <button type="button" class="gs-onboarding-btn" id="gs-btn-tour-done">Let's Go</button>
     </div>
     <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
   </div>

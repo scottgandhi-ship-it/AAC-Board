@@ -3047,17 +3047,17 @@ body.sensory-high-contrast .settings-btn {
 <!-- Talk View (AAC Board) -->
 <div id="view-talk" class="view active" role="tabpanel" aria-labelledby="tab-talk">
   <div id="message-bar">
-    <button class="bar-btn" id="btn-back-nav" aria-label="Go back" style="display:none;">
+    <button type="button" class="bar-btn" id="btn-back-nav" aria-label="Go back" style="display:none;">
       <svg viewBox="0 0 24 24" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <button class="bar-btn" id="btn-export-folder" aria-label="Export this folder">
+    <button type="button" class="bar-btn" id="btn-export-folder" aria-label="Export this folder">
       <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
     </button>
     <div id="message-words"></div>
-    <button class="bar-btn" id="btn-backspace" aria-label="Backspace"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
-    <button class="bar-btn" id="btn-search" aria-label="Search words"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-    <button class="bar-btn" id="btn-speak" aria-label="Speak sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
-    <button class="bar-btn" id="btn-clear" aria-label="Clear sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button type="button" class="bar-btn" id="btn-backspace" aria-label="Backspace"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+    <button type="button" class="bar-btn" id="btn-search" aria-label="Search words"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button type="button" class="bar-btn" id="btn-speak" aria-label="Speak sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+    <button type="button" class="bar-btn" id="btn-clear" aria-label="Clear sentence"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div id="prediction-bar"></div>
   <div id="core-word-strip"></div>
@@ -3066,16 +3066,16 @@ body.sensory-high-contrast .settings-btn {
       <span class="activity-banner-icon" id="activity-banner-icon"></span>
       <span id="activity-banner-label"></span>
     </span>
-    <button id="btn-guided-mode" class="activity-banner-guide" aria-label="Start guided mode" style="display:none;">Guide</button>
-    <button class="activity-banner-close" id="btn-activity-close" aria-label="End activity">&times;</button>
+    <button type="button" id="btn-guided-mode" class="activity-banner-guide" aria-label="Start guided mode" style="display:none;">Guide</button>
+    <button type="button" class="activity-banner-close" id="btn-activity-close" aria-label="End activity">&times;</button>
   </div>
   <div id="grid-container">
     <div id="folder-label"></div>
     <div id="guided-overlay" style="display:none;" role="region" aria-label="Guided vocabulary" aria-live="polite">
       <div id="guided-nav">
-        <button id="btn-guided-prev" class="guided-nav-btn" aria-label="Previous step">&larr;</button>
+        <button type="button" id="btn-guided-prev" class="guided-nav-btn" aria-label="Previous step">&larr;</button>
         <span id="guided-step-indicator"></span>
-        <button id="btn-guided-next" class="guided-nav-btn" aria-label="Next step">&rarr;</button>
+        <button type="button" id="btn-guided-next" class="guided-nav-btn" aria-label="Next step">&rarr;</button>
       </div>
       <div id="guided-dots"></div>
       <div id="guided-step-name"></div>
@@ -3083,7 +3083,7 @@ body.sensory-high-contrast .settings-btn {
       <div id="guided-words"></div>
       <div id="guided-prompt"></div>
       <div id="guided-actions">
-        <button id="btn-guided-exit" class="guided-action-btn">Full Board</button>
+        <button type="button" id="btn-guided-exit" class="guided-action-btn">Full Board</button>
       </div>
     </div>
     <div id="grid"></div>
@@ -3106,11 +3106,11 @@ body.sensory-high-contrast .settings-btn {
       </select>
     </div>
     <div id="activity-preview-actions">
-      <button id="btn-activity-cancel">Cancel</button>
-      <button id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
-      <button id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
-      <button id="btn-activity-customize">Customize</button>
-      <button id="btn-activity-start">Start Activity</button>
+      <button type="button" id="btn-activity-cancel">Cancel</button>
+      <button type="button" id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
+      <button type="button" id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
+      <button type="button" id="btn-activity-customize">Customize</button>
+      <button type="button" id="btn-activity-start">Start Activity</button>
     </div>
   </div>
 </div>
@@ -3130,7 +3130,7 @@ body.sensory-high-contrast .settings-btn {
       <h3 style="font-size:0.95rem;font-weight:700;color:#555;margin:0 0 8px;">Routines</h3>
       <div class="activity-cards" id="routines-tab-cards"></div>
     </div>
-    <button id="btn-import-activity" class="activities-import-btn">Import Activity Template</button>
+    <button type="button" id="btn-import-activity" class="activities-import-btn">Import Activity Template</button>
   </div>
 </div>
 
@@ -3140,8 +3140,8 @@ body.sensory-high-contrast .settings-btn {
     <p style="font-size:0.9rem;color:#888;margin:0 0 4px;">Next in routine:</p>
     <p id="routine-transition-name" style="font-size:1.3rem;font-weight:700;margin:0 0 16px;"></p>
     <div style="display:flex;gap:8px;justify-content:center;">
-      <button id="btn-routine-end" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">End Routine</button>
-      <button id="btn-routine-next" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Start</button>
+      <button type="button" id="btn-routine-end" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">End Routine</button>
+      <button type="button" id="btn-routine-next" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Start</button>
     </div>
   </div>
 </div>
@@ -3165,8 +3165,8 @@ body.sensory-high-contrast .settings-btn {
       <div id="create-routine-activity-list" style="max-height:200px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;"></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button id="btn-create-routine-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
-      <button id="btn-create-routine-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Routine</button>
+      <button type="button" id="btn-create-routine-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
+      <button type="button" id="btn-create-routine-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Routine</button>
     </div>
   </div>
 </div>
@@ -3180,25 +3180,25 @@ body.sensory-high-contrast .settings-btn {
       <input type="text" id="create-activity-name" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
     </div>
     <div id="walkthrough-section" style="display:none;margin-bottom:12px;">
-      <button id="btn-walkthrough-toggle" class="walkthrough-toggle-btn">Describe this activity</button>
+      <button type="button" id="btn-walkthrough-toggle" class="walkthrough-toggle-btn">Describe this activity</button>
       <div id="walkthrough-steps" style="display:none;">
         <p style="font-size:0.8rem;color:#888;margin:8px 0 10px;">Describe what happens step by step. The app will suggest vocabulary your child needs.</p>
         <div id="walkthrough-step-inputs"></div>
-        <button id="btn-walkthrough-add-step" style="padding:6px 12px;border:1px dashed #ccc;border-radius:8px;background:transparent;font-family:inherit;font-size:0.8rem;color:#999;cursor:pointer;width:100%;margin-top:6px;">+ Add another step</button>
-        <button id="btn-walkthrough-surface" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;width:100%;">Show Suggested Words</button>
+        <button type="button" id="btn-walkthrough-add-step" style="padding:6px 12px;border:1px dashed #ccc;border-radius:8px;background:transparent;font-family:inherit;font-size:0.8rem;color:#999;cursor:pointer;width:100%;margin-top:6px;">+ Add another step</button>
+        <button type="button" id="btn-walkthrough-surface" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;width:100%;">Show Suggested Words</button>
       </div>
     </div>
     <div id="walkthrough-review" style="display:none;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <label style="font-weight:600;font-size:0.9rem;color:#555;">Suggested Vocabulary</label>
-        <button id="btn-walkthrough-add-all" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
+        <button type="button" id="btn-walkthrough-add-all" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
       </div>
       <div id="walkthrough-review-categories"></div>
     </div>
     <div id="create-activity-suggestions" style="display:none;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <label style="font-weight:600;font-size:0.9rem;color:#555;">Suggested Words</label>
-        <button id="btn-add-all-suggestions" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
+        <button type="button" id="btn-add-all-suggestions" style="padding:4px 10px;border:1px solid var(--bar-bg);border-radius:6px;background:#fff;color:var(--bar-bg);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Add All</button>
       </div>
       <div id="create-activity-suggestion-chips" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
@@ -3217,8 +3217,8 @@ body.sensory-high-contrast .settings-btn {
       <div id="create-activity-word-list" style="max-height:200px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;"></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button id="btn-create-activity-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
-      <button id="btn-create-activity-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Activity</button>
+      <button type="button" id="btn-create-activity-cancel" style="padding:10px 20px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-size:0.9rem;cursor:pointer;">Cancel</button>
+      <button type="button" id="btn-create-activity-save" style="padding:10px 20px;border:none;border-radius:8px;background:var(--bar-bg);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Activity</button>
     </div>
   </div>
 </div>
@@ -3231,7 +3231,7 @@ body.sensory-high-contrast .settings-btn {
 <div id="view-insights" role="dialog" aria-label="Insights">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
     <h2 style="margin:0;font-size:1.3rem;font-weight:800;color:#333;">Insights</h2>
-    <button id="btn-close-insights" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;color:#888;">&#x2715;</button>
+    <button type="button" id="btn-close-insights" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;color:#888;">&#x2715;</button>
   </div>
   <div id="insights-content">
     <div class="insights-cards" id="insights-cards"></div>
@@ -3248,23 +3248,23 @@ body.sensory-high-contrast .settings-btn {
       <div id="insights-activity-list"></div>
     </div>
     <div class="insights-actions">
-      <button id="btn-export-csv">Export CSV</button>
-      <button id="btn-clear-usage" class="danger">Clear Data</button>
+      <button type="button" id="btn-export-csv">Export CSV</button>
+      <button type="button" id="btn-clear-usage" class="danger">Clear Data</button>
     </div>
   </div>
 </div>
 
 <!-- Tab Bar -->
 <nav id="tab-bar" role="tablist" aria-label="App navigation">
-  <button class="tab-btn active" id="tab-talk" role="tab" aria-selected="true" aria-controls="view-talk">
+  <button type="button" class="tab-btn active" id="tab-talk" role="tab" aria-selected="true" aria-controls="view-talk">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="tab-label">Talk</span>
   </button>
-  <button class="tab-btn" id="tab-activities" role="tab" aria-selected="false" aria-controls="view-activities">
+  <button type="button" class="tab-btn" id="tab-activities" role="tab" aria-selected="false" aria-controls="view-activities">
     <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
     <span class="tab-label">Activities</span>
   </button>
-  <button class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
+  <button type="button" class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span class="tab-label">Settings</span>
   </button>
@@ -3280,7 +3280,7 @@ body.sensory-high-contrast .settings-btn {
       <h3>Child's Name</h3>
       <div style="display:flex;gap:8px;align-items:center;">
         <input type="text" id="child-name-input" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;">
-        <button class="settings-btn" id="btn-save-child-name" style="background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap;width:auto;margin-bottom:0;">Save</button>
+        <button type="button" class="settings-btn" id="btn-save-child-name" style="background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap;width:auto;margin-bottom:0;">Save</button>
       </div>
       <p id="child-name-status" style="font-size:0.8rem;color:#43A047;margin-top:4px;display:none;"></p>
     </div>
@@ -3289,19 +3289,19 @@ body.sensory-high-contrast .settings-btn {
     <div class="settings-section">
       <h3>Parent Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
-      <button class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
-      <button class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
-      <button class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
+      <button type="button" class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+      <button type="button" class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
+      <button type="button" class="settings-btn" id="btn-open-insights" style="background:#e3f2fd;color:#1565C0;margin-top:8px;">View Insights &amp; Usage Data</button>
     </div>
 
     <div class="settings-section" id="getting-started-section">
-      <button class="getting-started-toggle" aria-expanded="false" aria-controls="getting-started-items">
+      <button type="button" class="getting-started-toggle" aria-expanded="false" aria-controls="getting-started-items">
         <h3>Getting Started</h3>
         <span class="guide-chevron" aria-hidden="true">&#9654;</span>
       </button>
       <div class="getting-started-items" id="getting-started-items">
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-1-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-1-content">
           <div class="guide-title-text">
             <strong>You are their voice right now</strong>
             <span>Your child learns by watching you use the board.</span>
@@ -3313,7 +3313,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-2-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-2-content">
           <div class="guide-title-text">
             <strong>Keep it natural</strong>
             <span>Use the board during everyday moments, not as a quiz.</span>
@@ -3325,7 +3325,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-3-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-3-content">
           <div class="guide-title-text">
             <strong>Every sound, point, and gesture counts</strong>
             <span>AAC adds to how your child already communicates.</span>
@@ -3337,7 +3337,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-4-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-4-content">
           <div class="guide-title-text">
             <strong>Stay one word ahead</strong>
             <span>Match your child's level, then add just one word.</span>
@@ -3349,7 +3349,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-5-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-5-content">
           <div class="guide-title-text">
             <strong>The small words matter most</strong>
             <span>Words like "more," "want," "stop," and "help" are the foundation.</span>
@@ -3361,7 +3361,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-6-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-6-content">
           <div class="guide-title-text">
             <strong>Give them time</strong>
             <span>After you model, wait. Count to 10 in your head.</span>
@@ -3373,7 +3373,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-7-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-7-content">
           <div class="guide-title-text">
             <strong>Use it everywhere</strong>
             <span>The board works at the table, in the car, at the park, and at bedtime.</span>
@@ -3385,7 +3385,7 @@ body.sensory-high-contrast .settings-btn {
         </div>
       </div>
       <div class="guide-item">
-        <button class="guide-title" aria-expanded="false" aria-controls="guide-8-content">
+        <button type="button" class="guide-title" aria-expanded="false" aria-controls="guide-8-content">
           <div class="guide-title-text">
             <strong>This takes time, and you're doing great</strong>
             <span>Most children need weeks or months before using the board on their own.</span>
@@ -3401,10 +3401,10 @@ body.sensory-high-contrast .settings-btn {
 
     <!-- Category Navigation -->
     <div class="settings-nav" role="tablist" aria-label="Settings categories">
-      <button class="settings-category-btn active" data-category="communication" role="tab" aria-selected="true">Communication</button>
-      <button class="settings-category-btn" data-category="accessibility" role="tab" aria-selected="false">Accessibility</button>
-      <button class="settings-category-btn" data-category="customize" role="tab" aria-selected="false">Customize</button>
-      <button class="settings-category-btn" data-category="data" role="tab" aria-selected="false">Data &amp; Privacy</button>
+      <button type="button" class="settings-category-btn active" data-category="communication" role="tab" aria-selected="true">Communication</button>
+      <button type="button" class="settings-category-btn" data-category="accessibility" role="tab" aria-selected="false">Accessibility</button>
+      <button type="button" class="settings-category-btn" data-category="customize" role="tab" aria-selected="false">Customize</button>
+      <button type="button" class="settings-category-btn" data-category="data" role="tab" aria-selected="false">Data &amp; Privacy</button>
     </div>
 
     <!-- Category: Communication -->
@@ -3431,9 +3431,9 @@ body.sensory-high-contrast .settings-btn {
         </button>
         <div id="language-details" class="accordion-details">
           <div id="language-buttons" style="display:flex;gap:8px;margin-top:8px;">
-            <button class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
-            <button class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
-            <button class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
+            <button type="button" class="settings-btn lang-opt" data-lang="en" style="flex:1;">English</button>
+            <button type="button" class="settings-btn lang-opt" data-lang="es" style="flex:1;">Espa&ntilde;ol</button>
+            <button type="button" class="settings-btn lang-opt" data-lang="both" style="flex:1;">Both</button>
           </div>
         </div>
       </div>
@@ -3456,7 +3456,7 @@ body.sensory-high-contrast .settings-btn {
             <input type="range" id="voice-pitch-slider" min="0.5" max="2.0" step="0.2" value="1.0">
             <span class="voice-slider-value" id="voice-pitch-display">normal</span>
           </div>
-          <button class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
+          <button type="button" class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
         </div>
       </div>
       <div class="settings-section">
@@ -3483,7 +3483,7 @@ body.sensory-high-contrast .settings-btn {
           <input type="checkbox" id="setting-auto-speak" class="settings-checkbox" checked> Auto-speak sentences
         </label>
         <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
-        <button class="settings-btn danger" id="btn-reset-predictions">Reset learned predictions</button>
+        <button type="button" class="settings-btn danger" id="btn-reset-predictions">Reset learned predictions</button>
         <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
       </div>
     </div>
@@ -3527,8 +3527,8 @@ body.sensory-high-contrast .settings-btn {
       </div>
       <div class="settings-section">
         <h3>Buttons</h3>
-        <button class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
-        <button class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
+        <button type="button" class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
+        <button type="button" class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
         <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
       </div>
@@ -3542,21 +3542,21 @@ body.sensory-high-contrast .settings-btn {
     <div class="settings-category-content" id="settings-cat-data">
       <div class="settings-section" id="settings-install-section" style="display:none;">
         <h3>App</h3>
-        <button class="settings-btn" id="btn-settings-install" style="background:#e8f5e9;color:#2E7D32;">Install App on Device</button>
+        <button type="button" class="settings-btn" id="btn-settings-install" style="background:#e8f5e9;color:#2E7D32;">Install App on Device</button>
         <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="settings-install-hint">Add to your home screen for full-screen access and offline use.</p>
       </div>
       <div class="settings-section">
         <h3>Data</h3>
-        <button class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
-        <button class="settings-btn parent-mode-only" id="btn-export-folders" style="background:#e8f5e9;color:#2E7D32;">Export Folders</button>
-        <button class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
+        <button type="button" class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
+        <button type="button" class="settings-btn parent-mode-only" id="btn-export-folders" style="background:#e8f5e9;color:#2E7D32;">Export Folders</button>
+        <button type="button" class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
         <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
-        <button class="settings-btn parent-mode-only" id="btn-clear-symbol-cache" style="background:#fff3e0;color:#E65100;">Clear Symbol Cache</button>
-        <button class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
+        <button type="button" class="settings-btn parent-mode-only" id="btn-clear-symbol-cache" style="background:#fff3e0;color:#E65100;">Clear Symbol Cache</button>
+        <button type="button" class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
       </div>
     </div>
 
-    <button id="btn-close-settings">Done</button>
+    <button type="button" id="btn-close-settings">Done</button>
   </div>
 </div>
 
@@ -3572,8 +3572,8 @@ body.sensory-high-contrast .settings-btn {
     Add to your home screen for full-screen, quick access, and offline use.
   </div>
   <div class="pwa-install-banner-buttons" id="pwa-install-buttons">
-    <button class="pwa-install-btn-dismiss" id="pwa-install-dismiss">Not now</button>
-    <button class="pwa-install-btn-primary" id="pwa-install-accept">Add to Home Screen</button>
+    <button type="button" class="pwa-install-btn-dismiss" id="pwa-install-dismiss">Not now</button>
+    <button type="button" class="pwa-install-btn-primary" id="pwa-install-accept">Add to Home Screen</button>
   </div>
 </div>
 
@@ -3593,16 +3593,16 @@ body.sensory-high-contrast .settings-btn {
     <label>Image</label>
     <img id="edit-image-preview" alt="preview">
     <div id="edit-image-btns">
-      <button id="btn-edit-upload">Upload Image</button>
-      <button id="btn-edit-camera">Take Photo</button>
-      <button id="btn-edit-clear-img">Remove Image</button>
+      <button type="button" id="btn-edit-upload">Upload Image</button>
+      <button type="button" id="btn-edit-camera">Take Photo</button>
+      <button type="button" id="btn-edit-clear-img">Remove Image</button>
     </div>
     <input type="file" id="edit-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
     <input type="file" id="edit-camera-input" accept="image/*" capture="environment" style="display:none">
     <div class="edit-btn-row">
-      <button id="btn-edit-cancel">Cancel</button>
-      <button id="btn-edit-remove">Delete</button>
-      <button id="btn-edit-save">Save</button>
+      <button type="button" id="btn-edit-cancel">Cancel</button>
+      <button type="button" id="btn-edit-remove">Delete</button>
+      <button type="button" id="btn-edit-save">Save</button>
     </div>
   </div>
 </div>
@@ -3620,8 +3620,8 @@ body.sensory-high-contrast .settings-btn {
       <option value="youtube">YouTube</option>
     </select>
     <div class="edit-btn-row">
-      <button id="btn-add-show-cancel">Cancel</button>
-      <button id="btn-add-show-save">Save</button>
+      <button type="button" id="btn-add-show-cancel">Cancel</button>
+      <button type="button" id="btn-add-show-save">Save</button>
     </div>
   </div>
 </div>
@@ -3630,13 +3630,13 @@ body.sensory-high-contrast .settings-btn {
 <div id="reorder-overlay">
   <div id="reorder-panel">
     <div class="reorder-header">
-      <button id="btn-reorder-cancel" class="reorder-header-btn">Cancel</button>
+      <button type="button" id="btn-reorder-cancel" class="reorder-header-btn">Cancel</button>
       <h2>Reorder Folders</h2>
-      <button id="btn-reorder-done" class="reorder-header-btn reorder-done-btn">Done</button>
+      <button type="button" id="btn-reorder-done" class="reorder-header-btn reorder-done-btn">Done</button>
     </div>
     <p class="reorder-hint">Drag folders to change their order on the home screen</p>
     <div id="reorder-list"></div>
-    <button id="btn-reorder-reset" class="reorder-reset-btn">Reset to Default</button>
+    <button type="button" id="btn-reorder-reset" class="reorder-reset-btn">Reset to Default</button>
   </div>
 </div>
 
@@ -3645,7 +3645,7 @@ body.sensory-high-contrast .settings-btn {
   <div id="search-panel">
     <div id="search-header">
       <input type="text" id="search-input" placeholder="Search words..." autocomplete="off">
-      <button id="btn-close-search">Close</button>
+      <button type="button" id="btn-close-search">Close</button>
     </div>
     <div id="search-results"></div>
   </div>
@@ -3660,7 +3660,7 @@ body.sensory-high-contrast .settings-btn {
       <h1 class="onboarding-headline">Your child has something to say.</h1>
       <p class="onboarding-subhead">Let's give them a voice.</p>
       <p class="onboarding-body">AAC works alongside gestures, sounds, and expressions &mdash; it adds to how your child already communicates.</p>
-      <button class="onboarding-btn" id="btn-onboarding-start">Get Started</button>
+      <button type="button" class="onboarding-btn" id="btn-onboarding-start">Get Started</button>
     </div>
     <div class="onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
@@ -3670,8 +3670,8 @@ body.sensory-high-contrast .settings-btn {
       <p class="onboarding-body">We'll use their name to make the experience feel personal.</p>
       <label for="onboarding-child-name" style="display:block;font-size:0.9rem;color:#666;margin-bottom:6px;text-align:left;">Child's name</label>
       <input type="text" id="onboarding-child-name" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:14px;border:2px solid #ddd;border-radius:12px;font-size:1.1rem;font-family:inherit;box-sizing:border-box;margin-bottom:16px;">
-      <button class="onboarding-btn" id="btn-onboarding-name-next">Next</button>
-      <button class="onboarding-skip" id="btn-onboarding-name-skip">Skip for now</button>
+      <button type="button" class="onboarding-btn" id="btn-onboarding-name-next">Next</button>
+      <button type="button" class="onboarding-skip" id="btn-onboarding-name-skip">Skip for now</button>
     </div>
     <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
@@ -3714,8 +3714,8 @@ body.sensory-high-contrast .settings-btn {
     </div>
     <div class="word-picker-body" id="word-picker-body"></div>
     <div class="word-picker-footer">
-      <button class="word-picker-cancel" id="word-picker-cancel">Cancel</button>
-      <button class="word-picker-confirm" id="word-picker-confirm">Confirm</button>
+      <button type="button" class="word-picker-cancel" id="word-picker-cancel">Cancel</button>
+      <button type="button" class="word-picker-confirm" id="word-picker-confirm">Confirm</button>
     </div>
   </div>
 </div>
@@ -3725,8 +3725,8 @@ body.sensory-high-contrast .settings-btn {
   <p>Pick the grid size that matches your child's communication level. You can change this later in Settings.</p>
   <p class="onboarding-reassure" style="display:none;">You can change this anytime.</p>
   <div id="grid-picker-lang" style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
-    <button class="settings-btn picker-lang-opt active" data-lang="en" style="flex:0 1 120px;padding:10px;">English</button>
-    <button class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
+    <button type="button" class="settings-btn picker-lang-opt active" data-lang="en" style="flex:0 1 120px;padding:10px;">English</button>
+    <button type="button" class="settings-btn picker-lang-opt" data-lang="es" style="flex:0 1 120px;padding:10px;">Espa&ntilde;ol</button>
   </div>
   <label for="grid-picker-select" class="visually-hidden">Grid size</label>
   <select id="grid-picker-select" class="grid-size-select" aria-label="Choose grid size">
@@ -3738,7 +3738,7 @@ body.sensory-high-contrast .settings-btn {
     <option value="5">Big Talker (5x5)</option>
     <option value="6">Chatterbox (6x6)</option>
   </select>
-  <button class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
+  <button type="button" class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
   <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
 </div>
 
@@ -9796,7 +9796,7 @@ function renderActivitiesTab() {
       badgeHtml += '<span style="position:absolute;top:4px;left:4px;font-size:0.6rem;background:#E3F2FD;color:#1565C0;padding:1px 4px;border-radius:4px;">Starter</span>';
     }
 
-    const exportBtn = `<button class="activity-card-export" title="Export activity" aria-label="Export ${activity.name}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+    const exportBtn = `<button type="button" class="activity-card-export" title="Export activity" aria-label="Export ${activity.name}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
 
     card.innerHTML = `${exportBtn}<span class="activity-card-icon">${activity.icon}</span><span class="activity-card-label">${label}</span>${badgeHtml}`;
 
@@ -11272,8 +11272,8 @@ function showExportModal() {
       <div class="export-progress-bar" id="export-progress-bar" style="width:0%"></div>
     </div>
     <div id="export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>
-    <button class="settings-btn" id="btn-do-export" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Export</button>
-    <button class="settings-btn" id="btn-cancel-export">Cancel</button>
+    <button type="button" class="settings-btn" id="btn-do-export" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Export</button>
+    <button type="button" class="settings-btn" id="btn-cancel-export">Cancel</button>
   `;
   showExportImportPanel(html);
 
@@ -11473,16 +11473,16 @@ async function showFolderSelectModal() {
   const html = '<h2>Export Folders</h2>'
     + '<p style="font-size:0.85rem;color:#888;margin:0 0 8px;">Tap folders to select, then export with all custom images.</p>'
     + '<div class="folder-select-actions">'
-    + '<button id="btn-folder-select-all">Select All</button>'
-    + '<button id="btn-folder-select-none">Clear</button>'
+    + '<button type="button" id="btn-folder-select-all">Select All</button>'
+    + '<button type="button" id="btn-folder-select-none">Clear</button>'
     + '</div>'
     + '<div class="folder-select-grid">' + cardsHtml + '</div>'
     + '<div class="export-progress" id="folder-export-progress" style="display:none;">'
     + '<div class="export-progress-bar" id="folder-export-progress-bar" style="width:0%"></div>'
     + '</div>'
     + '<div id="folder-export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>'
-    + '<button class="settings-btn" id="btn-do-folder-export" style="background:#ccc;color:#fff;font-weight:700;margin-top:12px;" disabled>Select folders to export</button>'
-    + '<button class="settings-btn" id="btn-cancel-folder-export">Cancel</button>';
+    + '<button type="button" class="settings-btn" id="btn-do-folder-export" style="background:#ccc;color:#fff;font-weight:700;margin-top:12px;" disabled>Select folders to export</button>'
+    + '<button type="button" class="settings-btn" id="btn-cancel-folder-export">Cancel</button>';
 
   showExportImportPanel(html);
 
@@ -11680,13 +11680,13 @@ async function showImportPreview(data) {
   if (hasExistingData) {
     html += `
       <p style="color:#e53935;font-size:0.9rem;font-weight:600;margin-bottom:12px;">This will replace your current board.</p>
-      <button class="settings-btn" id="btn-backup-first" style="background:#fff3e0;color:#E65100;">Back Up First</button>
-      <button class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Replace My Board</button>
-      <button class="settings-btn" id="btn-cancel-import">Cancel</button>`;
+      <button type="button" class="settings-btn" id="btn-backup-first" style="background:#fff3e0;color:#E65100;">Back Up First</button>
+      <button type="button" class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Replace My Board</button>
+      <button type="button" class="settings-btn" id="btn-cancel-import">Cancel</button>`;
   } else {
     html += `
-      <button class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Use This Board</button>
-      <button class="settings-btn" id="btn-cancel-import">Cancel</button>`;
+      <button type="button" class="settings-btn" id="btn-do-import" style="background:#4CAF50;color:#fff;font-weight:700;">Use This Board</button>
+      <button type="button" class="settings-btn" id="btn-cancel-import">Cancel</button>`;
   }
 
   showExportImportPanel(html);
@@ -11838,8 +11838,8 @@ async function showFolderImportPreview(data) {
     + '<div class="import-preview-row"><span class="import-preview-label">Exported</span><span class="import-preview-value">' + dateDisplay + '</span></div>'
     + '</div>'
     + itemsHtml
-    + '<button class="settings-btn" id="btn-do-folder-import" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Add to My Board</button>'
-    + '<button class="settings-btn" id="btn-cancel-folder-import">Cancel</button>';
+    + '<button type="button" class="settings-btn" id="btn-do-folder-import" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Add to My Board</button>'
+    + '<button type="button" class="settings-btn" id="btn-cancel-folder-import">Cancel</button>';
 
   showExportImportPanel(html);
 
@@ -12082,7 +12082,7 @@ if (screen.orientation) {
       ' at the bottom of Safari, then tap <strong style="display:inline;">"Add to Home Screen."</strong>';
 
     buttonsEl.innerHTML =
-      '<button class="pwa-install-btn-dismiss" id="pwa-install-dismiss-ios">Got it</button>';
+      '<button type="button" class="pwa-install-btn-dismiss" id="pwa-install-dismiss-ios">Got it</button>';
 
     document.getElementById('pwa-install-dismiss-ios').addEventListener('click', function() {
       hideBanner();

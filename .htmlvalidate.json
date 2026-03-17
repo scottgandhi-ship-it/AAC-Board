@@ -10,7 +10,7 @@
     "wcag/h71": "off",
     "element-permitted-content": "off",
     "svg-focusable": "off",
-    "no-implicit-button-type": "off",
+    "no-implicit-button-type": "error",
     "close-order": "off",
     "empty-heading": "off",
     "unique-landmark": "off",
