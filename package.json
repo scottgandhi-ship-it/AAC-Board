@@ -6,9 +6,9 @@
   "scripts": {
     "sync": "mkdir -p www && cp index.html manifest.json www/ && npx cap sync",
     "sync:check": "bash .scripts/check-www-sync.sh",
-    "deploy:aacboard": "bundle exec fastlane aacboard",
-    "deploy:guidingsteps": "bundle exec fastlane guidingsteps",
-    "deploy:all": "bundle exec fastlane both",
+    "deploy:aacboard": "export PATH=/opt/homebrew/opt/ruby/bin:$HOME/.local/share/gem/ruby/4.0.0/bin:$PATH && bundle exec fastlane aacboard",
+    "deploy:guidingsteps": "export PATH=/opt/homebrew/opt/ruby/bin:$HOME/.local/share/gem/ruby/4.0.0/bin:$PATH && bundle exec fastlane guidingsteps",
+    "deploy:all": "export PATH=/opt/homebrew/opt/ruby/bin:$HOME/.local/share/gem/ruby/4.0.0/bin:$PATH && bundle exec fastlane both",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
