@@ -1,22 +1,49 @@
 #!/usr/bin/env bash
-# Warns if www/index.html is out of sync with root index.html
+# Checks that www/ and ios/App/App/public/ stay in sync with root files
+# Covers both AAC-Board (repo root) and guiding-steps/ sub-app
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-if [ ! -f "www/index.html" ]; then
-  echo "OK: www/index.html does not exist, skipping sync check."
-  exit 0
-fi
+ERRORS=0
 
-if diff -q "index.html" "www/index.html" > /dev/null 2>&1; then
-  echo "OK: www/index.html is in sync with index.html."
-  exit 0
-else
-  echo "WARNING: www/index.html is out of sync with index.html!"
-  echo ""
-  echo "Differences:"
-  diff --brief "index.html" "www/index.html" || true
-  echo ""
-  echo "Run 'npm run sync' or copy index.html to www/index.html to fix."
+check_sync() {
+  local source="$1"
+  local target="$2"
+  local label="$3"
+
+  if [ ! -f "$target" ]; then
+    echo "SKIP: $target does not exist."
+    return
+  fi
+
+  if diff -q "$source" "$target" > /dev/null 2>&1; then
+    echo "OK: $label in sync."
+  else
+    echo "OUT OF SYNC: $label"
+    echo "  source: $source"
+    echo "  target: $target"
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
+echo "=== AAC-Board sync check ==="
+check_sync "index.html" "www/index.html" "www/index.html vs root"
+check_sync "manifest.json" "www/manifest.json" "www/manifest.json vs root"
+check_sync "index.html" "ios/App/App/public/index.html" "ios public/index.html vs root"
+check_sync "manifest.json" "ios/App/App/public/manifest.json" "ios public/manifest.json vs root"
+
+echo ""
+echo "=== Guiding Steps sync check ==="
+check_sync "guiding-steps/index.html" "guiding-steps/www/index.html" "guiding-steps www/index.html vs root"
+check_sync "guiding-steps/manifest.json" "guiding-steps/www/manifest.json" "guiding-steps www/manifest.json vs root"
+check_sync "guiding-steps/index.html" "guiding-steps/ios/App/App/public/index.html" "guiding-steps ios public/index.html vs root"
+check_sync "guiding-steps/manifest.json" "guiding-steps/ios/App/App/public/manifest.json" "guiding-steps ios public/manifest.json vs root"
+
+echo ""
+if [ "$ERRORS" -gt 0 ]; then
+  echo "FAIL: $ERRORS file(s) out of sync. Run '.scripts/sync-all.sh' to fix."
   exit 1
+else
+  echo "ALL CHECKS PASSED."
+  exit 0
 fi

@@ -25,3 +25,10 @@ jobs:
 
       - name: HTML validation
         run: npx html-validate index.html
+
+      - name: Verify www/ sync
+        run: |
+          mkdir -p www && cp index.html manifest.json www/
+          diff -q index.html www/index.html
+          diff -q manifest.json www/manifest.json
+          echo "www/ sync check passed"
