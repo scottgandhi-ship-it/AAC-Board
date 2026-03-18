@@ -1582,6 +1582,15 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
 }
 .activity-card-icon { font-size: 1.6rem; }
 .activity-card-label { text-align: center; line-height: 1.2; }
+.activity-cards:empty::after {
+  content: 'No activities yet. Create one to get started!';
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--chrome-text-muted);
+  padding: 24px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 .activity-card-badge {
   font-size: 0.65rem;
   font-weight: 700;
@@ -2476,7 +2485,15 @@ html.lang-es #search-results:empty::after {
 
 /* ── App Header ── */
 #app-header {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 36px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
 }
 
 #app-header.parent-active {
@@ -3095,7 +3112,7 @@ body.sensory-high-contrast .settings-btn {
 
 <!-- App Header -->
 <div id="app-header">
-  <span id="app-header-title">Talk</span>
+  <span id="app-header-title">AAC Board</span>
 </div>
 
 <!-- Talk View (AAC Board) -->
