@@ -6103,6 +6103,12 @@ function openStoryEditor(story) {
   document.getElementById('editor-title').textContent = editingStory.title ? 'Edit Story' : 'New Story';
 
   document.getElementById('story-editor').classList.add('open');
+  updateEditorSaveState();
+}
+
+function updateEditorSaveState() {
+  const onPages = document.getElementById('editor-step-pages').style.display !== 'none';
+  document.getElementById('editor-save').disabled = !onPages;
 }
 
 function updateSetupNextState() {
@@ -6137,6 +6143,7 @@ document.getElementById('editor-back').addEventListener('click', () => {
     document.getElementById('editor-step-helper').style.display = 'none';
     document.getElementById('editor-step-describe').style.display = 'none';
   }
+  updateEditorSaveState();
 });
 
 document.getElementById('editor-person-mode').addEventListener('click', (e) => {
@@ -6180,6 +6187,7 @@ document.getElementById('editor-setup-next').addEventListener('click', () => {
     document.getElementById('editor-step-pages').style.display = '';
     editingPageIdx = 0;
     renderEditorPage();
+    updateEditorSaveState();
   } else {
     openDescribeSteps();
   }
@@ -6204,6 +6212,7 @@ function openDescribeSteps(prefillSteps) {
   document.getElementById('editor-step-pages').style.display = 'none';
   document.getElementById('editor-step-helper').style.display = 'none';
   document.getElementById('editor-step-describe').style.display = '';
+  updateEditorSaveState();
   document.getElementById('editor-title').textContent = 'Describe Steps';
 
   var list = document.getElementById('describe-step-list');
@@ -6350,6 +6359,7 @@ document.getElementById('btn-describe-generate').addEventListener('click', funct
   document.getElementById('editor-title').textContent = 'Edit Story';
   editingPageIdx = 0;
   renderEditorPage();
+  updateEditorSaveState();
   showToast('Story created -- review and edit your pages');
 });
 
@@ -6653,6 +6663,7 @@ function openStoryHelper() {
   document.getElementById('editor-step-setup').style.display = 'none';
   document.getElementById('editor-step-pages').style.display = 'none';
   document.getElementById('editor-step-helper').style.display = '';
+  updateEditorSaveState();
   document.getElementById('helper-situation').value = '';
   document.getElementById('helper-scene').value = '';
   document.getElementById('helper-others-feelings').value = '';
@@ -6897,6 +6908,7 @@ function generateStoryFromHelper() {
   document.getElementById('editor-title').textContent = 'Edit Story';
   editingPageIdx = 0;
   renderEditorPage();
+  updateEditorSaveState();
   showToast('Story created -- review and edit your pages');
 }
 

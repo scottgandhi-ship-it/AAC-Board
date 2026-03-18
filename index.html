@@ -2579,14 +2579,14 @@ html.lang-es #search-results:empty::after {
 #tab-bar {
   display: flex;
   position: fixed;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+  bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
   background: var(--chrome-surface);
   border-top: 1px solid rgba(0,0,0,0.08);
-  padding: 4px 12px 2px;
-  padding-bottom: calc(2px + env(safe-area-inset-bottom, 0px));
+  padding: 4px 12px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   gap: 4px;
   box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
 }
