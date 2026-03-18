@@ -137,15 +137,22 @@ body {
   flex-wrap: wrap;
   gap: 6px;
   min-height: 40px;
+  align-items: center;
   padding: 6px 10px;
   background: #f3f2ff;
   border-radius: var(--radius-md);
-  align-items: center;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--chrome-text);
   overflow-y: auto;
   max-height: 80px;
+}
+#message-words:empty::after {
+  content: 'Tap words to build a sentence';
+  color: var(--chrome-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.5;
 }
 
 #message-words .word-chip {
@@ -280,7 +287,7 @@ body {
 .cell .cell-label {
   font-size: clamp(0.7rem, 2.5vw, 1rem);
   font-weight: 800;
-  color: rgba(0,0,0,0.7);
+  color: rgba(0,0,0,0.8);
   text-align: center;
   line-height: 1.15;
   word-break: break-word;
@@ -1516,8 +1523,8 @@ body.sensory-reduced-motion #image-preview-overlay {
   background: rgba(255,255,255,0.2);
   border: none;
   color: #fff;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   font-size: 1.1rem;
   cursor: pointer;
@@ -2623,7 +2630,7 @@ html.lang-es #search-results:empty::after {
   line-height: 1;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
 }
 
 /* ── Placeholder Views ── */
@@ -3136,7 +3143,6 @@ body.sensory-high-contrast .settings-btn {
     <div id="grid"></div>
     </div>
   </div>
-</div>
 
 <!-- Activity Preview Overlay -->
 <div id="activity-preview-overlay">
@@ -3579,10 +3585,6 @@ body.sensory-high-contrast .settings-btn {
         <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
         <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
       </div>
-      <div class="settings-section">
-        <h3>Symbols</h3>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Downloads AAC pictogram symbols for all buttons. Requires internet.</p>
-      </div>
     </div>
 
     <!-- Category: Data & Privacy -->
@@ -3598,7 +3600,6 @@ body.sensory-high-contrast .settings-btn {
         <button type="button" class="settings-btn parent-mode-only" id="btn-export-folders" style="background:#e8f5e9;color:#2E7D32;">Export Folders</button>
         <button type="button" class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
         <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
-        <button type="button" class="settings-btn parent-mode-only" id="btn-clear-symbol-cache" style="background:#fff3e0;color:#E65100;">Clear Symbol Cache</button>
         <button type="button" class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
       </div>
     </div>
@@ -5141,7 +5142,7 @@ let messageWords = [];
 let messageButtonIds = [];
 let lastTapId = null;
 let lastTapTime = 0;
-let speechRate = 0.85;
+let speechRate = parseFloat(localStorage.getItem('aac-speed')) || 0.85;
 let speechPitch = parseFloat(localStorage.getItem('aac-pitch')) || 1.0;
 let activeTab = 'talk';
 
@@ -6148,7 +6149,8 @@ function allocateActivityPositions(words, activityId, gridCols) {
 let activeActivity = null; // null when no activity is active
 let _activitySlotOverrides = null;
 let vocabLevel = localStorage.getItem('aac-vocab-level') || 'expanded';
-let activityLevelOverrides = JSON.parse(localStorage.getItem('aac-activity-level-overrides') || '{}');
+let activityLevelOverrides;
+try { activityLevelOverrides = JSON.parse(localStorage.getItem('aac-activity-level-overrides') || '{}'); } catch { activityLevelOverrides = {}; }
 
 function saveActivityLevelOverrides() {
   localStorage.setItem('aac-activity-level-overrides', JSON.stringify(activityLevelOverrides));
@@ -6612,7 +6614,7 @@ const ACTIVITY_BUNDLES = [
 
 // ── Parent Mode ──
 let parentAutoLockTimer = null;
-const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
+const PARENT_AUTO_LOCK_MS = 30 * 60 * 1000;
 const DB_NAME = 'aac-board';
 const DB_VERSION = 3;
 const STORE_BUTTONS = 'buttons';
@@ -7227,7 +7229,7 @@ async function init() {
       }
     });
 
-    if (migrated) saveButtons();
+    if (migrated) await saveButtons();
     setGridSize(gridSize);
     updateChildNamePhrase();
     rebuildCoreWordsCache();
@@ -7445,7 +7447,8 @@ function getVoice() {
     if (match) return match;
   }
   const langVoices = getActiveVoices();
-  return pickDefaultVoice(langVoices) || langVoices[0] || voices[0] || null;
+  const activeLang = currentLang === 'en' ? 'en' : 'es';
+  return pickDefaultVoice(langVoices) || langVoices[0] || voices.find(v => v.lang.startsWith(activeLang)) || voices[0] || null;
 }
 
 // ── Grammar Engine ──
@@ -7661,6 +7664,7 @@ function speak(text) {
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
   utter.pitch = speechPitch;
+  utter.onerror = () => { speechSynthesis.cancel(); };
   speechSynthesis.speak(utter);
 }
 
@@ -8291,7 +8295,8 @@ function clearUsageData() {
 }
 
 // ── Activity Session Tracking ──
-let activitySessions = JSON.parse(localStorage.getItem('aac-activity-sessions') || '[]');
+let activitySessions;
+try { activitySessions = JSON.parse(localStorage.getItem('aac-activity-sessions') || '[]'); } catch { activitySessions = []; }
 
 function startActivitySession(activityId) {
   activitySessions.push({ activityId, startedAt: Date.now(), endedAt: null });
@@ -9402,6 +9407,7 @@ const speedSlider = document.getElementById('voice-speed-slider');
 speedSlider.value = speechRate;
 speedSlider.addEventListener('input', () => {
   speechRate = parseFloat(speedSlider.value);
+  localStorage.setItem('aac-speed', speechRate);
   updateSpeedDisplay();
 });
 speedSlider.addEventListener('change', () => {
@@ -9549,16 +9555,6 @@ document.getElementById('btn-clear-usage').addEventListener('click', () => {
   clearUsageData();
   renderInsights();
   showToast(t('toast.usageCleared', 'Usage data cleared'));
-});
-
-document.getElementById('btn-clear-symbol-cache').addEventListener('click', async () => {
-  const count = await getImageCacheCount();
-  if (!confirm(t('confirm.clearSymbolCache', `Clear ${count} cached symbols? They will re-download when online.`))) return;
-  await clearImageCache();
-  localStorage.removeItem('aac-symbols-cached');
-  revokeActiveBlobUrls();
-  renderGrid();
-  showToast(t('toast.symbolCacheCleared', `Cleared ${count} cached symbols`));
 });
 
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
