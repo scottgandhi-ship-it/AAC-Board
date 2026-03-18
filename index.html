@@ -255,6 +255,9 @@ body {
               box-shadow 0.12s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   border-bottom: 3px solid rgba(0,0,0,0.1);
+}
+
+.cell.animate-in {
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -7751,6 +7754,7 @@ function renderGrid() {
 
       if (w) {
         const c = createCell({ ...w, folderId: null, type: 'fringe', position: i });
+        c.classList.add('animate-in');
         c.style.animationDelay = `${i * 25}ms`;
         c.setAttribute('data-slot', String(i));
         grid.appendChild(c);
@@ -7846,6 +7850,7 @@ function renderGrid() {
       }
       cell.appendChild(label);
 
+      cell.classList.add('animate-in');
       cell.style.animationDelay = `${i * 25}ms`;
       cell.addEventListener('click', () => {
         const speakText = (currentLang === 'es') ? w.labelEs : w.label;
@@ -7885,7 +7890,6 @@ function renderGrid() {
 
     items.forEach((btn, i) => {
       const c = createCell(btn);
-      c.style.animationDelay = `${i * 25}ms`;
       grid.appendChild(c);
     });
 
@@ -7904,6 +7908,7 @@ function renderGrid() {
     folderLabel.style.display = 'none';
     items.forEach((btn, i) => {
       const c = createCell(btn);
+      c.classList.add('animate-in');
       c.style.animationDelay = `${i * 25}ms`;
       grid.appendChild(c);
     });
