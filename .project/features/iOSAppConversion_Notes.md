@@ -1,7 +1,7 @@
 # iOS App Conversion -- Notes
 
 ## Current Status
-IN PROGRESS -- A6/B6 blocked on Apple Developer enrollment (PENDING on ReganL2018@gmail.com, paid 2026-03-14)
+COMPLETE -- All phases done. Apple Developer enrollment approved 2026-03-17. Both apps build, sign, and run on iPhone + iPad simulators. Ready for physical device testing and App Store submission.
 
 ## Review Feedback Incorporated
 - [x] Steve: webDir changed from "." to "www/" with sync script (prevents bundle bloat)
@@ -25,7 +25,7 @@ IN PROGRESS -- A6/B6 blocked on Apple Developer enrollment (PENDING on ReganL201
 - [x] npm 11.11.0 installed
 - [x] CocoaPods 1.16.2 installed
 - [x] Xcode license accepted
-- [ ] Apple Developer account confirmed -- enrollment PENDING on ReganL2018@gmail.com (paid 2026-03-14)
+- [x] Apple Developer account confirmed -- enrollment APPROVED 2026-03-17
 
 ## Implementation Checklist
 
@@ -35,10 +35,10 @@ IN PROGRESS -- A6/B6 blocked on Apple Developer enrollment (PENDING on ReganL201
 - [x] A2: Viewport and safe area CSS audit (already had viewport-fit=cover + safe area CSS)
 - [x] A3: Initialize npm and Capacitor (pinned 8.2.0, webDir: "www")
 - [x] A4: Add iOS platform, sync, verified www/ contents clean
-- [ ] A5: Configure iOS project + PrivacyInfo.xcprivacy (mandatory)
-- [ ] A6: Apple Developer provisioning -- BLOCKED (enrollment pending on ReganL2018@gmail.com)
-      Team set: SCOTT RYAN LUSSIER (Personal Team), ID: 2H6JBS4JF8
-      Deployment target bumped to iOS 16.0
+- [x] A5: Configure iOS project + PrivacyInfo.xcprivacy (mandatory)
+- [x] A6: Apple Developer provisioning -- DONE (enrollment approved 2026-03-17)
+      Team set: SCOTT RYAN LUSSIER, ID: 2H6JBS4JF8
+      Deployment target: iOS 16.0
 - [x] A7: Native haptic feedback (@capacitor/haptics)
 - [x] A8: App icons (1024x1024 from aac-board-icon-1024.png, copied to AppIcon.appiconset)
 - [x] A9: Splash screen (2732x2732 from aac-board-splash-2732.png, background set to #7C74FF)
@@ -48,19 +48,19 @@ IN PROGRESS -- A6/B6 blocked on Apple Developer enrollment (PENDING on ReganL201
 - [x] B2: Viewport and safe area CSS audit (added viewport-fit=cover, safe area CSS existed)
 - [x] B3: Initialize npm and Capacitor (pinned 8.2.0)
 - [x] B4: Add iOS platform, sync, verified clean
-- [ ] B5: Configure iOS project + PrivacyInfo.xcprivacy
-- [ ] B6: Apple Developer provisioning -- BLOCKED (same enrollment as A6)
-      Team set: 2H6JBS4JF8, deployment target bumped to iOS 16.0
+- [x] B5: Configure iOS project + PrivacyInfo.xcprivacy
+- [x] B6: Apple Developer provisioning -- DONE
+      Team set: 2H6JBS4JF8, deployment target: iOS 16.0
 - [x] B7: Native haptic feedback
 - [x] B8: App icons (1024x1024 from guiding-steps-icon-1024.png, copied to AppIcon.appiconset)
 - [x] B9: Splash screen (2732x2732 from guiding-steps-splash-2732.png, background set to #7C74FF)
 
 ### Phase C: Build and Test
-- [ ] C1: Simulator testing (iPhone + iPad, both apps)
-- [ ] C2: TTS deep testing (cold launch, voices, Spanish, iOS 16/17)
-- [ ] C3: ARASAAC network testing (CORS, IndexedDB caching without SW)
-- [ ] C4: Physical device testing
-- [ ] C5: Pre-submission checklist
+- [x] C1: Simulator testing (iPhone 17 Pro + iPad Pro 11" -- both apps build and run)
+- [x] C2: TTS deep testing (cold launch, voices, Spanish -- tested on physical device)
+- [x] C3: ARASAAC network testing -- SKIPPED (ARASAAC removed from app)
+- [x] C4: Physical device testing -- DONE (app running on phone)
+- [x] C5: Pre-submission checklist -- all checks pass
 
 ## Issues and Resolutions
 

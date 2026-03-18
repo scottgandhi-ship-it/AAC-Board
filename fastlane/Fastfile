@@ -1,0 +1,94 @@
+default_platform(:ios)
+
+platform :ios do
+
+  desc "Build AAC Board and upload to TestFlight"
+  lane :aacboard do
+    # Sync web assets and iOS project
+    sh("cd #{ENV['PWD']} && npm run sync")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]),
+    )
+
+    # Auto-increment build number
+    current = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: "com.lussier.aacboard",
+    )
+    new_build = current + 1
+    increment_build_number(
+      build_number: new_build,
+      xcodeproj: "ios/App/App.xcodeproj",
+    )
+    UI.message("AAC Board build number: #{new_build}")
+
+    build_app(
+      project: "ios/App/App.xcodeproj",
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: "build/aacboard",
+      output_name: "AACBoard.ipa",
+      clean: true,
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+    )
+
+    UI.success("AAC Board #{new_build} uploaded to TestFlight!")
+  end
+
+  desc "Build Guiding Steps and upload to TestFlight"
+  lane :guidingsteps do
+    guiding_steps_dir = File.join(ENV["PWD"], "guiding-steps")
+
+    # Sync web assets and iOS project for Guiding Steps
+    sh("cd #{guiding_steps_dir} && npm run sync")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]),
+    )
+
+    # Auto-increment build number
+    current = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: "com.lussier.guidingsteps",
+    )
+    new_build = current + 1
+    increment_build_number(
+      build_number: new_build,
+      xcodeproj: File.join(guiding_steps_dir, "ios/App/App.xcodeproj"),
+    )
+    UI.message("Guiding Steps build number: #{new_build}")
+
+    build_app(
+      project: File.join(guiding_steps_dir, "ios/App/App.xcodeproj"),
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: "build/guidingsteps",
+      output_name: "GuidingSteps.ipa",
+      clean: true,
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: "com.lussier.guidingsteps",
+      skip_waiting_for_build_processing: true,
+    )
+
+    UI.success("Guiding Steps #{new_build} uploaded to TestFlight!")
+  end
+
+  desc "Build and upload both apps to TestFlight"
+  lane :both do
+    aacboard
+    guidingsteps
+  end
+
+end

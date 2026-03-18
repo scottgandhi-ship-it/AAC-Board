@@ -1,0 +1,6 @@
+app_identifier "com.lussier.aacboard"
+team_id "2H6JBS4JF8"
+
+for_lane :guidingsteps do
+  app_identifier "com.lussier.guidingsteps"
+end

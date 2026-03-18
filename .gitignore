@@ -13,3 +13,10 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 Pods/
 .DS_Store
+
+# Fastlane
+.keys/
+fastlane/report.xml
+fastlane/Preview.html
+build/aacboard/
+build/guidingsteps/

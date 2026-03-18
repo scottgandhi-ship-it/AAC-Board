@@ -6,6 +6,9 @@
   "scripts": {
     "sync": "mkdir -p www && cp index.html manifest.json www/ && npx cap sync",
     "sync:check": "bash .scripts/check-www-sync.sh",
+    "deploy:aacboard": "bundle exec fastlane aacboard",
+    "deploy:guidingsteps": "bundle exec fastlane guidingsteps",
+    "deploy:all": "bundle exec fastlane both",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
