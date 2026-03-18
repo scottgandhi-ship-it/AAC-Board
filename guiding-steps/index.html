@@ -98,7 +98,7 @@ body {
   border-bottom: 2px solid rgba(108,99,255,0.12);
   flex-shrink: 0; padding: 0 12px;
 }
-#app-header-title { font-size: 1rem; font-weight: 800; color: var(--bar-bg); letter-spacing: 0.03em; cursor: pointer; }
+#app-header-title { font-size: 1.15rem; font-weight: 800; color: var(--bar-bg); letter-spacing: 0.03em; cursor: pointer; }
 
 /* -- Kids Mode -- */
 .kids-mode .parent-only { display: none !important; }
@@ -109,7 +109,8 @@ body {
 
 /* -- Views -- */
 .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-.view.active { display: flex; }
+.view.active { display: flex; animation: viewFadeIn 0.15s ease; }
+@keyframes viewFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* -- Tab Bar -- */
 #tab-bar {
@@ -119,7 +120,7 @@ body {
 .tab-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; padding: 6px 0; min-height: 54px; background: none; border: none; cursor: pointer;
-  font-family: inherit; font-size: 0.7rem; font-weight: 700; color: #aaa;
+  font-family: inherit; font-size: 0.75rem; font-weight: 700; color: #888;
   position: relative; border-radius: var(--radius-md); transition: color 0.2s, background 0.2s;
 }
 .tab-btn:active { background: rgba(0,0,0,0.04); }
@@ -163,7 +164,7 @@ body {
 }
 .gs-onboarding-btn:active { transform: scale(0.98); }
 .gs-onboarding-skip {
-  display: block; width: 100%; background: none; border: none; color: #999;
+  display: block; width: 100%; background: none; border: none; color: #777;
   font-size: 0.95rem; cursor: pointer; padding: 8px; font-family: inherit;
 }
 .gs-onboarding-step { display: none; flex-direction: column; align-items: center; width: 100%; }
@@ -264,7 +265,7 @@ body {
 }
 .settings-accordion-btn:active { opacity: 0.7; }
 .accordion-chevron {
-  font-size: 0.8rem; color: #999; transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
+  font-size: 0.8rem; color: #777; transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
 }
 .settings-accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
 .accordion-details { display: none; margin-top: 8px; }
@@ -331,7 +332,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: #999;
+  color: #777;
   text-align: center;
   flex: 1;
 }
@@ -580,7 +581,7 @@ body {
 .reward-card-status {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #999;
+  color: #777;
 }
 
 .reward-card.unlocked .reward-card-status {
@@ -1316,7 +1317,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: #999;
+  color: #777;
   padding: 40px;
   text-align: center;
 }
@@ -1360,6 +1361,12 @@ body {
   width: 200px;
   padding: 14px 20px;
   font-size: 1rem;
+}
+#schedule-content.state-idle #btn-start-schedule {
+  background: linear-gradient(135deg, var(--chrome-primary), var(--chrome-primary-dark));
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(124,116,255,0.3);
 }
 
 .sched-parent-btn {
@@ -1625,7 +1632,7 @@ body {
 }
 
 .picker-item-label {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--gray-700);
   text-align: center;
@@ -1762,7 +1769,7 @@ body {
 
 .tmpl-list-empty {
   text-align: center;
-  color: #999;
+  color: #777;
   padding: 20px;
   font-size: 0.95rem;
 }
@@ -1779,47 +1786,6 @@ body {
   cursor: pointer;
   font-family: inherit;
   margin-top: 8px;
-}
-
-/* -- Celebration Overlay -- */
-#celebration-overlay {
-  display: none; position: fixed; inset: 0; z-index: 250;
-  background: linear-gradient(160deg, rgba(237,232,255,0.95) 0%, rgba(252,228,236,0.95) 40%, rgba(255,243,224,0.95) 80%, rgba(232,245,233,0.95) 100%);
-  backdrop-filter: blur(8px); flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-}
-#celebration-overlay.visible { display: flex; }
-#celebration-reward {
-  width: 130px; height: 130px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--bar-bg), var(--bar-bg-dark));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 3.5rem; color: #fff; font-weight: 800;
-  animation: celebrationPop 0.6s ease; overflow: hidden;
-  box-shadow: 0 8px 32px rgba(108,99,255,0.35);
-}
-#celebration-reward img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-#celebration-text { font-size: 2rem; font-weight: 900; color: var(--bar-bg); letter-spacing: 0.02em; }
-
-@keyframes celebrationPop {
-  0% { transform: scale(0); }
-  60% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-.confetti-piece {
-  position: fixed; width: 10px; height: 10px; border-radius: 2px;
-  z-index: 251; pointer-events: none; animation: confettiFall 2.5s ease-out forwards;
-}
-@keyframes confettiFall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .task-tile.animate-fill { animation: none; }
-  .task-tile.active { animation: none; }
-  .reward-card.unlocked { animation: none; }
-  @keyframes rewardPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(124, 77, 255, 0.3); } }
-  @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
-  .confetti-piece { animation: none; display: none; }
 }
 
 /* -- Sensory-Friendly: Reduced Motion -- */
@@ -1877,7 +1843,7 @@ body.sensory-high-contrast .task-tile {
 
 #stories-empty {
   display: none; flex: 1; flex-direction: column; align-items: center;
-  justify-content: center; gap: 16px; color: #999; padding: 40px; text-align: center;
+  justify-content: center; gap: 16px; color: #777; padding: 40px; text-align: center;
 }
 #stories-empty-new {
   padding: 20px 48px; border: none; border-radius: var(--radius-md);
@@ -2212,7 +2178,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 }
 .describe-step-body { flex: 1; }
 .describe-step-label {
-  font-size: 0.8rem; color: #999; margin-bottom: 4px; font-weight: 600;
+  font-size: 0.8rem; color: #777; margin-bottom: 4px; font-weight: 600;
 }
 .describe-step-input {
   width: 100%; padding: 12px; border: 2px solid var(--chrome-border);
@@ -2240,7 +2206,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 .describe-add-btn {
   width: 100%; padding: 10px; border: 2px dashed var(--chrome-border);
   border-radius: var(--radius-sm); background: none; font-family: inherit;
-  font-size: 0.9rem; color: #999; cursor: pointer; margin-bottom: 8px;
+  font-size: 0.9rem; color: #777; cursor: pointer; margin-bottom: 8px;
   min-height: 44px;
 }
 .describe-add-btn:hover { border-color: var(--chrome-primary); color: var(--chrome-primary); }
@@ -2280,7 +2246,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 .story-picker-section-label {
   font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: #999; margin: 16px 0 8px; padding-left: 4px;
+  letter-spacing: 0.05em; color: #777; margin: 16px 0 8px; padding-left: 4px;
 }
 .story-picker-section-label:first-child { margin-top: 0; }
 
@@ -2787,7 +2753,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 </div>
 
 <!-- Reward Config Modal -->
-<!-- Reward Config Modal -->
 <div id="reward-config-overlay">
   <div id="reward-config-panel">
     <h2 id="reward-config-title">New Reward Track</h2>
@@ -2857,7 +2822,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 </div>
 
 <!-- Template List Modal -->
-<!-- Template List Modal -->
 <div id="tmpl-list-overlay">
   <div id="tmpl-list-panel">
     <h2 id="tmpl-list-title">Choose Schedule</h2>
@@ -2866,7 +2830,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   </div>
 </div>
 
-<!-- Template Editor Modal -->
 <!-- Template Editor Modal -->
 <div id="tmpl-editor-overlay">
   <div id="tmpl-editor-panel">
@@ -2884,7 +2847,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   </div>
 </div>
 
-<!-- Activity Picker Modal -->
 <!-- Activity Picker Modal -->
 <div id="activity-picker-overlay">
   <div id="activity-picker-panel">
@@ -2910,7 +2872,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   </div>
 </div>
 
-<!-- Task Image Picker Modal -->
 <!-- Task Image Picker Modal -->
 <div id="task-image-picker-overlay">
   <div id="task-image-picker-panel">
@@ -2962,7 +2923,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <button type="button" class="gs-onboarding-btn" id="gs-btn-start">Get Started</button>
       <button type="button" class="gs-onboarding-skip" id="gs-btn-skip-1">Skip</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
   <div id="gs-onboarding-step-2" class="gs-onboarding-step">
     <div class="gs-onboarding-content">
@@ -2973,7 +2934,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <button type="button" class="gs-onboarding-btn" id="gs-btn-name-next">Next</button>
       <button type="button" class="gs-onboarding-skip" id="gs-btn-name-skip">Skip for now</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
   </div>
   <div id="gs-onboarding-step-3" class="gs-onboarding-step">
     <div class="gs-onboarding-content">
@@ -3009,7 +2970,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       </div>
       <button type="button" class="gs-onboarding-btn" id="gs-btn-tour-done">Let's Go</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
   </div>
 </div>
 
@@ -3509,10 +3470,12 @@ function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   haptic();
   speechSynthesis.cancel();
+  if (speechSynthesis.paused) speechSynthesis.resume();
   const utter = new SpeechSynthesisUtterance(text);
   const voice = getVoice();
   if (voice) utter.voice = voice;
   utter.rate = speechRate;
+  utter.onerror = () => { speechSynthesis.cancel(); };
   speechSynthesis.speak(utter);
 }
 
@@ -4904,14 +4867,14 @@ function getGridCols(count) {
   return 5;
 }
 
-function handleTileTap(track) {
+async function handleTileTap(track) {
   if (!track || track.status !== 'active') return;
   if (track._cooldown) return;
   track._cooldown = true;
-  setTimeout(() => { track._cooldown = false; }, 1500);
+  setTimeout(() => { track._cooldown = false; }, 500);
 
   track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
-  saveTrack(track);
+  await saveTrack(track);
 
   playDing();
   speak(track.currentCount + ' out of ' + track.targetCount);
@@ -5921,12 +5884,12 @@ function renderReaderPage(pages, direction) {
   againBtn.style.display = currentReaderPage === pages.length - 1 ? 'block' : 'none';
   dots.forEach((d, i) => d.classList.toggle('active', i === currentReaderPage));
 
-  window.speechSynthesis.cancel();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
 function closeStoryReader() {
   document.getElementById('story-reader').classList.remove('open');
-  window.speechSynthesis.cancel();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   currentReaderStory = null;
   renderStoriesList();
 }
@@ -7068,7 +7031,7 @@ async function init() {
   GSOnboarding.init();
 }
 
-init();
+init().catch(() => { showToast('Failed to load -- please reload'); });
 
 // -- Service Worker Registration --
 if (window.Capacitor?.isNativePlatform()) {
