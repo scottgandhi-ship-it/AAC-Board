@@ -1125,6 +1125,189 @@ describe('A.16 Export & Import', (it) => {
     const parsed = JSON.parse(json);
     assertEqual(parsed.length, app.buttons.length, 'Round-trip should preserve count');
   });
+
+  it('exportUsageCSV function exists', () => {
+    const app = getApp();
+    assertEqual(typeof app.exportUsageCSV, 'function', 'exportUsageCSV should be a global function');
+  });
+
+  it('Export CSV button exists in DOM', () => {
+    const btn = getDoc().getElementById('btn-export-csv');
+    assertExists(btn, 'btn-export-csv not found in DOM');
+    assertEqual(btn.tagName, 'BUTTON', 'Export CSV element should be a button');
+  });
+
+  it('CSV export shows toast when no data', () => {
+    const app = getApp();
+    const originalLog = app.usageLog.slice();
+    app.usageLog.length = 0;
+    let toastShown = false;
+    const origToast = app.showToast;
+    app.showToast = (msg) => { toastShown = true; };
+    app.exportUsageCSV();
+    app.showToast = origToast;
+    // Restore log
+    originalLog.forEach(e => app.usageLog.push(e));
+    assert(toastShown, 'Should show toast when usageLog is empty');
+  });
+
+  it('CSV export creates valid CSV content with headers', () => {
+    const app = getApp();
+    const originalLog = app.usageLog.slice();
+    // Inject test data
+    app.usageLog.length = 0;
+    app.usageLog.push({ btnId: 'btn-test-1', ts: Date.now(), source: 'independent' });
+    app.usageLog.push({ btnId: 'btn-test-2', ts: Date.now(), source: 'modeled' });
+
+    // Intercept the Blob and anchor click
+    let capturedCSV = null;
+    const OrigBlob = app.Blob;
+    const origCreateElement = getDoc().createElement.bind(getDoc());
+    const origAppendChild = getDoc().body.appendChild.bind(getDoc().body);
+    const origRemoveChild = getDoc().body.removeChild.bind(getDoc().body);
+    const origCreateObjectURL = app.URL.createObjectURL;
+    const origRevokeObjectURL = app.URL.revokeObjectURL;
+
+    app.URL.createObjectURL = () => 'blob:test';
+    app.URL.revokeObjectURL = () => {};
+
+    const origBlobConstructor = app.Blob;
+    app.Blob = function(parts, opts) {
+      capturedCSV = parts[0];
+      return new OrigBlob(parts, opts);
+    };
+
+    // Prevent actual DOM manipulation / navigation
+    const fakeAnchor = { href: '', download: '', click: () => {} };
+    const origCE = getDoc().createElement;
+    getDoc().createElement = (tag) => {
+      if (tag === 'a') return fakeAnchor;
+      return origCE.call(getDoc(), tag);
+    };
+    getDoc().body.appendChild = (el) => { if (el !== fakeAnchor) origAppendChild(el); };
+    getDoc().body.removeChild = (el) => { if (el !== fakeAnchor) origRemoveChild(el); };
+
+    app.exportUsageCSV();
+
+    // Restore everything
+    getDoc().createElement = origCE;
+    getDoc().body.appendChild = origAppendChild;
+    getDoc().body.removeChild = origRemoveChild;
+    app.Blob = origBlobConstructor;
+    app.URL.createObjectURL = origCreateObjectURL;
+    app.URL.revokeObjectURL = origRevokeObjectURL;
+    app.usageLog.length = 0;
+    originalLog.forEach(e => app.usageLog.push(e));
+
+    assert(capturedCSV !== null, 'CSV content should have been generated');
+    const lines = capturedCSV.split('\n');
+    assertEqual(lines[0], 'word,button_id,timestamp,source', 'First line should be CSV headers');
+    assertEqual(lines.length, 3, 'Should have header + 2 data rows');
+    assert(lines[1].includes('btn-test-1'), 'Row 1 should contain first button ID');
+    assert(lines[2].includes('modeled'), 'Row 2 should contain source=modeled');
+  });
+
+  it('CSV filename includes date', () => {
+    const app = getApp();
+    const originalLog = app.usageLog.slice();
+    app.usageLog.length = 0;
+    app.usageLog.push({ btnId: 'test', ts: Date.now(), source: 'independent' });
+
+    let capturedFilename = '';
+    const OrigBlob = app.Blob;
+    app.Blob = function(parts, opts) { return new OrigBlob(parts, opts); };
+    app.URL.createObjectURL = () => 'blob:test';
+    app.URL.revokeObjectURL = () => {};
+
+    const origCE = getDoc().createElement;
+    const origAppendChild = getDoc().body.appendChild.bind(getDoc().body);
+    const origRemoveChild = getDoc().body.removeChild.bind(getDoc().body);
+    const fakeAnchor = { href: '', download: '', click: () => {} };
+    getDoc().createElement = (tag) => {
+      if (tag === 'a') return fakeAnchor;
+      return origCE.call(getDoc(), tag);
+    };
+    getDoc().body.appendChild = (el) => { if (el !== fakeAnchor) origAppendChild(el); };
+    getDoc().body.removeChild = (el) => { if (el !== fakeAnchor) origRemoveChild(el); };
+
+    const origCreateObjectURL = app.URL.createObjectURL;
+    const origRevokeObjectURL = app.URL.revokeObjectURL;
+    app.URL.createObjectURL = () => 'blob:test';
+    app.URL.revokeObjectURL = () => {};
+
+    app.exportUsageCSV();
+    capturedFilename = fakeAnchor.download;
+
+    // Restore
+    getDoc().createElement = origCE;
+    getDoc().body.appendChild = origAppendChild;
+    getDoc().body.removeChild = origRemoveChild;
+    app.Blob = OrigBlob;
+    app.URL.createObjectURL = origCreateObjectURL;
+    app.URL.revokeObjectURL = origRevokeObjectURL;
+    app.usageLog.length = 0;
+    originalLog.forEach(e => app.usageLog.push(e));
+
+    assert(capturedFilename.startsWith('aac-usage-'), 'Filename should start with aac-usage-');
+    assert(capturedFilename.endsWith('.csv'), 'Filename should end with .csv');
+    // Check date pattern YYYY-MM-DD
+    const dateMatch = capturedFilename.match(/aac-usage-(\d{4}-\d{2}-\d{2})\.csv/);
+    assert(dateMatch !== null, 'Filename should contain a date in YYYY-MM-DD format');
+  });
+
+  it('CSV export handles special characters in labels', () => {
+    const app = getApp();
+    const originalLog = app.usageLog.slice();
+    const originalButtons = app.buttons.slice();
+
+    // Add a button with special characters
+    app.buttons.push({ id: 'btn-special-test', label: 'I "want" more, please' });
+    app.usageLog.length = 0;
+    app.usageLog.push({ btnId: 'btn-special-test', ts: Date.now(), source: 'independent' });
+
+    let capturedCSV = null;
+    const OrigBlob = app.Blob;
+    app.Blob = function(parts, opts) {
+      capturedCSV = parts[0];
+      return new OrigBlob(parts, opts);
+    };
+    app.URL.createObjectURL = () => 'blob:test';
+    app.URL.revokeObjectURL = () => {};
+
+    const origCE = getDoc().createElement;
+    const origAppendChild = getDoc().body.appendChild.bind(getDoc().body);
+    const origRemoveChild = getDoc().body.removeChild.bind(getDoc().body);
+    const fakeAnchor = { href: '', download: '', click: () => {} };
+    getDoc().createElement = (tag) => {
+      if (tag === 'a') return fakeAnchor;
+      return origCE.call(getDoc(), tag);
+    };
+    getDoc().body.appendChild = (el) => { if (el !== fakeAnchor) origAppendChild(el); };
+    getDoc().body.removeChild = (el) => { if (el !== fakeAnchor) origRemoveChild(el); };
+
+    const origCreateObjectURL = app.URL.createObjectURL;
+    const origRevokeObjectURL = app.URL.revokeObjectURL;
+    app.URL.createObjectURL = () => 'blob:test';
+    app.URL.revokeObjectURL = () => {};
+
+    app.exportUsageCSV();
+
+    // Restore
+    getDoc().createElement = origCE;
+    getDoc().body.appendChild = origAppendChild;
+    getDoc().body.removeChild = origRemoveChild;
+    app.Blob = OrigBlob;
+    app.URL.createObjectURL = origCreateObjectURL;
+    app.URL.revokeObjectURL = origRevokeObjectURL;
+    app.usageLog.length = 0;
+    originalLog.forEach(e => app.usageLog.push(e));
+    app.buttons.length = 0;
+    originalButtons.forEach(b => app.buttons.push(b));
+
+    assert(capturedCSV !== null, 'CSV should have been generated');
+    // Double-quotes inside labels should be escaped as ""
+    assert(capturedCSV.includes('""want""'), 'Quotes in labels should be escaped as double-quotes in CSV');
+  });
 });
 
 // ── A.17: Onboarding ──
