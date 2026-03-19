@@ -2,7 +2,96 @@ default_platform(:ios)
 
 platform :ios do
 
-  desc "Build AAC Board and upload to TestFlight"
+  # Shared helper: wait for build processing, submit beta review, distribute to external group
+  def distribute_to_external(api_key:, app_identifier:, build_number:)
+    require "jwt"
+    require "net/http"
+    require "json"
+
+    # Generate a fresh ASC API token
+    key_data = File.read(File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]))
+    ec_key = OpenSSL::PKey::EC.new(key_data)
+    now = Time.now.to_i
+    payload = { iss: ENV["ASC_ISSUER_ID"], iat: now, exp: now + 1200, aud: "appstoreconnect-v1" }
+    token = JWT.encode(payload, ec_key, "ES256", { kid: ENV["ASC_KEY_ID"] })
+
+    base = "https://api.appstoreconnect.apple.com/v1"
+    headers = { "Authorization" => "Bearer #{token}", "Content-Type" => "application/json" }
+
+    # Look up the app ID
+    uri = URI("#{base}/apps?filter[bundleId]=#{app_identifier}&fields[apps]=bundleId")
+    req = Net::HTTP::Get.new(uri, headers)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    app_id = JSON.parse(res.body)["data"][0]["id"]
+
+    # Find the build by version number
+    uri = URI("#{base}/builds?filter[app]=#{app_id}&filter[version]=#{build_number}&limit=1")
+    req = Net::HTTP::Get.new(uri, headers)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    build_data = JSON.parse(res.body)["data"][0]
+    build_id = build_data["id"]
+    UI.message("Found build #{build_number} (#{build_id})")
+
+    # Wait for processing if needed
+    30.times do
+      state = build_data["attributes"]["processingState"]
+      break if state == "VALID"
+      UI.message("Build processing state: #{state} — waiting 30s...")
+      sleep(30)
+      req = Net::HTTP::Get.new(uri, headers)
+      res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+      build_data = JSON.parse(res.body)["data"][0]
+    end
+    UI.error("Build did not finish processing") unless build_data["attributes"]["processingState"] == "VALID"
+
+    # Submit for beta app review
+    body = {
+      data: {
+        type: "betaAppReviewSubmissions",
+        relationships: { build: { data: { type: "builds", id: build_id } } }
+      }
+    }.to_json
+    uri = URI("#{base}/betaAppReviewSubmissions")
+    req = Net::HTTP::Post.new(uri, headers)
+    req.body = body
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    review_response = JSON.parse(res.body)
+    if review_response["data"]
+      review_state = review_response["data"]["attributes"]["betaReviewState"]
+      UI.message("Beta review submitted: #{review_state}")
+    else
+      detail = review_response.dig("errors", 0, "detail") || "unknown"
+      if detail.include?("already exists")
+        UI.message("Beta review already submitted")
+      else
+        UI.important("Beta review submission note: #{detail}")
+      end
+    end
+
+    # Find external beta group
+    uri = URI("#{base}/apps/#{app_id}/betaGroups")
+    req = Net::HTTP::Get.new(uri, headers)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    groups = JSON.parse(res.body)["data"]
+    external_group = groups.find { |g| g["attributes"]["isInternalGroup"] == false }
+
+    if external_group
+      group_name = external_group["attributes"]["name"]
+      group_id = external_group["id"]
+
+      # Add build to external group
+      body = { data: [{ type: "betaGroups", id: group_id }] }.to_json
+      uri = URI("#{base}/builds/#{build_id}/relationships/betaGroups")
+      req = Net::HTTP::Post.new(uri, headers)
+      req.body = body
+      res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+      UI.success("Build #{build_number} assigned to external group '#{group_name}' — testers will be notified!")
+    else
+      UI.important("No external beta group found — skipping distribution")
+    end
+  end
+
+  desc "Build AAC Board, upload to TestFlight, and distribute to external testers"
   lane :aacboard do
     # Sync web assets and iOS project
     sh("cd #{ENV['PWD']} && npm run sync")
@@ -40,9 +129,16 @@ platform :ios do
     )
 
     UI.success("AAC Board #{new_build} uploaded to TestFlight!")
+
+    # Auto-distribute to external testers
+    distribute_to_external(
+      api_key: api_key,
+      app_identifier: "com.lussier.aacboard",
+      build_number: new_build,
+    )
   end
 
-  desc "Build Guiding Steps and upload to TestFlight"
+  desc "Build Guiding Steps, upload to TestFlight, and distribute to external testers"
   lane :guidingsteps do
     guiding_steps_dir = File.join(ENV["PWD"], "guiding-steps")
 
@@ -83,6 +179,13 @@ platform :ios do
     )
 
     UI.success("Guiding Steps #{new_build} uploaded to TestFlight!")
+
+    # Auto-distribute to external testers
+    distribute_to_external(
+      api_key: api_key,
+      app_identifier: "com.lussier.guidingsteps",
+      build_number: new_build,
+    )
   end
 
   desc "Build and upload both apps to TestFlight"
