@@ -2514,6 +2514,34 @@ html.lang-es #search-results:empty::after {
 .parent-mode-only { display: none !important; }
 .parent-mode .parent-mode-only { display: block !important; }
 
+/* ── Quick-Add FAB (parent mode only) ── */
+#fab-quick-add {
+  display: none;
+  position: fixed;
+  bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  z-index: 99;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bar-bg);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(108,99,255,0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#fab-quick-add:active {
+  transform: scale(0.92);
+  box-shadow: 0 1px 6px rgba(108,99,255,0.3);
+}
+body.parent-mode #fab-quick-add { display: flex; align-items: center; justify-content: center; }
+body.parent-mode #fab-quick-add.hidden { display: none; }
+
 #btn-parent-settings.parent-active {
   color: #FF8F00;
 }
@@ -2803,6 +2831,7 @@ body.sensory-high-contrast .settings-btn {
   background: linear-gradient(180deg, #f5f3ff 0%, #faf9ff 100%);
   overflow-y: auto;
   padding: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   padding-bottom: 80px;
 }
 #view-insights.open {
@@ -3326,6 +3355,9 @@ body.sensory-high-contrast .settings-btn {
     </div>
   </div>
 </div>
+
+<!-- Quick-Add FAB (visible in parent mode) -->
+<button type="button" id="fab-quick-add" aria-label="Quick add button">+</button>
 
 <!-- Tab Bar -->
 <nav id="tab-bar" role="tablist" aria-label="App navigation">
@@ -4128,6 +4160,12 @@ function _buildLangEs() { return {
     'qp-help-me': 'ayuda', 'qp-want-that': 'querer', 'qp-all-done': 'terminar',
     'qp-go-home': 'casa ir', 'qp-thank-you': 'gracias', 'qp-love-you': 'amor querer',
     'qp-play-with-me': 'jugar amigo', 'qp-need-break': 'descanso', 'qp-too-loud': 'fuerte ruido',
+    'qp-like-that': 'gustar', 'qp-dont-want': 'no querer', 'qp-need-help': 'ayuda necesitar',
+    'qp-hungry': 'hambre', 'qp-thirsty': 'sed', 'qp-not-feel-good': 'mal sentir',
+    'qp-tired': 'cansado', 'qp-yes-please': 'si por favor', 'qp-no-thank-you': 'no gracias',
+    'qp-wait-please': 'espera por favor', 'qp-want-mommy': 'querer mama', 'qp-want-daddy': 'querer papa',
+    'qp-leave-alone': 'dejar solo', 'qp-look-at-this': 'mira esto', 'qp-want-hug': 'querer abrazo',
+    'qp-where-going': 'donde ir', 'qp-thats-funny': 'gracioso',
     'act-chase': 'perseguir', 'act-hide': 'esconder', 'act-find': 'encontrar',
     'act-catch': 'atrapar', 'act-tickle': 'cosquillas', 'act-climb': 'trepar',
     'act-dig': 'cavar', 'act-pour': 'verter', 'act-blow': 'soplar',
@@ -4160,6 +4198,15 @@ function _buildLangEs() { return {
     'qp-thank-you': 'gracias', 'qp-love-you': 'te quiero',
     'qp-play-with-me': 'juega conmigo',
     'qp-need-break': 'necesito un descanso', 'qp-too-loud': 'esta muy fuerte',
+    'qp-like-that': 'me gusta eso', 'qp-dont-want': 'no quiero eso',
+    'qp-need-help': 'necesito ayuda', 'qp-hungry': 'tengo hambre',
+    'qp-thirsty': 'tengo sed', 'qp-not-feel-good': 'no me siento bien',
+    'qp-tired': 'estoy cansado', 'qp-yes-please': 'si por favor',
+    'qp-no-thank-you': 'no gracias', 'qp-wait-please': 'espera por favor',
+    'qp-want-mommy': 'quiero a mi mama', 'qp-want-daddy': 'quiero a mi papa',
+    'qp-leave-alone': 'dejame solo', 'qp-look-at-this': 'mira esto',
+    'qp-want-hug': 'puedo tener un abrazo', 'qp-where-going': 'a donde vamos',
+    'qp-thats-funny': 'que gracioso',
     // Entertainment
     'ent-watch': 'ver', 'ent-movie': 'pelicula', 'ent-show': 'programa',
     'ent-video': 'video', 'ent-cartoon': 'caricatura', 'ent-music': 'musica',
@@ -5120,6 +5167,26 @@ const DEFAULT_BUTTONS = [
   // Regulation (blue)
   { id: 'qp-need-break', label: 'I need a break',      color: 'blue',  type: 'fringe', folderId: 'quick', position: 13 },
   { id: 'qp-too-loud',   label: "it's too loud",       color: 'blue',  type: 'fringe', folderId: 'quick', position: 14 },
+  // Likes/preferences (green)
+  { id: 'qp-like-that',  label: 'I like that',         color: 'green', type: 'fringe', folderId: 'quick', position: 15 },
+  { id: 'qp-dont-want',  label: "I don't want that",   color: 'red',   type: 'fringe', folderId: 'quick', position: 16 },
+  // Needs (red/green)
+  { id: 'qp-need-help',  label: 'I need help',         color: 'red',   type: 'fringe', folderId: 'quick', position: 17 },
+  { id: 'qp-hungry',     label: "I'm hungry",          color: 'green', type: 'fringe', folderId: 'quick', position: 18 },
+  { id: 'qp-thirsty',    label: "I'm thirsty",         color: 'green', type: 'fringe', folderId: 'quick', position: 19 },
+  { id: 'qp-not-feel-good', label: "I don't feel good", color: 'red',  type: 'fringe', folderId: 'quick', position: 20 },
+  { id: 'qp-tired',      label: "I'm tired",           color: 'blue',  type: 'fringe', folderId: 'quick', position: 21 },
+  // Social (pink)
+  { id: 'qp-yes-please', label: 'yes please',          color: 'pink',  type: 'fringe', folderId: 'quick', position: 22 },
+  { id: 'qp-no-thank-you',label:'no thank you',        color: 'pink',  type: 'fringe', folderId: 'quick', position: 23 },
+  { id: 'qp-wait-please',label: 'wait please',         color: 'pink',  type: 'fringe', folderId: 'quick', position: 24 },
+  { id: 'qp-want-mommy', label: 'I want my mommy',     color: 'green', type: 'fringe', folderId: 'quick', position: 25 },
+  { id: 'qp-want-daddy', label: 'I want my daddy',     color: 'green', type: 'fringe', folderId: 'quick', position: 26 },
+  { id: 'qp-leave-alone',label: 'leave me alone',      color: 'red',   type: 'fringe', folderId: 'quick', position: 27 },
+  { id: 'qp-look-at-this',label:'look at this',        color: 'pink',  type: 'fringe', folderId: 'quick', position: 28 },
+  { id: 'qp-want-hug',   label: 'can I have a hug',   color: 'pink',  type: 'fringe', folderId: 'quick', position: 29 },
+  { id: 'qp-where-going',label: 'where are we going',  color: 'blue',  type: 'fringe', folderId: 'quick', position: 30 },
+  { id: 'qp-thats-funny',label: "that's funny",        color: 'pink',  type: 'fringe', folderId: 'quick', position: 31 },
 
   // ── Entertainment (screen time & media) ──
   { id: 'ent-watch',      label: 'watch',          color: 'green',  type: 'fringe', folderId: 'entertainment', position: 0 },
@@ -8770,6 +8837,12 @@ const BUTTON_ICONS = {
   'qp-scared': '😨', 'qp-more-please': '🙏', 'qp-help-me': '🆘', 'qp-want-that': '👉',
   'qp-all-done': '✅', 'qp-go-home': '🏠', 'qp-thank-you': '💕', 'qp-love-you': '❤️',
   'qp-play-with-me': '🎮', 'qp-need-break': '⏸️', 'qp-too-loud': '🔊',
+  'qp-like-that': '👍', 'qp-dont-want': '🚫', 'qp-need-help': '🙋',
+  'qp-hungry': '🍽️', 'qp-thirsty': '🥤', 'qp-not-feel-good': '🤒',
+  'qp-tired': '😴', 'qp-yes-please': '👍', 'qp-no-thank-you': '🙅',
+  'qp-wait-please': '✋', 'qp-want-mommy': '👩', 'qp-want-daddy': '👨',
+  'qp-leave-alone': '🙅', 'qp-look-at-this': '👀', 'qp-want-hug': '🤗',
+  'qp-where-going': '🗺️', 'qp-thats-funny': '😂',
   // Entertainment
   'ent-watch': '👀', 'ent-movie': '🎬', 'ent-show': '📺', 'ent-video': '▶️',
   'ent-cartoon': '🎨', 'ent-music': '🎵', 'ent-song': '🎶', 'ent-remote': '🎮',
@@ -10093,6 +10166,39 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
     openEditModal(newId);
   });
 });
+
+// Quick-add FAB — one-tap add button from board
+document.getElementById('fab-quick-add').addEventListener('click', () => {
+  if (!parentMode) return;
+  resetParentAutoLock();
+  const folder = currentFolder;
+  const existing = buttons.filter(b => b.folderId === folder);
+  const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
+  const newId = 'btn-' + Date.now();
+  const newBtn = {
+    id: newId,
+    label: 'new',
+    color: 'orange',
+    type: 'fringe',
+    folderId: folder,
+    position: nextPos,
+  };
+  buttons.push(newBtn);
+  saveButton(newBtn).then(() => {
+    renderGrid();
+    openEditModal(newId);
+  });
+});
+
+// Hide FAB when settings or insights are open
+const _fabEl = document.getElementById('fab-quick-add');
+const _fabObserver = new MutationObserver(() => {
+  const settingsOpen = document.getElementById('settings-overlay').classList.contains('open');
+  const insightsOpen = document.getElementById('view-insights').classList.contains('open');
+  _fabEl.classList.toggle('hidden', settingsOpen || insightsOpen);
+});
+_fabObserver.observe(document.getElementById('settings-overlay'), { attributes: true, attributeFilter: ['class'] });
+_fabObserver.observe(document.getElementById('view-insights'), { attributes: true, attributeFilter: ['class'] });
 
 // Voice speed slider
 const speedSlider = document.getElementById('voice-speed-slider');
