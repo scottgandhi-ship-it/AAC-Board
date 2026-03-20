@@ -1,0 +1,21 @@
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(50,50,60,0.92);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  font-weight: 700;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+}
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

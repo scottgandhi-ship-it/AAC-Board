@@ -1,8 +1,19 @@
-const CACHE_NAME = 'aac-board-v58';
+const CACHE_NAME = 'aac-board-v59';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './css/tokens.css',
+  './css/ui-shared.css',
+  './css/app-chrome.css',
+  './css/message-bar.css',
+  './css/grid.css',
+  './css/modals.css',
+  './css/onboarding.css',
+  './css/settings.css',
+  './css/activities.css',
+  './css/insights.css',
+  './css/responsive.css'
 ];
 
 // Install — pre-cache shell assets

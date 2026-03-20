@@ -1,0 +1,85 @@
+/* ── Message Bar ── */
+#message-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8f7ff;
+  color: var(--chrome-text);
+  min-height: 60px;
+  flex-shrink: 0;
+  border-bottom: 2px solid rgba(124, 116, 255, 0.25);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+#message-words {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 40px;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f3f2ff;
+  border-radius: var(--radius-md);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--chrome-text);
+  overflow-y: auto;
+  max-height: 80px;
+}
+#message-words:empty::after {
+  content: 'Tap words to build a sentence';
+  color: var(--chrome-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+#message-words .word-chip {
+  background: rgba(108,99,255,0.08);
+  padding: 3px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+  color: var(--chrome-text);
+}
+
+.bar-btn {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.bar-btn:active {
+  transform: scale(0.9);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+#btn-speak {
+  background: linear-gradient(135deg, var(--color-green-dark), var(--chrome-success));
+  color: #fff;
+}
+
+#btn-clear {
+  background: linear-gradient(135deg, var(--color-red-dark), var(--chrome-danger));
+  color: #fff;
+}
+
+#btn-backspace {
+  background: linear-gradient(135deg, var(--color-orange-dark), var(--chrome-warning));
+  color: #fff;
+}
+
+#btn-search {
+  background: linear-gradient(135deg, var(--chrome-primary), var(--chrome-primary-dark));
+  color: #fff;
+}

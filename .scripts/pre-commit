@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Git pre-commit hook: runs validation checks on index.html before commit
+# Git pre-commit hook: runs validation checks before commit
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-# Only run checks if index.html or guiding-steps/index.html is staged
+# Run checks if index.html, js/, css/, or sw.js files are staged
 staged=$(git diff --cached --name-only)
-if ! echo "$staged" | grep -qE '(^|\/)index\.html$'; then
+if ! echo "$staged" | grep -qE '(^|\/)index\.html$|^js/|^css/|^sw\.js$'; then
   exit 0
 fi
 
@@ -26,6 +26,15 @@ echo "--- Checking JS syntax ---"
 if ! bash .scripts/check-html-syntax.sh; then
   echo ""
   echo "COMMIT BLOCKED: Fix JS syntax errors before committing."
+  exit 1
+fi
+
+# Check sw.js cache integrity -- blocks commit
+echo ""
+echo "--- Checking sw.js cache integrity ---"
+if ! bash .scripts/check-sw-cache.sh; then
+  echo ""
+  echo "COMMIT BLOCKED: Update sw.js ASSETS to include all css/js files."
   exit 1
 fi
 

@@ -29,8 +29,17 @@ check_sync() {
 echo "=== AAC-Board sync check ==="
 check_sync "index.html" "www/index.html" "www/index.html vs root"
 check_sync "manifest.json" "www/manifest.json" "www/manifest.json vs root"
+check_sync "sw.js" "www/sw.js" "www/sw.js vs root"
 check_sync "index.html" "ios/App/App/public/index.html" "ios public/index.html vs root"
 check_sync "manifest.json" "ios/App/App/public/manifest.json" "ios public/manifest.json vs root"
+
+echo ""
+echo "=== AAC-Board CSS sync check ==="
+for cssfile in css/*.css; do
+  if [ -f "$cssfile" ]; then
+    check_sync "$cssfile" "www/$cssfile" "www/$cssfile vs root"
+  fi
+done
 
 echo ""
 echo "=== Guiding Steps sync check ==="

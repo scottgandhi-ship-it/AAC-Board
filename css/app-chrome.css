@@ -1,0 +1,221 @@
+/* ── App Header ── */
+#app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 36px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+#app-header.parent-active {
+  border-bottom-color: var(--color-orange-dark);
+  background: rgba(255,243,224,0.9);
+}
+
+#app-header-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--bar-bg);
+  letter-spacing: 0.03em;
+}
+
+.parent-mode-only { display: none !important; }
+.parent-mode .parent-mode-only { display: block !important; }
+
+/* ── Quick-Add FAB (parent mode only) ── */
+#fab-quick-add {
+  display: none;
+  position: fixed;
+  bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  z-index: 99;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bar-bg);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(108,99,255,0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#fab-quick-add:active {
+  transform: scale(0.92);
+  box-shadow: 0 1px 6px rgba(108,99,255,0.3);
+}
+body.parent-mode #fab-quick-add { display: flex; align-items: center; justify-content: center; }
+body.parent-mode #fab-quick-add.hidden { display: none; }
+
+#btn-parent-settings.parent-active {
+  color: #FF8F00;
+}
+#btn-parent-settings.parent-active svg {
+  stroke: #FF8F00;
+}
+
+/* ── Back Button (inline in message bar) ── */
+#btn-back-nav {
+  background: linear-gradient(135deg, #FF6F00, #FFA000);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  min-width: 44px;
+  font-weight: 800;
+}
+#btn-back-nav:active {
+  background: linear-gradient(135deg, #E65100, #FF8F00);
+  transform: scale(0.95);
+}
+#btn-back-nav.visible { display: flex; }
+#btn-back-nav svg {
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Folder Export Button (inline in message bar, parent mode only) ── */
+#btn-export-folder {
+  display: none;
+  background: linear-gradient(135deg, #1976D2, var(--color-blue-dark));
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  min-width: 44px;
+  font-weight: 800;
+}
+#btn-export-folder:active {
+  background: linear-gradient(135deg, #1565C0, #1E88E5);
+  transform: scale(0.95);
+}
+#btn-export-folder svg {
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Views ── */
+.view {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.view.active {
+  display: flex;
+}
+
+/* ── Tab Bar ── */
+#tab-bar {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--chrome-surface);
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 4px 12px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  gap: 4px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 0 4px;
+  min-height: 48px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #999;
+  position: relative;
+  border-radius: 12px;
+  transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn:active { background: rgba(108,99,255,0.06); }
+
+.tab-btn.active {
+  color: var(--bar-bg);
+  background: none;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 3px;
+  background: var(--bar-bg);
+  border-radius: 0 0 3px 3px;
+}
+
+.tab-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab-btn.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.tab-label {
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+/* ── Placeholder Views ── */
+.view-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+.view-placeholder-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+
+.view-placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.view-placeholder-sub {
+  font-size: 0.9rem;
+}
