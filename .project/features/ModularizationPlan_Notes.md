@@ -56,17 +56,16 @@
 - [x] Browser testing -- PASSED (verified by developer)
 
 ### Phase 3: Core Infrastructure
-- [ ] Extract js/ui-shared.js (showToast, escapeHtml)
-- [ ] Extract js/storage.js (IndexedDB, buttons, images, grid helpers)
-- [ ] Extract js/i18n.js (language system, translations)
-- [ ] Extract js/grammar.js (grammar engine EN + ES)
-- [ ] Extract js/tts.js (TTS, voices, speak, haptic)
-- [ ] Update sw.js cache list
-- [ ] Bump cache version
-- [ ] Verify language switching
-- [ ] Verify TTS works
-- [ ] Verify grammar features
-- [ ] Verify offline mode
+- [x] Extract js/ui-shared.js (15 lines -- showToast, escapeHtml)
+- [x] Extract js/storage.js (270 lines -- IndexedDB, CRUD, images, grid helpers)
+- [x] Extract js/i18n.js (610 lines -- language system, translations, updateUIStrings)
+- [x] Extract js/grammar.js (186 lines -- grammar engines EN+ES, pluralization)
+- [x] Extract js/tts.js (150 lines -- TTS, voices, speak, haptic)
+- [x] Update sw.js cache list (v60 -> v61)
+- [x] SW cache check: PASSED
+- [x] JS syntax check: PASSED
+- [x] Console.log check: PASSED
+- [x] Browser testing -- PASSED (verified by developer)
 
 ### Phase 4: Feature Modules
 - [ ] Extract js/predictions.js
