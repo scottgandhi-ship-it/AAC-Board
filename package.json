@@ -4,7 +4,7 @@
   "description": "",
   "main": "check-syntax.js",
   "scripts": {
-    "sync": "mkdir -p www/css && cp index.html manifest.json sw.js www/ && cp -r css/ www/css/ && npx cap sync",
+    "sync": "mkdir -p www/css www/js && cp index.html manifest.json sw.js www/ && cp -r css/ www/css/ && cp -r js/ www/js/ && npx cap sync",
     "sync:check": "bash .scripts/check-www-sync.sh",
     "deploy:aacboard": "export PATH=/opt/homebrew/opt/ruby/bin:$HOME/.local/share/gem/ruby/4.0.0/bin:$PATH && bundle exec fastlane aacboard",
     "deploy:guidingsteps": "export PATH=/opt/homebrew/opt/ruby/bin:$HOME/.local/share/gem/ruby/4.0.0/bin:$PATH && bundle exec fastlane guidingsteps",

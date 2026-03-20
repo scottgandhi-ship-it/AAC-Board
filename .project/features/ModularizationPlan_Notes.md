@@ -42,13 +42,18 @@
 - [ ] Verify offline mode
 
 ### Phase 2: Data Modules
-- [ ] Create js/ directory
-- [ ] Extract js/state.js (global state variables)
-- [ ] Extract js/vocabulary.js (all vocabulary data constants)
-- [ ] Update sw.js cache list
-- [ ] Bump cache version
-- [ ] Verify grid renders correctly
-- [ ] Verify all grid sizes (1x1 through 6x6)
+- [x] Create js/ directory
+- [x] Extract js/state.js (59 lines -- 31 global state variables)
+- [x] Extract js/vocabulary.js (2,341 lines -- all vocab data, grid templates, word pools, icons)
+- [x] Update sw.js cache list (v59 -> v60)
+- [x] Update npm run sync to copy js/ directory
+- [x] Update check-www-sync.sh to verify js/ files
+- [x] Update check-console-logs.sh to scan js/*.js
+- [x] Update check-html-syntax.sh for external script tags
+- [x] SW cache check: PASSED
+- [x] JS syntax check: PASSED
+- [x] Console.log check: PASSED
+- [x] Browser testing -- PASSED (verified by developer)
 
 ### Phase 3: Core Infrastructure
 - [ ] Extract js/ui-shared.js (showToast, escapeHtml)

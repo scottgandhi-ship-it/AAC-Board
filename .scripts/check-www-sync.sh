@@ -42,6 +42,14 @@ for cssfile in css/*.css; do
 done
 
 echo ""
+echo "=== AAC-Board JS sync check ==="
+for jsfile in js/*.js; do
+  if [ -f "$jsfile" ]; then
+    check_sync "$jsfile" "www/$jsfile" "www/$jsfile vs root"
+  fi
+done
+
+echo ""
 echo "=== Guiding Steps sync check ==="
 check_sync "guiding-steps/index.html" "guiding-steps/www/index.html" "guiding-steps www/index.html vs root"
 check_sync "guiding-steps/manifest.json" "guiding-steps/www/manifest.json" "guiding-steps www/manifest.json vs root"

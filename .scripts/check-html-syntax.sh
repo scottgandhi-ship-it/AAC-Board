@@ -15,7 +15,7 @@ check_file() {
 
   # Check for unmatched <script>/<style> tags
   local script_open script_close style_open style_close
-  script_open=$(grep -c '<script>' "$file" || true)
+  script_open=$(grep -c '<script' "$file" || true)
   script_close=$(grep -c '</script>' "$file" || true)
   style_open=$(grep -c '<style>' "$file" || true)
   style_close=$(grep -c '</style>' "$file" || true)

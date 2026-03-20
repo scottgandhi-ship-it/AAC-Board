@@ -5,7 +5,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 found=0
 
-for file in index.html guiding-steps/index.html; do
+for file in index.html guiding-steps/index.html js/*.js; do
   if [ -f "$file" ]; then
     matches=$(grep -n 'console\.log' "$file" || true)
     if [ -n "$matches" ]; then

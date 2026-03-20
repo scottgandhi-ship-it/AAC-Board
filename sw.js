@@ -1,8 +1,10 @@
-const CACHE_NAME = 'aac-board-v59';
+const CACHE_NAME = 'aac-board-v60';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './js/state.js',
+  './js/vocabulary.js',
   './css/tokens.css',
   './css/ui-shared.css',
   './css/app-chrome.css',
