@@ -3820,11 +3820,16 @@ document.getElementById('btn-edit-upload').addEventListener('click', () => {
 document.getElementById('edit-image-input').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
-  await saveImage(editingButtonId, file);
-  markAsCustomImage(editingButtonId);
-  const preview = document.getElementById('edit-image-preview');
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
+  try {
+    const compressed = await compressImage(file);
+    await saveImage(editingButtonId, compressed);
+    markAsCustomImage(editingButtonId);
+    const preview = document.getElementById('edit-image-preview');
+    preview.src = compressed;
+    preview.style.display = 'block';
+  } catch (err) {
+    showToast('Failed to load image. Please try again.');
+  }
   e.target.value = '';
 });
 
@@ -3845,11 +3850,16 @@ document.getElementById('btn-edit-camera').addEventListener('click', () => {
 document.getElementById('edit-camera-input').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
-  await saveImage(editingButtonId, file);
-  markAsCustomImage(editingButtonId);
-  const preview = document.getElementById('edit-image-preview');
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
+  try {
+    const compressed = await compressImage(file);
+    await saveImage(editingButtonId, compressed);
+    markAsCustomImage(editingButtonId);
+    const preview = document.getElementById('edit-image-preview');
+    preview.src = compressed;
+    preview.style.display = 'block';
+  } catch (err) {
+    showToast('Failed to load image. Please try again.');
+  }
   e.target.value = '';
 });
 
@@ -5339,25 +5349,30 @@ document.getElementById('btn-quick-photo').addEventListener('click', () => {
 document.getElementById('quick-photo-input').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
-  const folder = currentFolder;
-  const existing = buttons.filter(b => b.folderId === folder);
-  const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
-  const newId = 'btn-' + Date.now();
-  const newBtn = {
-    id: newId,
-    label: 'new',
-    color: 'orange',
-    type: 'fringe',
-    folderId: folder,
-    position: nextPos,
-  };
-  buttons.push(newBtn);
-  await saveButton(newBtn);
-  await saveImage(newId, file);
-  markAsCustomImage(newId);
-  renderGrid();
-  document.getElementById('settings-overlay').classList.remove('open');
-  openEditModal(newId);
+  try {
+    const compressed = await compressImage(file);
+    const folder = currentFolder;
+    const existing = buttons.filter(b => b.folderId === folder);
+    const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
+    const newId = 'btn-' + Date.now();
+    const newBtn = {
+      id: newId,
+      label: 'new',
+      color: 'orange',
+      type: 'fringe',
+      folderId: folder,
+      position: nextPos,
+    };
+    buttons.push(newBtn);
+    await saveButton(newBtn);
+    await saveImage(newId, compressed);
+    markAsCustomImage(newId);
+    renderGrid();
+    document.getElementById('settings-overlay').classList.remove('open');
+    openEditModal(newId);
+  } catch (err) {
+    showToast('Failed to add photo. Please try again.');
+  }
   e.target.value = '';
 });
 
