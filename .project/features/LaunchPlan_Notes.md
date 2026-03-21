@@ -35,26 +35,26 @@
 - [x] Scott decisions on all findings (completed 2026-03-20)
 
 ### Stream 5B: Review Fixes -- AAC Board (v1.0)
-- [ ] Parental gate -- tap+hold, obvious to parents (Apple Kids requirement)
-- [ ] Default grid 3x3 if onboarding skipped
-- [ ] Add stop/yes/no to core word strip for 3x3 and 4x4 grids
-- [ ] Verify stop/yes/no present in 5x5 and 6x6 grids
-- [ ] Fix Fitzgerald Key color consistency (stop, all done, no)
-- [ ] Rephrase auto-speak setting in plain language
-- [ ] Parent mode auto-lock 30min -> 5min
-- [ ] Safeguard grid-size switching (auto-backup before switch, reversible)
-- [ ] Grammar Assistance plain language ("articles" -> "add 'a' and 'the'")
-- [ ] Car Ride activity sensory vocabulary (loud, bumpy, stop, too fast)
-- [ ] Spanish accent marks review and fix
-- [ ] Toileting vocabulary (wet, dry, pull up, flush, wipe)
-- [ ] Privacy statement visible in app ("Your data stays on this device")
+- [x] Parental gate -- tap+hold, obvious to parents (Apple Kids requirement) (2026-03-21)
+- [x] Default grid 3x3 if onboarding skipped (2026-03-20)
+- [x] Add stop/yes/no to core word strip for 3x3+ grids (2026-03-20)
+- [x] Removed duplicates from 4x4 and 6x6 grids (2026-03-20)
+- [x] Fix Fitzgerald Key color consistency -- stop, all done, no all red (2026-03-20)
+- [x] Rephrase auto-speak setting in plain language (2026-03-20)
+- [x] Parent mode auto-lock 30min -> 5min (2026-03-20)
+- [x] Safeguard grid-size switching (auto-backup before switch, reversible) (2026-03-21)
+- [x] Grammar Assistance plain language ("articles" -> "add 'a' and 'the'") (2026-03-20)
+- [x] Car Ride activity sensory vocabulary (too fast, too loud, too bright, scary) (2026-03-20)
+- [x] Spanish accent marks -- 30+ words fixed across i18n.js + vocabulary.js (2026-03-20)
+- [x] Toileting vocabulary (wet, wipe, pull up added to My Body) (2026-03-20)
+- [x] Privacy statement visible in app (2026-03-20)
 - [ ] Session export for SLP documentation (promoted from v1.1)
 - [ ] Use child's name more throughout (promoted from v1.1)
 - [ ] Therapist sharing features -- export reports, import boards (promoted from v1.1)
 - [ ] Search finds core words and folders (promoted from v1.1)
 
 ### Stream 5C: Review Fixes -- Guiding Steps (v1.0)
-- [ ] Parental gate -- tap+hold, same solution as AAC Board
+- [x] Parental gate -- tap+hold, same solution as AAC Board (2026-03-21)
 - [ ] Pre-load sample schedule, reward track at first boot
 - [ ] Surface first 4 social story templates on Stories tab at first boot
 - [ ] Auto-assign sentence types in quick-create story flow

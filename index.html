@@ -233,6 +233,15 @@
       <div id="insights-activity-list"></div>
     </div>
     <div class="insights-actions">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <label for="report-range" style="font-weight:600;font-size:0.85rem;color:#555;">Report period:</label>
+        <select id="report-range" style="flex:1;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:0.9rem;font-family:inherit;">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+      </div>
+      <button type="button" id="btn-share-report">Share Progress Report</button>
       <button type="button" id="btn-export-csv">Export CSV</button>
       <button type="button" id="btn-clear-usage" class="danger">Clear Data</button>
     </div>
@@ -2644,6 +2653,161 @@ async function exportUsageCSV() {
   }
 }
 
+// ── SLP Progress Report ──
+
+function generateSLPReport(days) {
+  const cutoff = Date.now() - (days * 86400000);
+  const filtered = usageLog.filter(e => e.ts >= cutoff);
+
+  if (filtered.length === 0) return null;
+
+  const childName = localStorage.getItem('aac-child-name') || '';
+  const now = new Date();
+  const startDate = new Date(cutoff);
+  const fmt = d => (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+
+  const allWords = getAllVocabWords();
+  const allTemplateButtons = getTemplate(getGridSize());
+  const btnLookup = {};
+  [...allWords, ...allTemplateButtons].forEach(b => { if (!btnLookup[b.id]) btnLookup[b.id] = b; });
+
+  const wordCounts = {};
+  const dailyCounts = {};
+  const categoryCounts = {};
+  for (const evt of filtered) {
+    wordCounts[evt.btnId] = (wordCounts[evt.btnId] || 0) + 1;
+    const dk = getDateKey(evt.ts);
+    dailyCounts[dk] = (dailyCounts[dk] || 0) + 1;
+
+    const btn = btnLookup[evt.btnId];
+    const color = btn ? (btn.color || 'other') : 'other';
+    const cat = FITZGERALD_COLOR_LABELS[color] || 'Other';
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+  }
+
+  const totalWords = filtered.length;
+  const activeDays = Object.keys(dailyCounts).length;
+  const avgPerDay = activeDays > 0 ? (totalWords / activeDays).toFixed(1) : '0';
+
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dk = getDateKey(d.getTime());
+    if (dailyCounts[dk]) streak++;
+    else break;
+  }
+
+  const topWords = Object.entries(wordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(([id, count], i) => {
+      const btn = btnLookup[id];
+      const label = btn ? btn.label : id;
+      const color = btn ? (btn.color || '') : '';
+      const cat = FITZGERALD_COLOR_LABELS[color] || 'Other';
+      const rank = String(i + 1).padStart(2, ' ');
+      const padLabel = (label + '                    ').slice(0, 20);
+      return rank + '. ' + padLabel + '(' + count + ' taps)  [' + cat + ']';
+    });
+
+  const catSorted = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([cat, count]) => {
+      const pct = Math.round((count / totalWords) * 100);
+      const padCat = (cat + ':              ').slice(0, 15);
+      return padCat + count + ' (' + pct + '%)';
+    });
+
+  let lines = [];
+  lines.push('AAC Board Progress Report');
+  if (childName) lines.push('Child: ' + childName);
+  lines.push('Period: ' + fmt(startDate) + ' - ' + fmt(now) + ' (' + days + ' days)');
+  lines.push('Generated: ' + fmt(now));
+  lines.push('');
+  lines.push('-- Communication Summary --');
+  lines.push('Total words communicated: ' + totalWords);
+  lines.push('Average words per day: ' + avgPerDay);
+  lines.push('Active days: ' + activeDays + ' of ' + days + ' (' + Math.round((activeDays / days) * 100) + '%)');
+  lines.push('Current streak: ' + streak + ' day' + (streak !== 1 ? 's' : ''));
+  lines.push('');
+  lines.push('-- Top Vocabulary --');
+  topWords.forEach(l => lines.push(l));
+  lines.push('');
+  lines.push('-- Category Breakdown --');
+  catSorted.forEach(l => lines.push(l));
+
+  const actInsights = getActivityInsights();
+  if (actInsights.length > 0) {
+    lines.push('');
+    lines.push('-- Activity Usage --');
+    actInsights.forEach(a => {
+      lines.push(a.name + ': ' + a.sessions + ' session' + (a.sessions !== 1 ? 's' : '') + (a.avgMinutes > 0 ? ', avg ' + a.avgMinutes + ' min' : ''));
+      if (a.topWords && a.topWords.length > 0) {
+        lines.push('  Top words: ' + a.topWords.map(w => w.label).join(', '));
+      }
+    });
+  }
+
+  const weeklyData = [];
+  for (let w = 0; w < Math.min(Math.ceil(days / 7), 8); w++) {
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - ((w + 1) * 7) + 1);
+    const weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() - (w * 7));
+    let weekTotal = 0;
+    let weekDays = 0;
+    for (let d = 0; d < 7; d++) {
+      const dd = new Date(weekStart);
+      dd.setDate(dd.getDate() + d);
+      const dk = getDateKey(dd.getTime());
+      if (dailyCounts[dk]) { weekTotal += dailyCounts[dk]; weekDays++; }
+    }
+    if (weekDays > 0) {
+      weeklyData.unshift({ label: 'Week of ' + fmt(weekStart), avg: Math.round(weekTotal / 7) });
+    }
+  }
+
+  if (weeklyData.length >= 2) {
+    lines.push('');
+    lines.push('-- Weekly Trend --');
+    weeklyData.forEach(w => lines.push(w.label + ':  avg ' + w.avg + '/day'));
+    const first = weeklyData[0].avg;
+    const last = weeklyData[weeklyData.length - 1].avg;
+    const trend = last > first * 1.1 ? 'Increasing' : last < first * 0.9 ? 'Decreasing' : 'Stable';
+    lines.push('Trend: ' + trend);
+  }
+
+  lines.push('');
+  lines.push('Generated by AAC Board');
+
+  return lines.join('\n');
+}
+
+async function shareProgressReport() {
+  const days = parseInt(document.getElementById('report-range').value) || 30;
+  const report = generateSLPReport(days);
+  if (!report) {
+    showToast('No usage data for this period');
+    return;
+  }
+  const childName = localStorage.getItem('aac-child-name') || 'aac-board';
+  const filename = childName.toLowerCase().replace(/\s+/g, '-') + '-progress-' + days + 'day-' + todayKey() + '.txt';
+  const blob = new Blob([report], { type: 'text/plain' });
+  const file = new File([blob], filename, { type: 'text/plain' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ title: 'AAC Progress Report', files: [file] });
+    } else {
+      downloadBlob(blob, filename);
+    }
+    showToast('Progress report shared');
+  } catch (err) {
+    if (err.name !== 'AbortError') showToast('Share failed. Please try again.');
+  }
+}
+
 // ── Blended Prediction Ranking ──
 const COLD_START_BONUS = 3;
 const MAX_PREDICTIONS = 8;
@@ -3086,14 +3250,16 @@ document.getElementById('search-input').addEventListener('input', e => {
   resultsEl.innerHTML = '';
   if (query.length === 0) return;
 
-  const matches = buttons.filter(b => {
-    if (b.type !== 'fringe') return false;
+  const filtered = buttons.filter(b => {
+    if (b.type !== 'fringe' && b.type !== 'core' && b.type !== 'folder') return false;
     const primary = getPrimaryLabel(b).toLowerCase();
     const english = b.label.toLowerCase();
     return primary.includes(query) || english.includes(query);
-  }).slice(0, 30);
+  });
 
-  // Build a map of folderId -> folder label
+  const typeOrder = { core: 0, folder: 1, fringe: 2 };
+  const matches = filtered.sort((a, b) => (typeOrder[a.type] || 2) - (typeOrder[b.type] || 2)).slice(0, 30);
+
   const folderLabels = {};
   buttons.filter(b => b.type === 'folder').forEach(b => {
     folderLabels[b.id.replace('folder-', '')] = getPrimaryLabel(b);
@@ -3116,14 +3282,20 @@ document.getElementById('search-input').addEventListener('input', e => {
 
     const folder = document.createElement('span');
     folder.className = 'search-folder';
-    folder.textContent = folderLabels[btn.folderId] || btn.folderId || '';
+    folder.textContent = btn.type === 'core' ? t('search.core', 'Core') : btn.type === 'folder' ? t('search.folder', 'Folder') : (folderLabels[btn.folderId] || btn.folderId || '');
     cell.appendChild(folder);
 
     cell.addEventListener('click', () => {
-      const speakText = getSpeakLabel(btn);
-      speak(speakText);
-      addWordToMessage(speakText, btn.id);
-      recordUsageEvent(btn.id, 'independent');
+      if (btn.type === 'folder') {
+        currentFolder = btn.id.replace('folder-', '');
+        clearPredictions();
+        renderGrid();
+      } else {
+        const speakText = getSpeakLabel(btn);
+        speak(speakText);
+        addWordToMessage(speakText, btn.id);
+        recordUsageEvent(btn.id, 'independent');
+      }
       document.getElementById('search-overlay').classList.remove('open');
     });
     resultsEl.appendChild(cell);
@@ -3797,6 +3969,7 @@ document.getElementById('btn-save-child-name').addEventListener('click', async (
   showToast(`"My name is ${name}" added!`);
 });
 
+document.getElementById('btn-share-report').addEventListener('click', shareProgressReport);
 document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
 
 document.getElementById('btn-clear-usage').addEventListener('click', () => {
