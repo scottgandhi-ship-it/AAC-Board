@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>AAC Board</string>
+        <string>Yappie</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>9</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -50,8 +50,8 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>AAC Board needs camera access to take photos for communication buttons.</string>
+	<string>Yappie needs camera access to take photos for communication buttons.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>AAC Board needs photo library access to add images to communication buttons.</string>
+	<string>Yappie needs photo library access to add images to communication buttons.</string>
 </dict>
 </plist>

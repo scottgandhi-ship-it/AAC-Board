@@ -1,6 +1,6 @@
 {
-  "name": "AAC Communication Board",
-  "short_name": "AAC Board",
+  "name": "Yappie",
+  "short_name": "Yappie",
   "description": "Augmentative and Alternative Communication board for building sentences with picture+word buttons",
   "start_url": "./index.html",
   "display": "standalone",
