@@ -1424,8 +1424,8 @@ body {
   background: rgba(0,0,0,0.5);
   z-index: 200;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 20px;
+  align-items: center;
+  padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px);
   overflow-y: auto;
 }
 
@@ -1749,7 +1749,7 @@ body {
   z-index: 200;
   justify-content: center;
   align-items: center;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 20px);
 }
 
 #tmpl-list-overlay.open { display: flex; }
@@ -2358,7 +2358,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="schedule-empty">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       <div style="font-size:1.1rem;font-weight:600;">No schedule for today</div>
-      <div style="font-size:0.9rem;">Tap Start Schedule below to begin</div>
+      <div style="font-size:0.9rem;">Pick from built-in templates or create your own routine</div>
     </div>
     <div id="schedule-all-done">
       <div class="schedule-done-icon">
@@ -2368,7 +2368,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="schedule-done-msg" style="font-size:1rem;color:#555;"></div>
     </div>
     <div id="schedule-parent-controls">
-      <button type="button" class="sched-parent-btn" id="btn-start-schedule">Start Schedule</button>
+      <button type="button" class="sched-parent-btn" id="btn-start-schedule">Set Up a Schedule</button>
       <button type="button" class="sched-parent-btn" id="btn-edit-templates">Edit Templates</button>
     </div>
   </div>
@@ -2377,12 +2377,12 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 <!-- Rewards View -->
 <div id="view-rewards" class="view" role="tabpanel" aria-labelledby="tab-rewards">
   <div id="rewards-content">
-    <div id="rewards-track-tabs" role="tablist" aria-label="Reward tracks"></div>
+    <div id="rewards-track-tabs" role="tablist" aria-label="Reward charts"></div>
     <div id="rewards-path-area" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0">
       <div id="rewards-empty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <div id="rewards-empty-text">No reward tracks yet</div>
-        <div id="rewards-empty-sub">Tap New Track below to create one</div>
+        <div id="rewards-empty-text">No reward charts yet</div>
+        <div id="rewards-empty-sub">Tap New Chart below to create one</div>
       </div>
       <div id="rewards-task-header">
         <div id="rewards-task-image" role="img" aria-label=""></div>
@@ -2401,7 +2401,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="reward-timer-status"></div>
     </div>
     <div id="rewards-parent-controls">
-      <button type="button" class="rewards-parent-btn" id="btn-new-track">New Track</button>
+      <button type="button" class="rewards-parent-btn" id="btn-new-track">New Chart</button>
       <button type="button" class="rewards-parent-btn" id="btn-edit-track">Configure</button>
       <button type="button" class="rewards-parent-btn" id="btn-reset-track">Reset</button>
     </div>
@@ -2776,6 +2776,9 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <h3>Data</h3>
       <button type="button" class="settings-btn danger parent-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
     </div>
+    <div class="settings-section">
+      <p style="font-size:0.8rem;color:#888;text-align:center;margin:8px 0 0;">Your data stays on this device. Nothing is sent to the cloud.</p>
+    </div>
     <button type="button" id="btn-close-settings">Done</button>
   </div>
 </div>
@@ -2789,8 +2792,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 <!-- Reward Config Modal -->
 <div id="reward-config-overlay">
   <div id="reward-config-panel">
-    <h2 id="reward-config-title">New Reward Track</h2>
-    <label for="reward-task-input">Task</label>
+    <h2 id="reward-config-title">New Reward Chart</h2>
+    <label for="reward-task-input">What is your child working on?</label>
     <input type="text" id="reward-task-input">
     <label>Task image</label>
     <div id="task-image-preview-wrap">
@@ -2807,7 +2810,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <span id="stepper-value">5</span>
       <button type="button" class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
     </div>
-    <label for="reward-label-input">Reward</label>
+    <label for="reward-label-input">What do they earn?</label>
     <input type="text" id="reward-label-input">
     <label>Reward image</label>
     <img id="reward-image-preview" alt="Reward preview">
@@ -2848,7 +2851,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 <!-- Reward Template Picker -->
 <div id="reward-tmpl-picker" style="display:none;position:fixed;inset:0;z-index:960;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:var(--radius-lg);max-width:400px;width:100%;max-height:80vh;overflow-y:auto;padding:20px;">
-    <h2 style="font-size:1.1rem;font-weight:800;color:#333;margin-bottom:16px;">New Reward Track</h2>
+    <h2 style="font-size:1.1rem;font-weight:800;color:#333;margin-bottom:16px;">New Reward Chart</h2>
     <div id="reward-tmpl-list"></div>
     <button type="button" id="btn-reward-from-scratch" style="width:100%;padding:14px;border:2px dashed #ccc;border-radius:var(--radius-sm);background:none;font-size:0.95rem;font-weight:600;color:#888;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Start from Scratch</button>
     <button type="button" id="btn-reward-tmpl-cancel" style="width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;min-height:44px;">Cancel</button>
@@ -2991,7 +2994,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           </div>
           <div>
             <div class="gs-feature-card-name">Rewards</div>
-            <div class="gs-feature-card-desc">Track progress toward goals they care about</div>
+            <div class="gs-feature-card-desc">Chart progress toward goals they care about</div>
           </div>
         </div>
         <div class="gs-feature-card">
@@ -4519,13 +4522,13 @@ function openTemplateList(mode) {
     });
   }
 
-  if (mode === 'edit') {
+  {
     const newBtn = document.createElement('button');
     newBtn.className = 'tmpl-list-item';
     newBtn.style.justifyContent = 'center';
     newBtn.style.color = 'var(--bar-bg)';
     newBtn.style.fontWeight = '700';
-    newBtn.textContent = '+ New Template';
+    newBtn.textContent = '+ Create New';
     newBtn.addEventListener('click', () => {
       document.getElementById('tmpl-list-overlay').classList.remove('open');
       openTemplateEditor(null);
@@ -4945,7 +4948,7 @@ function renderRewards() {
     pathArea.style.display = 'flex';
     editBtn.style.display = 'none';
     resetBtn.style.display = 'none';
-    newBtn.textContent = 'New Track';
+    newBtn.textContent = 'New Chart';
     taskImgEl.classList.remove('visible');
     taskImgEl.innerHTML = '';
     return;
@@ -5348,7 +5351,7 @@ function openRewardConfig(trackId) {
   editingTrackId = trackId || null;
   const track = trackId ? rewardTracks.find(t => t.id === trackId) : null;
 
-  document.getElementById('reward-config-title').textContent = track ? 'Edit Reward Track' : 'New Reward Track';
+  document.getElementById('reward-config-title').textContent = track ? 'Edit Reward Chart' : 'New Reward Chart';
   document.getElementById('reward-task-input').value = track ? track.taskLabel : '';
   document.getElementById('reward-label-input').value = track ? track.rewardLabel : '';
   configStepperValue = track ? track.targetCount : 5;
@@ -5503,7 +5506,7 @@ document.getElementById('btn-reward-save').addEventListener('click', async () =>
   document.getElementById('reward-config-overlay').classList.remove('open');
   editingTrackId = null;
   renderRewards();
-  showToast('Track saved');
+  showToast('Chart saved');
 });
 
 document.getElementById('btn-reward-cancel').addEventListener('click', () => {
@@ -5519,7 +5522,7 @@ document.getElementById('reward-config-overlay').addEventListener('click', e => 
 
 document.getElementById('btn-reward-delete').addEventListener('click', async () => {
   if (!editingTrackId) return;
-  if (!confirm('Delete this reward track?')) return;
+  if (!confirm('Delete this reward chart?')) return;
   const track = rewardTracks.find(t => t.id === editingTrackId);
   const imageKey = 'reward-' + editingTrackId;
   await deleteImage(imageKey);
@@ -5534,7 +5537,7 @@ document.getElementById('btn-reward-delete').addEventListener('click', async () 
   document.getElementById('reward-config-overlay').classList.remove('open');
   editingTrackId = null;
   renderRewards();
-  showToast('Track deleted');
+  showToast('Chart deleted');
 });
 
 // ── Reward Templates ──
@@ -5763,7 +5766,7 @@ document.getElementById('task-image-picker-overlay').addEventListener('click', e
 
 document.getElementById('btn-new-track').addEventListener('click', async () => {
   if (rewardTracks.length >= 5) {
-    showToast('Maximum 5 tracks');
+    showToast('Maximum 5 charts');
     return;
   }
   try {
@@ -5786,13 +5789,13 @@ document.getElementById('btn-edit-track').addEventListener('click', () => {
 document.getElementById('btn-reset-track').addEventListener('click', async () => {
   const track = getActiveTrack();
   if (!track) return;
-  if (!confirm('Reset this track? Progress will start over.')) return;
+  if (!confirm('Reset this chart? Progress will start over.')) return;
   track.currentCount = 0;
   track.status = 'active';
   track.timerStartedAt = null;
   await saveTrack(track);
   renderRewards();
-  showToast('Track reset');
+  showToast('Chart reset');
 });
 
 
@@ -5805,7 +5808,7 @@ document.getElementById('celebration-overlay').addEventListener('click', () => {
 
 // -- Reset all to defaults --
 document.getElementById('btn-reset-defaults').addEventListener('click', async () => {
-  if (!confirm('Reset everything? All schedules, reward tracks, and settings will be erased.')) return;
+  if (!confirm('Reset everything? All schedules, reward charts, and settings will be erased.')) return;
   const db = await openDB();
   const storeNames = [STORE_IMAGES, STORE_REWARD_TRACKS, STORE_SCHED_TEMPLATES, STORE_ACTIVE_SCHED, STORE_STORIES, STORE_REWARD_TMPLS];
   for (const storeName of storeNames) {
