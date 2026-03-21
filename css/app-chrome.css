@@ -57,8 +57,92 @@ body.parent-mode #fab-quick-add.hidden { display: none; }
 #btn-parent-settings.parent-active {
   color: #FF8F00;
 }
-#btn-parent-settings.parent-active svg {
+#btn-parent-settings.parent-active svg.gear-icon {
   stroke: #FF8F00;
+}
+
+/* ── Parental Gate (press-and-hold) ── */
+#btn-parent-settings {
+  position: relative;
+}
+
+.parental-gate-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.parental-gate-ring circle {
+  fill: none;
+  stroke: var(--bar-bg, #6C63FF);
+  stroke-width: 3;
+  stroke-dasharray: 113;
+  stroke-dashoffset: 113;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 2s linear;
+}
+
+.parental-gate-ring.active {
+  opacity: 1;
+}
+
+.parental-gate-ring.active circle {
+  stroke-dashoffset: 0;
+}
+
+.parental-gate-ring.complete circle {
+  stroke: #43A047;
+}
+
+.gate-hint {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gate-hint.visible {
+  opacity: 1;
+}
+
+.gate-hint::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0,0,0,0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parental-gate-ring circle {
+    transition: none;
+  }
+  .parental-gate-ring.active circle {
+    stroke-dashoffset: 113;
+  }
+  .parental-gate-ring.complete circle {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ── Back Button (inline in message bar) ── */

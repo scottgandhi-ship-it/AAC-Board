@@ -252,8 +252,10 @@
     <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
     <span class="tab-label">Activities</span>
   </button>
-  <button type="button" class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <button type="button" class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Hold for settings">
+    <svg class="gear-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg class="parental-gate-ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/></svg>
+    <span class="gate-hint" id="gate-hint">Hold for settings</span>
     <span class="tab-label">Settings</span>
   </button>
 </nav>
@@ -3321,11 +3323,73 @@ function updateAllAccordionSummaries() {
   updateAacSensorySummary();
 }
 
-document.getElementById('btn-parent-settings').addEventListener('click', () => {
+// ── Parental Gate (press-and-hold to open settings) ──
+function openSettingsPanel() {
   updateAllAccordionSummaries();
   document.getElementById('settings-overlay').classList.add('open');
   updateGridSizeSelect();
-});
+  const saved = localStorage.getItem('aac-child-name') || '';
+  document.getElementById('child-name-input').value = saved;
+  document.getElementById('child-name-status').style.display = 'none';
+  renderActivityCards();
+}
+
+(function initParentalGate() {
+  const btn = document.getElementById('btn-parent-settings');
+  const ring = btn.querySelector('.parental-gate-ring');
+  const hint = document.getElementById('gate-hint');
+  const HOLD_MS = 2000;
+  const HINT_MS = 10000;
+  let timer = null;
+  let hintTimer = null;
+
+  function showHint() {
+    if (!hint) return;
+    hint.classList.add('visible');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.remove('visible'), HINT_MS);
+  }
+
+  showHint();
+
+  function startGate(e) {
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.type === 'keydown') e.preventDefault();
+    if (parentMode) { openSettingsPanel(); return; }
+    if (timer) return;
+    if (hint) { hint.classList.remove('visible'); clearTimeout(hintTimer); }
+    ring.classList.remove('complete');
+    ring.classList.add('active');
+    timer = setTimeout(() => {
+      ring.classList.add('complete');
+      if (navigator.vibrate) navigator.vibrate(50);
+      openSettingsPanel();
+      setTimeout(() => {
+        ring.classList.remove('active', 'complete');
+        ring.querySelector('circle').style.strokeDashoffset = '';
+      }, 300);
+      timer = null;
+    }, HOLD_MS);
+  }
+
+  function cancelGate() {
+    if (!timer) return;
+    clearTimeout(timer);
+    timer = null;
+    ring.classList.remove('active', 'complete');
+    showHint();
+  }
+
+  btn.addEventListener('pointerdown', startGate);
+  btn.addEventListener('pointerup', cancelGate);
+  btn.addEventListener('pointercancel', cancelGate);
+  btn.addEventListener('pointerleave', cancelGate);
+  btn.addEventListener('keydown', startGate);
+  btn.addEventListener('keyup', cancelGate);
+
+  btn.addEventListener('click', e => { e.preventDefault(); });
+  btn.addEventListener('contextmenu', e => { e.preventDefault(); });
+})();
 
 // ── Insights (opened from Settings) ──
 document.getElementById('btn-open-insights').addEventListener('click', () => {
@@ -3368,22 +3432,88 @@ document.getElementById('settings-grid-select').addEventListener('change', async
     return;
   }
 
-  const confirmMsg = t('confirm.gridSwitch', 'Switch to {name}? This will reset your buttons to defaults for that layout. Custom buttons will be lost.').replace('{name}', names[newSize]);
-  if (!confirm(confirmMsg)) {
-    e.target.value = String(getGridSize());
-    return;
+  const currentSize = getGridSize();
+  const sel = e.target;
+
+  try {
+    await saveGridBackup(currentSize, buttons);
+  } catch (err) {
+    if (!confirm('Could not save backup of your current board. Switch anyway?')) {
+      sel.value = String(currentSize);
+      return;
+    }
   }
-  await clearAllData();
-  setGridSize(newSize);
-  buttons = getTemplate(newSize);
-  updateChildNamePhrase();
-  await saveButtons();
-  currentFolder = null;
-  rebuildCoreWordsCache();
-  buildIconLookup();
-  renderGrid();
-  showToast(names[newSize]);
+
+  showGridSwitchModal(newSize, names[newSize], sel);
 });
+
+function showGridSwitchModal(newSize, sizeName, selectEl) {
+  const currentSize = getGridSize();
+
+  const html = `
+    <h2>Switch to ${sizeName}</h2>
+    <p style="color:#555;font-size:0.9rem;margin-bottom:16px;">Your current board has been saved.</p>
+    <button type="button" class="settings-btn" id="btn-grid-fresh" style="background:#4CAF50;color:#fff;font-weight:700;">Keep My Photos</button>
+    <p style="color:#888;font-size:0.8rem;margin:-4px 0 8px 0;">New ${sizeName} layout with your custom photos</p>
+    <button type="button" class="settings-btn" id="btn-grid-default" style="background:#FF9800;color:#fff;font-weight:700;">Reset to Default</button>
+    <p style="color:#888;font-size:0.8rem;margin:-4px 0 8px 0;">Original template, no custom images</p>
+    <button type="button" class="settings-btn" id="btn-grid-cancel" style="margin-top:4px;">Cancel</button>
+  `;
+
+  showExportImportPanel(html);
+
+  async function doFresh() {
+    closeExportImportPanel();
+    const previousImages = await collectAllImages().catch(() => ({}));
+    await clearAllData();
+    setGridSize(newSize);
+    buttons = getTemplate(newSize);
+    updateChildNamePhrase();
+    await saveButtons();
+
+    const newIds = new Set(buttons.map(b => b.id));
+    const carriedOver = {};
+    for (const [id, dataURL] of Object.entries(previousImages)) {
+      if (newIds.has(id)) {
+        try { await saveImage(id, dataURL); carriedOver[id] = true; } catch (e) {}
+      }
+    }
+    localStorage.setItem('aac-custom-images', JSON.stringify(carriedOver));
+    customImageCache = carriedOver;
+
+    currentFolder = null;
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
+    const carried = Object.keys(carriedOver).length;
+    showToast(carried ? sizeName + ' (' + carried + ' image' + (carried > 1 ? 's' : '') + ' kept)' : sizeName);
+  }
+
+  async function doDefault() {
+    closeExportImportPanel();
+    await clearAllData();
+    setGridSize(newSize);
+    buttons = getTemplate(newSize);
+    updateChildNamePhrase();
+    await saveButtons();
+    localStorage.setItem('aac-custom-images', '{}');
+    customImageCache = {};
+    currentFolder = null;
+    rebuildCoreWordsCache();
+    buildIconLookup();
+    renderGrid();
+    showToast(sizeName);
+  }
+
+  function doCancel() {
+    closeExportImportPanel();
+    selectEl.value = String(currentSize);
+  }
+
+  document.getElementById('btn-grid-fresh').addEventListener('click', doFresh);
+  document.getElementById('btn-grid-default').addEventListener('click', doDefault);
+  document.getElementById('btn-grid-cancel').addEventListener('click', doCancel);
+}
 
 // ── Vocabulary Level Setting ──
 const vocabLevelSelect = document.getElementById('settings-vocab-level');
@@ -3665,13 +3795,6 @@ document.getElementById('btn-save-child-name').addEventListener('click', async (
   status.style.color = '#43A047';
   status.style.display = 'block';
   showToast(`"My name is ${name}" added!`);
-});
-
-// Populate child name input on settings open
-document.getElementById('btn-parent-settings').addEventListener('click', () => {
-  const saved = localStorage.getItem('aac-child-name') || '';
-  document.getElementById('child-name-input').value = saved;
-  document.getElementById('child-name-status').style.display = 'none';
 });
 
 document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
@@ -4474,12 +4597,6 @@ document.getElementById('btn-create-routine-save').addEventListener('click', () 
   document.getElementById('create-routine-overlay').style.display = 'none';
   renderRoutinesTab();
   showToast(`${routine.icon} ${routine.name} routine created`);
-});
-
-// Populate activity cards when settings opens
-const _origSettingsOpen = document.getElementById('btn-parent-settings').onclick;
-document.getElementById('btn-parent-settings').addEventListener('click', () => {
-  renderActivityCards();
 });
 
 // ── Create Activity ──

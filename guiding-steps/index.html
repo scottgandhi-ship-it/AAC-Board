@@ -133,8 +133,40 @@ body {
   width: 26px; height: 26px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
 }
-.tab-btn.active svg { fill: currentColor; stroke: currentColor; }
+.tab-btn.active svg.gear-icon { fill: currentColor; stroke: currentColor; }
+.tab-btn.active svg:not(.gear-icon):not(.parental-gate-ring) { fill: currentColor; stroke: currentColor; }
 .tab-label { line-height: 1; letter-spacing: 0.02em; }
+
+/* -- Parental Gate (press-and-hold) -- */
+#btn-parent-settings { position: relative; }
+.parental-gate-ring {
+  position: absolute; top: 50%; left: 50%; width: 44px; height: 44px;
+  transform: translate(-50%, -55%); pointer-events: none; opacity: 0; transition: opacity 0.15s;
+}
+.parental-gate-ring circle {
+  fill: none; stroke: var(--bar-bg, #6C63FF); stroke-width: 3;
+  stroke-dasharray: 113; stroke-dashoffset: 113; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 2s linear;
+}
+.parental-gate-ring.active { opacity: 1; }
+.parental-gate-ring.active circle { stroke-dashoffset: 0; }
+.parental-gate-ring.complete circle { stroke: #43A047; }
+.gate-hint {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.8); color: #fff; font-size: 0.7rem; font-weight: 600;
+  padding: 4px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+}
+.gate-hint.visible { opacity: 1; }
+.gate-hint::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: rgba(0,0,0,0.8);
+}
+@media (prefers-reduced-motion: reduce) {
+  .parental-gate-ring circle { transition: none; }
+  .parental-gate-ring.active circle { stroke-dashoffset: 113; }
+  .parental-gate-ring.complete circle { stroke-dashoffset: 0; }
+}
 
 /* -- Onboarding Overlay -- */
 #gs-onboarding-overlay {
@@ -2908,8 +2940,10 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     <span class="tab-label">Stories</span>
   </button>
-  <button type="button" class="tab-btn" id="btn-parent-settings" aria-label="Settings">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <button type="button" class="tab-btn" id="btn-parent-settings" aria-label="Hold for settings">
+    <svg class="gear-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg class="parental-gate-ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/></svg>
+    <span class="gate-hint" id="gs-gate-hint">Hold for settings</span>
     <span class="tab-label">Settings</span>
   </button>
 </nav>
@@ -3278,13 +3312,69 @@ document.querySelectorAll('.tab-btn').forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.id));
 });
 
-// -- Settings Modal --
-document.getElementById('btn-parent-settings').addEventListener('click', () => {
+// -- Settings Modal (Parental Gate) --
+function openSettingsPanel() {
   updateSensorySummary();
   updateScheduleSummary();
   updateVoiceSummary();
   document.getElementById('settings-overlay').classList.add('open');
-});
+}
+
+(function initParentalGate() {
+  const btn = document.getElementById('btn-parent-settings');
+  const ring = btn.querySelector('.parental-gate-ring');
+  const hint = document.getElementById('gs-gate-hint');
+  const HOLD_MS = 2000;
+  const HINT_MS = 10000;
+  let timer = null;
+  let hintTimer = null;
+
+  function showHint() {
+    if (!hint) return;
+    hint.classList.add('visible');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.remove('visible'), HINT_MS);
+  }
+
+  showHint();
+
+  function startGate(e) {
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.type === 'keydown') e.preventDefault();
+    if (!kidsMode) { openSettingsPanel(); return; }
+    if (timer) return;
+    if (hint) { hint.classList.remove('visible'); clearTimeout(hintTimer); }
+    ring.classList.remove('complete');
+    ring.classList.add('active');
+    timer = setTimeout(() => {
+      ring.classList.add('complete');
+      if (navigator.vibrate) navigator.vibrate(50);
+      openSettingsPanel();
+      setTimeout(() => {
+        ring.classList.remove('active', 'complete');
+        ring.querySelector('circle').style.strokeDashoffset = '';
+      }, 300);
+      timer = null;
+    }, HOLD_MS);
+  }
+
+  function cancelGate() {
+    if (!timer) return;
+    clearTimeout(timer);
+    timer = null;
+    ring.classList.remove('active', 'complete');
+    showHint();
+  }
+
+  btn.addEventListener('pointerdown', startGate);
+  btn.addEventListener('pointerup', cancelGate);
+  btn.addEventListener('pointercancel', cancelGate);
+  btn.addEventListener('pointerleave', cancelGate);
+  btn.addEventListener('keydown', startGate);
+  btn.addEventListener('keyup', cancelGate);
+  btn.addEventListener('click', e => { e.preventDefault(); });
+  btn.addEventListener('contextmenu', e => { e.preventDefault(); });
+})();
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
   ['sensory', 'schedule', 'voice'].forEach(key => {

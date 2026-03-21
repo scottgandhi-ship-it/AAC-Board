@@ -1,9 +1,10 @@
 // ── Parent Mode ──
 const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_BUTTONS = 'buttons';
 const STORE_IMAGES = 'images';
+const STORE_BACKUPS = 'backups';
 
 // ── IndexedDB ──
 function openDB() {
@@ -16,6 +17,9 @@ function openDB() {
       }
       if (!db.objectStoreNames.contains(STORE_IMAGES)) {
         db.createObjectStore(STORE_IMAGES);
+      }
+      if (!db.objectStoreNames.contains(STORE_BACKUPS)) {
+        db.createObjectStore(STORE_BACKUPS);
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -242,6 +246,118 @@ async function clearAllData() {
     tx.objectStore(STORE_IMAGES).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── Grid Backup (auto-save before grid switch) ──
+
+async function saveGridBackup(gridSize, buttonsArray) {
+  const db = await openDB();
+  const images = await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readonly');
+    const store = tx.objectStore(STORE_IMAGES);
+    const allImages = {};
+    const cursorReq = store.openCursor();
+    cursorReq.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        allImages[cursor.key] = cursor.value;
+        cursor.continue();
+      } else {
+        resolve(allImages);
+      }
+    };
+    cursorReq.onerror = () => reject(cursorReq.error);
+  });
+
+  const settings = {};
+  EXPORTED_SETTINGS_KEYS.forEach(key => {
+    const val = localStorage.getItem(key);
+    if (val !== null) settings[key] = val;
+  });
+
+  const backup = {
+    gridSize,
+    buttons: buttonsArray,
+    images,
+    settings,
+    savedAt: new Date().toISOString()
+  };
+
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BACKUPS, 'readwrite');
+    tx.objectStore(STORE_BACKUPS).put(backup, gridSize);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadGridBackup(gridSize) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BACKUPS, 'readonly');
+    const req = tx.objectStore(STORE_BACKUPS).get(gridSize);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function restoreGridBackup(gridSize) {
+  const backup = await loadGridBackup(gridSize);
+  if (!backup) throw new Error('No backup found for grid size ' + gridSize);
+
+  const db = await openDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE_BUTTONS, STORE_IMAGES], 'readwrite');
+    const btnStore = tx.objectStore(STORE_BUTTONS);
+    const imgStore = tx.objectStore(STORE_IMAGES);
+    btnStore.clear();
+    imgStore.clear();
+    backup.buttons.forEach(b => btnStore.put(b));
+    if (backup.images) {
+      Object.entries(backup.images).forEach(([key, val]) => imgStore.put(val, key));
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+
+  if (backup.settings) {
+    Object.entries(backup.settings).forEach(([key, val]) => {
+      if (key === 'aac-grid-size') return;
+      localStorage.setItem(key, val);
+    });
+  }
+
+  return backup;
+}
+
+async function deleteGridBackup(gridSize) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BACKUPS, 'readwrite');
+    tx.objectStore(STORE_BACKUPS).delete(gridSize);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function collectAllImages() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_IMAGES, 'readonly');
+    const store = tx.objectStore(STORE_IMAGES);
+    const images = {};
+    const cursorReq = store.openCursor();
+    cursorReq.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        images[cursor.key] = cursor.value;
+        cursor.continue();
+      } else {
+        resolve(images);
+      }
+    };
+    cursorReq.onerror = () => reject(cursorReq.error);
   });
 }
 
