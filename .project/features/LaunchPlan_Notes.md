@@ -48,23 +48,23 @@
 - [x] Spanish accent marks -- 30+ words fixed across i18n.js + vocabulary.js (2026-03-20)
 - [x] Toileting vocabulary (wet, wipe, pull up added to My Body) (2026-03-20)
 - [x] Privacy statement visible in app (2026-03-20)
-- [ ] Session export for SLP documentation (promoted from v1.1)
+- [x] Session export for SLP documentation (2026-03-21) -- combined with #26 as SLP Progress Report
 - [ ] Use child's name more throughout (promoted from v1.1)
-- [ ] Therapist sharing features -- export reports, import boards (promoted from v1.1)
-- [ ] Search finds core words and folders (promoted from v1.1)
+- [x] Therapist sharing features -- board/folder export already exists; SLP report added (2026-03-21)
+- [x] Search finds core words and folders (2026-03-21)
 
 ### Stream 5C: Review Fixes -- Guiding Steps (v1.0)
 - [x] Parental gate -- tap+hold, same solution as AAC Board (2026-03-21)
-- [ ] Pre-load sample schedule, reward track at first boot
-- [ ] Surface first 4 social story templates on Stories tab at first boot
+- [x] Pre-load sample schedule, reward track at first boot (2026-03-21)
+- [x] Surface story templates on Stories tab at first boot + Create Story card (2026-03-21)
 - [ ] Auto-assign sentence types in quick-create story flow
-- [ ] Rename "Start Schedule" to clarify (e.g., "Set Up a Schedule")
-- [ ] Rename "track" to "chart" throughout reward system
-- [ ] Reward creation contextual labels (Task -> "What is your child working on?")
+- [x] Rename "Start Schedule" to "Set Up a Schedule" (2026-03-21)
+- [x] Rename "track" to "chart" throughout reward system (2026-03-21)
+- [x] Reward creation contextual labels (2026-03-21)
 - [ ] Add confirmation dialog to "Reset all to defaults"
 - [ ] Guide users through pre-loaded sample on first use
-- [ ] Schedule empty state clarification text
-- [ ] Privacy statement visible in app
+- [x] Schedule empty state clarification text (2026-03-21)
+- [x] Privacy statement visible in app (2026-03-21)
 - [ ] Communication log / narrative summary (promoted from v1.1)
 - [ ] Auto-read for social stories -- play all, page by page (promoted from v1.1)
 - [ ] Reorder steps in active schedule without restarting (promoted from v1.1)

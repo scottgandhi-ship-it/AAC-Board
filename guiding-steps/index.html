@@ -6662,12 +6662,34 @@ function updateRatioBar() {
   });
 }
 
+function inferSentenceType(text) {
+  const lower = (text || '').toLowerCase();
+  if (!lower.trim()) return null;
+  const perspectiveWords = ['feel', 'scary', 'nervous', 'worried', 'okay', 'different', 'loud', 'busy', 'tingly', 'afraid', 'upset', 'overwhelm', 'might feel'];
+  const directiveWords = ['can try', 'can hold', 'can squeeze', 'can tell', 'can cover', 'can take a break', 'can ask', 'should', 'remember to'];
+  const cooperativeWords = ['will be there', 'will be right', 'will help', 'will come', 'together', 'parent will', 'teacher will help', 'mommy', 'daddy'];
+  const affirmativeWords = ['proud', 'great job', 'did it', 'well done', 'brave', 'fun', 'important', 'will be clean', 'will look great', 'love'];
+  if (directiveWords.some(w => lower.includes(w))) return 'directive';
+  if (cooperativeWords.some(w => lower.includes(w))) return 'cooperative';
+  if (affirmativeWords.some(w => lower.includes(w))) return 'affirmative';
+  if (perspectiveWords.some(w => lower.includes(w))) return 'perspective';
+  return 'descriptive';
+}
+
 document.getElementById('editor-page-text').addEventListener('input', (e) => {
   const page = editingStory.pages[editingPageIdx];
   page.text = e.target.value;
   if (page._continueNote) {
     delete page._continueNote;
     document.getElementById('editor-page-indicator').textContent = 'Page ' + (editingPageIdx + 1) + ' of ' + editingStory.pages.length;
+  }
+  if (!page._manualType) {
+    const inferred = inferSentenceType(e.target.value);
+    if (inferred && inferred !== page.sentenceType) {
+      page.sentenceType = inferred;
+      document.querySelectorAll('.sentence-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === inferred));
+      updateRatioBar();
+    }
   }
   updateWordCounter(e.target.value);
   updateSaveState();
@@ -6676,7 +6698,9 @@ document.getElementById('editor-page-text').addEventListener('input', (e) => {
 document.getElementById('editor-sentence-type').addEventListener('click', (e) => {
   const btn = e.target.closest('.sentence-type-btn');
   if (!btn) return;
-  editingStory.pages[editingPageIdx].sentenceType = btn.dataset.type;
+  const page = editingStory.pages[editingPageIdx];
+  page.sentenceType = btn.dataset.type;
+  page._manualType = true;
   document.querySelectorAll('.sentence-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === btn.dataset.type));
   updateRatioBar();
 });
