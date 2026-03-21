@@ -1872,6 +1872,8 @@ body.sensory-high-contrast .task-tile {
   color: var(--chrome-text-secondary); cursor: pointer;
 }
 .story-card-action-btn.danger { color: #D32F2F; border-color: #FFCDD2; }
+.story-card-create { border: 2px dashed var(--gray-300); box-shadow: none; background: var(--gray-50); }
+.story-card-create:active { background: var(--gray-100); }
 
 #stories-empty {
   display: none; flex: 1; flex-direction: column; align-items: center;
@@ -4312,6 +4314,22 @@ async function initSchedules() {
     }
   }
   activeSchedule = await loadActiveSchedule();
+
+  if (!activeSchedule && !localStorage.getItem('gs-sample-loaded')) {
+    const morning = schedTemplates.find(t => t.id === 'tmpl-default-morning');
+    if (morning) {
+      activeSchedule = {
+        id: 'current',
+        templateId: morning.id,
+        templateName: morning.name,
+        steps: morning.steps.map((s, i) => ({ ...s, status: i === 0 ? 'current' : 'upcoming' })),
+        activatedAt: Date.now(),
+        completedAt: null,
+      };
+      await saveActiveSchedule(activeSchedule);
+    }
+  }
+
   renderSchedule();
 }
 
@@ -4828,6 +4846,29 @@ function getActiveTrack() {
 
 async function initRewards() {
   rewardTracks = await loadTracks();
+
+  if (rewardTracks.length === 0 && !localStorage.getItem('gs-sample-loaded')) {
+    const sampleTrack = {
+      id: 'track-sample',
+      taskLabel: 'Practice waiting',
+      targetCount: 5,
+      currentCount: 0,
+      rewardLabel: 'Choose a game',
+      rewardImageKey: null,
+      timerEnabled: false,
+      timerDuration: 30,
+      timerStartedAt: null,
+      status: 'active',
+      position: 0,
+      createdAt: Date.now(),
+      taskImageType: 'none',
+      taskDefaultImageKey: null,
+      taskImageKey: null,
+    };
+    await saveTrack(sampleTrack);
+    rewardTracks = [sampleTrack];
+  }
+
   rewardTracks.sort((a, b) => a.position - b.position);
   if (rewardTracks.length > 0 && !activeTrackId) {
     activeTrackId = rewardTracks[0].id;
@@ -5851,6 +5892,40 @@ let editorFileInput = null;
 
 async function initStories() {
   stories = await loadStories();
+
+  if (stories.length === 0 && !localStorage.getItem('gs-sample-loaded')) {
+    const sampleKeys = ['haircut', 'school', 'grocery-store'];
+    const childName = getGlobalChildName();
+    const now = Date.now();
+    for (let i = 0; i < sampleKeys.length; i++) {
+      const tmpl = DEFAULT_STORY_TEMPLATES.find(t => t.key === sampleKeys[i]);
+      if (!tmpl) continue;
+      const story = {
+        id: generateId(),
+        title: tmpl.title,
+        childName: childName,
+        childAge: null,
+        parentName: '',
+        personMode: childName ? 'third' : 'first',
+        createdAt: now + i,
+        updatedAt: now + i,
+        readCount: 0,
+        lastReadAt: null,
+        isTemplate: true,
+        templateKey: tmpl.key,
+        pages: tmpl.pages.map(p => ({
+          text: p.text,
+          sentenceType: p.sentenceType,
+          imageType: p.imageType || 'stock',
+          stockKey: p.stockKey || null,
+          customImageKey: null,
+        })),
+      };
+      await saveStory(story);
+      stories.push(story);
+    }
+  }
+
   renderStoriesList();
 }
 
@@ -5915,6 +5990,13 @@ function renderStoriesList() {
     card.addEventListener('click', () => openStoryReader(story));
     grid.appendChild(card);
   });
+
+  const createCard = document.createElement('div');
+  createCard.className = 'story-card story-card-create';
+  createCard.innerHTML = '<div class="story-card-cover" style="display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#aaa;">+</div>'
+    + '<div class="story-card-info"><div class="story-card-title" style="color:#7C74FF;">Create Story</div></div>';
+  createCard.addEventListener('click', () => openStoryEditor(null));
+  grid.appendChild(createCard);
 }
 
 // -- Story Reader --
@@ -7130,6 +7212,9 @@ async function init() {
   await initSchedules();
   await initRewards();
   await initStories();
+  if (!localStorage.getItem('gs-sample-loaded')) {
+    localStorage.setItem('gs-sample-loaded', 'true');
+  }
   GSOnboarding.init();
 }
 
