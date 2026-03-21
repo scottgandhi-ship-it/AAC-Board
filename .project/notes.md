@@ -1,15 +1,31 @@
 # AAC Communication Board - Project Notes
 
 ## Current Focus
-Activity system enhancements complete (walkthrough + guided stories). Next priorities: iOS app completion, marketing, investor alignment.
+Initial launch preparation -- comprehensive 12-stream launch plan created covering branding, pricing, QA, marketing, legal, and infrastructure for iOS-first release of both AAC Board and Guiding Steps.
 
 ## Active Features
+
+### Initial Launch (Active)
+- Plan: .project/features/LaunchPlan.md
+- Notes: .project/features/LaunchPlan_Notes.md
+- Status: APPROVED -- execution begins 2026-03-23
+- Scope: 12 streams covering branding, pricing, QA, expert reviews, tutorials, website, marketing, SEO, legal, infrastructure
+- Target: iOS-first launch 2026-05-18 (8 weeks)
+- Pricing: $9.99 AAC Board, $4.99 Guiding Steps (paid upfront)
+- Key decisions: Kids category, Crashlytics v1.0, analytics v1.1, PayPal donate, one website
+
+### Modularization (Active -- Opportunistic)
+- Plan: .project/features/ModularizationPlan.md
+- Notes: .project/features/ModularizationPlan_Notes.md
+- Status: Phases 0-3 done, Phase 4 opportunistic per feedback
+- Rollback tag: pre-modularization (commit b475d31)
+- index.html: 12,983 -> 6,273 lines (52% reduction)
+- Extracted: 11 CSS files, 7 JS files
 
 ### iOS App Conversion (Milestone 5)
 - Plan: .project/features/iOSAppConversion.md
 - Notes: .project/features/iOSAppConversion_Notes.md
-- Status: IN PROGRESS -- Phase A/B complete (Capacitor setup, builds, simulator tested)
-- Remaining: A5/B5 PrivacyInfo.xcprivacy, A6/B6 Apple Developer provisioning, A8/B8 app icons, A9/B9 splash screens, Phase C testing
+- Status: COMPLETE -- all phases done, Apple Developer approved, physical device tested
 
 ### Folder Export with Images & Tile Image Preview
 - Plan: .project/features/FolderExportAndImagePreview.md

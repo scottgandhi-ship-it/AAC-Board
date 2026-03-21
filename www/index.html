@@ -461,7 +461,7 @@
             <input type="checkbox" id="grammar-verbs" class="settings-checkbox"> Verb forms
           </label>
           <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;">
-            <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add articles
+            <input type="checkbox" id="grammar-articles" class="settings-checkbox"> Add 'a' and 'the' before words
           </label>
         </div>
       </div>
@@ -470,7 +470,7 @@
         <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:0.95rem;cursor:pointer;">
           <input type="checkbox" id="setting-auto-speak" class="settings-checkbox" checked> Auto-speak sentences
         </label>
-        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, tapping a noun in predictions speaks the full sentence automatically. Turn off to let your child build longer sentences before speaking.</p>
+        <p style="font-size:0.8rem;color:#888;margin:-4px 0 8px 28px;">When on, your child's sentence will be spoken out loud as soon as they pick the last word. Turn off to let them build longer sentences before speaking.</p>
         <button type="button" class="settings-btn danger" id="btn-reset-predictions">Reset learned predictions</button>
         <p style="font-size:0.8rem;color:#888;margin-top:4px;">Clears word prediction data. Useful when switching users or starting fresh.</p>
       </div>
@@ -536,6 +536,10 @@
         <button type="button" class="settings-btn parent-mode-only" id="btn-import-board" style="background:#e3f2fd;color:#1565C0;">Import Board</button>
         <input type="file" id="import-file-input" accept=".aacboard,.json" style="display:none">
         <button type="button" class="settings-btn danger" id="btn-reset-defaults">Reset all to defaults</button>
+      </div>
+      <div class="settings-section">
+        <h3>Privacy</h3>
+        <p style="font-size:0.9rem;color:#666;line-height:1.5;">Your data stays on this device. We don't collect, store, or share any information about you or your child.</p>
       </div>
     </div>
 
@@ -2610,7 +2614,7 @@ function renderInsights() {
 }
 
 
-function exportUsageCSV() {
+async function exportUsageCSV() {
   if (usageLog.length === 0) {
     showToast('No data to export');
     return;
@@ -2622,16 +2626,20 @@ function exportUsageCSV() {
     const ts = new Date(evt.ts).toISOString();
     rows.push('"' + label.replace(/"/g, '""') + '","' + evt.btnId + '","' + ts + '","' + (evt.source || 'independent') + '"');
   }
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'aac-usage-' + todayKey() + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('CSV exported');
+  const csvText = rows.join('\n');
+  const blob = new Blob([csvText], { type: 'text/csv' });
+  const filename = 'aac-usage-' + todayKey() + '.csv';
+  const file = new File([blob], filename, { type: 'text/csv' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ title: 'AAC Usage Data', files: [file] });
+    } else {
+      downloadBlob(blob, filename);
+    }
+    showToast('CSV exported');
+  } catch (err) {
+    if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
+  }
 }
 
 // ── Blended Prediction Ranking ──

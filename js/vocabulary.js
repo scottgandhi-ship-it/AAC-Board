@@ -10,6 +10,9 @@ const CORE_WORD_DEFS = [
   { id: 'core-dont-want',  label: "don't want", color: 'red',    type: 'core', folderId: null, position: 2 },
   { id: 'core-more',       label: 'more',       color: 'blue',   type: 'core', folderId: null, position: 3 },
   { id: 'core-help',       label: 'help',       color: 'green',  type: 'core', folderId: null, position: 4 },
+  { id: 'core-yes',        label: 'yes',        color: 'green',  type: 'core', folderId: null, position: 5 },
+  { id: 'core-no',         label: 'no',         color: 'red',    type: 'core', folderId: null, position: 6 },
+  { id: 'core-stop',       label: 'stop',       color: 'red',    type: 'core', folderId: null, position: 7 },
 ];
 
 // ── Grid Templates (Composition Pattern) ──
@@ -31,10 +34,7 @@ const HOME_GRID_3X3_FOLDERS = [
 
 // 6x6 Talker: 16 folders + 20 extra standalone words on home grid for fast access
 const HOME_GRID_6X6_EXTRAS = [
-  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 16 },
-  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 17 },
-  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 18 },
-  { id: 't-go',     label: 'go',     color: 'green',  type: 'core', folderId: null, position: 19 },
+  { id: 't-go',     label: 'go',     color: 'green',  type: 'core', folderId: null, position: 16 },
   { id: 't-like',   label: 'like',   color: 'green',  type: 'core', folderId: null, position: 20 },
   { id: 't-need',   label: 'need',   color: 'green',  type: 'core', folderId: null, position: 21 },
   { id: 't-you',    label: 'you',    color: 'yellow', type: 'core', folderId: null, position: 22 },
@@ -114,10 +114,7 @@ const HOME_GRID_5X5_FOLDERS = [
   { id: 'folder-nature',    label: 'Nature',       color: 'orange', type: 'folder', folderId: null, position: 21 },
   { id: 'folder-senses',   label: 'I Feel',       color: 'blue',   type: 'folder', folderId: null, position: 22 },
   { id: 'folder-quick',    label: 'Quick Phrases', color: 'pink',  type: 'folder', folderId: null, position: 23 },
-  { id: 'folder-entertainment', label: 'Entertainment', color: 'orange', type: 'folder', folderId: null, position: 24 },
-  { id: 't-yes',    label: 'yes',    color: 'green',  type: 'core', folderId: null, position: 25 },
-  { id: 't-no',     label: 'no',     color: 'red',    type: 'core', folderId: null, position: 26 },
-  { id: 't-stop',   label: 'stop',   color: 'red',    type: 'core', folderId: null, position: 27 }
+  { id: 'folder-entertainment', label: 'Entertainment', color: 'orange', type: 'folder', folderId: null, position: 24 }
 ];
 
 // ── Default Vocabulary ──
@@ -340,6 +337,9 @@ const DEFAULT_BUTTONS = [
   { id: 'body-dry-off',  label: 'dry off',  color: 'green',  type: 'fringe', folderId: 'body', position: 29 },
   { id: 'body-comb-hair',label: 'comb hair',color: 'green',  type: 'fringe', folderId: 'body', position: 30 },
   { id: 'body-flush',    label: 'flush',    color: 'green',  type: 'fringe', folderId: 'body', position: 31 },
+  { id: 'body-wet',      label: 'wet',      color: 'blue',   type: 'fringe', folderId: 'body', position: 32 },
+  { id: 'body-wipe',     label: 'wipe',     color: 'green',  type: 'fringe', folderId: 'body', position: 33 },
+  { id: 'body-pull-up',  label: 'pull up',  color: 'orange', type: 'fringe', folderId: 'body', position: 34 },
 
   // ── Feelings ──
   { id: 'feel-happy',        label: 'happy',       color: 'blue', type: 'fringe', folderId: 'feelings', position: 0 },
@@ -702,7 +702,7 @@ const DEFAULT_BUTTONS = [
   { id: 'qp-more-please',label: 'can I have more',     color: 'green', type: 'fringe', folderId: 'quick', position: 5 },
   { id: 'qp-help-me',    label: 'help me please',      color: 'green', type: 'fringe', folderId: 'quick', position: 6 },
   { id: 'qp-want-that',  label: 'I want that',         color: 'green', type: 'fringe', folderId: 'quick', position: 7 },
-  { id: 'qp-all-done',   label: "I'm all done",        color: 'green', type: 'fringe', folderId: 'quick', position: 8 },
+  { id: 'qp-all-done',   label: "I'm all done",        color: 'red',   type: 'fringe', folderId: 'quick', position: 8 },
   { id: 'qp-go-home',    label: 'I want to go home',   color: 'green', type: 'fringe', folderId: 'quick', position: 9 },
   // Social (pink)
   { id: 'qp-thank-you',  label: 'thank you',           color: 'pink',  type: 'fringe', folderId: 'quick', position: 10 },
@@ -782,10 +782,10 @@ const VOCAB_WORD_POOL = {
   "don't want": { labelEs: 'no quiero',   color: 'red',    icon: '🚫',  symbolKw: 'no want' },
   'more':       { labelEs: 'mas',         color: 'blue',   icon: '➕',  symbolKw: 'more' },
   'help':       { labelEs: 'ayuda',       color: 'green',  icon: '🆘',  symbolKw: 'help' },
-  'stop':       { labelEs: 'para',        color: 'green',  icon: '🛑',  symbolKw: 'stop' },
-  'all done':   { labelEs: 'ya termine',  color: 'green',  icon: '✅',  symbolKw: 'finished' },
-  'no':         { labelEs: 'no',          color: 'pink',   icon: '👎',  symbolKw: 'no' },
-  'yes':        { labelEs: 'si',          color: 'green',  icon: '👍',  symbolKw: 'yes' },
+  'stop':       { labelEs: 'para',        color: 'red',    icon: '🛑',  symbolKw: 'stop' },
+  'all done':   { labelEs: 'ya termin\u00e9',  color: 'red',    icon: '✅',  symbolKw: 'finished' },
+  'no':         { labelEs: 'no',          color: 'red',    icon: '👎',  symbolKw: 'no' },
+  'yes':        { labelEs: 's\u00ed',        color: 'green',  icon: '👍',  symbolKw: 'yes' },
   'again':      { labelEs: 'otra vez',    color: 'blue',   icon: '🔄',  symbolKw: 'again' },
   'my turn':    { labelEs: 'mi turno',    color: 'pink',   icon: '🙋',  symbolKw: 'my turn' },
   'your turn':  { labelEs: 'tu turno',    color: 'pink',   icon: '👉',  symbolKw: 'your turn' },
@@ -961,7 +961,8 @@ const VOCAB_WORD_POOL = {
   'movie':      { labelEs: 'pelicula',    color: 'orange', icon: '🎬',  symbolKw: 'movie' },
   'cape':       { labelEs: 'capa',        color: 'orange', icon: '🦸',  symbolKw: 'cape' },
   'mirror':     { labelEs: 'espejo',      color: 'orange', icon: '🪞',  symbolKw: 'mirror' },
-  'potty':      { labelEs: 'bano',        color: 'orange', icon: '🚽',  symbolKw: 'toilet' },
+  'potty':      { labelEs: 'ba\u00f1o',        color: 'orange', icon: '🚽',  symbolKw: 'toilet' },
+  'pull up':    { labelEs: 'pa\u00f1al',       color: 'orange', icon: '🩲',  symbolKw: 'diaper' },
   'sink':       { labelEs: 'lavabo',      color: 'orange', icon: '🚰',  symbolKw: 'sink' },
   'noodle':     { labelEs: 'flotador',    color: 'orange', icon: '🏊',  symbolKw: 'pool noodle' },
   'teacher':    { labelEs: 'maestra',     color: 'orange', icon: '👩‍🏫', symbolKw: 'teacher' },
@@ -974,7 +975,11 @@ const VOCAB_WORD_POOL = {
   'hold me':    { labelEs: 'sostenme',    color: 'pink',   icon: '🤗',  symbolKw: 'hold me' },
   'are we there': { labelEs: 'ya llegamos', color: 'pink', icon: '❓',  symbolKw: 'are we there' },
   'hot':        { labelEs: 'caliente',    color: 'blue',   icon: '🔥',  symbolKw: 'hot' },
-  'cold':       { labelEs: 'frio',        color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+  'cold':       { labelEs: 'fr\u00edo',       color: 'blue',   icon: '🥶',  symbolKw: 'cold' },
+  'too fast':   { labelEs: 'muy r\u00e1pido',  color: 'blue',   icon: '💨',  symbolKw: 'too fast' },
+  'too loud':   { labelEs: 'muy fuerte',  color: 'blue',   icon: '🔊',  symbolKw: 'too loud' },
+  'too bright': { labelEs: 'muy brillante', color: 'blue', icon: '☀\ufe0f',  symbolKw: 'too bright' },
+  'scary':      { labelEs: 'da miedo',    color: 'blue',   icon: '😨',  symbolKw: 'scary' },
   'wet':        { labelEs: 'mojado',      color: 'blue',   icon: '💧',  symbolKw: 'wet' },
   'clean':      { labelEs: 'limpio',      color: 'blue',   icon: '✨',  symbolKw: 'clean' },
   'dirty':      { labelEs: 'sucio',       color: 'blue',   icon: '🟤',  symbolKw: 'dirty' },
@@ -1817,7 +1822,7 @@ const ACTIVITY_TEMPLATES = {
     core: ['I', 'want', 'more', 'help', 'stop', 'no', 'all done', 'go'],
     actions: ['go', 'stop', 'drive', 'buckle', 'listen', 'look', 'sing', 'wait', 'sleep', 'read', 'watch', 'eat'],
     objects: ['car', 'seat', 'window', 'music', 'snack', 'toy', 'book', 'home', 'truck', 'bus', 'airplane', 'train', 'tree', 'phone'],
-    descriptors: ['fast', 'slow', 'loud', 'quiet', 'bumpy', 'hot', 'cold', 'fun', 'boring', 'sleepy', 'hungry'],
+    descriptors: ['fast', 'slow', 'loud', 'quiet', 'bumpy', 'hot', 'cold', 'fun', 'boring', 'sleepy', 'hungry', 'too fast', 'too loud', 'too bright', 'scary'],
     social: ['please', 'again', 'are we there', "let's go", 'almost done', 'look at me'],
   },
   sensoryplay: {
@@ -2154,7 +2159,7 @@ const FOLDER_ICONS = {
 const BUTTON_ICONS = {
   // Core words
   'core-i': '🙋', 'core-want': '👉', 'core-dont-want': '🚫', 'core-help': '🆘',
-  'core-more': '➕',
+  'core-more': '➕', 'core-yes': '👍', 'core-no': '👎', 'core-stop': '🛑',
   // 6x6 Talker extra words
   't-yes': '👍', 't-no': '👎', 't-stop': '🛑', 't-go': '▶️',
   't-like': '❤️', 't-need': '🙏', 't-you': '👉', 't-my': '🙋',
@@ -2217,6 +2222,7 @@ const BUTTON_ICONS = {
   'body-wash-hands': '🧼', 'body-brush-teeth': '🪥', 'body-go-potty': '🚽',
   'body-take-bath': '🛁', 'body-get-dressed': '👕', 'body-put-on': '👕',
   'body-take-off': '👗', 'body-dry-off': '🧻', 'body-comb-hair': '💇', 'body-flush': '🚽',
+  'body-wet': '💧', 'body-wipe': '🧻', 'body-pull-up': '🩲',
   // Feelings
   'feel-happy': '😊', 'feel-sad': '😢', 'feel-angry': '😠', 'feel-scared': '😨',
   'feel-tired': '😴', 'feel-excited': '🤩', 'feel-frustrated': '😤', 'feel-calm': '😌',

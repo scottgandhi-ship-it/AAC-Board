@@ -1,5 +1,5 @@
 // ── Parent Mode ──
-const PARENT_AUTO_LOCK_MS = 30 * 60 * 1000;
+const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
 const DB_VERSION = 3;
 const STORE_BUTTONS = 'buttons';
@@ -60,8 +60,8 @@ function isEarlyLearnerGrid(size) { return size === 1 || size === 21 || size ===
 
 function getGridSize() {
   const stored = localStorage.getItem('aac-grid-size');
-  if (['1', '21', '2', '3', '5', '6'].includes(stored)) return parseInt(stored);
-  return 4;
+  if (['1', '21', '2', '3', '4', '5', '6'].includes(stored)) return parseInt(stored);
+  return 3;
 }
 
 function setGridSize(size) {
