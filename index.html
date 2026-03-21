@@ -2610,7 +2610,7 @@ function renderInsights() {
 }
 
 
-function exportUsageCSV() {
+async function exportUsageCSV() {
   if (usageLog.length === 0) {
     showToast('No data to export');
     return;
@@ -2622,16 +2622,20 @@ function exportUsageCSV() {
     const ts = new Date(evt.ts).toISOString();
     rows.push('"' + label.replace(/"/g, '""') + '","' + evt.btnId + '","' + ts + '","' + (evt.source || 'independent') + '"');
   }
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'aac-usage-' + todayKey() + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('CSV exported');
+  const csvText = rows.join('\n');
+  const blob = new Blob([csvText], { type: 'text/csv' });
+  const filename = 'aac-usage-' + todayKey() + '.csv';
+  const file = new File([blob], filename, { type: 'text/csv' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ title: 'AAC Usage Data', files: [file] });
+    } else {
+      downloadBlob(blob, filename);
+    }
+    showToast('CSV exported');
+  } catch (err) {
+    if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
+  }
 }
 
 // ── Blended Prediction Ranking ──
