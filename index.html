@@ -91,11 +91,12 @@
       </select>
     </div>
     <div id="activity-preview-actions">
+      <button type="button" id="btn-activity-start">Start Activity</button>
+      <button type="button" id="btn-activity-customize">Customize</button>
+    </div>
+    <div id="activity-preview-actions-secondary">
       <button type="button" id="btn-activity-cancel">Cancel</button>
       <button type="button" id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
-      <button type="button" id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
-      <button type="button" id="btn-activity-customize">Customize</button>
-      <button type="button" id="btn-activity-start">Start Activity</button>
     </div>
   </div>
 </div>
@@ -1506,7 +1507,7 @@ const FITZGERALD_COLOR_LABELS = {
 };
 const FITZGERALD_COLOR_HEX = {
   yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
-  blue: '#42A5F5', pink: '#EC407A', red: '#EF5350', purple: '#AB47BC'
+  blue: '#42A5F5', pink: '#E91E90', red: '#EF5350', purple: '#AB47BC'
 };
 
 function openWordPicker(maxSelections, currentIds, onConfirm, slotIndex, wordSource) {
@@ -2528,7 +2529,7 @@ function getTotalCount() {
 // ── Insights Rendering ──
 const FITZ_BAR_COLORS = {
   yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
-  blue: '#42A5F5', pink: '#EC407A', purple: '#AB47BC', red: '#EF5350'
+  blue: '#42A5F5', pink: '#E91E90', purple: '#AB47BC', red: '#EF5350'
 };
 
 function renderInsights() {
@@ -3361,21 +3362,11 @@ backNavBtn.addEventListener('click', () => {
   updateBackButton();
 });
 
-document.getElementById('btn-export-folder').addEventListener('click', async () => {
+document.getElementById('btn-export-folder').addEventListener('click', () => {
   if (!currentFolder) return;
-  const exportBtn = document.getElementById('btn-export-folder');
-  exportBtn.disabled = true;
-  try {
-    const folderBtn = buttons.find(b => b.id === 'folder-' + currentFolder);
-    const folderLabel = folderBtn ? folderBtn.label : currentFolder;
-    const data = await buildFolderExportData([currentFolder], folderLabel);
-    await triggerExportDownload(data, folderLabel);
-    const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
-    showToast('Folder exported!' + skipMsg);
-  } catch (err) {
-    if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
-  }
-  exportBtn.disabled = false;
+  const folderBtn = buttons.find(b => b.id === 'folder-' + currentFolder);
+  const folderLabel = folderBtn ? folderBtn.label : currentFolder;
+  showFolderExportModeModal([currentFolder], folderLabel);
 });
 
 // Patch switchTab and renderGrid to keep back button in sync
@@ -4321,7 +4312,6 @@ function openActivityPreview(activityId) {
   title.innerHTML = `<span>${activity.icon}</span> ${currentLang === 'es' ? activity.nameEs : activity.name}`;
   desc.textContent = `${activity.words.length} words`;
   document.getElementById('btn-activity-delete').style.display = activity.custom ? '' : 'none';
-  document.getElementById('btn-activity-duplicate').style.display = activity.custom ? '' : 'none';
   document.getElementById('btn-activity-customize').textContent = activity.custom
     ? (currentLang === 'es' ? 'Editar' : 'Edit')
     : (currentLang === 'es' ? 'Personalizar' : 'Customize');
@@ -4363,14 +4353,6 @@ document.getElementById('btn-activity-customize').addEventListener('click', () =
   const activity = getAllActivities().find(a => a.id === activityId);
   overlay.classList.remove('open');
   if (activity) openCreateActivityModal(activity, activity.custom ? true : false);
-});
-
-document.getElementById('btn-activity-duplicate').addEventListener('click', () => {
-  const overlay = document.getElementById('activity-preview-overlay');
-  const activityId = overlay.dataset.activityId;
-  const activity = getAllActivities().find(a => a.id === activityId);
-  overlay.classList.remove('open');
-  if (activity) openCreateActivityModal(activity, false);
 });
 
 document.getElementById('btn-activity-start').addEventListener('click', () => {
@@ -5794,7 +5776,7 @@ async function triggerExportDownload(data, name) {
   }
 }
 
-async function buildFolderExportData(folderIds, boardName, onProgress) {
+async function buildFolderExportData(folderIds, boardName, mode, onProgress) {
   const allButtons = await loadButtons();
   const folders = [];
   const images = {};
@@ -5810,15 +5792,18 @@ async function buildFolderExportData(folderIds, boardName, onProgress) {
   }
 
   let skippedImages = 0;
-  for (let i = 0; i < allBtnIds.length; i++) {
-    try {
-      const blob = await loadImage(allBtnIds[i]);
-      if (blob) {
-        images[allBtnIds[i]] = await compressImage(blob);
-        markAsCustomImage(allBtnIds[i]);
-      }
-    } catch { skippedImages++; }
-    if (onProgress) onProgress((i + 1) / allBtnIds.length);
+  if (mode === 'backup') {
+    loadCustomImageCache();
+    const customIds = allBtnIds.filter(id => isCustomImage(id));
+    for (let i = 0; i < customIds.length; i++) {
+      try {
+        const blob = await loadImage(customIds[i]);
+        if (blob) {
+          images[customIds[i]] = await compressImage(blob);
+        }
+      } catch { skippedImages++; }
+      if (onProgress) onProgress((i + 1) / customIds.length);
+    }
   }
 
   return {
@@ -5899,6 +5884,70 @@ function compressImage(data) {
   });
 }
 
+function showFolderExportModeModal(folderIds, exportName) {
+  const html = `
+    <h2>Export ${escapeHtml(exportName)}</h2>
+    <div id="folder-export-mode-template" class="export-mode-option selected" tabindex="0" role="radio" aria-checked="true">
+      <h4>Share as Template</h4>
+      <p>Folder structure without personal photos. Best for sharing with others.</p>
+    </div>
+    <div id="folder-export-mode-backup" class="export-mode-option" tabindex="0" role="radio" aria-checked="false" style="margin-top:8px;">
+      <h4>Full Backup</h4>
+      <p>Complete folder with all your custom photos. Best for moving to a new device.</p>
+    </div>
+    <div class="export-progress" id="folder-mode-progress" style="display:none;">
+      <div class="export-progress-bar" id="folder-mode-progress-bar" style="width:0%"></div>
+    </div>
+    <div id="folder-mode-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>
+    <button type="button" class="settings-btn" id="btn-do-folder-mode-export" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Export</button>
+    <button type="button" class="settings-btn" id="btn-cancel-folder-mode-export">Cancel</button>
+  `;
+  showExportImportPanel(html);
+
+  let selectedMode = 'template';
+  const templateOpt = document.getElementById('folder-export-mode-template');
+  const backupOpt = document.getElementById('folder-export-mode-backup');
+
+  function selectMode(mode) {
+    selectedMode = mode;
+    templateOpt.classList.toggle('selected', mode === 'template');
+    backupOpt.classList.toggle('selected', mode === 'backup');
+    templateOpt.setAttribute('aria-checked', mode === 'template');
+    backupOpt.setAttribute('aria-checked', mode === 'backup');
+  }
+
+  templateOpt.addEventListener('click', () => selectMode('template'));
+  backupOpt.addEventListener('click', () => selectMode('backup'));
+  document.getElementById('btn-cancel-folder-mode-export').addEventListener('click', closeExportImportPanel);
+
+  document.getElementById('btn-do-folder-mode-export').addEventListener('click', async () => {
+    const exportBtn = document.getElementById('btn-do-folder-mode-export');
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Exporting...';
+    try {
+      const data = await buildFolderExportData(folderIds, exportName, selectedMode, (progress) => {
+        const bar = document.getElementById('folder-mode-progress');
+        const fill = document.getElementById('folder-mode-progress-bar');
+        const status = document.getElementById('folder-mode-status');
+        bar.style.display = 'block';
+        status.style.display = 'block';
+        fill.style.width = Math.round(progress * 100) + '%';
+        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
+      });
+      await triggerExportDownload(data, exportName);
+      closeExportImportPanel();
+      const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
+      showToast('Exported!' + skipMsg);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export';
+        showToast('Export failed. Please try again.');
+      }
+    }
+  });
+}
+
 async function showFolderSelectModal() {
   const allButtons = await loadButtons();
   const folderBtns = allButtons.filter(b => b.type === 'folder');
@@ -5928,10 +5977,6 @@ async function showFolderSelectModal() {
     + '<button type="button" id="btn-folder-select-none">Clear</button>'
     + '</div>'
     + '<div class="folder-select-grid">' + cardsHtml + '</div>'
-    + '<div class="export-progress" id="folder-export-progress" style="display:none;">'
-    + '<div class="export-progress-bar" id="folder-export-progress-bar" style="width:0%"></div>'
-    + '</div>'
-    + '<div id="folder-export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>'
     + '<button type="button" class="settings-btn" id="btn-do-folder-export" style="background:#ccc;color:#fff;font-weight:700;margin-top:12px;" disabled>Select folders to export</button>'
     + '<button type="button" class="settings-btn" id="btn-cancel-folder-export">Cancel</button>';
 
@@ -5990,36 +6035,14 @@ async function showFolderSelectModal() {
 
   document.getElementById('btn-cancel-folder-export').addEventListener('click', closeExportImportPanel);
 
-  document.getElementById('btn-do-folder-export').addEventListener('click', async () => {
+  document.getElementById('btn-do-folder-export').addEventListener('click', () => {
     if (selectedIds.size === 0) return;
-    const exportBtn = document.getElementById('btn-do-folder-export');
-    exportBtn.disabled = true;
-    exportBtn.textContent = 'Exporting...';
-    try {
-      const ids = [...selectedIds];
-      const name = ids.length === 1
-        ? (folderBtns.find(b => b.id === 'folder-' + ids[0])?.label || ids[0])
-        : 'AAC_Folders';
-      const data = await buildFolderExportData(ids, name, (progress) => {
-        const bar = document.getElementById('folder-export-progress');
-        const fill = document.getElementById('folder-export-progress-bar');
-        const status = document.getElementById('folder-export-status');
-        bar.style.display = 'block';
-        status.style.display = 'block';
-        fill.style.width = Math.round(progress * 100) + '%';
-        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
-      });
-      await triggerExportDownload(data, name);
-      closeExportImportPanel();
-      const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
-      showToast(ids.length + ' folder' + (ids.length > 1 ? 's' : '') + ' exported!' + skipMsg);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        exportBtn.disabled = false;
-        exportBtn.textContent = 'Export ' + selectedIds.size + ' Folder' + (selectedIds.size > 1 ? 's' : '');
-        showToast('Export failed. Please try again.');
-      }
-    }
+    const ids = [...selectedIds];
+    const name = ids.length === 1
+      ? (folderBtns.find(b => b.id === 'folder-' + ids[0])?.label || ids[0])
+      : 'AAC_Folders';
+    closeExportImportPanel();
+    showFolderExportModeModal(ids, name);
   });
 }
 

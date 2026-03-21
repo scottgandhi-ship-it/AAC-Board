@@ -178,7 +178,7 @@ const DEFAULT_BUTTONS = [
   { id: 'gen-goodnight',  label: 'goodnight',  color: 'pink',   type: 'fringe', folderId: 'general', position: 26 },
   { id: 'gen-see-you',    label: 'see you later',color:'pink',   type: 'fringe', folderId: 'general', position: 27 },
   { id: 'gen-yr-welcome', label: "you're welcome",color:'pink',  type: 'fringe', folderId: 'general', position: 28 },
-  { id: 'gen-no-thank-you',label:'no thank you',color: 'red',    type: 'fringe', folderId: 'general', position: 29 },
+  { id: 'gen-no-thank-you',label:'no thank you',color: 'pink',   type: 'fringe', folderId: 'general', position: 29 },
   { id: 'gen-cool',       label: 'cool',       color: 'pink',   type: 'fringe', folderId: 'general', position: 30 },
   { id: 'gen-awesome',    label: 'awesome',    color: 'pink',   type: 'fringe', folderId: 'general', position: 31 },
   { id: 'gen-thats-funny',label: "that's funny",color:'pink',   type: 'fringe', folderId: 'general', position: 32 },
@@ -708,8 +708,8 @@ const DEFAULT_BUTTONS = [
   { id: 'qp-thank-you',  label: 'thank you',           color: 'pink',  type: 'fringe', folderId: 'quick', position: 10 },
   { id: 'qp-love-you',   label: 'I love you',          color: 'pink',  type: 'fringe', folderId: 'quick', position: 11 },
   { id: 'qp-play-with-me',label:'play with me',        color: 'pink',  type: 'fringe', folderId: 'quick', position: 12 },
-  // Regulation (blue)
-  { id: 'qp-need-break', label: 'I need a break',      color: 'blue',  type: 'fringe', folderId: 'quick', position: 13 },
+  // Regulation (red)
+  { id: 'qp-need-break', label: 'I need a break',      color: 'red',   type: 'fringe', folderId: 'quick', position: 13 },
   { id: 'qp-too-loud',   label: "it's too loud",       color: 'blue',  type: 'fringe', folderId: 'quick', position: 14 },
   // Likes/preferences (green)
   { id: 'qp-like-that',  label: 'I like that',         color: 'green', type: 'fringe', folderId: 'quick', position: 15 },

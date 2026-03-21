@@ -516,6 +516,21 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
   font-weight: 700;
   cursor: pointer;
 }
+#activity-preview-actions-secondary {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+#activity-preview-actions-secondary button {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
 #btn-activity-start {
   background: linear-gradient(135deg, #7C74FF, #6C63FF);
   color: #fff;
