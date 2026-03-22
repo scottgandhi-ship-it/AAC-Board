@@ -119,8 +119,21 @@ function getVoice() {
   const activeLang = currentLang === 'en' ? 'en' : 'es';
   return pickDefaultVoice(langVoices) || langVoices[0] || voices.find(v => v.lang.startsWith(activeLang)) || voices[0] || null;
 }
-// Pronunciation overrides for TTS (iOS Safari says "capital I" for lone "I")
-const SPEAK_OVERRIDES = { 'I': 'eye' };
+// Pronunciation overrides for TTS
+const SPEAK_OVERRIDES = {
+  'I': 'eye',
+  'help': 'help.',
+  'want': 'wont.',
+  'wait': 'wayt.',
+  'play': 'play.',
+  'soup': 'soop.',
+  'fruit snacks': 'froot snacks.',
+  'ice cream': 'ice creem.',
+  'peanut butter': 'penut butter.',
+  'hamburger': 'ham burger.',
+  'orange juice': 'ornge juice.',
+  'apple juice': 'apple juice.',
+};
 
 function getSpeakOverrides() {
   if (currentLang === 'en') return SPEAK_OVERRIDES;
@@ -137,9 +150,11 @@ function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
   haptic();
   speechSynthesis.cancel();
-  // Apply overrides for single-word utterances
   const overrides = getSpeakOverrides();
-  const spoken = overrides[text] || text;
+  let spoken = overrides[text] || text;
+  if (!spoken.endsWith('.') && !spoken.endsWith('!') && !spoken.endsWith('?')) {
+    spoken += '.';
+  }
   const utter = new SpeechSynthesisUtterance(spoken);
   const voice = getVoice();
   if (voice) utter.voice = voice;
