@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<title>AAC Board</title>
+<title>Yappie</title>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/ui-shared.css">
 <link rel="stylesheet" href="css/app-chrome.css">
@@ -27,7 +27,7 @@
 
 <!-- App Header -->
 <div id="app-header">
-  <span id="app-header-title">AAC Board</span>
+  <span id="app-header-title">Yappie</span>
 </div>
 
 <!-- Talk View (AAC Board) -->
@@ -91,11 +91,12 @@
       </select>
     </div>
     <div id="activity-preview-actions">
+      <button type="button" id="btn-activity-start">Start Activity</button>
+      <button type="button" id="btn-activity-customize">Customize</button>
+    </div>
+    <div id="activity-preview-actions-secondary">
       <button type="button" id="btn-activity-cancel">Cancel</button>
       <button type="button" id="btn-activity-delete" class="parent-mode-only" style="display:none;background:#FFEBEE;color:#C62828;">Delete</button>
-      <button type="button" id="btn-activity-duplicate" class="parent-mode-only" style="display:none;background:#E8EAF6;color:#283593;">Duplicate</button>
-      <button type="button" id="btn-activity-customize">Customize</button>
-      <button type="button" id="btn-activity-start">Start Activity</button>
     </div>
   </div>
 </div>
@@ -233,6 +234,15 @@
       <div id="insights-activity-list"></div>
     </div>
     <div class="insights-actions">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <label for="report-range" style="font-weight:600;font-size:0.85rem;color:#555;">Report period:</label>
+        <select id="report-range" style="flex:1;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:0.9rem;font-family:inherit;">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+      </div>
+      <button type="button" id="btn-share-report">Share Progress Report</button>
       <button type="button" id="btn-export-csv">Export CSV</button>
       <button type="button" id="btn-clear-usage" class="danger">Clear Data</button>
     </div>
@@ -633,7 +643,7 @@
 <div id="search-overlay">
   <div id="search-panel">
     <div id="search-header">
-      <input type="text" id="search-input" placeholder="Search words..." autocomplete="off">
+      <input type="search" id="search-input" placeholder="Search words..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
       <button type="button" id="btn-close-search">Close</button>
     </div>
     <div id="search-results"></div>
@@ -1497,7 +1507,7 @@ const FITZGERALD_COLOR_LABELS = {
 };
 const FITZGERALD_COLOR_HEX = {
   yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
-  blue: '#42A5F5', pink: '#EC407A', red: '#EF5350', purple: '#AB47BC'
+  blue: '#42A5F5', pink: '#E91E90', red: '#EF5350', purple: '#AB47BC'
 };
 
 function openWordPicker(maxSelections, currentIds, onConfirm, slotIndex, wordSource) {
@@ -2519,7 +2529,7 @@ function getTotalCount() {
 // ── Insights Rendering ──
 const FITZ_BAR_COLORS = {
   yellow: '#FFD54F', green: '#66BB6A', orange: '#FFA726',
-  blue: '#42A5F5', pink: '#EC407A', purple: '#AB47BC', red: '#EF5350'
+  blue: '#42A5F5', pink: '#E91E90', purple: '#AB47BC', red: '#EF5350'
 };
 
 function renderInsights() {
@@ -2641,6 +2651,161 @@ async function exportUsageCSV() {
     showToast('CSV exported');
   } catch (err) {
     if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
+  }
+}
+
+// ── SLP Progress Report ──
+
+function generateSLPReport(days) {
+  const cutoff = Date.now() - (days * 86400000);
+  const filtered = usageLog.filter(e => e.ts >= cutoff);
+
+  if (filtered.length === 0) return null;
+
+  const childName = localStorage.getItem('aac-child-name') || '';
+  const now = new Date();
+  const startDate = new Date(cutoff);
+  const fmt = d => (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+
+  const allWords = getAllVocabWords();
+  const allTemplateButtons = getTemplate(getGridSize());
+  const btnLookup = {};
+  [...allWords, ...allTemplateButtons].forEach(b => { if (!btnLookup[b.id]) btnLookup[b.id] = b; });
+
+  const wordCounts = {};
+  const dailyCounts = {};
+  const categoryCounts = {};
+  for (const evt of filtered) {
+    wordCounts[evt.btnId] = (wordCounts[evt.btnId] || 0) + 1;
+    const dk = getDateKey(evt.ts);
+    dailyCounts[dk] = (dailyCounts[dk] || 0) + 1;
+
+    const btn = btnLookup[evt.btnId];
+    const color = btn ? (btn.color || 'other') : 'other';
+    const cat = FITZGERALD_COLOR_LABELS[color] || 'Other';
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+  }
+
+  const totalWords = filtered.length;
+  const activeDays = Object.keys(dailyCounts).length;
+  const avgPerDay = activeDays > 0 ? (totalWords / activeDays).toFixed(1) : '0';
+
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dk = getDateKey(d.getTime());
+    if (dailyCounts[dk]) streak++;
+    else break;
+  }
+
+  const topWords = Object.entries(wordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(([id, count], i) => {
+      const btn = btnLookup[id];
+      const label = btn ? btn.label : id;
+      const color = btn ? (btn.color || '') : '';
+      const cat = FITZGERALD_COLOR_LABELS[color] || 'Other';
+      const rank = String(i + 1).padStart(2, ' ');
+      const padLabel = (label + '                    ').slice(0, 20);
+      return rank + '. ' + padLabel + '(' + count + ' taps)  [' + cat + ']';
+    });
+
+  const catSorted = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([cat, count]) => {
+      const pct = Math.round((count / totalWords) * 100);
+      const padCat = (cat + ':              ').slice(0, 15);
+      return padCat + count + ' (' + pct + '%)';
+    });
+
+  let lines = [];
+  lines.push('Yappie Progress Report');
+  if (childName) lines.push('Child: ' + childName);
+  lines.push('Period: ' + fmt(startDate) + ' - ' + fmt(now) + ' (' + days + ' days)');
+  lines.push('Generated: ' + fmt(now));
+  lines.push('');
+  lines.push('-- Communication Summary --');
+  lines.push('Total words communicated: ' + totalWords);
+  lines.push('Average words per day: ' + avgPerDay);
+  lines.push('Active days: ' + activeDays + ' of ' + days + ' (' + Math.round((activeDays / days) * 100) + '%)');
+  lines.push('Current streak: ' + streak + ' day' + (streak !== 1 ? 's' : ''));
+  lines.push('');
+  lines.push('-- Top Vocabulary --');
+  topWords.forEach(l => lines.push(l));
+  lines.push('');
+  lines.push('-- Category Breakdown --');
+  catSorted.forEach(l => lines.push(l));
+
+  const actInsights = getActivityInsights();
+  if (actInsights.length > 0) {
+    lines.push('');
+    lines.push('-- Activity Usage --');
+    actInsights.forEach(a => {
+      lines.push(a.name + ': ' + a.sessions + ' session' + (a.sessions !== 1 ? 's' : '') + (a.avgMinutes > 0 ? ', avg ' + a.avgMinutes + ' min' : ''));
+      if (a.topWords && a.topWords.length > 0) {
+        lines.push('  Top words: ' + a.topWords.map(w => w.label).join(', '));
+      }
+    });
+  }
+
+  const weeklyData = [];
+  for (let w = 0; w < Math.min(Math.ceil(days / 7), 8); w++) {
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - ((w + 1) * 7) + 1);
+    const weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() - (w * 7));
+    let weekTotal = 0;
+    let weekDays = 0;
+    for (let d = 0; d < 7; d++) {
+      const dd = new Date(weekStart);
+      dd.setDate(dd.getDate() + d);
+      const dk = getDateKey(dd.getTime());
+      if (dailyCounts[dk]) { weekTotal += dailyCounts[dk]; weekDays++; }
+    }
+    if (weekDays > 0) {
+      weeklyData.unshift({ label: 'Week of ' + fmt(weekStart), avg: Math.round(weekTotal / 7) });
+    }
+  }
+
+  if (weeklyData.length >= 2) {
+    lines.push('');
+    lines.push('-- Weekly Trend --');
+    weeklyData.forEach(w => lines.push(w.label + ':  avg ' + w.avg + '/day'));
+    const first = weeklyData[0].avg;
+    const last = weeklyData[weeklyData.length - 1].avg;
+    const trend = last > first * 1.1 ? 'Increasing' : last < first * 0.9 ? 'Decreasing' : 'Stable';
+    lines.push('Trend: ' + trend);
+  }
+
+  lines.push('');
+  lines.push('Generated by Yappie');
+
+  return lines.join('\n');
+}
+
+async function shareProgressReport() {
+  const days = parseInt(document.getElementById('report-range').value) || 30;
+  const report = generateSLPReport(days);
+  if (!report) {
+    showToast('No usage data for this period');
+    return;
+  }
+  const childName = localStorage.getItem('aac-child-name') || 'aac-board';
+  const filename = childName.toLowerCase().replace(/\s+/g, '-') + '-progress-' + days + 'day-' + todayKey() + '.txt';
+  const blob = new Blob([report], { type: 'text/plain' });
+  const file = new File([blob], filename, { type: 'text/plain' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ title: 'AAC Progress Report', files: [file] });
+    } else {
+      downloadBlob(blob, filename);
+    }
+    showToast('Progress report shared');
+  } catch (err) {
+    if (err.name !== 'AbortError') showToast('Share failed. Please try again.');
   }
 }
 
@@ -2908,7 +3073,7 @@ function setupGridDelegation() {
     if (!cell) return;
     if (_gridDidLongPress) { _gridDidLongPress = false; return; }
     const btnId = cell.getAttribute('data-id');
-    const btn = buttons.find(b => b.id === btnId);
+    let btn = buttons.find(b => b.id === btnId);
     if (!btn) return;
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
@@ -2938,7 +3103,8 @@ let _imagePreviewBlobUrl = null;
 let _imagePreviewTriggerCell = null;
 
 function showImagePreview(buttonId) {
-  const btn = buttons.find(b => b.id === buttonId);
+  let btn = buttons.find(b => b.id === buttonId);
+  if (!btn && activeActivity) btn = activeActivity.words.find(w => w.id === buttonId);
   if (!btn) return;
   _imagePreviewTriggerCell = document.querySelector('.cell[data-id="' + buttonId + '"]');
   loadImage(buttonId).then(data => {
@@ -3062,11 +3228,91 @@ document.getElementById('btn-backspace').addEventListener('click', () => {
 });
 
 // ── Word Search ──
+function renderSearchBrowse() {
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'search-group-header';
+  header.textContent = t('search.browse', 'Browse by category');
+  resultsEl.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.className = 'search-browse-grid';
+
+  const folders = buttons.filter(b => b.type === 'folder');
+  folders.forEach(btn => {
+    const cell = document.createElement('button');
+    cell.className = 'search-browse-btn';
+
+    const icon = document.createElement('span');
+    icon.className = 'search-browse-icon';
+    icon.textContent = BUTTON_ICONS[btn.id] || FOLDER_ICONS[btn.id.replace('folder-', '')] || '📁';
+    cell.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.textContent = getPrimaryLabel(btn);
+    cell.appendChild(label);
+
+    cell.addEventListener('click', () => {
+      currentFolder = btn.id.replace('folder-', '');
+      clearPredictions();
+      renderGrid();
+      document.getElementById('search-overlay').classList.remove('open');
+    });
+    grid.appendChild(cell);
+  });
+
+  if (folders.length === 0) {
+    resultsEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:32px 0;">' + t('search.typeToSearch', 'Type to search all words...') + '</div>';
+    return;
+  }
+  resultsEl.appendChild(grid);
+}
+
+function createSearchCell(btn, folderLabels) {
+  const cell = document.createElement('button');
+  cell.className = 'search-result-cell';
+  cell.setAttribute('data-color', btn.color);
+
+  const icon = document.createElement('span');
+  icon.className = 'search-icon';
+  icon.textContent = BUTTON_ICONS[btn.id] || '💬';
+  cell.appendChild(icon);
+
+  const label = document.createElement('span');
+  label.className = 'search-label';
+  label.textContent = getPrimaryLabel(btn);
+  cell.appendChild(label);
+
+  if (btn.type === 'folder') {
+    const tag = document.createElement('span');
+    tag.className = 'search-folder';
+    tag.textContent = t('search.folder', 'Folder');
+    cell.appendChild(tag);
+  }
+
+  cell.addEventListener('click', () => {
+    if (btn.type === 'folder') {
+      currentFolder = btn.id.replace('folder-', '');
+      clearPredictions();
+      renderGrid();
+    } else {
+      const speakText = getSpeakLabel(btn);
+      speak(speakText);
+      addWordToMessage(speakText, btn.id);
+      recordUsageEvent(btn.id, 'independent');
+    }
+    document.getElementById('search-overlay').classList.remove('open');
+  });
+  return cell;
+}
+
 document.getElementById('btn-search').addEventListener('click', () => {
   document.getElementById('search-overlay').classList.add('open');
   const input = document.getElementById('search-input');
   input.value = '';
-  document.getElementById('search-results').innerHTML = '';
+  renderSearchBrowse();
   setTimeout(() => input.focus(), 100);
 });
 
@@ -3083,54 +3329,69 @@ document.getElementById('search-overlay').addEventListener('click', e => {
 document.getElementById('search-input').addEventListener('input', e => {
   const query = e.target.value.trim().toLowerCase();
   const resultsEl = document.getElementById('search-results');
-  resultsEl.innerHTML = '';
-  if (query.length === 0) return;
 
-  const matches = buttons.filter(b => {
-    if (b.type !== 'fringe') return false;
+  if (query.length === 0) {
+    renderSearchBrowse();
+    return;
+  }
+
+  resultsEl.innerHTML = '';
+
+  const filtered = buttons.filter(b => {
+    if (b.type !== 'fringe' && b.type !== 'core' && b.type !== 'folder') return false;
     const primary = getPrimaryLabel(b).toLowerCase();
     const english = b.label.toLowerCase();
     return primary.includes(query) || english.includes(query);
-  }).slice(0, 30);
+  });
 
-  // Build a map of folderId -> folder label
+  const typeOrder = { core: 0, folder: 1, fringe: 2 };
+  const matches = filtered.sort((a, b) => (typeOrder[a.type] || 2) - (typeOrder[b.type] || 2)).slice(0, 40);
+
   const folderLabels = {};
   buttons.filter(b => b.type === 'folder').forEach(b => {
     folderLabels[b.id.replace('folder-', '')] = getPrimaryLabel(b);
   });
 
+  // Group matches by category
+  const groups = {};
   matches.forEach(btn => {
-    const cell = document.createElement('button');
-    cell.className = 'search-result-cell';
-    cell.setAttribute('data-color', btn.color);
+    let groupKey;
+    if (btn.type === 'folder') groupKey = '__folders';
+    else if (btn.type === 'core') groupKey = '__core';
+    else groupKey = btn.folderId || '__other';
+    if (!groups[groupKey]) groups[groupKey] = [];
+    groups[groupKey].push(btn);
+  });
 
-    const icon = document.createElement('span');
-    icon.className = 'search-icon';
-    icon.textContent = BUTTON_ICONS[btn.id] || '💬';
-    cell.appendChild(icon);
+  // Render groups in order: folders, core, then by folder name
+  const groupOrder = ['__folders', '__core'];
+  const otherKeys = Object.keys(groups).filter(k => !groupOrder.includes(k)).sort((a, b) => {
+    return (folderLabels[a] || a).localeCompare(folderLabels[b] || b);
+  });
+  const orderedKeys = [...groupOrder.filter(k => groups[k]), ...otherKeys];
 
-    const label = document.createElement('span');
-    label.className = 'search-label';
-    label.textContent = getPrimaryLabel(btn);
-    cell.appendChild(label);
+  const groupLabels = {
+    '__folders': t('search.folders', 'Folders'),
+    '__core': t('search.coreWords', 'Core Words'),
+    '__other': t('search.other', 'Other'),
+  };
 
-    const folder = document.createElement('span');
-    folder.className = 'search-folder';
-    folder.textContent = folderLabels[btn.folderId] || btn.folderId || '';
-    cell.appendChild(folder);
+  orderedKeys.forEach(key => {
+    const header = document.createElement('div');
+    header.className = 'search-group-header';
+    header.textContent = groupLabels[key] || folderLabels[key] || key;
+    resultsEl.appendChild(header);
 
-    cell.addEventListener('click', () => {
-      const speakText = getSpeakLabel(btn);
-      speak(speakText);
-      addWordToMessage(speakText, btn.id);
-      recordUsageEvent(btn.id, 'independent');
-      document.getElementById('search-overlay').classList.remove('open');
+    const grid = document.createElement('div');
+    grid.className = 'search-grid';
+    groups[key].forEach(btn => {
+      grid.appendChild(createSearchCell(btn, folderLabels));
     });
-    resultsEl.appendChild(cell);
+    resultsEl.appendChild(grid);
   });
 
   if (matches.length === 0) {
-    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">' + t('search.noMatches', 'No matches found') + '</div>';
+    resultsEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:32px 0;">' + t('search.noMatches', 'No matches found') + '</div>';
   }
 });
 
@@ -3189,21 +3450,11 @@ backNavBtn.addEventListener('click', () => {
   updateBackButton();
 });
 
-document.getElementById('btn-export-folder').addEventListener('click', async () => {
+document.getElementById('btn-export-folder').addEventListener('click', () => {
   if (!currentFolder) return;
-  const exportBtn = document.getElementById('btn-export-folder');
-  exportBtn.disabled = true;
-  try {
-    const folderBtn = buttons.find(b => b.id === 'folder-' + currentFolder);
-    const folderLabel = folderBtn ? folderBtn.label : currentFolder;
-    const data = await buildFolderExportData([currentFolder], folderLabel);
-    await triggerExportDownload(data, folderLabel);
-    const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
-    showToast('Folder exported!' + skipMsg);
-  } catch (err) {
-    if (err.name !== 'AbortError') showToast('Export failed. Please try again.');
-  }
-  exportBtn.disabled = false;
+  const folderBtn = buttons.find(b => b.id === 'folder-' + currentFolder);
+  const folderLabel = folderBtn ? folderBtn.label : currentFolder;
+  showFolderExportModeModal([currentFolder], folderLabel);
 });
 
 // Patch switchTab and renderGrid to keep back button in sync
@@ -3605,6 +3856,17 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
 });
 
 document.getElementById('btn-add-button').addEventListener('click', () => {
+  if (activeActivity) {
+    ensureCustomActivity(activeActivity);
+    const newId = activeActivity.id + '-custom-' + Date.now();
+    const newWord = { id: newId, label: 'new', color: 'orange', type: 'fringe' };
+    activeActivity.words.push(newWord);
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('settings-overlay').classList.remove('open');
+    openEditModal(newId);
+    return;
+  }
   const folder = currentFolder;
   const existing = buttons.filter(b => b.folderId === folder);
   const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
@@ -3629,6 +3891,16 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
 document.getElementById('fab-quick-add').addEventListener('click', () => {
   if (!parentMode) return;
   resetParentAutoLock();
+  if (activeActivity) {
+    ensureCustomActivity(activeActivity);
+    const newId = activeActivity.id + '-custom-' + Date.now();
+    const newWord = { id: newId, label: 'new', color: 'orange', type: 'fringe' };
+    activeActivity.words.push(newWord);
+    saveCurrentActivity();
+    renderGrid();
+    openEditModal(newId);
+    return;
+  }
   const folder = currentFolder;
   const existing = buttons.filter(b => b.folderId === folder);
   const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
@@ -3797,6 +4069,7 @@ document.getElementById('btn-save-child-name').addEventListener('click', async (
   showToast(`"My name is ${name}" added!`);
 });
 
+document.getElementById('btn-share-report').addEventListener('click', shareProgressReport);
 document.getElementById('btn-export-csv').addEventListener('click', exportUsageCSV);
 
 document.getElementById('btn-clear-usage').addEventListener('click', () => {
@@ -3860,9 +4133,16 @@ function renderColorSwatches(selectedColor, disabled) {
   });
 }
 
+var editingActivityContext = null;
+
 function openEditModal(buttonId) {
   editingButtonId = buttonId;
-  const btn = buttons.find(b => b.id === buttonId);
+  editingActivityContext = null;
+  let btn = buttons.find(b => b.id === buttonId);
+  if (!btn && activeActivity) {
+    btn = activeActivity.words.find(w => w.id === buttonId);
+    if (btn) editingActivityContext = activeActivity;
+  }
   if (!btn) return;
 
   document.getElementById('edit-label').value = btn.label;
@@ -3910,6 +4190,29 @@ document.getElementById('edit-overlay').addEventListener('click', e => {
 });
 
 document.getElementById('btn-edit-save').addEventListener('click', async () => {
+  if (editingActivityContext) {
+    ensureCustomActivity(editingActivityContext);
+    const word = activeActivity.words.find(w => w.id === editingButtonId);
+    if (!word) return;
+    word.label = document.getElementById('edit-label').value.trim() || word.label;
+    word.color = document.getElementById('edit-color').value;
+    if (currentLang !== 'en') {
+      const esVal = document.getElementById('edit-label-es').value.trim();
+      if (esVal) {
+        const customEs = getCustomEsLabels();
+        customEs[word.id] = esVal;
+        localStorage.setItem('aac-custom-es-labels', JSON.stringify(customEs));
+      }
+    }
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('edit-overlay').classList.remove('open');
+    editingButtonId = null;
+    editingActivityContext = null;
+    showToast(t('toast.buttonSaved', 'Button saved'));
+    return;
+  }
+
   const btn = buttons.find(b => b.id === editingButtonId);
   if (!btn) return;
 
@@ -3935,6 +4238,19 @@ document.getElementById('btn-edit-save').addEventListener('click', async () => {
 
 document.getElementById('btn-edit-remove').addEventListener('click', async () => {
   if (!confirm(t('confirm.deleteButton', 'Delete this button?'))) return;
+
+  if (editingActivityContext) {
+    ensureCustomActivity(editingActivityContext);
+    activeActivity.words = activeActivity.words.filter(w => w.id !== editingButtonId);
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('edit-overlay').classList.remove('open');
+    editingButtonId = null;
+    editingActivityContext = null;
+    showToast(t('toast.buttonDeleted', 'Button deleted'));
+    return;
+  }
+
   buttons = buttons.filter(b => b.id !== editingButtonId);
   await deleteButton(editingButtonId);
   await deleteImage(editingButtonId);
@@ -4048,11 +4364,35 @@ let _allActivitiesCache = null;
 function getAllActivities() {
   if (!_allActivitiesCache) {
     const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
-    _allActivitiesCache = [...ACTIVITY_BUNDLES, ...custom];
+    const customIds = new Set(custom.map(a => a.id));
+    const builtins = ACTIVITY_BUNDLES.filter(a => !customIds.has(a.id));
+    _allActivitiesCache = [...builtins, ...custom];
   }
   return _allActivitiesCache;
 }
 function invalidateActivitiesCache() { _allActivitiesCache = null; }
+
+function ensureCustomActivity(activity) {
+  if (activity.custom) return activity;
+  const clone = JSON.parse(JSON.stringify(activity));
+  clone.custom = true;
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  const idx = custom.findIndex(a => a.id === clone.id);
+  if (idx >= 0) custom[idx] = clone; else custom.push(clone);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+  activeActivity = clone;
+  invalidateActivitiesCache();
+  return clone;
+}
+
+function saveCurrentActivity() {
+  if (!activeActivity) return;
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  const idx = custom.findIndex(a => a.id === activeActivity.id);
+  if (idx >= 0) custom[idx] = activeActivity; else custom.push(activeActivity);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+  invalidateActivitiesCache();
+}
 
 function renderActivityCards() {
   const container = document.getElementById('activity-cards');
@@ -4148,7 +4488,6 @@ function openActivityPreview(activityId) {
   title.innerHTML = `<span>${activity.icon}</span> ${currentLang === 'es' ? activity.nameEs : activity.name}`;
   desc.textContent = `${activity.words.length} words`;
   document.getElementById('btn-activity-delete').style.display = activity.custom ? '' : 'none';
-  document.getElementById('btn-activity-duplicate').style.display = activity.custom ? '' : 'none';
   document.getElementById('btn-activity-customize').textContent = activity.custom
     ? (currentLang === 'es' ? 'Editar' : 'Edit')
     : (currentLang === 'es' ? 'Personalizar' : 'Customize');
@@ -4190,14 +4529,6 @@ document.getElementById('btn-activity-customize').addEventListener('click', () =
   const activity = getAllActivities().find(a => a.id === activityId);
   overlay.classList.remove('open');
   if (activity) openCreateActivityModal(activity, activity.custom ? true : false);
-});
-
-document.getElementById('btn-activity-duplicate').addEventListener('click', () => {
-  const overlay = document.getElementById('activity-preview-overlay');
-  const activityId = overlay.dataset.activityId;
-  const activity = getAllActivities().find(a => a.id === activityId);
-  overlay.classList.remove('open');
-  if (activity) openCreateActivityModal(activity, false);
 });
 
 document.getElementById('btn-activity-start').addEventListener('click', () => {
@@ -5536,7 +5867,7 @@ function showExportModal() {
     <h2>Export Board</h2>
     <div style="margin-bottom:16px;">
       <label for="export-board-name" style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin-bottom:4px;">Board name</label>
-      <input type="text" id="export-board-name" value="My AAC Board" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+      <input type="text" id="export-board-name" value="My Yappie Board" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
     </div>
     <div id="export-mode-template" class="export-mode-option selected" tabindex="0" role="radio" aria-checked="true">
       <h4>Share as Template</h4>
@@ -5575,7 +5906,7 @@ function showExportModal() {
 
   document.getElementById('btn-cancel-export').addEventListener('click', closeExportImportPanel);
   document.getElementById('btn-do-export').addEventListener('click', async () => {
-    const boardName = document.getElementById('export-board-name').value.trim() || 'My AAC Board';
+    const boardName = document.getElementById('export-board-name').value.trim() || 'My Yappie Board';
     const exportBtn = document.getElementById('btn-do-export');
     exportBtn.disabled = true;
     exportBtn.textContent = 'Exporting...';
@@ -5621,7 +5952,7 @@ async function triggerExportDownload(data, name) {
   }
 }
 
-async function buildFolderExportData(folderIds, boardName, onProgress) {
+async function buildFolderExportData(folderIds, boardName, mode, onProgress) {
   const allButtons = await loadButtons();
   const folders = [];
   const images = {};
@@ -5637,15 +5968,18 @@ async function buildFolderExportData(folderIds, boardName, onProgress) {
   }
 
   let skippedImages = 0;
-  for (let i = 0; i < allBtnIds.length; i++) {
-    try {
-      const blob = await loadImage(allBtnIds[i]);
-      if (blob) {
-        images[allBtnIds[i]] = await compressImage(blob);
-        markAsCustomImage(allBtnIds[i]);
-      }
-    } catch { skippedImages++; }
-    if (onProgress) onProgress((i + 1) / allBtnIds.length);
+  if (mode === 'backup') {
+    loadCustomImageCache();
+    const customIds = allBtnIds.filter(id => isCustomImage(id));
+    for (let i = 0; i < customIds.length; i++) {
+      try {
+        const blob = await loadImage(customIds[i]);
+        if (blob) {
+          images[customIds[i]] = await compressImage(blob);
+        }
+      } catch { skippedImages++; }
+      if (onProgress) onProgress((i + 1) / customIds.length);
+    }
   }
 
   return {
@@ -5726,6 +6060,70 @@ function compressImage(data) {
   });
 }
 
+function showFolderExportModeModal(folderIds, exportName) {
+  const html = `
+    <h2>Export ${escapeHtml(exportName)}</h2>
+    <div id="folder-export-mode-template" class="export-mode-option selected" tabindex="0" role="radio" aria-checked="true">
+      <h4>Share as Template</h4>
+      <p>Folder structure without personal photos. Best for sharing with others.</p>
+    </div>
+    <div id="folder-export-mode-backup" class="export-mode-option" tabindex="0" role="radio" aria-checked="false" style="margin-top:8px;">
+      <h4>Full Backup</h4>
+      <p>Complete folder with all your custom photos. Best for moving to a new device.</p>
+    </div>
+    <div class="export-progress" id="folder-mode-progress" style="display:none;">
+      <div class="export-progress-bar" id="folder-mode-progress-bar" style="width:0%"></div>
+    </div>
+    <div id="folder-mode-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>
+    <button type="button" class="settings-btn" id="btn-do-folder-mode-export" style="background:#4CAF50;color:#fff;font-weight:700;margin-top:12px;">Export</button>
+    <button type="button" class="settings-btn" id="btn-cancel-folder-mode-export">Cancel</button>
+  `;
+  showExportImportPanel(html);
+
+  let selectedMode = 'template';
+  const templateOpt = document.getElementById('folder-export-mode-template');
+  const backupOpt = document.getElementById('folder-export-mode-backup');
+
+  function selectMode(mode) {
+    selectedMode = mode;
+    templateOpt.classList.toggle('selected', mode === 'template');
+    backupOpt.classList.toggle('selected', mode === 'backup');
+    templateOpt.setAttribute('aria-checked', mode === 'template');
+    backupOpt.setAttribute('aria-checked', mode === 'backup');
+  }
+
+  templateOpt.addEventListener('click', () => selectMode('template'));
+  backupOpt.addEventListener('click', () => selectMode('backup'));
+  document.getElementById('btn-cancel-folder-mode-export').addEventListener('click', closeExportImportPanel);
+
+  document.getElementById('btn-do-folder-mode-export').addEventListener('click', async () => {
+    const exportBtn = document.getElementById('btn-do-folder-mode-export');
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Exporting...';
+    try {
+      const data = await buildFolderExportData(folderIds, exportName, selectedMode, (progress) => {
+        const bar = document.getElementById('folder-mode-progress');
+        const fill = document.getElementById('folder-mode-progress-bar');
+        const status = document.getElementById('folder-mode-status');
+        bar.style.display = 'block';
+        status.style.display = 'block';
+        fill.style.width = Math.round(progress * 100) + '%';
+        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
+      });
+      await triggerExportDownload(data, exportName);
+      closeExportImportPanel();
+      const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
+      showToast('Exported!' + skipMsg);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export';
+        showToast('Export failed. Please try again.');
+      }
+    }
+  });
+}
+
 async function showFolderSelectModal() {
   const allButtons = await loadButtons();
   const folderBtns = allButtons.filter(b => b.type === 'folder');
@@ -5755,10 +6153,6 @@ async function showFolderSelectModal() {
     + '<button type="button" id="btn-folder-select-none">Clear</button>'
     + '</div>'
     + '<div class="folder-select-grid">' + cardsHtml + '</div>'
-    + '<div class="export-progress" id="folder-export-progress" style="display:none;">'
-    + '<div class="export-progress-bar" id="folder-export-progress-bar" style="width:0%"></div>'
-    + '</div>'
-    + '<div id="folder-export-status" style="text-align:center;color:#888;font-size:0.85rem;margin:8px 0;display:none;"></div>'
     + '<button type="button" class="settings-btn" id="btn-do-folder-export" style="background:#ccc;color:#fff;font-weight:700;margin-top:12px;" disabled>Select folders to export</button>'
     + '<button type="button" class="settings-btn" id="btn-cancel-folder-export">Cancel</button>';
 
@@ -5817,36 +6211,14 @@ async function showFolderSelectModal() {
 
   document.getElementById('btn-cancel-folder-export').addEventListener('click', closeExportImportPanel);
 
-  document.getElementById('btn-do-folder-export').addEventListener('click', async () => {
+  document.getElementById('btn-do-folder-export').addEventListener('click', () => {
     if (selectedIds.size === 0) return;
-    const exportBtn = document.getElementById('btn-do-folder-export');
-    exportBtn.disabled = true;
-    exportBtn.textContent = 'Exporting...';
-    try {
-      const ids = [...selectedIds];
-      const name = ids.length === 1
-        ? (folderBtns.find(b => b.id === 'folder-' + ids[0])?.label || ids[0])
-        : 'AAC_Folders';
-      const data = await buildFolderExportData(ids, name, (progress) => {
-        const bar = document.getElementById('folder-export-progress');
-        const fill = document.getElementById('folder-export-progress-bar');
-        const status = document.getElementById('folder-export-status');
-        bar.style.display = 'block';
-        status.style.display = 'block';
-        fill.style.width = Math.round(progress * 100) + '%';
-        status.textContent = 'Compressing images... ' + Math.round(progress * 100) + '%';
-      });
-      await triggerExportDownload(data, name);
-      closeExportImportPanel();
-      const skipMsg = data._skippedImages > 0 ? ' (' + data._skippedImages + ' images could not be included)' : '';
-      showToast(ids.length + ' folder' + (ids.length > 1 ? 's' : '') + ' exported!' + skipMsg);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        exportBtn.disabled = false;
-        exportBtn.textContent = 'Export ' + selectedIds.size + ' Folder' + (selectedIds.size > 1 ? 's' : '');
-        showToast('Export failed. Please try again.');
-      }
-    }
+    const ids = [...selectedIds];
+    const name = ids.length === 1
+      ? (folderBtns.find(b => b.id === 'folder-' + ids[0])?.label || ids[0])
+      : 'AAC_Folders';
+    closeExportImportPanel();
+    showFolderExportModeModal(ids, name);
   });
 }
 

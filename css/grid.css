@@ -74,9 +74,9 @@
 }
 
 .cell img {
-  width: 70%;
-  max-height: 60%;
-  min-height: 24px;
+  width: 80%;
+  max-height: 70%;
+  min-height: 28px;
   object-fit: contain;
   border-radius: 8px;
   aspect-ratio: 1;
@@ -94,7 +94,7 @@
 }
 
 .cell .cell-big-text {
-  font-size: clamp(1.6rem, 5vw, 2.5rem);
+  font-size: clamp(1.9rem, 6vw, 2.8rem);
   font-weight: 900;
   color: rgba(0,0,0,0.6);
   line-height: 1;
@@ -271,14 +271,14 @@
 /* Grid size adjustments for 6x6 */
 body.grid-6 .cell { padding: 4px 3px; gap: 2px; }
 body.grid-6 .cell .cell-label { font-size: clamp(0.6rem, 1.8vw, 0.8rem); }
-body.grid-6 .cell .cell-big-text { font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
+body.grid-6 .cell .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
 body.grid-6 .cell.folder-btn .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
 body.grid-6 .cell.folder-btn .cell-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); }
 
 /* Grid size adjustments for 5x5 */
 body.grid-5 .cell { padding: 5px 4px; gap: 2px; }
 body.grid-5 .cell .cell-label { font-size: clamp(0.7rem, 2vw, 0.9rem); }
-body.grid-5 .cell .cell-big-text { font-size: clamp(1.4rem, 4vw, 2rem); }
+body.grid-5 .cell .cell-big-text { font-size: clamp(1.6rem, 4.5vw, 2.2rem); }
 body.grid-5 .cell.folder-btn .cell-big-text { font-size: clamp(1.6rem, 4.5vw, 2.2rem); }
 body.grid-5 .cell.folder-btn .cell-label { font-size: clamp(0.55rem, 1.6vw, 0.75rem); }
 

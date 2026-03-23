@@ -643,7 +643,7 @@
 <div id="search-overlay">
   <div id="search-panel">
     <div id="search-header">
-      <input type="text" id="search-input" placeholder="Search words..." autocomplete="off">
+      <input type="search" id="search-input" placeholder="Search words..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
       <button type="button" id="btn-close-search">Close</button>
     </div>
     <div id="search-results"></div>
@@ -3073,7 +3073,7 @@ function setupGridDelegation() {
     if (!cell) return;
     if (_gridDidLongPress) { _gridDidLongPress = false; return; }
     const btnId = cell.getAttribute('data-id');
-    const btn = buttons.find(b => b.id === btnId);
+    let btn = buttons.find(b => b.id === btnId);
     if (!btn) return;
     if (btn.type === 'folder') {
       const folderId = btn.id.replace('folder-', '');
@@ -3103,7 +3103,8 @@ let _imagePreviewBlobUrl = null;
 let _imagePreviewTriggerCell = null;
 
 function showImagePreview(buttonId) {
-  const btn = buttons.find(b => b.id === buttonId);
+  let btn = buttons.find(b => b.id === buttonId);
+  if (!btn && activeActivity) btn = activeActivity.words.find(w => w.id === buttonId);
   if (!btn) return;
   _imagePreviewTriggerCell = document.querySelector('.cell[data-id="' + buttonId + '"]');
   loadImage(buttonId).then(data => {
@@ -3227,11 +3228,91 @@ document.getElementById('btn-backspace').addEventListener('click', () => {
 });
 
 // ── Word Search ──
+function renderSearchBrowse() {
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'search-group-header';
+  header.textContent = t('search.browse', 'Browse by category');
+  resultsEl.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.className = 'search-browse-grid';
+
+  const folders = buttons.filter(b => b.type === 'folder');
+  folders.forEach(btn => {
+    const cell = document.createElement('button');
+    cell.className = 'search-browse-btn';
+
+    const icon = document.createElement('span');
+    icon.className = 'search-browse-icon';
+    icon.textContent = BUTTON_ICONS[btn.id] || FOLDER_ICONS[btn.id.replace('folder-', '')] || '📁';
+    cell.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.textContent = getPrimaryLabel(btn);
+    cell.appendChild(label);
+
+    cell.addEventListener('click', () => {
+      currentFolder = btn.id.replace('folder-', '');
+      clearPredictions();
+      renderGrid();
+      document.getElementById('search-overlay').classList.remove('open');
+    });
+    grid.appendChild(cell);
+  });
+
+  if (folders.length === 0) {
+    resultsEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:32px 0;">' + t('search.typeToSearch', 'Type to search all words...') + '</div>';
+    return;
+  }
+  resultsEl.appendChild(grid);
+}
+
+function createSearchCell(btn, folderLabels) {
+  const cell = document.createElement('button');
+  cell.className = 'search-result-cell';
+  cell.setAttribute('data-color', btn.color);
+
+  const icon = document.createElement('span');
+  icon.className = 'search-icon';
+  icon.textContent = BUTTON_ICONS[btn.id] || '💬';
+  cell.appendChild(icon);
+
+  const label = document.createElement('span');
+  label.className = 'search-label';
+  label.textContent = getPrimaryLabel(btn);
+  cell.appendChild(label);
+
+  if (btn.type === 'folder') {
+    const tag = document.createElement('span');
+    tag.className = 'search-folder';
+    tag.textContent = t('search.folder', 'Folder');
+    cell.appendChild(tag);
+  }
+
+  cell.addEventListener('click', () => {
+    if (btn.type === 'folder') {
+      currentFolder = btn.id.replace('folder-', '');
+      clearPredictions();
+      renderGrid();
+    } else {
+      const speakText = getSpeakLabel(btn);
+      speak(speakText);
+      addWordToMessage(speakText, btn.id);
+      recordUsageEvent(btn.id, 'independent');
+    }
+    document.getElementById('search-overlay').classList.remove('open');
+  });
+  return cell;
+}
+
 document.getElementById('btn-search').addEventListener('click', () => {
   document.getElementById('search-overlay').classList.add('open');
   const input = document.getElementById('search-input');
   input.value = '';
-  document.getElementById('search-results').innerHTML = '';
+  renderSearchBrowse();
   setTimeout(() => input.focus(), 100);
 });
 
@@ -3248,8 +3329,13 @@ document.getElementById('search-overlay').addEventListener('click', e => {
 document.getElementById('search-input').addEventListener('input', e => {
   const query = e.target.value.trim().toLowerCase();
   const resultsEl = document.getElementById('search-results');
+
+  if (query.length === 0) {
+    renderSearchBrowse();
+    return;
+  }
+
   resultsEl.innerHTML = '';
-  if (query.length === 0) return;
 
   const filtered = buttons.filter(b => {
     if (b.type !== 'fringe' && b.type !== 'core' && b.type !== 'folder') return false;
@@ -3259,51 +3345,53 @@ document.getElementById('search-input').addEventListener('input', e => {
   });
 
   const typeOrder = { core: 0, folder: 1, fringe: 2 };
-  const matches = filtered.sort((a, b) => (typeOrder[a.type] || 2) - (typeOrder[b.type] || 2)).slice(0, 30);
+  const matches = filtered.sort((a, b) => (typeOrder[a.type] || 2) - (typeOrder[b.type] || 2)).slice(0, 40);
 
   const folderLabels = {};
   buttons.filter(b => b.type === 'folder').forEach(b => {
     folderLabels[b.id.replace('folder-', '')] = getPrimaryLabel(b);
   });
 
+  // Group matches by category
+  const groups = {};
   matches.forEach(btn => {
-    const cell = document.createElement('button');
-    cell.className = 'search-result-cell';
-    cell.setAttribute('data-color', btn.color);
+    let groupKey;
+    if (btn.type === 'folder') groupKey = '__folders';
+    else if (btn.type === 'core') groupKey = '__core';
+    else groupKey = btn.folderId || '__other';
+    if (!groups[groupKey]) groups[groupKey] = [];
+    groups[groupKey].push(btn);
+  });
 
-    const icon = document.createElement('span');
-    icon.className = 'search-icon';
-    icon.textContent = BUTTON_ICONS[btn.id] || '💬';
-    cell.appendChild(icon);
+  // Render groups in order: folders, core, then by folder name
+  const groupOrder = ['__folders', '__core'];
+  const otherKeys = Object.keys(groups).filter(k => !groupOrder.includes(k)).sort((a, b) => {
+    return (folderLabels[a] || a).localeCompare(folderLabels[b] || b);
+  });
+  const orderedKeys = [...groupOrder.filter(k => groups[k]), ...otherKeys];
 
-    const label = document.createElement('span');
-    label.className = 'search-label';
-    label.textContent = getPrimaryLabel(btn);
-    cell.appendChild(label);
+  const groupLabels = {
+    '__folders': t('search.folders', 'Folders'),
+    '__core': t('search.coreWords', 'Core Words'),
+    '__other': t('search.other', 'Other'),
+  };
 
-    const folder = document.createElement('span');
-    folder.className = 'search-folder';
-    folder.textContent = btn.type === 'core' ? t('search.core', 'Core') : btn.type === 'folder' ? t('search.folder', 'Folder') : (folderLabels[btn.folderId] || btn.folderId || '');
-    cell.appendChild(folder);
+  orderedKeys.forEach(key => {
+    const header = document.createElement('div');
+    header.className = 'search-group-header';
+    header.textContent = groupLabels[key] || folderLabels[key] || key;
+    resultsEl.appendChild(header);
 
-    cell.addEventListener('click', () => {
-      if (btn.type === 'folder') {
-        currentFolder = btn.id.replace('folder-', '');
-        clearPredictions();
-        renderGrid();
-      } else {
-        const speakText = getSpeakLabel(btn);
-        speak(speakText);
-        addWordToMessage(speakText, btn.id);
-        recordUsageEvent(btn.id, 'independent');
-      }
-      document.getElementById('search-overlay').classList.remove('open');
+    const grid = document.createElement('div');
+    grid.className = 'search-grid';
+    groups[key].forEach(btn => {
+      grid.appendChild(createSearchCell(btn, folderLabels));
     });
-    resultsEl.appendChild(cell);
+    resultsEl.appendChild(grid);
   });
 
   if (matches.length === 0) {
-    resultsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px 0;">' + t('search.noMatches', 'No matches found') + '</div>';
+    resultsEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:32px 0;">' + t('search.noMatches', 'No matches found') + '</div>';
   }
 });
 
@@ -3768,6 +3856,17 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
 });
 
 document.getElementById('btn-add-button').addEventListener('click', () => {
+  if (activeActivity) {
+    ensureCustomActivity(activeActivity);
+    const newId = activeActivity.id + '-custom-' + Date.now();
+    const newWord = { id: newId, label: 'new', color: 'orange', type: 'fringe' };
+    activeActivity.words.push(newWord);
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('settings-overlay').classList.remove('open');
+    openEditModal(newId);
+    return;
+  }
   const folder = currentFolder;
   const existing = buttons.filter(b => b.folderId === folder);
   const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
@@ -3792,6 +3891,16 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
 document.getElementById('fab-quick-add').addEventListener('click', () => {
   if (!parentMode) return;
   resetParentAutoLock();
+  if (activeActivity) {
+    ensureCustomActivity(activeActivity);
+    const newId = activeActivity.id + '-custom-' + Date.now();
+    const newWord = { id: newId, label: 'new', color: 'orange', type: 'fringe' };
+    activeActivity.words.push(newWord);
+    saveCurrentActivity();
+    renderGrid();
+    openEditModal(newId);
+    return;
+  }
   const folder = currentFolder;
   const existing = buttons.filter(b => b.folderId === folder);
   const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
@@ -4024,9 +4133,16 @@ function renderColorSwatches(selectedColor, disabled) {
   });
 }
 
+var editingActivityContext = null;
+
 function openEditModal(buttonId) {
   editingButtonId = buttonId;
-  const btn = buttons.find(b => b.id === buttonId);
+  editingActivityContext = null;
+  let btn = buttons.find(b => b.id === buttonId);
+  if (!btn && activeActivity) {
+    btn = activeActivity.words.find(w => w.id === buttonId);
+    if (btn) editingActivityContext = activeActivity;
+  }
   if (!btn) return;
 
   document.getElementById('edit-label').value = btn.label;
@@ -4074,6 +4190,29 @@ document.getElementById('edit-overlay').addEventListener('click', e => {
 });
 
 document.getElementById('btn-edit-save').addEventListener('click', async () => {
+  if (editingActivityContext) {
+    ensureCustomActivity(editingActivityContext);
+    const word = activeActivity.words.find(w => w.id === editingButtonId);
+    if (!word) return;
+    word.label = document.getElementById('edit-label').value.trim() || word.label;
+    word.color = document.getElementById('edit-color').value;
+    if (currentLang !== 'en') {
+      const esVal = document.getElementById('edit-label-es').value.trim();
+      if (esVal) {
+        const customEs = getCustomEsLabels();
+        customEs[word.id] = esVal;
+        localStorage.setItem('aac-custom-es-labels', JSON.stringify(customEs));
+      }
+    }
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('edit-overlay').classList.remove('open');
+    editingButtonId = null;
+    editingActivityContext = null;
+    showToast(t('toast.buttonSaved', 'Button saved'));
+    return;
+  }
+
   const btn = buttons.find(b => b.id === editingButtonId);
   if (!btn) return;
 
@@ -4099,6 +4238,19 @@ document.getElementById('btn-edit-save').addEventListener('click', async () => {
 
 document.getElementById('btn-edit-remove').addEventListener('click', async () => {
   if (!confirm(t('confirm.deleteButton', 'Delete this button?'))) return;
+
+  if (editingActivityContext) {
+    ensureCustomActivity(editingActivityContext);
+    activeActivity.words = activeActivity.words.filter(w => w.id !== editingButtonId);
+    saveCurrentActivity();
+    renderGrid();
+    document.getElementById('edit-overlay').classList.remove('open');
+    editingButtonId = null;
+    editingActivityContext = null;
+    showToast(t('toast.buttonDeleted', 'Button deleted'));
+    return;
+  }
+
   buttons = buttons.filter(b => b.id !== editingButtonId);
   await deleteButton(editingButtonId);
   await deleteImage(editingButtonId);
@@ -4212,11 +4364,35 @@ let _allActivitiesCache = null;
 function getAllActivities() {
   if (!_allActivitiesCache) {
     const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
-    _allActivitiesCache = [...ACTIVITY_BUNDLES, ...custom];
+    const customIds = new Set(custom.map(a => a.id));
+    const builtins = ACTIVITY_BUNDLES.filter(a => !customIds.has(a.id));
+    _allActivitiesCache = [...builtins, ...custom];
   }
   return _allActivitiesCache;
 }
 function invalidateActivitiesCache() { _allActivitiesCache = null; }
+
+function ensureCustomActivity(activity) {
+  if (activity.custom) return activity;
+  const clone = JSON.parse(JSON.stringify(activity));
+  clone.custom = true;
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  const idx = custom.findIndex(a => a.id === clone.id);
+  if (idx >= 0) custom[idx] = clone; else custom.push(clone);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+  activeActivity = clone;
+  invalidateActivitiesCache();
+  return clone;
+}
+
+function saveCurrentActivity() {
+  if (!activeActivity) return;
+  const custom = JSON.parse(localStorage.getItem('aac-custom-activities') || '[]');
+  const idx = custom.findIndex(a => a.id === activeActivity.id);
+  if (idx >= 0) custom[idx] = activeActivity; else custom.push(activeActivity);
+  localStorage.setItem('aac-custom-activities', JSON.stringify(custom));
+  invalidateActivitiesCache();
+}
 
 function renderActivityCards() {
   const container = document.getElementById('activity-cards');

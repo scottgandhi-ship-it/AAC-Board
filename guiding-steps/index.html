@@ -103,6 +103,7 @@ body {
 /* -- Kids Mode -- */
 .kids-mode .parent-only { display: none !important; }
 .kids-mode #rewards-parent-controls { display: none !important; }
+.kids-mode #rewards-track-tabs { display: none !important; }
 .kids-mode #schedule-parent-controls { display: none !important; }
 .kids-mode .story-card-actions { display: none !important; }
 .kids-mode #stories-parent-controls { display: none !important; }
@@ -314,8 +315,8 @@ body {
 
 #rewards-track-tabs {
   display: none;
-  gap: 6px;
-  padding: 8px 12px 4px;
+  gap: 4px;
+  padding: 6px 12px 2px;
   overflow-x: auto;
   flex-shrink: 0;
 }
@@ -325,18 +326,18 @@ body {
 }
 
 .track-tab {
-  padding: 10px 16px;
-  border: 2px solid var(--gray-300);
-  border-radius: 20px;
+  padding: 6px 14px;
+  border: 1px solid var(--gray-300);
+  border-radius: 16px;
   background: #fafafa;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--chrome-text-secondary);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   font-family: inherit;
-  min-height: 44px;
+  min-height: 36px;
   display: flex;
   align-items: center;
 }
@@ -353,9 +354,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 16px;
-  overflow-y: auto;
+  padding: 8px 10px;
+  overflow: hidden;
   position: relative;
+  min-height: 0;
 }
 
 #rewards-empty {
@@ -515,6 +517,15 @@ body {
   50% { box-shadow: 0 0 0 8px rgba(124, 77, 255, 0.25); }
 }
 
+/* Step label for task strips */
+.task-tile-step-label {
+  font-size: 0.75rem; font-weight: 700; color: #555; text-align: center;
+  line-height: 1.2; margin-top: 2px; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  max-width: 100%; word-break: break-word;
+}
+.task-tile.completed .task-tile-step-label { opacity: 0.7; }
+
 /* Locked tile */
 .task-tile.locked {
   opacity: 0.45;
@@ -667,10 +678,10 @@ body {
 #rewards-task-header {
   display: none;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   max-width: 420px;
-  margin: 0 auto 8px;
+  margin: 0 auto 4px;
 }
 
 #rewards-task-header.visible {
@@ -709,9 +720,9 @@ body {
 }
 
 #rewards-task-label {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--chrome-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-text-muted);
 }
 
 #rewards-progress-text {
@@ -757,18 +768,52 @@ body {
 
 #rewards-parent-controls {
   display: flex;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   flex-shrink: 0;
 }
 
-.rewards-parent-btn {
+#steps-all-done {
+  flex: 1; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 40px; text-align: center;
+}
+
+.rewards-more-btn {
+  flex: 0 0 44px !important;
+  font-size: 1.2rem !important;
+  letter-spacing: 2px;
+  padding: 8px 0 !important;
+  text-align: center;
+}
+
+#track-more-menu {
+  padding: 0 12px 8px;
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.track-more-option {
   flex: 1;
-  padding: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--chrome-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 38px;
+}
+
+.rewards-parent-btn {
+  flex: 1 1 auto;
+  padding: 8px 10px;
   border: 2px solid var(--gray-300);
   border-radius: 10px;
   background: #fafafa;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -852,6 +897,73 @@ body {
   @keyframes celebrationPop { 0%, 100% { transform: scale(1); } }
   .confetti-piece { animation: none; display: none; }
 }
+
+/* ── Track Type Chooser ── */
+#track-type-chooser {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px); z-index: 210; justify-content: center; align-items: center;
+}
+#track-type-chooser.open { display: flex; }
+#track-type-chooser-panel {
+  background: #faf8ff; border-radius: var(--radius-lg); width: 92%; max-width: 380px;
+  padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); text-align: center;
+}
+#track-type-chooser-panel h2 { font-size: 1.1rem; font-weight: 800; color: #333; margin-bottom: 16px; }
+.track-type-option {
+  display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 10px;
+  border-radius: var(--radius-md); border: 2px solid #e0e0e0; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s; text-align: left; width: 100%; background: #fff;
+  font-family: inherit;
+}
+.track-type-option:active { transform: scale(0.98); }
+.track-type-option:hover { border-color: var(--purple-400, #7C74FF); background: #f3f0ff; }
+.track-type-icon { font-size: 1.8rem; flex-shrink: 0; width: 44px; text-align: center; }
+.track-type-info h3 { font-size: 0.95rem; font-weight: 700; color: #333; margin: 0 0 2px; }
+.track-type-info p { font-size: 0.8rem; font-weight: 600; color: #888; margin: 0; line-height: 1.3; }
+
+/* ── Step Editor (inside reward config) ── */
+#step-editor-section { display: none; }
+#step-editor-section.visible { display: block; }
+#step-editor-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.step-editor-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px; background: #f5f3ff;
+  border-radius: 10px; border: 1px solid #e8e4ff;
+}
+.step-editor-num {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--purple-400, #7C74FF);
+  color: #fff; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.step-editor-img-btn {
+  width: 44px; height: 44px; border-radius: 8px; border: 1px dashed #ccc; background: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  overflow: hidden; font-size: 1.2rem; color: #aaa;
+}
+.step-editor-img-btn img { width: 100%; height: 100%; object-fit: cover; }
+.step-editor-img-btn svg { width: 70%; height: 70%; }
+.step-editor-label-input {
+  flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 0.9rem; font-family: inherit; font-weight: 600;
+}
+.step-editor-arrows { display: flex; flex-direction: column; gap: 2px; }
+.step-editor-arrows button {
+  width: 28px; height: 22px; border: 1px solid #ddd; border-radius: 4px; background: #fff;
+  cursor: pointer; font-size: 0.65rem; color: #666; display: flex; align-items: center;
+  justify-content: center; padding: 0;
+}
+.step-editor-arrows button:disabled { opacity: 0.3; cursor: default; }
+.step-editor-del {
+  width: 28px; height: 28px; border: none; border-radius: 50%; background: #ffebee;
+  color: #D32F2F; font-size: 1rem; cursor: pointer; flex-shrink: 0; display: flex;
+  align-items: center; justify-content: center;
+}
+#btn-add-step {
+  width: 100%; padding: 10px; border: 2px dashed #ccc; border-radius: 10px; background: none;
+  font-size: 0.9rem; font-weight: 600; color: #888; cursor: pointer; font-family: inherit;
+  min-height: 44px;
+}
+#btn-add-step:disabled { opacity: 0.4; cursor: default; }
+#step-limit-msg { font-size: 0.75rem; color: #999; text-align: center; margin-top: 4px; display: none; }
 
 /* ── Reward Config Modal ── */
 #reward-config-overlay {
@@ -1189,7 +1301,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border-radius: var(--radius-md);
   background: var(--chrome-surface);
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
@@ -1208,9 +1320,14 @@ body {
 }
 
 .sched-step.done {
-  opacity: 0.6;
+  opacity: 0.5;
   background: #F1F8E9;
+  box-shadow: none;
+  min-height: auto;
+  padding: 10px;
 }
+.sched-step.done .sched-step-img { width: 40px; height: 40px; }
+.sched-step:not(.current):not(.done) { opacity: 0.7; box-shadow: none; }
 
 .sched-step.done .sched-step-check {
   display: flex;
@@ -1852,6 +1969,7 @@ body.sensory-high-contrast .task-tile {
 .story-card {
   background: var(--chrome-surface); border-radius: var(--radius-md); overflow: hidden;
   box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  display: flex; flex-direction: column;
 }
 .story-card:active { transform: scale(0.97); }
 .story-card-cover {
@@ -1911,6 +2029,15 @@ body.sensory-high-contrast .task-tile {
   color: var(--chrome-text-secondary); transition: background 0.15s;
 }
 #reader-close:active { background: rgba(0,0,0,0.12); }
+
+#reader-print {
+  position: absolute; top: 12px; right: 12px; z-index: 10;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(0,0,0,0.06); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--chrome-text-secondary); transition: background 0.15s;
+}
+#reader-print:active { background: rgba(0,0,0,0.12); }
 
 #reader-image-area {
   flex: 0 0 60%; display: flex; align-items: center; justify-content: center;
@@ -2336,6 +2463,42 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 @supports (padding-top: env(safe-area-inset-top)) {
   #editor-header { padding-top: calc(10px + env(safe-area-inset-top)); }
   #reader-close { top: calc(12px + env(safe-area-inset-top)); }
+  #reader-print { top: calc(12px + env(safe-area-inset-top)); }
+}
+
+/* ── Print Styles ── */
+#print-story-view { display: none; }
+
+@media print {
+  body > *:not(#print-story-view) { display: none !important; }
+  #print-story-view {
+    display: block !important;
+    position: static;
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    color: #333;
+  }
+  .print-page {
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 95vh;
+    padding: 40px;
+    text-align: center;
+  }
+  .print-page:last-child { page-break-after: avoid; }
+  .print-title-page h1 { font-size: 2rem; font-weight: 900; margin-bottom: 12px; }
+  .print-title-page p { font-size: 1.2rem; font-weight: 600; color: #666; }
+  .print-page-image { max-width: 70%; max-height: 50vh; margin-bottom: 24px; }
+  .print-page-image svg { width: 100%; height: auto; max-height: 50vh; }
+  .print-page-image img { width: 100%; height: auto; max-height: 50vh; object-fit: contain; }
+  .print-page-text {
+    font-size: 1.4rem; font-weight: 600; line-height: 1.6;
+    max-width: 600px; color: #333;
+  }
+  .print-page-num { font-size: 0.8rem; color: #aaa; margin-top: 16px; }
 }
 
 </style>
@@ -2366,6 +2529,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       </div>
       <div style="font-size:1.6rem;font-weight:800;">All Done!</div>
       <div id="schedule-done-msg" style="font-size:1rem;color:#555;"></div>
+      <div style="margin-top:16px;font-size:0.95rem;font-weight:600;color:#888;">What's next?</div>
+      <button type="button" id="btn-schedule-new-after-done" class="sched-parent-btn" style="margin-top:8px;background:linear-gradient(135deg,var(--chrome-primary),var(--chrome-primary-dark));color:#fff;border:none;box-shadow:0 4px 12px rgba(124,116,255,0.3);">Start Another Schedule</button>
     </div>
     <div id="schedule-parent-controls">
       <button type="button" class="sched-parent-btn" id="btn-start-schedule">Set Up a Schedule</button>
@@ -2381,7 +2546,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="rewards-path-area" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0">
       <div id="rewards-empty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <div id="rewards-empty-text">No reward charts yet</div>
+        <div id="rewards-empty-text">No step charts yet</div>
         <div id="rewards-empty-sub">Tap New Chart below to create one</div>
       </div>
       <div id="rewards-task-header">
@@ -2400,10 +2565,28 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="reward-timer-display" aria-live="polite"></div>
       <div id="reward-timer-status"></div>
     </div>
+    <div id="steps-all-done" style="display:none;">
+      <div class="schedule-done-icon">
+        <svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+      </div>
+      <div style="font-size:1.6rem;font-weight:800;">All Done!</div>
+      <div id="steps-done-msg" style="font-size:1rem;color:#555;"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;width:100%;max-width:240px;">
+        <button type="button" class="sched-parent-btn" id="btn-steps-reset" style="background:linear-gradient(135deg,#66BB6A,#43A047);color:#fff;border:none;box-shadow:0 4px 12px rgba(67,160,71,0.3);">Reset Steps</button>
+        <button type="button" class="sched-parent-btn" id="btn-steps-new">Start Another</button>
+        <button type="button" class="sched-parent-btn" id="btn-steps-configure">Configure</button>
+      </div>
+    </div>
     <div id="rewards-parent-controls">
       <button type="button" class="rewards-parent-btn" id="btn-new-track">New Chart</button>
       <button type="button" class="rewards-parent-btn" id="btn-edit-track">Configure</button>
-      <button type="button" class="rewards-parent-btn" id="btn-reset-track">Reset</button>
+      <button type="button" class="rewards-parent-btn rewards-more-btn" id="btn-track-more" aria-label="More options">...</button>
+      <input type="file" id="track-import-input" accept=".gsstrip,.json" style="display:none">
+    </div>
+    <div id="track-more-menu" style="display:none;">
+      <button type="button" class="track-more-option" id="btn-share-track">Share</button>
+      <button type="button" class="track-more-option" id="btn-import-track">Import</button>
+      <button type="button" class="track-more-option" id="btn-reset-track" style="color:#D32F2F;">Reset</button>
     </div>
   </div>
 </div>
@@ -2419,6 +2602,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     </div>
     <div id="stories-parent-controls">
       <button type="button" class="stories-parent-btn" id="btn-new-story">New Story</button>
+      <button type="button" class="stories-parent-btn" id="btn-import-story">Import Story</button>
+      <input type="file" id="story-import-input" accept=".gsstory,.json" style="display:none">
     </div>
   </div>
 </div>
@@ -2427,6 +2612,9 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 <div id="story-reader" aria-label="Story reader" role="dialog">
   <button type="button" id="reader-close" aria-label="Close story">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <button type="button" id="reader-print" aria-label="Print story">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
   </button>
   <div id="reader-image-area"></div>
   <div id="reader-text-area">
@@ -2475,7 +2663,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div class="editor-field">
         <label>Child's Age (years)</label>
         <div class="age-pill-group" id="editor-child-age" role="radiogroup" aria-label="Child's age in years">
-          <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="2">2</button>
           <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="3">3</button>
           <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="4">4</button>
           <button type="button" class="age-pill" role="radio" aria-checked="false" data-age="5">5</button>
@@ -2538,7 +2725,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <div class="helper-field-label">Or pick a category to get started</div>
         <div class="helper-chips" id="helper-sparks">
           <button type="button" class="helper-chip" data-val="a new experience">A new experience</button>
-          <button type="button" class="helper-chip" data-val="something scary">Something scary</button>
+          <button type="button" class="helper-chip" data-val="something new or hard">Something new or hard</button>
           <button type="button" class="helper-chip" data-val="a routine change">A routine change</button>
           <button type="button" class="helper-chip" data-val="a social interaction">A social interaction</button>
           <button type="button" class="helper-chip" data-val="a sensory challenge">A sensory challenge</button>
@@ -2789,28 +2976,59 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="celebration-text"></div>
 </div>
 
+<!-- Track Type Chooser -->
+<div id="track-type-chooser">
+  <div id="track-type-chooser-panel">
+    <h2>What kind of chart?</h2>
+    <button type="button" class="track-type-option" id="btn-choose-taskstrip">
+      <div class="track-type-icon">&#x1F4CB;</div>
+      <div class="track-type-info">
+        <h3>Task Strip</h3>
+        <p>Step-by-step routine with different images for each step. Great for potty training, brushing teeth, getting dressed.</p>
+      </div>
+    </button>
+    <button type="button" class="track-type-option" id="btn-choose-counter">
+      <div class="track-type-icon">&#x2B50;</div>
+      <div class="track-type-info">
+        <h3>Simple Counter</h3>
+        <p>Count repetitions of one task to earn a reward. Great for practicing a skill multiple times.</p>
+      </div>
+    </button>
+    <button type="button" id="btn-type-chooser-cancel" style="width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;min-height:44px;">Cancel</button>
+  </div>
+</div>
+
 <!-- Reward Config Modal -->
 <div id="reward-config-overlay">
   <div id="reward-config-panel">
     <h2 id="reward-config-title">New Reward Chart</h2>
     <label for="reward-task-input">What is your child working on?</label>
     <input type="text" id="reward-task-input">
-    <label>Task image</label>
-    <div id="task-image-preview-wrap">
-      <div id="task-image-preview-box"></div>
-      <div id="task-image-config-btns">
-        <button id="btn-task-image-choose" type="button">Choose Image</button>
-        <button id="btn-task-image-remove" type="button">Remove</button>
+    <div id="counter-only-fields">
+      <label>Task image</label>
+      <div id="task-image-preview-wrap">
+        <div id="task-image-preview-box"></div>
+        <div id="task-image-config-btns">
+          <button id="btn-task-image-choose" type="button">Choose Image</button>
+          <button id="btn-task-image-remove" type="button">Remove</button>
+        </div>
+      </div>
+      <input type="file" id="task-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
+      <label>Steps needed</label>
+      <div class="stepper-row">
+        <button type="button" class="stepper-btn" id="stepper-minus" aria-label="Decrease steps">-</button>
+        <span id="stepper-value">5</span>
+        <button type="button" class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
       </div>
     </div>
-    <input type="file" id="task-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
-    <label>Steps needed</label>
-    <div class="stepper-row">
-      <button type="button" class="stepper-btn" id="stepper-minus" aria-label="Decrease steps">-</button>
-      <span id="stepper-value">5</span>
-      <button type="button" class="stepper-btn" id="stepper-plus" aria-label="Increase steps">+</button>
+    <div id="step-editor-section">
+      <label>Steps <span id="step-count-display"></span></label>
+      <div id="step-editor-list"></div>
+      <button type="button" id="btn-add-step">+ Add Step</button>
+      <div id="step-limit-msg">8 step maximum</div>
+      <input type="file" id="step-image-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none">
     </div>
-    <label for="reward-label-input">What do they earn?</label>
+    <label for="reward-label-input" id="reward-label-label">What do they earn?</label>
     <input type="text" id="reward-label-input">
     <label>Reward image</label>
     <img id="reward-image-preview" alt="Reward preview">
@@ -2939,7 +3157,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   </button>
   <button type="button" class="tab-btn" id="tab-rewards" role="tab" aria-selected="false" aria-controls="view-rewards">
     <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    <span class="tab-label">Rewards</span>
+    <span class="tab-label">Steps</span>
   </button>
   <button type="button" class="tab-btn" id="tab-stories" role="tab" aria-selected="false" aria-controls="view-stories">
     <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -2993,8 +3211,8 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
           <div>
-            <div class="gs-feature-card-name">Rewards</div>
-            <div class="gs-feature-card-desc">Chart progress toward goals they care about</div>
+            <div class="gs-feature-card-name">Steps</div>
+            <div class="gs-feature-card-desc">Visual task strips for daily routines</div>
           </div>
         </div>
         <div class="gs-feature-card">
@@ -3153,6 +3371,30 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// ── Task Strip Helpers ──
+function isTaskStrip(track) { return !!(track && track.steps); }
+function getTargetCount(track) { return track.steps ? track.steps.length : track.targetCount; }
+function generateStepId() { return 'step-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6); }
+
+function compressImage(blob, maxEdge = 800) {
+  return new Promise((resolve) => {
+    if (!blob || !blob.type.startsWith('image/')) { resolve(blob); return; }
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      if (w <= maxEdge && h <= maxEdge) { URL.revokeObjectURL(img.src); resolve(blob); return; }
+      const scale = maxEdge / Math.max(w, h);
+      const nw = Math.round(w * scale), nh = Math.round(h * scale);
+      const c = document.createElement('canvas');
+      c.width = nw; c.height = nh;
+      c.getContext('2d').drawImage(img, 0, 0, nw, nh);
+      c.toBlob(out => { URL.revokeObjectURL(img.src); resolve(out || blob); }, 'image/jpeg', 0.8);
+    };
+    img.onerror = () => { URL.revokeObjectURL(img.src); resolve(blob); };
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
 async function loadTracks() {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -3293,7 +3535,7 @@ function showToast(msg) {
 function getTabViewMap() {
   return {
     'tab-schedule': { view: 'view-schedule', title: 'Schedule' },
-    'tab-rewards': { view: 'view-rewards', title: 'Rewards' },
+    'tab-rewards': { view: 'view-rewards', title: 'Steps' },
     'tab-stories': { view: 'view-stories', title: 'Stories' },
   };
 }
@@ -3563,6 +3805,7 @@ function haptic() {
 
 function speak(text) {
   if (!text || !('speechSynthesis' in window)) return;
+  if (document.body.classList.contains('sensory-quiet')) return;
   haptic();
   speechSynthesis.cancel();
   if (speechSynthesis.paused) speechSynthesis.resume();
@@ -3724,6 +3967,45 @@ const DEFAULT_TASK_IMAGES = [
     svg: '<svg viewBox="0 0 60 60"><rect x="8" y="30" width="44" height="16" rx="4" fill="#7986CB" stroke="#3F51B5" stroke-width="2"/><rect x="8" y="44" width="44" height="4" rx="2" fill="#3F51B5"/><rect x="12" y="24" width="14" height="8" rx="4" fill="#E8EAF6" stroke="#7986CB" stroke-width="1.5"/><path d="M12 30 Q12 20 20 16" fill="none" stroke="#7986CB" stroke-width="1.5"/></svg>' },
   { key: 'put-on-pajamas', label: 'Put on pajamas', category: 'Bedtime',
     svg: '<svg viewBox="0 0 60 60"><path d="M20 18 L30 14 L40 18 L42 26 L38 26 L38 48 L22 48 L22 26 L18 26 Z" fill="#CE93D8" stroke="#8E24AA" stroke-width="2"/><circle cx="28" cy="30" r="2" fill="#fff"/><circle cx="28" cy="38" r="2" fill="#fff"/></svg>' },
+  // Task strip step icons
+  { key: 'pants-down', label: 'Pull pants down', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 12 L40 12 L42 32 L36 32 L36 52 L24 52 L24 32 L18 32 Z" fill="#90CAF9" stroke="#1E88E5" stroke-width="2"/><path d="M24 32 L24 52 M36 32 L36 52" stroke="#1E88E5" stroke-width="1.5"/><path d="M22 22 L20 30 M38 22 L40 30" stroke="#1E88E5" stroke-width="1.5" stroke-dasharray="2 2"/></svg>' },
+  { key: 'sit-down', label: 'Sit down', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="14" y="28" width="32" height="4" rx="2" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="1.5"/><rect x="14" y="32" width="4" height="18" rx="2" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="1.5"/><rect x="42" y="32" width="4" height="18" rx="2" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="1.5"/><circle cx="30" cy="18" r="6" fill="#FFCCBC" stroke="#E64A19" stroke-width="1.5"/><path d="M26 24 L26 32 L34 32 L34 24" fill="#7986CB" stroke="#3F51B5" stroke-width="1.5"/></svg>' },
+  { key: 'wipe', label: 'Wipe', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="18" y="14" width="24" height="32" rx="4" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="24" y1="22" x2="36" y2="22" stroke="#F9A825" stroke-width="1.5"/><line x1="24" y1="28" x2="36" y2="28" stroke="#F9A825" stroke-width="1.5"/><line x1="24" y1="34" x2="36" y2="34" stroke="#F9A825" stroke-width="1.5"/><path d="M22 46 Q30 54 38 46" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { key: 'pants-up', label: 'Pull pants up', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 12 L40 12 L42 32 L36 32 L36 52 L24 52 L24 32 L18 32 Z" fill="#90CAF9" stroke="#1E88E5" stroke-width="2"/><path d="M24 32 L24 52 M36 32 L36 52" stroke="#1E88E5" stroke-width="1.5"/><path d="M28 16 L30 10 L32 16" stroke="#1E88E5" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' },
+  { key: 'flush', label: 'Flush', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="15" y="18" width="30" height="28" rx="4" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="2"/><rect x="12" y="14" width="36" height="6" rx="3" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="2"/><circle cx="40" cy="26" r="4" fill="#64B5F6" stroke="#1E88E5" stroke-width="1.5"/><path d="M24 32 Q26 36 30 34 Q34 32 36 36" stroke="#64B5F6" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' },
+  { key: 'water-on', label: 'Turn on water', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M22 16 L22 28 Q22 32 26 32 L34 32 Q38 32 38 28 L38 16" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="2"/><rect x="28" y="10" width="4" height="10" rx="2" fill="#9E9E9E"/><path d="M27 36 L27 42 M30 36 L30 44 M33 36 L33 42" stroke="#64B5F6" stroke-width="2" stroke-linecap="round"/><ellipse cx="30" cy="50" rx="8" ry="4" fill="#BBDEFB" stroke="#42A5F5" stroke-width="1.5"/></svg>' },
+  { key: 'wet-hands', label: 'Wet hands', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 28 Q20 16 30 14 Q40 16 40 28" fill="#FFCCBC" stroke="#E64A19" stroke-width="2"/><path d="M22 30 Q24 34 28 32 Q32 34 34 30 Q36 34 38 30" stroke="#64B5F6" stroke-width="2" fill="none"/><circle cx="24" cy="40" r="3" fill="#BBDEFB"/><circle cx="30" cy="44" r="2" fill="#BBDEFB"/><circle cx="36" cy="40" r="3" fill="#BBDEFB"/></svg>' },
+  { key: 'soap', label: 'Get soap', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="20" y="20" width="20" height="26" rx="4" fill="#C5E1A5" stroke="#7CB342" stroke-width="2"/><rect x="26" y="14" width="8" height="8" rx="2" fill="#AED581" stroke="#7CB342" stroke-width="1.5"/><circle cx="26" cy="30" r="2" fill="#fff" opacity="0.6"/><circle cx="34" cy="34" r="3" fill="#fff" opacity="0.6"/><circle cx="28" cy="38" r="2" fill="#fff" opacity="0.6"/></svg>' },
+  { key: 'rub-hands', label: 'Rub hands', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M18 28 Q18 16 28 14" fill="none" stroke="#E64A19" stroke-width="2"/><path d="M42 28 Q42 16 32 14" fill="none" stroke="#E64A19" stroke-width="2"/><ellipse cx="30" cy="30" rx="14" ry="10" fill="#FFCCBC" stroke="#E64A19" stroke-width="2"/><circle cx="24" cy="28" r="3" fill="#C5E1A5" opacity="0.7"/><circle cx="34" cy="26" r="3" fill="#C5E1A5" opacity="0.7"/><circle cx="30" cy="34" r="2" fill="#C5E1A5" opacity="0.7"/></svg>' },
+  { key: 'rinse-hands', label: 'Rinse hands', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 28 Q20 16 30 14 Q40 16 40 28" fill="#FFCCBC" stroke="#E64A19" stroke-width="2"/><path d="M24 34 L24 44 M30 32 L30 46 M36 34 L36 44" stroke="#64B5F6" stroke-width="2" stroke-linecap="round"/><ellipse cx="30" cy="50" rx="10" ry="4" fill="#BBDEFB" stroke="#42A5F5" stroke-width="1.5"/></svg>' },
+  { key: 'dry-hands', label: 'Dry hands', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="16" y="12" width="28" height="36" rx="4" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="22" y1="20" x2="38" y2="20" stroke="#F9A825" stroke-width="1.5"/><line x1="22" y1="26" x2="38" y2="26" stroke="#F9A825" stroke-width="1.5"/><path d="M20 38 Q20 26 30 24 Q40 26 40 38" fill="#FFCCBC" stroke="#E64A19" stroke-width="1.5"/></svg>' },
+  { key: 'toothpaste', label: 'Put on toothpaste', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><rect x="27" y="30" width="6" height="22" rx="3" fill="#64B5F6" stroke="#1E88E5" stroke-width="1.5"/><rect x="24" y="50" width="12" height="4" rx="2" fill="#E0E0E0"/><rect x="12" y="14" width="22" height="14" rx="4" fill="#E0E0E0" stroke="#9E9E9E" stroke-width="1.5"/><path d="M34 20 L42 20 Q44 20 44 22 L44 24 Q44 26 42 26 L34 26" fill="#EF9A9A" stroke="#E53935" stroke-width="1.5"/><path d="M28 30 Q28 26 32 26" stroke="#E53935" stroke-width="2" fill="none"/></svg>' },
+  { key: 'spit-rinse', label: 'Spit and rinse', category: 'Bathroom',
+    svg: '<svg viewBox="0 0 60 60"><path d="M18 16 L18 40 Q18 46 24 46 L36 46 Q42 46 42 40 L42 16" fill="#E3F2FD" stroke="#42A5F5" stroke-width="2"/><rect x="18" y="32" width="24" height="14" rx="0" fill="#64B5F6" opacity="0.5"/><circle cx="26" cy="26" r="3" fill="#fff" opacity="0.7"/><circle cx="34" cy="22" r="2" fill="#fff" opacity="0.7"/></svg>' },
+  { key: 'underwear', label: 'Underwear', category: 'Self-Care',
+    svg: '<svg viewBox="0 0 60 60"><path d="M16 18 L44 18 L44 30 Q44 42 36 42 L34 42 Q30 42 30 36 Q30 42 26 42 L24 42 Q16 42 16 30 Z" fill="#CE93D8" stroke="#8E24AA" stroke-width="2"/></svg>' },
+  { key: 'pants', label: 'Pants', category: 'Self-Care',
+    svg: '<svg viewBox="0 0 60 60"><path d="M18 12 L42 12 L44 32 L38 32 L38 52 L32 52 L30 36 L28 52 L22 52 L22 32 L16 32 Z" fill="#90CAF9" stroke="#1E88E5" stroke-width="2"/></svg>' },
+  { key: 'shirt', label: 'Shirt', category: 'Self-Care',
+    svg: '<svg viewBox="0 0 60 60"><path d="M20 16 L26 12 L34 12 L40 16 L48 22 L44 28 L38 24 L38 48 L22 48 L22 24 L16 28 L12 22 Z" fill="#EF9A9A" stroke="#E53935" stroke-width="2"/></svg>' },
+  { key: 'socks', label: 'Socks', category: 'Self-Care',
+    svg: '<svg viewBox="0 0 60 60"><path d="M18 10 L18 34 Q18 44 28 44 L32 44 Q42 44 42 34 L42 10" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="18" y1="16" x2="42" y2="16" stroke="#F9A825" stroke-width="2"/><line x1="18" y1="20" x2="42" y2="20" stroke="#F9A825" stroke-width="1.5"/></svg>' },
+  { key: 'read-book', label: 'Read a book', category: 'Bedtime',
+    svg: '<svg viewBox="0 0 60 60"><path d="M10 14 L30 18 L50 14 L50 44 L30 48 L10 44 Z" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="30" y1="18" x2="30" y2="48" stroke="#F9A825" stroke-width="2"/><line x1="16" y1="22" x2="26" y2="24" stroke="#E0E0E0" stroke-width="1.5"/><line x1="16" y1="28" x2="26" y2="30" stroke="#E0E0E0" stroke-width="1.5"/><line x1="34" y1="24" x2="44" y2="22" stroke="#E0E0E0" stroke-width="1.5"/><line x1="34" y1="30" x2="44" y2="28" stroke="#E0E0E0" stroke-width="1.5"/></svg>' },
+  { key: 'lights-off', label: 'Lights off', category: 'Bedtime',
+    svg: '<svg viewBox="0 0 60 60"><circle cx="30" cy="24" r="12" fill="#FFF9C4" stroke="#F9A825" stroke-width="2"/><line x1="30" y1="8" x2="30" y2="4" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="42" y1="12" x2="46" y2="8" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="12" x2="14" y2="8" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><rect x="26" y="36" width="8" height="4" rx="2" fill="#9E9E9E"/><line x1="22" y1="44" x2="38" y2="44" stroke="#E53935" stroke-width="3" stroke-linecap="round"/></svg>' },
 ];
 
 // ── Visual Schedules ──
@@ -4494,6 +4776,14 @@ document.getElementById('btn-start-schedule').addEventListener('click', () => {
   openTemplateList('start');
 });
 
+document.getElementById('btn-schedule-new-after-done').addEventListener('click', () => {
+  if (schedTemplates.length === 0) {
+    showToast('Create a template first');
+    return;
+  }
+  openTemplateList('start');
+});
+
 let tmplListMode = 'start';
 
 function openTemplateList(mode) {
@@ -4812,7 +5102,7 @@ document.getElementById('btn-add-custom-step').addEventListener('click', async (
   const imageKey = customStepImageBlob ? 'sched-' + templateId + '-' + stepId : null;
 
   if (customStepImageBlob) {
-    await saveImage(imageKey, customStepImageBlob);
+    await saveImage(imageKey, await compressImage(customStepImageBlob));
   }
 
   editorSteps.push({
@@ -4853,10 +5143,10 @@ async function initRewards() {
   if (rewardTracks.length === 0 && !localStorage.getItem('gs-sample-loaded')) {
     const sampleTrack = {
       id: 'track-sample',
-      taskLabel: 'Practice waiting',
-      targetCount: 5,
+      taskLabel: 'Bedtime',
+      targetCount: 6,
       currentCount: 0,
-      rewardLabel: 'Choose a game',
+      rewardLabel: '',
       rewardImageKey: null,
       timerEnabled: false,
       timerDuration: 30,
@@ -4867,9 +5157,84 @@ async function initRewards() {
       taskImageType: 'none',
       taskDefaultImageKey: null,
       taskImageKey: null,
+      steps: [
+        { id: 'sample-bed-1', label: 'Put on pajamas', imageType: 'default', imageKey: 'put-on-pajamas' },
+        { id: 'sample-bed-2', label: 'Brush teeth', imageType: 'default', imageKey: 'brush-teeth' },
+        { id: 'sample-bed-3', label: 'Go potty', imageType: 'default', imageKey: 'potty' },
+        { id: 'sample-bed-4', label: 'Read a book', imageType: 'default', imageKey: 'read-book' },
+        { id: 'sample-bed-5', label: 'Lights off', imageType: 'default', imageKey: 'lights-off' },
+        { id: 'sample-bed-6', label: 'Goodnight hug', imageType: 'default', imageKey: 'be-gentle' },
+      ],
     };
     await saveTrack(sampleTrack);
     rewardTracks = [sampleTrack];
+  }
+
+  // Pre-load task strip templates on first launch
+  const STRIP_TMPL_VERSION = '2';
+  if (localStorage.getItem('gs-taskstrip-templates-version') !== STRIP_TMPL_VERSION) {
+    localStorage.setItem('gs-taskstrip-templates-version', STRIP_TMPL_VERSION);
+    // Delete old default templates before re-creating
+    try {
+      const oldTmpls = await loadRewardTemplates();
+      for (const t of oldTmpls) {
+        if (t.id && t.id.startsWith('rtmpl-')) await deleteRewardTemplate(t.id);
+      }
+    } catch (e) {}
+    const stripTemplates = [
+      { id: 'rtmpl-potty', name: 'Potty Training', taskLabel: 'Potty Training', rewardLabel: 'Great job!',
+        targetCount: 7, timerEnabled: false, timerDuration: 30, taskImageType: 'none', taskDefaultImageKey: null, createdAt: Date.now(),
+        steps: [
+          { id: 'ts-potty-1', label: 'Pull pants down', imageType: 'default', imageKey: 'pants-down' },
+          { id: 'ts-potty-2', label: 'Sit on potty', imageType: 'default', imageKey: 'sit-down' },
+          { id: 'ts-potty-3', label: 'Go pee/poop', imageType: 'default', imageKey: 'potty' },
+          { id: 'ts-potty-4', label: 'Wipe', imageType: 'default', imageKey: 'wipe' },
+          { id: 'ts-potty-5', label: 'Pull pants up', imageType: 'default', imageKey: 'pants-up' },
+          { id: 'ts-potty-6', label: 'Flush', imageType: 'default', imageKey: 'flush' },
+          { id: 'ts-potty-7', label: 'Wash hands', imageType: 'default', imageKey: 'wash-hands' },
+        ]},
+      { id: 'rtmpl-handwash', name: 'Handwashing', taskLabel: 'Wash Hands', rewardLabel: 'Clean hands!',
+        targetCount: 6, timerEnabled: false, timerDuration: 30, taskImageType: 'none', taskDefaultImageKey: null, createdAt: Date.now(),
+        steps: [
+          { id: 'ts-hw-1', label: 'Turn on water', imageType: 'default', imageKey: 'water-on' },
+          { id: 'ts-hw-2', label: 'Wet hands', imageType: 'default', imageKey: 'wet-hands' },
+          { id: 'ts-hw-3', label: 'Get soap', imageType: 'default', imageKey: 'soap' },
+          { id: 'ts-hw-4', label: 'Scrub hands (sing ABCs)', imageType: 'default', imageKey: 'rub-hands' },
+          { id: 'ts-hw-5', label: 'Rinse hands', imageType: 'default', imageKey: 'rinse-hands' },
+          { id: 'ts-hw-6', label: 'Dry hands', imageType: 'default', imageKey: 'dry-hands' },
+        ]},
+      { id: 'rtmpl-teeth', name: 'Brushing Teeth', taskLabel: 'Brush Teeth', rewardLabel: 'Sparkly teeth!',
+        targetCount: 5, timerEnabled: false, timerDuration: 30, taskImageType: 'none', taskDefaultImageKey: null, createdAt: Date.now(),
+        steps: [
+          { id: 'ts-teeth-1', label: 'Get toothbrush', imageType: 'default', imageKey: 'brush-teeth' },
+          { id: 'ts-teeth-2', label: 'Put on toothpaste', imageType: 'default', imageKey: 'toothpaste' },
+          { id: 'ts-teeth-3', label: 'Brush teeth', imageType: 'default', imageKey: 'brush-teeth' },
+          { id: 'ts-teeth-4', label: 'Spit and rinse', imageType: 'default', imageKey: 'spit-rinse' },
+          { id: 'ts-teeth-5', label: 'Put toothbrush away', imageType: 'default', imageKey: 'clean-up' },
+        ]},
+      { id: 'rtmpl-dressed', name: 'Getting Dressed', taskLabel: 'Get Dressed', rewardLabel: 'Looking good!',
+        targetCount: 5, timerEnabled: false, timerDuration: 30, taskImageType: 'none', taskDefaultImageKey: null, createdAt: Date.now(),
+        steps: [
+          { id: 'ts-dress-1', label: 'Underwear', imageType: 'default', imageKey: 'underwear' },
+          { id: 'ts-dress-2', label: 'Shirt', imageType: 'default', imageKey: 'shirt' },
+          { id: 'ts-dress-3', label: 'Pants', imageType: 'default', imageKey: 'pants' },
+          { id: 'ts-dress-4', label: 'Socks', imageType: 'default', imageKey: 'socks' },
+          { id: 'ts-dress-5', label: 'Shoes', imageType: 'default', imageKey: 'put-on-shoes' },
+        ]},
+      { id: 'rtmpl-bedtime', name: 'Bedtime Routine', taskLabel: 'Bedtime', rewardLabel: '',
+        targetCount: 6, timerEnabled: false, timerDuration: 30, taskImageType: 'none', taskDefaultImageKey: null, createdAt: Date.now(),
+        steps: [
+          { id: 'ts-bed-1', label: 'Put on pajamas', imageType: 'default', imageKey: 'put-on-pajamas' },
+          { id: 'ts-bed-2', label: 'Brush teeth', imageType: 'default', imageKey: 'brush-teeth' },
+          { id: 'ts-bed-3', label: 'Go potty', imageType: 'default', imageKey: 'potty' },
+          { id: 'ts-bed-4', label: 'Read a book', imageType: 'default', imageKey: 'read-book' },
+          { id: 'ts-bed-5', label: 'Lights off', imageType: 'default', imageKey: 'lights-off' },
+          { id: 'ts-bed-6', label: 'Goodnight hug', imageType: 'default', imageKey: 'be-gentle' },
+        ]},
+    ];
+    for (const tmpl of stripTemplates) {
+      await saveRewardTemplate(tmpl);
+    }
   }
 
   rewardTracks.sort((a, b) => a.position - b.position);
@@ -4947,17 +5312,42 @@ function renderRewards() {
     activeScreen.classList.remove('visible');
     pathArea.style.display = 'flex';
     editBtn.style.display = 'none';
-    resetBtn.style.display = 'none';
+    document.getElementById('btn-track-more').style.display = 'none';
+    document.getElementById('track-more-menu').style.display = 'none';
     newBtn.textContent = 'New Chart';
     taskImgEl.classList.remove('visible');
     taskImgEl.innerHTML = '';
+    document.getElementById('steps-all-done').style.display = 'none';
     return;
   }
 
   editBtn.style.display = '';
-  newBtn.disabled = rewardTracks.length >= 5;
+  document.getElementById('btn-track-more').style.display = '';
+  newBtn.disabled = rewardTracks.length >= 3;
 
   const isRewardState = track.status === 'reward-earned' || track.status === 'timer-running' || track.status === 'timer-complete';
+  const tc = getTargetCount(track);
+  const stepsAllDone = document.getElementById('steps-all-done');
+
+  // Task strip completed — show All Done screen
+  if (isTaskStrip(track) && (track.currentCount >= tc || isRewardState)) {
+    emptyEl.style.display = 'none';
+    pathEl.style.display = 'none';
+    rewardCard.style.display = 'none';
+    taskHeader.classList.remove('visible');
+    progressText.textContent = '';
+    pathArea.style.display = 'none';
+    activeScreen.classList.remove('visible');
+    taskImgEl.classList.remove('visible');
+    taskImgEl.innerHTML = '';
+    stepsAllDone.style.display = 'flex';
+    document.getElementById('steps-done-msg').textContent = track.rewardLabel
+      ? 'You earned ' + track.rewardLabel + '!'
+      : 'Great job finishing ' + track.taskLabel + '!';
+    return;
+  }
+
+  stepsAllDone.style.display = 'none';
 
   if (isRewardState) {
     emptyEl.style.display = 'none';
@@ -4968,7 +5358,6 @@ function renderRewards() {
     progressText.textContent = '';
     pathArea.style.display = 'none';
     activeScreen.classList.add('visible');
-    resetBtn.style.display = '';
     taskImgEl.classList.remove('visible');
     taskImgEl.innerHTML = '';
     renderRewardActive(track);
@@ -4982,12 +5371,18 @@ function renderRewards() {
   resetBtn.style.display = track.currentCount > 0 ? '' : 'none';
 
   pathArea.setAttribute('aria-valuenow', track.currentCount);
-  pathArea.setAttribute('aria-valuemax', track.targetCount);
+  pathArea.setAttribute('aria-valuemax', tc);
 
-  renderTaskImage(track);
+  // Skip task image for task strips (images are per-step)
+  if (!isTaskStrip(track)) renderTaskImage(track);
+  else { document.getElementById('rewards-task-image').classList.remove('visible'); document.getElementById('rewards-task-image').innerHTML = ''; }
   taskHeader.classList.add('visible');
-  taskLabel.textContent = track.taskLabel;
-  progressText.textContent = track.currentCount + ' of ' + track.targetCount;
+  if (isTaskStrip(track) && track.rewardLabel) {
+    taskLabel.textContent = 'First ' + track.taskLabel + ', then ' + track.rewardLabel;
+  } else {
+    taskLabel.textContent = track.taskLabel;
+  }
+  progressText.textContent = '';
 
   renderPath(track);
 }
@@ -5007,11 +5402,17 @@ async function handleTileTap(track) {
   track._cooldown = true;
   setTimeout(() => { track._cooldown = false; }, 500);
 
-  track.currentCount = Math.min(track.currentCount + 1, track.targetCount);
+  const tc = getTargetCount(track);
+  const completedIdx = track.currentCount;
+  track.currentCount = Math.min(track.currentCount + 1, tc);
   await saveTrack(track);
 
   playDing();
-  speak(track.currentCount + ' out of ' + track.targetCount);
+  if (isTaskStrip(track) && track.steps[completedIdx]) {
+    speak(track.steps[completedIdx].label + ', done!');
+  } else {
+    speak(track.currentCount + ' out of ' + tc);
+  }
 
   renderRewards();
 
@@ -5023,8 +5424,19 @@ async function handleTileTap(track) {
     setTimeout(() => lastTile.classList.remove('animate-fill'), 450);
   }
 
-  if (track.currentCount >= track.targetCount) {
-    setTimeout(() => triggerCelebration(track), 500);
+  if (track.currentCount >= tc) {
+    if (isTaskStrip(track) && !track.rewardLabel) {
+      // No reward configured — simple completion without celebration
+      setTimeout(async () => {
+        playTaDa();
+        speak('All done!');
+        track.status = 'active';
+        await saveTrack(track);
+        renderRewards();
+      }, 500);
+    } else {
+      setTimeout(() => triggerCelebration(track), 500);
+    }
   }
 }
 
@@ -5032,12 +5444,182 @@ function renderPath(track) {
   const pathEl = document.getElementById('rewards-path');
   revokeBlobURLs(pathEl);
   pathEl.innerHTML = '';
-  const cols = getGridCols(track.targetCount);
+  const tc = getTargetCount(track);
+
+  if (isTaskStrip(track)) {
+    // Schedule-style vertical card list for task strips
+    pathEl.className = '';
+    pathEl.style.cssText = 'flex:1;overflow-y:auto;padding:2px 2px 8px;scroll-behavior:smooth;';
+    const stepCount = Math.min(tc, 4);
+    pathEl.classList.add('steps-size-' + stepCount);
+
+    for (let i = 0; i < tc; i++) {
+      const step = track.steps[i];
+      const row = document.createElement('div');
+      row.className = 'sched-step';
+
+      if (i < track.currentCount) {
+        row.classList.add('done');
+        // Long-press undo (parent mode only)
+        if (!kidsMode) {
+          let _undoTimer = null, _undoFeedback = null;
+          const startUndo = (e) => {
+            if (e.type === 'touchstart') e.preventDefault();
+            _undoFeedback = setTimeout(() => { row.style.transform = 'scale(0.96)'; row.style.opacity = '0.8'; }, 400);
+            _undoTimer = setTimeout(async () => {
+              row.style.transform = ''; row.style.opacity = '';
+              track.currentCount = i;
+              track.status = 'active';
+              await saveTrack(track);
+              renderRewards();
+              speak(step.label + ', undo');
+            }, 800);
+          };
+          const cancelUndo = () => {
+            clearTimeout(_undoTimer); clearTimeout(_undoFeedback);
+            row.style.transform = ''; row.style.opacity = '';
+          };
+          row.addEventListener('touchstart', startUndo, { passive: false });
+          row.addEventListener('touchend', cancelUndo);
+          row.addEventListener('touchcancel', cancelUndo);
+          row.addEventListener('mousedown', startUndo);
+          row.addEventListener('mouseup', cancelUndo);
+          row.addEventListener('mouseleave', cancelUndo);
+        }
+      } else if (i === track.currentCount) {
+        row.classList.add('current');
+      }
+
+      // Step image
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'sched-step-img';
+      if (step.imageType === 'uploaded' && step.imageKey) {
+        loadImage(step.imageKey).then(blob => {
+          if (blob) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.alt = step.label;
+            imgDiv.appendChild(img);
+          }
+        });
+      } else if (step.imageType === 'default' && step.imageKey) {
+        const act = DEFAULT_TASK_IMAGES.find(a => a.key === step.imageKey);
+        if (act) imgDiv.innerHTML = act.svg;
+      }
+      row.appendChild(imgDiv);
+
+      // Step label
+      const label = document.createElement('span');
+      label.className = 'sched-step-label';
+      label.textContent = step.label;
+      row.appendChild(label);
+
+      // Done checkmark (for completed steps)
+      const check = document.createElement('div');
+      check.className = 'sched-step-check';
+      check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>';
+      row.appendChild(check);
+
+      // Done button (for current step)
+      if (i === track.currentCount) {
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'sched-step-done-btn';
+        doneBtn.textContent = 'Done!';
+        doneBtn.addEventListener('click', (e) => { e.stopPropagation(); handleTileTap(track); });
+        row.appendChild(doneBtn);
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => handleTileTap(track));
+      }
+
+      pathEl.appendChild(row);
+    }
+
+    // Reward as final card (if reward label exists)
+    if (track.rewardLabel) {
+      const allDone = track.currentCount >= tc;
+      const rewardRow = document.createElement('div');
+      rewardRow.className = 'sched-step';
+      if (allDone) {
+        rewardRow.classList.add('done');
+        rewardRow.style.background = '#FFF8E1';
+        rewardRow.style.borderLeftColor = '#F9A825';
+      } else {
+        rewardRow.style.opacity = '0.4';
+        rewardRow.style.borderLeft = '4px dashed #ccc';
+      }
+
+      const rewardImg = document.createElement('div');
+      rewardImg.className = 'sched-step-img';
+      rewardImg.style.background = allDone ? '#FFF8E1' : '#f5f5f5';
+      if (track.rewardImageKey) {
+        loadImage(track.rewardImageKey).then(blob => {
+          if (blob) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.alt = track.rewardLabel;
+            rewardImg.appendChild(img);
+          } else {
+            rewardImg.textContent = '\u2B50';
+            rewardImg.style.fontSize = '1.5rem';
+          }
+        });
+      } else {
+        rewardImg.textContent = '\u2B50';
+        rewardImg.style.fontSize = '1.5rem';
+      }
+      rewardRow.appendChild(rewardImg);
+
+      const rewardLabel = document.createElement('span');
+      rewardLabel.className = 'sched-step-label';
+      rewardLabel.style.fontWeight = '700';
+      rewardLabel.textContent = allDone ? track.rewardLabel + '!' : track.rewardLabel;
+      rewardRow.appendChild(rewardLabel);
+
+      if (allDone) {
+        const check = document.createElement('div');
+        check.className = 'sched-step-check';
+        check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>';
+        rewardRow.appendChild(check);
+      }
+
+      pathEl.appendChild(rewardRow);
+    }
+
+    // Hide the separate reward card for task strips
+    document.getElementById('rewards-reward-card').style.display = 'none';
+
+    // "Do It Again" button when all steps complete
+    if (track.currentCount >= tc) {
+      const againBtn = document.createElement('button');
+      againBtn.type = 'button';
+      againBtn.style.cssText = 'width:100%;padding:12px;margin:12px 0 4px;border:2px solid #43A047;border-radius:12px;background:transparent;color:#43A047;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;';
+      againBtn.textContent = 'Do It Again!';
+      againBtn.addEventListener('click', async () => {
+        track.currentCount = 0;
+        track.status = 'active';
+        await saveTrack(track);
+        renderRewards();
+      });
+      pathEl.appendChild(againBtn);
+    }
+
+    // Auto-scroll current step into view
+    const currentRow = pathEl.querySelector('.sched-step.current');
+    if (currentRow) {
+      setTimeout(() => currentRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+    }
+
+    return;
+  }
+
+  // Original counter mode: grid tiles
+  const cols = getGridCols(tc);
   pathEl.className = 'rewards-grid cols-' + cols;
+  pathEl.style.cssText = '';
 
   const imageType = track.taskImageType || 'none';
 
-  for (let i = 0; i < track.targetCount; i++) {
+  for (let i = 0; i < tc; i++) {
     const tile = document.createElement('div');
     tile.className = 'task-tile';
 
@@ -5066,7 +5648,6 @@ function renderPath(track) {
     tile.appendChild(check);
     tile.appendChild(tap);
 
-    // Fill tile with task image if available
     if (imageType === 'uploaded' && track.taskImageKey) {
       tile.classList.add('has-image');
       loadImage(track.taskImageKey).then(blob => {
@@ -5084,10 +5665,7 @@ function renderPath(track) {
         tile.classList.add('has-image');
         const wrapper = document.createElement('div');
         wrapper.className = 'task-tile-image';
-        wrapper.style.display = 'flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.justifyContent = 'center';
-        wrapper.style.background = '#f0f0f0';
+        wrapper.style.cssText = 'display:flex;align-items:center;justify-content:center;background:#f0f0f0;';
         wrapper.innerHTML = act.svg;
         tile.insertBefore(wrapper, tile.firstChild);
       }
@@ -5107,7 +5685,8 @@ function renderRewardCard(track) {
   cardEl.onclick = null;
   cardEl.style.cursor = '';
   cardEl.style.display = '';
-  const allDone = track.currentCount >= track.targetCount;
+  const tc = getTargetCount(track);
+  const allDone = track.currentCount >= tc;
   cardEl.className = 'reward-card' + (allDone ? ' unlocked' : ' locked');
 
   // Icon
@@ -5134,8 +5713,12 @@ function renderRewardCard(track) {
   label.textContent = track.rewardLabel;
   const status = document.createElement('div');
   status.className = 'reward-card-status';
-  const remaining = track.targetCount - track.currentCount;
-  status.textContent = allDone ? 'Reward unlocked!' : remaining + ' more to go';
+  const remaining = tc - track.currentCount;
+  if (isTaskStrip(track)) {
+    status.textContent = allDone ? 'Reward unlocked!' : remaining + ' ' + (remaining === 1 ? 'step' : 'steps') + ' left';
+  } else {
+    status.textContent = allDone ? 'Reward unlocked!' : remaining + ' more to go';
+  }
   info.appendChild(label);
   info.appendChild(status);
 
@@ -5151,8 +5734,13 @@ function renderRewardCard(track) {
   cardEl.style.cursor = 'pointer';
   if (!allDone) {
     cardEl.onclick = () => {
-      const remaining = track.targetCount - track.currentCount;
-      speak(track.rewardLabel + ', but first you have to do ' + track.taskLabel + ' ' + remaining + ' more ' + (remaining === 1 ? 'time' : 'times') + '.');
+      const remaining = tc - track.currentCount;
+      if (isTaskStrip(track)) {
+        const nextStep = track.steps[track.currentCount];
+        speak('Next step: ' + (nextStep ? nextStep.label : '') + '. ' + remaining + ' ' + (remaining === 1 ? 'step' : 'steps') + ' left for ' + track.rewardLabel + '.');
+      } else {
+        speak(track.rewardLabel + ', but first you have to do ' + track.taskLabel + ' ' + remaining + ' more ' + (remaining === 1 ? 'time' : 'times') + '.');
+      }
     };
   } else {
     cardEl.onclick = () => {
@@ -5172,7 +5760,7 @@ function renderTrackTabs() {
   rewardTracks.forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'track-tab' + (t.id === activeTrackId ? ' active' : '');
-    btn.textContent = t.taskLabel + ' (' + t.currentCount + '/' + t.targetCount + ')';
+    btn.textContent = t.taskLabel;
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', t.id === activeTrackId ? 'true' : 'false');
     btn.addEventListener('click', () => {
@@ -5351,16 +5939,55 @@ function openRewardConfig(trackId) {
   editingTrackId = trackId || null;
   const track = trackId ? rewardTracks.find(t => t.id === trackId) : null;
 
-  document.getElementById('reward-config-title').textContent = track ? 'Edit Reward Chart' : 'New Reward Chart';
+  // Detect task strip mode
+  if (track) {
+    configIsTaskStrip = isTaskStrip(track);
+  }
+  // configIsTaskStrip is already set by type chooser for new tracks
+
+  const titleText = configIsTaskStrip
+    ? (track ? 'Edit Task Strip' : 'New Task Strip')
+    : (track ? 'Edit Reward Chart' : 'New Reward Chart');
+  document.getElementById('reward-config-title').textContent = titleText;
   document.getElementById('reward-task-input').value = track ? track.taskLabel : '';
   document.getElementById('reward-label-input').value = track ? track.rewardLabel : '';
-  configStepperValue = track ? track.targetCount : 5;
+  configStepperValue = track ? getTargetCount(track) : 5;
   document.getElementById('stepper-value').textContent = configStepperValue;
   document.getElementById('timer-toggle').checked = track ? track.timerEnabled : false;
   document.getElementById('timer-duration-select').value = track ? track.timerDuration : 30;
   document.getElementById('timer-duration-row').classList.toggle('visible', track ? track.timerEnabled : false);
   document.getElementById('btn-reward-delete').style.display = track ? '' : 'none';
   document.getElementById('btn-reward-save-template').style.display = track ? '' : 'none';
+
+  // Show/hide counter vs task strip fields
+  document.getElementById('counter-only-fields').style.display = configIsTaskStrip ? 'none' : '';
+  document.getElementById('step-editor-section').classList.toggle('visible', configIsTaskStrip);
+
+  // Change labels for task strip
+  document.querySelector('label[for="reward-task-input"]').textContent = configIsTaskStrip ? 'What is this routine?' : 'What is your child working on?';
+  document.getElementById('reward-label-label').textContent = configIsTaskStrip ? 'Reward (optional)' : 'What do they earn?';
+
+  if (configIsTaskStrip) {
+    if (track && track.steps) {
+      // Load existing steps with their images
+      configSteps = track.steps.map(s => ({
+        id: s.id,
+        label: s.label,
+        imageType: s.imageType || 'none',
+        imageKey: s.imageKey || null,
+        imageBlob: null,
+      }));
+      // Load uploaded step images
+      configSteps.forEach((s, i) => {
+        if (s.imageType === 'uploaded' && s.imageKey) {
+          loadImage(s.imageKey).then(blob => {
+            if (blob) { configSteps[i].imageBlob = blob; renderStepEditor(); }
+          });
+        }
+      });
+    }
+    renderStepEditor();
+  }
 
   configTaskImageType = (track && track.taskImageType) || 'none';
   configTaskDefaultImageKey = (track && track.taskDefaultImageKey) || null;
@@ -5413,7 +6040,7 @@ document.getElementById('reward-image-input').addEventListener('change', async e
   if (!file) return;
   const trackId = editingTrackId || 'reward-temp';
   const imageKey = 'reward-' + trackId;
-  await saveImage(imageKey, file);
+  await saveImage(imageKey, await compressImage(file));
   const preview = document.getElementById('reward-image-preview');
   preview.src = URL.createObjectURL(file);
   preview.style.display = 'block';
@@ -5432,9 +6059,16 @@ document.getElementById('btn-reward-clear-img').addEventListener('click', async 
 document.getElementById('btn-reward-save').addEventListener('click', async () => {
   const taskLabel = document.getElementById('reward-task-input').value.trim();
   const rewardLabel = document.getElementById('reward-label-input').value.trim();
-  if (!taskLabel || !rewardLabel) {
+  if (!taskLabel || (!rewardLabel && !configIsTaskStrip)) {
     showToast('Please fill in task and reward');
     return;
+  }
+
+  // Validate task strip steps
+  if (configIsTaskStrip) {
+    if (configSteps.length < 2) { showToast('At least 2 steps required'); return; }
+    const emptyStep = configSteps.find(s => !s.label.trim());
+    if (emptyStep) { showToast('Every step needs a label'); return; }
   }
 
   const timerEnabled = document.getElementById('timer-toggle').checked;
@@ -5445,21 +6079,36 @@ document.getElementById('btn-reward-save').addEventListener('click', async () =>
     if (track) {
       track.taskLabel = taskLabel;
       track.rewardLabel = rewardLabel;
-      track.targetCount = Math.max(configStepperValue, track.currentCount);
       track.timerEnabled = timerEnabled;
       track.timerDuration = timerDuration;
       track.rewardImageKey = 'reward-' + track.id;
-      track.taskImageType = configTaskImageType;
-      track.taskDefaultImageKey = configTaskDefaultImageKey;
-      if (configTaskImageType === 'uploaded' && configTaskImageBlob) {
-        const taskImgKey = 'task-' + track.id;
-        await saveImage(taskImgKey, configTaskImageBlob);
-        track.taskImageKey = taskImgKey;
-      } else if (configTaskImageType !== 'uploaded') {
-        if (track.taskImageKey) {
-          await deleteImage(track.taskImageKey);
+
+      if (configIsTaskStrip) {
+        // Save per-step images
+        for (const step of configSteps) {
+          if (step.imageType === 'uploaded' && step.imageBlob) {
+            const key = 'step-img-' + step.id;
+            await saveImage(key, await compressImage(step.imageBlob));
+            step.imageKey = key;
+          }
         }
-        track.taskImageKey = null;
+        track.steps = configSteps.map(s => ({
+          id: s.id, label: s.label.trim(),
+          imageType: s.imageType, imageKey: s.imageType === 'uploaded' ? ('step-img-' + s.id) : s.imageKey,
+        }));
+        track.targetCount = track.steps.length;
+      } else {
+        track.targetCount = Math.max(configStepperValue, track.currentCount);
+        track.taskImageType = configTaskImageType;
+        track.taskDefaultImageKey = configTaskDefaultImageKey;
+        if (configTaskImageType === 'uploaded' && configTaskImageBlob) {
+          const taskImgKey = 'task-' + track.id;
+          await saveImage(taskImgKey, await compressImage(configTaskImageBlob));
+          track.taskImageKey = taskImgKey;
+        } else if (configTaskImageType !== 'uploaded') {
+          if (track.taskImageKey) { await deleteImage(track.taskImageKey); }
+          track.taskImageKey = null;
+        }
       }
       await saveTrack(track);
     }
@@ -5470,21 +6119,39 @@ document.getElementById('btn-reward-save').addEventListener('click', async () =>
     const permKey = 'reward-' + id;
     const tempBlob = await loadImage(tempKey);
     if (tempBlob) {
-      await saveImage(permKey, tempBlob);
+      await saveImage(permKey, await compressImage(tempBlob));
       await deleteImage(tempKey);
     }
 
-    // Save task image if uploaded
+    let steps = null;
     let taskImageKey = null;
-    if (configTaskImageType === 'uploaded' && configTaskImageBlob) {
-      taskImageKey = 'task-' + id;
-      await saveImage(taskImageKey, configTaskImageBlob);
+    let targetCount = configStepperValue;
+
+    if (configIsTaskStrip) {
+      // Save per-step images
+      for (const step of configSteps) {
+        if (step.imageType === 'uploaded' && step.imageBlob) {
+          const key = 'step-img-' + step.id;
+          await saveImage(key, await compressImage(step.imageBlob));
+          step.imageKey = key;
+        }
+      }
+      steps = configSteps.map(s => ({
+        id: s.id, label: s.label.trim(),
+        imageType: s.imageType, imageKey: s.imageType === 'uploaded' ? ('step-img-' + s.id) : s.imageKey,
+      }));
+      targetCount = steps.length;
+    } else {
+      if (configTaskImageType === 'uploaded' && configTaskImageBlob) {
+        taskImageKey = 'task-' + id;
+        await saveImage(taskImageKey, await compressImage(configTaskImageBlob));
+      }
     }
 
     const newTrack = {
       id,
       taskLabel,
-      targetCount: configStepperValue,
+      targetCount,
       currentCount: 0,
       rewardLabel,
       rewardImageKey: permKey,
@@ -5494,9 +6161,10 @@ document.getElementById('btn-reward-save').addEventListener('click', async () =>
       status: 'active',
       position: rewardTracks.length,
       createdAt: Date.now(),
-      taskImageType: configTaskImageType,
-      taskDefaultImageKey: configTaskDefaultImageKey,
+      taskImageType: configIsTaskStrip ? 'none' : configTaskImageType,
+      taskDefaultImageKey: configIsTaskStrip ? null : configTaskDefaultImageKey,
       taskImageKey,
+      steps,
     };
     rewardTracks.push(newTrack);
     activeTrackId = id;
@@ -5560,12 +6228,13 @@ document.getElementById('btn-reward-save-template').addEventListener('click', as
     name: name.trim(),
     taskLabel,
     rewardLabel,
-    targetCount: configStepperValue,
+    targetCount: configIsTaskStrip ? configSteps.length : configStepperValue,
     timerEnabled: document.getElementById('timer-toggle').checked,
     timerDuration: parseInt(document.getElementById('timer-duration-select').value, 10),
-    taskImageType: configTaskImageType,
-    taskDefaultImageKey: configTaskDefaultImageKey,
-    createdAt: Date.now()
+    taskImageType: configIsTaskStrip ? 'none' : configTaskImageType,
+    taskDefaultImageKey: configIsTaskStrip ? null : configTaskDefaultImageKey,
+    createdAt: Date.now(),
+    steps: configIsTaskStrip ? configSteps.map(s => ({ id: s.id, label: s.label.trim(), imageType: s.imageType, imageKey: s.imageType === 'default' ? s.imageKey : null })) : null,
   };
   await saveRewardTemplate(tmpl);
   showToast('Template saved');
@@ -5612,6 +6281,16 @@ function openRewardTemplatePicker(tmpls) {
 }
 
 function openRewardConfigFromTemplate(tmpl) {
+  // Set task strip mode before opening config
+  configIsTaskStrip = !!(tmpl.steps && tmpl.steps.length);
+  if (configIsTaskStrip) {
+    configSteps = tmpl.steps.map(s => ({
+      id: generateStepId(), label: s.label,
+      imageType: s.imageType || 'none', imageKey: s.imageKey || null, imageBlob: null,
+    }));
+  } else {
+    configSteps = [];
+  }
   openRewardConfig(null);
   document.getElementById('reward-task-input').value = tmpl.taskLabel;
   document.getElementById('reward-label-input').value = tmpl.rewardLabel;
@@ -5620,9 +6299,11 @@ function openRewardConfigFromTemplate(tmpl) {
   document.getElementById('timer-toggle').checked = tmpl.timerEnabled;
   document.getElementById('timer-duration-select').value = tmpl.timerDuration;
   document.getElementById('timer-duration-row').classList.toggle('visible', tmpl.timerEnabled);
-  configTaskImageType = tmpl.taskImageType || 'none';
-  configTaskDefaultImageKey = tmpl.taskDefaultImageKey || null;
-  updateTaskImagePreview();
+  if (!configIsTaskStrip) {
+    configTaskImageType = tmpl.taskImageType || 'none';
+    configTaskDefaultImageKey = tmpl.taskDefaultImageKey || null;
+    updateTaskImagePreview();
+  }
 }
 
 function escHtml(s) {
@@ -5633,7 +6314,15 @@ function escHtml(s) {
 
 document.getElementById('btn-reward-from-scratch').addEventListener('click', () => {
   document.getElementById('reward-tmpl-picker').style.display = 'none';
-  openRewardConfig(null);
+  if (configIsTaskStrip) {
+    configSteps = [
+      { id: generateStepId(), label: '', imageType: 'none', imageKey: null, imageBlob: null },
+      { id: generateStepId(), label: '', imageType: 'none', imageKey: null, imageBlob: null },
+    ];
+    openRewardConfig(null);
+  } else {
+    openTrackTypeChooser();
+  }
 });
 
 document.getElementById('btn-reward-tmpl-cancel').addEventListener('click', () => {
@@ -5644,6 +6333,236 @@ document.getElementById('reward-tmpl-picker').addEventListener('click', e => {
   if (e.target === e.currentTarget) {
     document.getElementById('reward-tmpl-picker').style.display = 'none';
   }
+});
+
+// ── Track Type Chooser ──
+let configIsTaskStrip = false;
+let configSteps = []; // [{id, label, imageType, imageKey, imageBlob}]
+let stepImageTargetIdx = null;
+
+function openTrackTypeChooser() {
+  document.getElementById('track-type-chooser').classList.add('open');
+}
+
+document.getElementById('btn-choose-taskstrip').addEventListener('click', async () => {
+  document.getElementById('track-type-chooser').classList.remove('open');
+  configIsTaskStrip = true;
+  // Check for task strip templates and show picker if any exist
+  try {
+    const tmpls = await loadRewardTemplates();
+    const stripTmpls = tmpls.filter(t => t.steps && t.steps.length > 0);
+    if (stripTmpls.length > 0) {
+      openRewardTemplatePicker(stripTmpls);
+      return;
+    }
+  } catch (e) {}
+  // No templates — start from scratch
+  configSteps = [
+    { id: generateStepId(), label: '', imageType: 'none', imageKey: null, imageBlob: null },
+    { id: generateStepId(), label: '', imageType: 'none', imageKey: null, imageBlob: null },
+  ];
+  openRewardConfig(null);
+});
+
+document.getElementById('btn-choose-counter').addEventListener('click', () => {
+  document.getElementById('track-type-chooser').classList.remove('open');
+  configIsTaskStrip = false;
+  configSteps = [];
+  openRewardConfig(null);
+});
+
+document.getElementById('btn-type-chooser-cancel').addEventListener('click', () => {
+  document.getElementById('track-type-chooser').classList.remove('open');
+});
+
+document.getElementById('track-type-chooser').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('track-type-chooser').classList.remove('open');
+});
+
+// ── Step Editor ──
+function renderStepEditor() {
+  const list = document.getElementById('step-editor-list');
+  list.innerHTML = '';
+  const countDisp = document.getElementById('step-count-display');
+  countDisp.textContent = '(' + configSteps.length + ' of 8)';
+
+  configSteps.forEach((step, i) => {
+    const row = document.createElement('div');
+    row.className = 'step-editor-row';
+
+    const num = document.createElement('div');
+    num.className = 'step-editor-num';
+    num.textContent = i + 1;
+    row.appendChild(num);
+
+    const imgBtn = document.createElement('button');
+    imgBtn.type = 'button';
+    imgBtn.className = 'step-editor-img-btn';
+    if (step.imageType === 'uploaded' && step.imageBlob) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(step.imageBlob);
+      img.alt = step.label || 'Step image';
+      imgBtn.appendChild(img);
+    } else if (step.imageType === 'default' && step.imageKey) {
+      const act = DEFAULT_TASK_IMAGES.find(a => a.key === step.imageKey);
+      if (act) imgBtn.innerHTML = act.svg;
+      else imgBtn.textContent = '+';
+    } else {
+      imgBtn.textContent = '+';
+    }
+    imgBtn.addEventListener('click', () => {
+      stepImageTargetIdx = i;
+      openStepImagePicker(i);
+    });
+    row.appendChild(imgBtn);
+
+    const labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.className = 'step-editor-label-input';
+    labelInput.value = step.label;
+    labelInput.setAttribute('aria-label', 'Step ' + (i + 1) + ' label');
+    labelInput.addEventListener('input', e => { configSteps[i].label = e.target.value; });
+    row.appendChild(labelInput);
+
+    const arrows = document.createElement('div');
+    arrows.className = 'step-editor-arrows';
+    const upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.innerHTML = '&#9650;';
+    upBtn.title = 'Move up';
+    upBtn.disabled = i === 0;
+    upBtn.addEventListener('click', () => { swapSteps(i, i - 1); });
+    const downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.innerHTML = '&#9660;';
+    downBtn.title = 'Move down';
+    downBtn.disabled = i === configSteps.length - 1;
+    downBtn.addEventListener('click', () => { swapSteps(i, i + 1); });
+    arrows.appendChild(upBtn);
+    arrows.appendChild(downBtn);
+    row.appendChild(arrows);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'step-editor-del';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Remove step';
+    delBtn.disabled = configSteps.length <= 2;
+    delBtn.addEventListener('click', () => {
+      configSteps.splice(i, 1);
+      renderStepEditor();
+    });
+    row.appendChild(delBtn);
+
+    list.appendChild(row);
+  });
+
+  const addBtn = document.getElementById('btn-add-step');
+  addBtn.disabled = configSteps.length >= 8;
+  document.getElementById('step-limit-msg').style.display = configSteps.length >= 8 ? 'block' : 'none';
+}
+
+function swapSteps(a, b) {
+  [configSteps[a], configSteps[b]] = [configSteps[b], configSteps[a]];
+  renderStepEditor();
+}
+
+document.getElementById('btn-add-step').addEventListener('click', () => {
+  if (configSteps.length >= 8) return;
+  configSteps.push({ id: generateStepId(), label: '', imageType: 'none', imageKey: null, imageBlob: null });
+  renderStepEditor();
+  // Scroll to and focus the new step's label input
+  const list = document.getElementById('step-editor-list');
+  const lastRow = list.lastElementChild;
+  if (lastRow) {
+    lastRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const inp = lastRow.querySelector('.step-editor-label-input');
+    if (inp) setTimeout(() => inp.focus(), 100);
+  }
+});
+
+// Step image picker — dedicated overlay for picking step images
+function openStepImagePicker(idx) {
+  let overlay = document.getElementById('step-image-picker-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'step-image-picker-overlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:960;background:rgba(0,0,0,0.4);align-items:flex-end;justify-content:center;padding:0;';
+    overlay.innerHTML = '<div id="step-image-picker-panel" style="background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:70vh;overflow-y:auto;padding:16px 12px 24px;box-shadow:0 -4px 24px rgba(0,0,0,0.2);"></div>';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.style.display = 'none'; } });
+    document.body.appendChild(overlay);
+  }
+  const panel = document.getElementById('step-image-picker-panel');
+  panel.innerHTML = '<h3 style="font-size:1rem;font-weight:800;color:#333;margin:0 0 12px;text-align:center;">Choose Step Image</h3>';
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:8px;';
+
+  // Upload photo option
+  const uploadCard = document.createElement('button');
+  uploadCard.type = 'button';
+  uploadCard.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:2px dashed #ccc;border-radius:10px;background:#fafafa;cursor:pointer;min-height:72px;font-family:inherit;';
+  uploadCard.innerHTML = '<div style="font-size:1.3rem;">&#x1F4F7;</div><div style="font-size:0.65rem;font-weight:600;color:#666;">Photo</div>';
+  uploadCard.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    document.getElementById('step-image-input').click();
+  });
+  grid.appendChild(uploadCard);
+
+  // Default images
+  DEFAULT_TASK_IMAGES.forEach(act => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;cursor:pointer;min-height:72px;font-family:inherit;';
+    card.innerHTML = '<div style="width:36px;height:36px;">' + act.svg + '</div><div style="font-size:0.55rem;font-weight:600;color:#666;text-align:center;line-height:1.1;">' + act.label + '</div>';
+    card.addEventListener('click', () => {
+      configSteps[idx].imageType = 'default';
+      configSteps[idx].imageKey = act.key;
+      configSteps[idx].imageBlob = null;
+      overlay.style.display = 'none';
+      renderStepEditor();
+    });
+    grid.appendChild(card);
+  });
+
+  panel.appendChild(grid);
+
+  // Remove button if image exists
+  if (configSteps[idx].imageType !== 'none') {
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.style.cssText = 'width:100%;padding:12px;margin-top:12px;border:1px solid #FFCDD2;border-radius:10px;background:#fff;color:#D32F2F;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;';
+    removeBtn.textContent = 'Remove Image';
+    removeBtn.addEventListener('click', () => {
+      configSteps[idx].imageType = 'none';
+      configSteps[idx].imageKey = null;
+      configSteps[idx].imageBlob = null;
+      overlay.style.display = 'none';
+      renderStepEditor();
+    });
+    panel.appendChild(removeBtn);
+  }
+
+  // Cancel button
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.style.cssText = 'width:100%;padding:10px;margin-top:8px;border:none;border-radius:10px;background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+  panel.appendChild(cancelBtn);
+
+  overlay.style.display = 'flex';
+}
+
+document.getElementById('step-image-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file || stepImageTargetIdx === null) return;
+  const compressed = await compressImage(file);
+  configSteps[stepImageTargetIdx].imageType = 'uploaded';
+  configSteps[stepImageTargetIdx].imageBlob = compressed;
+  configSteps[stepImageTargetIdx].imageKey = null;
+  renderStepEditor();
+  e.target.value = '';
 });
 
 // ── Task Image Config Buttons ──
@@ -5765,8 +6684,8 @@ document.getElementById('task-image-picker-overlay').addEventListener('click', e
 });
 
 document.getElementById('btn-new-track').addEventListener('click', async () => {
-  if (rewardTracks.length >= 5) {
-    showToast('Maximum 5 charts');
+  if (rewardTracks.length >= 3) {
+    showToast('Maximum 3 charts');
     return;
   }
   try {
@@ -5778,10 +6697,52 @@ document.getElementById('btn-new-track').addEventListener('click', async () => {
   } catch (e) {
     console.warn('Could not load reward templates:', e);
   }
-  openRewardConfig(null);
+  openTrackTypeChooser();
 });
 
 document.getElementById('btn-edit-track').addEventListener('click', () => {
+  if (!activeTrackId) return;
+  document.getElementById('track-more-menu').style.display = 'none';
+  openRewardConfig(activeTrackId);
+});
+
+document.getElementById('btn-track-more').addEventListener('click', () => {
+  const menu = document.getElementById('track-more-menu');
+  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Steps All Done buttons
+document.getElementById('btn-steps-reset').addEventListener('click', async () => {
+  const track = getActiveTrack();
+  if (!track) return;
+  track.currentCount = 0;
+  track.status = 'active';
+  track.timerStartedAt = null;
+  await saveTrack(track);
+  renderRewards();
+});
+
+document.getElementById('btn-steps-new').addEventListener('click', async () => {
+  // If at max, auto-delete the completed track to make room
+  if (rewardTracks.length >= 3) {
+    const track = getActiveTrack();
+    if (track) {
+      if (track.rewardImageKey) await deleteImage(track.rewardImageKey);
+      if (track.taskImageKey) await deleteImage(track.taskImageKey);
+      if (isTaskStrip(track) && track.steps) {
+        for (const s of track.steps) {
+          if (s.imageType === 'uploaded' && s.imageKey) await deleteImage(s.imageKey);
+        }
+      }
+      await deleteTrackFromDB(track.id);
+      rewardTracks = rewardTracks.filter(t => t.id !== track.id);
+      activeTrackId = rewardTracks.length > 0 ? rewardTracks[0].id : null;
+    }
+  }
+  openTrackTypeChooser();
+});
+
+document.getElementById('btn-steps-configure').addEventListener('click', () => {
   if (!activeTrackId) return;
   openRewardConfig(activeTrackId);
 });
@@ -5799,6 +6760,183 @@ document.getElementById('btn-reset-track').addEventListener('click', async () =>
 });
 
 
+
+// -- Track Export/Import --
+document.getElementById('btn-share-track').addEventListener('click', async () => {
+  const track = getActiveTrack();
+  if (!track) return;
+  showToast('Preparing chart...');
+
+  // Collect step images as base64
+  const images = {};
+  if (isTaskStrip(track) && track.steps) {
+    for (const step of track.steps) {
+      if (step.imageType === 'uploaded' && step.imageKey) {
+        const blob = await loadImage(step.imageKey);
+        if (blob) {
+          images[step.imageKey] = await new Promise(resolve => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.readAsDataURL(blob);
+          });
+        }
+      }
+    }
+  }
+  // Reward image
+  if (track.rewardImageKey) {
+    const blob = await loadImage(track.rewardImageKey);
+    if (blob) {
+      images[track.rewardImageKey] = await new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(blob);
+      });
+    }
+  }
+  // Task image (counter mode)
+  if (track.taskImageKey) {
+    const blob = await loadImage(track.taskImageKey);
+    if (blob) {
+      images[track.taskImageKey] = await new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(blob);
+      });
+    }
+  }
+
+  const exportData = {
+    format: 'guiding-steps-track',
+    version: 1,
+    exportDate: new Date().toISOString(),
+    track: {
+      taskLabel: track.taskLabel,
+      targetCount: getTargetCount(track),
+      rewardLabel: track.rewardLabel,
+      timerEnabled: track.timerEnabled,
+      timerDuration: track.timerDuration,
+      taskImageType: track.taskImageType,
+      taskDefaultImageKey: track.taskDefaultImageKey,
+      steps: track.steps || null,
+    },
+    images,
+  };
+
+  const json = JSON.stringify(exportData);
+  const blob = new Blob([json], { type: 'application/json' });
+  const safeName = (track.taskLabel || 'chart').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const fileName = safeName + '_' + dateStr + '.gsstrip';
+  const file = new File([blob], fileName, { type: 'application/json' });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ title: track.taskLabel, files: [file] }); }
+    catch (e) { if (e.name !== 'AbortError') showToast('Could not share'); }
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    showToast('Chart exported');
+  }
+});
+
+document.getElementById('btn-import-track').addEventListener('click', () => {
+  document.getElementById('track-import-input').click();
+});
+
+document.getElementById('track-import-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large (10MB max)'); return; }
+  if (rewardTracks.length >= 3) { showToast('Maximum 3 charts — delete one first'); return; }
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (data.format !== 'guiding-steps-track' || !data.track) {
+      showToast('Not a valid Guiding Steps chart file');
+      return;
+    }
+
+    const t = data.track;
+    const images = data.images || {};
+    const id = 'track-' + Date.now();
+
+    // Restore reward image
+    let rewardImageKey = null;
+    if (t.rewardLabel) {
+      rewardImageKey = 'reward-' + id;
+      for (const [k, v] of Object.entries(images)) {
+        if (k.startsWith('reward-')) {
+          const resp = await fetch(v);
+          await saveImage(rewardImageKey, await resp.blob());
+          break;
+        }
+      }
+    }
+
+    // Restore task image (counter mode)
+    let taskImageKey = null;
+    if (t.taskImageType === 'uploaded') {
+      taskImageKey = 'task-' + id;
+      for (const [k, v] of Object.entries(images)) {
+        if (k.startsWith('task-')) {
+          const resp = await fetch(v);
+          await saveImage(taskImageKey, await resp.blob());
+          break;
+        }
+      }
+    }
+
+    // Restore step images
+    let steps = null;
+    if (t.steps) {
+      steps = [];
+      for (const s of t.steps) {
+        const newStepId = generateStepId();
+        if (s.imageType === 'uploaded' && s.imageKey && images[s.imageKey]) {
+          const newKey = 'step-img-' + newStepId;
+          const resp = await fetch(images[s.imageKey]);
+          await saveImage(newKey, await resp.blob());
+          steps.push({ id: newStepId, label: s.label, imageType: 'uploaded', imageKey: newKey });
+        } else {
+          steps.push({ id: newStepId, label: s.label, imageType: s.imageType || 'none', imageKey: s.imageType === 'default' ? s.imageKey : null });
+        }
+      }
+    }
+
+    const newTrack = {
+      id,
+      taskLabel: t.taskLabel || 'Imported Chart',
+      targetCount: steps ? steps.length : (t.targetCount || 5),
+      currentCount: 0,
+      rewardLabel: t.rewardLabel || '',
+      rewardImageKey,
+      timerEnabled: t.timerEnabled || false,
+      timerDuration: t.timerDuration || 30,
+      timerStartedAt: null,
+      status: 'active',
+      position: rewardTracks.length,
+      createdAt: Date.now(),
+      taskImageType: t.taskImageType || 'none',
+      taskDefaultImageKey: t.taskDefaultImageKey || null,
+      taskImageKey,
+      steps,
+    };
+
+    rewardTracks.push(newTrack);
+    activeTrackId = id;
+    await saveTrack(newTrack);
+    renderRewards();
+    showToast('"' + newTrack.taskLabel + '" imported');
+  } catch (err) {
+    showToast('Could not import chart');
+  }
+});
 
 // -- Celebration overlay tap to dismiss --
 document.getElementById('celebration-overlay').addEventListener('click', () => {
@@ -5978,6 +7116,11 @@ function renderStoriesList() {
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => { e.stopPropagation(); openStoryEditor(story); });
     actions.appendChild(editBtn);
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'story-card-action-btn';
+    shareBtn.textContent = 'Share';
+    shareBtn.addEventListener('click', (e) => { e.stopPropagation(); exportStory(story); });
+    actions.appendChild(shareBtn);
     const delBtn = document.createElement('button');
     delBtn.className = 'story-card-action-btn danger';
     delBtn.textContent = 'Delete';
@@ -6102,6 +7245,245 @@ document.getElementById('reader-speak').addEventListener('click', () => {
     else if (dx > 0 && currentReaderPage > 0) { currentReaderPage--; renderReaderPage(reader._pages, 'back'); }
   }, { passive: true });
 })();
+
+// -- Print Story --
+document.getElementById('reader-print').addEventListener('click', () => {
+  if (!currentReaderStory) return;
+  printStory(currentReaderStory);
+});
+
+async function printStory(story) {
+  showToast('Preparing story...');
+
+  const pages = story.pages || [];
+  const title = story.title || 'Story';
+  const childName = story.childName || '';
+
+  // Convert custom images to base64 data URIs
+  const imageDataMap = {};
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    if (page.imageType === 'custom' && page.customImageKey) {
+      const blob = await loadImage(page.customImageKey);
+      if (blob) {
+        const reader = new FileReader();
+        const dataUri = await new Promise(resolve => {
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+        imageDataMap[page.customImageKey] = dataUri;
+      }
+    }
+  }
+
+  // Build self-contained HTML document
+  let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+  html += '<title>' + title + '</title>';
+  html += '<style>';
+  html += 'body{font-family:-apple-system,Helvetica,Arial,sans-serif;color:#333;margin:0;padding:0;}';
+  html += '.page{page-break-after:always;min-height:95vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;box-sizing:border-box;}';
+  html += '.page:last-child{page-break-after:avoid;}';
+  html += '.title-page h1{font-size:2rem;font-weight:900;margin:0 0 12px;}';
+  html += '.title-page p{font-size:1.2rem;color:#666;margin:0;}';
+  html += '.page-img{max-width:65%;max-height:45vh;margin-bottom:24px;}';
+  html += '.page-img svg{width:100%;height:auto;}';
+  html += '.page-img img{width:100%;height:auto;border-radius:12px;}';
+  html += '.page-text{font-size:1.3rem;font-weight:600;line-height:1.7;max-width:560px;}';
+  html += '.page-num{font-size:0.8rem;color:#aaa;margin-top:auto;padding-top:16px;}';
+  html += '@media print{.page{min-height:95vh;}}';
+  html += '</style></head><body>';
+
+  // Title page
+  html += '<div class="page title-page"><h1>' + escHtml(title) + '</h1>';
+  if (childName) html += '<p>A story for ' + escHtml(childName) + '</p>';
+  html += '</div>';
+
+  // Story pages
+  pages.forEach((page, i) => {
+    html += '<div class="page">';
+    html += '<div class="page-img">';
+    if (page.imageType === 'stock' && page.stockKey && STORY_SVGS[page.stockKey]) {
+      html += STORY_SVGS[page.stockKey];
+    } else if (page.imageType === 'custom' && page.customImageKey && imageDataMap[page.customImageKey]) {
+      html += '<img src="' + imageDataMap[page.customImageKey] + '" alt="Page ' + (i + 1) + '">';
+    }
+    html += '</div>';
+    const text = personalizeStoryText(page.text, childName, story.personMode, story.parentName);
+    html += '<div class="page-text">' + escHtml(text) + '</div>';
+    html += '<div class="page-num">' + (i + 1) + ' / ' + pages.length + '</div>';
+    html += '</div>';
+  });
+
+  html += '</body></html>';
+
+  // Create blob and share
+  const blob = new Blob([html], { type: 'text/html' });
+  const file = new File([blob], title.replace(/[^a-zA-Z0-9 ]/g, '') + '.html', { type: 'text/html' });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title: title, files: [file] });
+    } catch (e) {
+      if (e.name !== 'AbortError') showToast('Could not share');
+    }
+  } else {
+    // Fallback: open in new tab
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+}
+
+// -- Story Export/Import --
+async function exportStory(story) {
+  showToast('Preparing story...');
+  const pages = story.pages || [];
+
+  // Convert custom images to base64
+  const images = {};
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    if (page.imageType === 'custom' && page.customImageKey) {
+      const blob = await loadImage(page.customImageKey);
+      if (blob) {
+        const dataUri = await new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        });
+        images[page.customImageKey] = dataUri;
+      }
+    }
+  }
+
+  const exportData = {
+    format: 'guiding-steps-story',
+    version: 1,
+    exportDate: new Date().toISOString(),
+    story: {
+      title: story.title,
+      childName: story.childName,
+      childAge: story.childAge,
+      parentName: story.parentName,
+      personMode: story.personMode,
+      isTemplate: story.isTemplate,
+      templateKey: story.templateKey,
+      pages: pages.map(p => ({
+        text: p.text,
+        sentenceType: p.sentenceType,
+        imageType: p.imageType,
+        stockKey: p.stockKey || null,
+      })),
+    },
+    images,
+  };
+
+  const json = JSON.stringify(exportData);
+  const blob = new Blob([json], { type: 'application/json' });
+  const safeName = (story.title || 'story').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const fileName = safeName + '_' + dateStr + '.gsstory';
+  const file = new File([blob], fileName, { type: 'application/json' });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title: story.title, files: [file] });
+    } catch (e) {
+      if (e.name !== 'AbortError') showToast('Could not share');
+    }
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    showToast('Story exported');
+  }
+}
+
+document.getElementById('btn-import-story').addEventListener('click', () => {
+  document.getElementById('story-import-input').click();
+});
+
+document.getElementById('story-import-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('File too large (10MB max)');
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (data.format !== 'guiding-steps-story' || !data.story || !data.story.pages) {
+      showToast('Not a valid Guiding Steps story file');
+      return;
+    }
+
+    const s = data.story;
+    const newId = generateId();
+    const images = data.images || {};
+
+    // Save custom images to IndexedDB
+    for (let i = 0; i < s.pages.length; i++) {
+      const page = s.pages[i];
+      if (page.imageType === 'custom') {
+        const oldKey = 'story-' + (data.story._origId || 'imp') + '-page-' + i;
+        const newKey = 'story-' + newId + '-page-' + i;
+        // Find the image data — try old key patterns
+        let dataUri = null;
+        for (const [k, v] of Object.entries(images)) {
+          if (k.endsWith('-page-' + i)) { dataUri = v; break; }
+        }
+        if (dataUri) {
+          const resp = await fetch(dataUri);
+          const blob = await resp.blob();
+          await saveImage(newKey, blob);
+          page.customImageKey = newKey;
+        } else {
+          page.imageType = 'stock';
+          page.customImageKey = null;
+        }
+      }
+    }
+
+    const newStory = {
+      id: newId,
+      title: s.title || 'Imported Story',
+      childName: s.childName || '',
+      childAge: s.childAge || null,
+      parentName: s.parentName || '',
+      personMode: s.personMode || 'first',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      readCount: 0,
+      lastReadAt: null,
+      isTemplate: s.isTemplate || false,
+      templateKey: s.templateKey || null,
+      pages: s.pages.map((p, i) => ({
+        text: p.text || '',
+        sentenceType: p.sentenceType || 'descriptive',
+        imageType: p.imageType || 'stock',
+        stockKey: p.stockKey || null,
+        customImageKey: p.imageType === 'custom' ? ('story-' + newId + '-page-' + i) : null,
+      })),
+    };
+
+    await saveStory(newStory);
+    stories.push(newStory);
+    renderStoriesList();
+    showToast('"' + newStory.title + '" imported');
+  } catch (err) {
+    showToast('Could not import story');
+  }
+});
 
 // -- Story Picker --
 function openTemplatePicker() {
@@ -6660,6 +8042,20 @@ function updateRatioBar() {
       bar.appendChild(seg);
     }
   });
+  // Carol Gray ratio warning: directive should be < 33% of total
+  let warn = document.getElementById('editor-ratio-warn');
+  if (!warn) {
+    warn = document.createElement('div');
+    warn.id = 'editor-ratio-warn';
+    warn.style.cssText = 'font-size:0.75rem;font-weight:600;color:#E65100;padding:4px 0;display:none;';
+    bar.parentNode.insertBefore(warn, bar.nextSibling);
+  }
+  if (total >= 3 && counts.directive / total > 0.33) {
+    warn.textContent = 'Tip: Social stories work best when most pages describe or affirm. Consider adding a descriptive or perspective page.';
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
 }
 
 function inferSentenceType(text) {
@@ -6737,7 +8133,7 @@ editorFileInput.addEventListener('change', async () => {
   const file = editorFileInput.files[0];
   if (!file) return;
   const key = 'story-' + editingStory.id + '-page-' + editingPageIdx;
-  await saveImage(key, file);
+  await saveImage(key, await compressImage(file));
   editingStory.pages[editingPageIdx].imageType = 'custom';
   editingStory.pages[editingPageIdx].customImageKey = key;
   renderEditorPage();
