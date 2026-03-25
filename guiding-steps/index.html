@@ -332,6 +332,8 @@ body {
 .accordion-details { display: none; margin-top: 8px; }
 .accordion-details.open { display: block; }
 .accordion-summary { flex: 1; text-align: left; }
+.progress-day-card { padding: 10px 12px; background: var(--chrome-surface); border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; line-height: 1.4; color: #555; border-left: 3px solid var(--chrome-primary); }
+.progress-day-card h4 { font-size: 0.8rem; color: #999; margin: 0 0 4px; }
 
 /* ── Reward Tracker ── */
 #rewards-content {
@@ -2993,6 +2995,18 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <button type="button" class="settings-btn" id="btn-voice-test" style="margin-top:8px;background:#e3f2fd;color:#1565C0;">Test voice</button>
       </div>
     </div>
+    <div class="settings-section parent-only">
+      <button type="button" id="progress-toggle" class="settings-accordion-btn" aria-expanded="false">
+        <span style="font-size:1rem;font-weight:700;color:#555;">Progress</span>
+        <span class="accordion-summary" id="progress-summary" style="font-size:0.8rem;color:#888;"></span>
+        <span class="accordion-chevron">&#9660;</span>
+      </button>
+      <div id="progress-details" class="accordion-details">
+        <div id="progress-narrative" style="padding:12px;background:#f9f7ff;border-radius:10px;font-size:0.9rem;color:#444;line-height:1.5;margin-bottom:12px;"></div>
+        <div id="progress-past-days"></div>
+        <button type="button" class="settings-btn" id="btn-share-progress" style="margin-top:12px;background:#e8eaf6;color:#3949AB;">Share Progress Report</button>
+      </div>
+    </div>
     <div class="settings-section">
       <h3>Data</h3>
       <button type="button" class="settings-btn danger parent-only" id="btn-reset-defaults" style="background:#ffebee;color:#D32F2F;">Reset all to defaults</button>
@@ -3289,13 +3303,14 @@ let visibleStepsCount = parseInt(localStorage.getItem('gs-visible-steps'), 10) |
 
 // -- IndexedDB --
 const DB_NAME = 'guiding-steps';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_IMAGES = 'images';
 const STORE_REWARD_TRACKS = 'rewardTracks';
 const STORE_SCHED_TEMPLATES = 'scheduleTemplates';
 const STORE_ACTIVE_SCHED = 'activeSchedule';
 const STORE_STORIES = 'socialStories';
 const STORE_REWARD_TMPLS = 'rewardTemplates';
+const STORE_SESSION_LOG = 'sessionLog';
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -3308,6 +3323,11 @@ function openDB() {
       if (!db.objectStoreNames.contains(STORE_ACTIVE_SCHED)) db.createObjectStore(STORE_ACTIVE_SCHED, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_STORIES)) db.createObjectStore(STORE_STORIES, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_REWARD_TMPLS)) db.createObjectStore(STORE_REWARD_TMPLS, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(STORE_SESSION_LOG)) {
+        const logStore = db.createObjectStore(STORE_SESSION_LOG, { keyPath: 'id', autoIncrement: true });
+        logStore.createIndex('date', 'date', { unique: false });
+        logStore.createIndex('type', 'type', { unique: false });
+      }
     };
     req.onblocked = () => console.warn('IndexedDB upgrade blocked — close other tabs');
     req.onsuccess = () => {
@@ -3556,6 +3576,38 @@ async function clearActiveSchedule() {
   });
 }
 
+// -- Session Log --
+async function logSessionEvent(type, details) {
+  const db = await openDB();
+  const now = Date.now();
+  const dateStr = new Date(now).toISOString().slice(0, 10);
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SESSION_LOG, 'readwrite');
+    tx.objectStore(STORE_SESSION_LOG).add({ date: dateStr, timestamp: now, type: type, details: details });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getSessionLogForDate(dateStr) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SESSION_LOG, 'readonly');
+    const req = tx.objectStore(STORE_SESSION_LOG).index('date').getAll(dateStr);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getSessionLogForDateRange(startDate, endDate) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_SESSION_LOG, 'readonly');
+    const req = tx.objectStore(STORE_SESSION_LOG).index('date').getAll(IDBKeyRange.bound(startDate, endDate));
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -3609,6 +3661,7 @@ function openSettingsPanel() {
   updateSensorySummary();
   updateScheduleSummary();
   updateVoiceSummary();
+  renderProgressSection();
   document.getElementById('settings-overlay').classList.add('open');
 }
 
@@ -3669,7 +3722,7 @@ function openSettingsPanel() {
 })();
 document.getElementById('btn-close-settings').addEventListener('click', () => {
   document.getElementById('settings-overlay').classList.remove('open');
-  ['sensory', 'schedule', 'voice'].forEach(key => {
+  ['sensory', 'schedule', 'voice', 'progress'].forEach(key => {
     document.getElementById(key + '-toggle').setAttribute('aria-expanded', 'false');
     document.getElementById(key + '-details').classList.remove('open');
   });
@@ -3753,7 +3806,7 @@ function updateSensorySummary() {
   document.getElementById('sensory-summary').textContent = labels.length ? labels.join(', ') : 'All off';
 }
 
-['sensory', 'schedule', 'voice'].forEach(key => {
+['sensory', 'schedule', 'voice', 'progress'].forEach(key => {
   document.getElementById(key + '-toggle').addEventListener('click', () => {
     const btn = document.getElementById(key + '-toggle');
     const details = document.getElementById(key + '-details');
@@ -3761,6 +3814,180 @@ function updateSensorySummary() {
     btn.setAttribute('aria-expanded', String(!expanded));
     details.classList.toggle('open', !expanded);
   });
+});
+
+// -- Progress Narrative --
+function generateNarrative(events, childName) {
+  const name = childName || 'Your child';
+  const parts = [];
+
+  const schedCompletes = events.filter(e => e.type === 'schedule-complete');
+  for (const sc of schedCompletes) {
+    const d = sc.details;
+    const mins = Math.round((d.durationMs || 0) / 60000);
+    const timeStr = mins > 0 ? ' in ' + mins + ' minute' + (mins !== 1 ? 's' : '') : '';
+    parts.push('completed ' + d.scheduleName + ' (' + d.totalSteps + ' steps' + timeStr + ')');
+  }
+
+  const schedSteps = events.filter(e => e.type === 'schedule-step');
+  const schedNames = [...new Set(schedSteps.map(e => e.details.scheduleName))];
+  for (const sn of schedNames) {
+    if (!schedCompletes.find(c => c.details.scheduleName === sn)) {
+      const count = schedSteps.filter(e => e.details.scheduleName === sn).length;
+      parts.push('worked on ' + sn + ' (' + count + ' step' + (count !== 1 ? 's' : '') + ')');
+    }
+  }
+
+  const rewardCompletes = events.filter(e => e.type === 'reward-complete');
+  for (const rc of rewardCompletes) {
+    parts.push('earned their ' + rc.details.trackLabel + ' reward');
+  }
+
+  const storyReads = events.filter(e => e.type === 'story-read');
+  for (const sr of storyReads) {
+    parts.push("read '" + sr.details.storyTitle + "'");
+  }
+
+  if (parts.length === 0) return 'No activity recorded yet today.';
+
+  let sentence = 'Today ' + name + ' ';
+  if (parts.length === 1) {
+    sentence += parts[0] + '.';
+  } else if (parts.length === 2) {
+    sentence += parts[0] + ' and ' + parts[1] + '.';
+  } else {
+    sentence += parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] + '.';
+  }
+
+  const positives = ['Great day!', 'Keep it up!', 'Awesome progress!', 'Way to go!'];
+  sentence += ' ' + positives[Math.floor(Math.random() * positives.length)];
+  return sentence;
+}
+
+async function renderProgressSection() {
+  const narrativeEl = document.getElementById('progress-narrative');
+  const pastEl = document.getElementById('progress-past-days');
+  const summaryEl = document.getElementById('progress-summary');
+  if (!narrativeEl) return;
+
+  const childName = getGlobalChildName();
+  const today = new Date().toISOString().slice(0, 10);
+
+  try {
+    const todayEvents = await getSessionLogForDate(today);
+    narrativeEl.textContent = generateNarrative(todayEvents, childName);
+    summaryEl.textContent = todayEvents.length > 0 ? todayEvents.length + ' events today' : '';
+
+    pastEl.innerHTML = '';
+    for (let d = 1; d <= 7; d++) {
+      const date = new Date(Date.now() - d * 86400000);
+      const dateStr = date.toISOString().slice(0, 10);
+      const events = await getSessionLogForDate(dateStr);
+      if (events.length === 0) continue;
+      const card = document.createElement('div');
+      card.className = 'progress-day-card';
+      const h4 = document.createElement('h4');
+      h4.textContent = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      card.appendChild(h4);
+      const p = document.createElement('p');
+      p.style.margin = '0';
+      p.textContent = generateNarrative(events, childName).replace('Today ', '');
+      card.appendChild(p);
+      pastEl.appendChild(card);
+    }
+  } catch (e) {
+    narrativeEl.textContent = 'Could not load progress data.';
+  }
+}
+
+document.getElementById('btn-share-progress').addEventListener('click', async () => {
+  const childName = getGlobalChildName() || 'Child';
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+
+  let events;
+  try { events = await getSessionLogForDateRange(startDate, endDate); }
+  catch (e) { showToast('Could not load progress data'); return; }
+
+  const schedCompletes = events.filter(e => e.type === 'schedule-complete');
+  const schedByName = {};
+  for (const e of schedCompletes) {
+    const n = e.details.scheduleName;
+    if (!schedByName[n]) schedByName[n] = { count: 0, totalMs: 0 };
+    schedByName[n].count++;
+    schedByName[n].totalMs += (e.details.durationMs || 0);
+  }
+
+  const rewardSteps = events.filter(e => e.type === 'reward-step');
+  const rewardCompletes = events.filter(e => e.type === 'reward-complete');
+  const rewardByLabel = {};
+  for (const e of rewardSteps) {
+    const l = e.details.trackLabel;
+    if (!rewardByLabel[l]) rewardByLabel[l] = { maxCount: 0, target: 0, completions: 0 };
+    rewardByLabel[l].maxCount = Math.max(rewardByLabel[l].maxCount, e.details.currentCount);
+    rewardByLabel[l].target = e.details.targetCount;
+  }
+  for (const e of rewardCompletes) {
+    if (!rewardByLabel[e.details.trackLabel]) rewardByLabel[e.details.trackLabel] = { maxCount: 0, target: 0, completions: 0 };
+    rewardByLabel[e.details.trackLabel].completions++;
+  }
+
+  const storyReads = events.filter(e => e.type === 'story-read');
+  const storyByTitle = {};
+  for (const e of storyReads) {
+    storyByTitle[e.details.storyTitle] = (storyByTitle[e.details.storyTitle] || 0) + 1;
+  }
+
+  const startFmt = new Date(startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const endFmt = new Date(endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  let report = 'Guiding Steps \u2014 Progress Report for ' + childName + '\n';
+  report += 'Date range: ' + startFmt + ' \u2013 ' + endFmt + '\n\n';
+
+  report += 'SCHEDULES\n';
+  const schedNames = Object.keys(schedByName);
+  if (schedNames.length === 0) report += '- No schedules completed\n';
+  for (const n of schedNames) {
+    const s = schedByName[n];
+    const avg = Math.round(s.totalMs / s.count / 60000);
+    report += '- ' + n + ': Completed ' + s.count + ' time' + (s.count !== 1 ? 's' : '') + ' (avg ' + avg + ' min)\n';
+  }
+
+  report += '\nREWARD CHARTS\n';
+  const rewardLabels = Object.keys(rewardByLabel);
+  if (rewardLabels.length === 0) report += '- No reward activity\n';
+  for (const l of rewardLabels) {
+    const r = rewardByLabel[l];
+    if (r.completions > 0) {
+      report += '- ' + l + ': Completed! (earned reward ' + r.completions + 'x)\n';
+    } else {
+      report += '- ' + l + ': ' + r.maxCount + ' of ' + r.target + ' steps completed\n';
+    }
+  }
+
+  report += '\nSTORIES READ\n';
+  const titles = Object.keys(storyByTitle);
+  if (titles.length === 0) report += '- No stories read\n';
+  for (const t of titles) {
+    report += '- ' + t + ': ' + storyByTitle[t] + ' time' + (storyByTitle[t] !== 1 ? 's' : '') + '\n';
+  }
+
+  report += '\nGenerated by Guiding Steps on ' + new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '\n';
+
+  const blob = new Blob([report], { type: 'text/plain' });
+  const fileName = 'GuidingSteps_' + childName.replace(/[^a-zA-Z0-9]/g, '') + '_' + endDate + '.txt';
+  const file = new File([blob], fileName, { type: 'text/plain' });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ title: 'Progress Report', files: [file] }); }
+    catch (err) { if (err.name !== 'AbortError') showToast('Could not share'); }
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    showToast('Report downloaded');
+  }
 });
 
 function updateScheduleSummary() {
@@ -4810,6 +5037,12 @@ async function completeCurrentStep(idx) {
   if (!activeSchedule || activeSchedule.steps[idx].status !== 'current') return;
 
   activeSchedule.steps[idx].status = 'done';
+  logSessionEvent('schedule-step', {
+    scheduleName: activeSchedule.templateName,
+    stepLabel: activeSchedule.steps[idx].label,
+    stepIndex: idx,
+    totalSteps: activeSchedule.steps.length
+  }).catch(() => {});
 
   // Find next upcoming step
   const nextIdx = activeSchedule.steps.findIndex(s => s.status === 'upcoming');
@@ -4819,6 +5052,11 @@ async function completeCurrentStep(idx) {
     speak('Time to ' + activeSchedule.steps[nextIdx].label);
   } else {
     activeSchedule.completedAt = Date.now();
+    logSessionEvent('schedule-complete', {
+      scheduleName: activeSchedule.templateName,
+      totalSteps: activeSchedule.steps.length,
+      durationMs: activeSchedule.completedAt - activeSchedule.activatedAt
+    }).catch(() => {});
     playTaDa();
     speak('All done! Great job!');
   }
@@ -5472,6 +5710,9 @@ async function handleTileTap(track) {
   track.currentCount = Math.min(track.currentCount + 1, tc);
   await saveTrack(track);
 
+  const stepLabel = (isTaskStrip(track) && track.steps[completedIdx]) ? track.steps[completedIdx].label : track.currentCount + ' of ' + tc;
+  logSessionEvent('reward-step', { trackLabel: track.taskLabel, stepLabel: stepLabel, currentCount: track.currentCount, targetCount: tc }).catch(() => {});
+
   playDing();
   if (isTaskStrip(track) && track.steps[completedIdx]) {
     speak(track.steps[completedIdx].label + ', done!');
@@ -5490,6 +5731,7 @@ async function handleTileTap(track) {
   }
 
   if (track.currentCount >= tc) {
+    logSessionEvent('reward-complete', { trackLabel: track.taskLabel }).catch(() => {});
     if (isTaskStrip(track) && !track.rewardLabel) {
       // No reward configured — simple completion without celebration
       setTimeout(async () => {
@@ -7215,7 +7457,10 @@ function openStoryReader(story, previewPages) {
   const pages = previewPages || story.pages;
   currentReaderStory = story;
   currentReaderPage = 0;
-  if (!previewPages) { markStoryRead(story.id).then(updated => { if (updated) { const s = stories.find(st => st.id === story.id); if (s) { s.readCount = updated.readCount; s.lastReadAt = updated.lastReadAt; } } }); }
+  if (!previewPages) {
+    markStoryRead(story.id).then(updated => { if (updated) { const s = stories.find(st => st.id === story.id); if (s) { s.readCount = updated.readCount; s.lastReadAt = updated.lastReadAt; } } });
+    logSessionEvent('story-read', { storyTitle: story.title, pageCount: story.pages ? story.pages.length : 0 }).catch(() => {});
+  }
   const reader = document.getElementById('story-reader');
   const dotsEl = document.getElementById('reader-dots');
   dotsEl.innerHTML = '';
