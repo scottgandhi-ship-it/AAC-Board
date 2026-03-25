@@ -8863,6 +8863,8 @@ const GSCoachMarks = {
 
     // Show backdrop + tooltip
     backdrop.classList.add('visible');
+    // For waitForAction steps, let clicks pass through to the real UI
+    backdrop.style.pointerEvents = step.waitForAction ? 'none' : '';
     // Force reflow for transition
     tooltip.style.display = 'block';
     tooltip.style.opacity = '';
@@ -8878,7 +8880,7 @@ const GSCoachMarks = {
     requestAnimationFrame(() => tooltip.classList.add('visible'));
 
     // Backdrop dismiss
-    backdrop.onclick = () => this.dismiss();
+    backdrop.onclick = step.waitForAction ? null : () => this.dismiss();
 
     // Escape key
     this._escHandler = (e) => { if (e.key === 'Escape') this.dismiss(); };
@@ -8962,7 +8964,9 @@ const GSCoachMarks = {
   dismiss() {
     const tab = this.activeSequence;
     this.cleanup();
-    document.getElementById('gs-coach-backdrop').classList.remove('visible');
+    const backdrop = document.getElementById('gs-coach-backdrop');
+    backdrop.classList.remove('visible');
+    backdrop.style.pointerEvents = '';
     const tooltip = document.getElementById('gs-coach-mark');
     tooltip.classList.remove('visible');
     tooltip.style.display = '';

@@ -536,11 +536,6 @@
 
     <!-- Category: Data & Privacy -->
     <div class="settings-category-content" id="settings-cat-data">
-      <div class="settings-section" id="settings-install-section" style="display:none;">
-        <h3>App</h3>
-        <button type="button" class="settings-btn" id="btn-settings-install" style="background:#e8f5e9;color:#2E7D32;">Install App on Device</button>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="settings-install-hint">Add to your home screen for full-screen access and offline use.</p>
-      </div>
       <div class="settings-section">
         <h3>Data</h3>
         <button type="button" class="settings-btn parent-mode-only" id="btn-export-board" style="background:#e8f5e9;color:#2E7D32;">Export Board</button>
@@ -564,17 +559,6 @@
   <div id="export-import-panel" class="export-import-panel"></div>
 </div>
 
-<!-- PWA Install Banner -->
-<div id="pwa-install-banner" class="pwa-install-banner" role="alert" aria-live="polite">
-  <div class="pwa-install-banner-text" id="pwa-install-text">
-    <strong>Use this like an app</strong>
-    Add to your home screen for full-screen, quick access, and offline use.
-  </div>
-  <div class="pwa-install-banner-buttons" id="pwa-install-buttons">
-    <button type="button" class="pwa-install-btn-dismiss" id="pwa-install-dismiss">Not now</button>
-    <button type="button" class="pwa-install-btn-primary" id="pwa-install-accept">Add to Home Screen</button>
-  </div>
-</div>
 
 <!-- Edit Button Modal -->
 <div id="edit-overlay">
@@ -684,14 +668,15 @@
   </div>
 </div>
 
-<!-- Coach Marks Overlay (onboarding step 3) -->
-<div id="coach-marks-overlay">
-  <div class="coach-marks-message">
-    <p class="coach-marks-headline">Your child learns by watching <strong>YOU</strong> do it.</p>
-    <p class="coach-marks-body">Tap a few words to build a sentence. Try it now!</p>
-    <p class="coach-marks-counter" id="coach-tap-counter"></p>
-    <div class="onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+<!-- Coach Marks -->
+<div id="ab-coach-backdrop"></div>
+<div id="ab-coach-mark" role="dialog" aria-label="Guided tip">
+  <p class="ab-coach-text"></p>
+  <div class="ab-coach-footer">
+    <span class="ab-coach-step-counter"></span>
+    <button type="button" class="ab-coach-btn">Next</button>
   </div>
+  <div class="ab-coach-arrow"></div>
 </div>
 
 <div id="image-preview-overlay" role="dialog" aria-modal="true" aria-label="Enlarged image preview" tabindex="-1">
@@ -1748,38 +1733,14 @@ const Onboarding = {
   },
 
   showCoachMarks() {
-    const overlay = document.getElementById('coach-marks-overlay');
-    overlay.classList.add('visible');
-    this.setState({ currentStep: 4 });
-    this._tapCount = 0;
-    const TAPS_NEEDED = 1;
-    const counter = document.getElementById('coach-tap-counter');
-    counter.textContent = '';
-
-    const handleTap = (e) => {
-      if (e.target.closest('.folder-btn')) return;
-      this._tapCount++;
-      if (this._tapCount < TAPS_NEEDED) {
-        counter.textContent = this._tapCount + ' of ' + TAPS_NEEDED;
-      } else {
-        if (grid) grid.removeEventListener('click', handleTap);
-        if (coreStrip) coreStrip.removeEventListener('click', handleTap);
-        this.complete();
-      }
-    };
-
-    const grid = document.getElementById('grid');
-    if (grid) grid.addEventListener('click', handleTap);
-
-    const coreStrip = document.getElementById('core-word-strip');
-    if (coreStrip) coreStrip.addEventListener('click', handleTap);
+    this.complete();
   },
 
   complete() {
     this.setState({ complete: true });
     document.getElementById('onboarding-overlay').classList.remove('visible');
-    document.getElementById('coach-marks-overlay').classList.remove('visible');
     window.dispatchEvent(new Event('onboarding-complete'));
+    setTimeout(() => ABCoachMarks.tryShow('talk'), 600);
   },
 
   dismiss() {
@@ -1805,12 +1766,294 @@ document.getElementById('btn-onboarding-name-skip').addEventListener('click', ()
   Onboarding.showStep(3);
 });
 
-// Child-grab escape: tap outside coach marks message dismisses onboarding
-document.getElementById('coach-marks-overlay').addEventListener('click', (e) => {
-  if (!e.target.closest('.coach-marks-message')) {
-    Onboarding.dismiss();
+// -- Tab-Scoped Coach Marks --
+const ABCoachMarks = {
+  activeSequence: null,
+  activeStep: 0,
+  highlightedEl: null,
+
+  _childName() {
+    const name = localStorage.getItem('aac-child-name');
+    return name ? name + "'s" : "your child's";
+  },
+
+  SEQUENCES: {
+    talk: {
+      steps: [
+        {
+          target: () => document.querySelector('#core-word-strip .core-strip-btn[data-id="want"]')
+                     || document.querySelector('#core-word-strip .core-strip-btn'),
+          text: () => 'Start by tapping a core word like "Want." These words stay here on every screen.',
+          placement: 'top',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => !!document.querySelector('#core-word-strip .core-strip-btn')
+        },
+        {
+          target: () => document.getElementById('message-bar'),
+          text: () => 'See how the word appears here? This sentence bar builds ' + ABCoachMarks._childName() + ' message.',
+          placement: 'bottom',
+          btnLabel: 'Next',
+          waitForAction: false,
+          guard: () => document.getElementById('message-words')?.children.length > 0
+        },
+        {
+          target: () => document.querySelector('#prediction-bar .prediction-chip'),
+          text: () => 'Now tap a prediction to keep building the sentence.',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => !!document.querySelector('#prediction-bar .prediction-chip')
+        },
+        {
+          target: () => document.getElementById('btn-speak'),
+          text: () => 'Tap the speaker to say the sentence out loud.',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => document.getElementById('message-words')?.children.length > 0
+        },
+        {
+          target: () => document.getElementById('btn-clear'),
+          text: () => 'Tap the X to clear and start a new sentence. That\'s the whole loop!',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => true
+        }
+      ],
+      fallback: {
+        target: () => document.querySelector('#grid .cell'),
+        text: () => 'Tap any word to hear it spoken. Tap a few to build a sentence!',
+        placement: 'top',
+        btnLabel: 'Got it!'
+      }
+    },
+    activities: {
+      steps: [
+        {
+          target: () => document.getElementById('activity-template-select'),
+          text: () => 'Activities give ' + ABCoachMarks._childName().replace("'s", '') + ' the right words at the right time. Pick one to try it!',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => !!document.getElementById('activity-template-select')
+        },
+        {
+          target: () => document.getElementById('btn-activity-start'),
+          text: () => 'This preview shows the words your child will see. Tap Start Activity to begin!',
+          placement: 'top',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => document.getElementById('activity-preview-overlay')?.classList.contains('open')
+        },
+        {
+          target: () => document.getElementById('activity-banner'),
+          text: () => 'The activity is running! The board now shows words for this activity.',
+          placement: 'bottom',
+          btnLabel: 'Next',
+          waitForAction: false,
+          guard: () => document.getElementById('activity-banner')?.classList.contains('active')
+        },
+        {
+          target: () => document.getElementById('btn-guided-mode'),
+          text: () => 'Tap Guide for step-by-step vocabulary prompts during the activity.',
+          placement: 'bottom',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => document.getElementById('btn-guided-mode')?.style.display !== 'none'
+        }
+      ],
+      fallback: {
+        target: () => document.getElementById('activity-template-select'),
+        text: () => 'Choose an activity template to get started. Activities surface the right words at the right time.',
+        placement: 'bottom',
+        btnLabel: 'Got it!'
+      }
+    }
+  },
+
+  keyFor(tab) { return 'ab-coach-' + tab + '-seen'; },
+  hasSeen(tab) { return localStorage.getItem(this.keyFor(tab)) === 'true'; },
+  markSeen(tab) { localStorage.setItem(this.keyFor(tab), 'true'); },
+
+  tryShow(tab) {
+    if (this.hasSeen(tab)) return;
+    if (!Onboarding.isComplete()) return;
+    if (this.activeSequence) return;
+    this.start(tab);
+  },
+
+  start(tab) {
+    const seq = this.SEQUENCES[tab];
+    if (!seq) return;
+    const validSteps = seq.steps.filter(s => s.guard());
+    if (validSteps.length === 0) {
+      if (seq.fallback && seq.fallback.target()) {
+        this.activeSequence = tab;
+        this.activeStep = 0;
+        this._showSingle(seq.fallback);
+        return;
+      }
+      this.markSeen(tab);
+      return;
+    }
+    this.activeSequence = tab;
+    this.activeStep = 0;
+    this._showNextValid();
+  },
+
+  _showNextValid() {
+    const seq = this.SEQUENCES[this.activeSequence];
+    while (this.activeStep < seq.steps.length) {
+      const step = seq.steps[this.activeStep];
+      if (step.guard() && step.target()) {
+        this._renderStep(step, this.activeStep, seq.steps.length);
+        return;
+      }
+      this.activeStep++;
+    }
+    this.dismiss();
+  },
+
+  _renderStep(step, idx, total) {
+    const targetEl = step.target();
+    const backdrop = document.getElementById('ab-coach-backdrop');
+    const tooltip = document.getElementById('ab-coach-mark');
+    const textEl = tooltip.querySelector('.ab-coach-text');
+    const counterEl = tooltip.querySelector('.ab-coach-step-counter');
+    const btn = tooltip.querySelector('.ab-coach-btn');
+    const arrow = tooltip.querySelector('.ab-coach-arrow');
+
+    this.cleanup();
+    targetEl.classList.add('ab-coach-highlight');
+    this.highlightedEl = targetEl;
+
+    textEl.textContent = typeof step.text === 'function' ? step.text() : step.text;
+    counterEl.textContent = total > 1 ? (idx + 1) + ' of ' + total : '';
+
+    if (step.waitForAction) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+      btn.textContent = step.btnLabel || 'Next';
+      btn.onclick = () => this.advance();
+    }
+
+    backdrop.classList.add('visible');
+    // For waitForAction steps, let clicks pass through to the real UI
+    backdrop.style.pointerEvents = step.waitForAction ? 'none' : '';
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '';
+    tooltip.style.transform = '';
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+    this._position(targetEl, tooltip, arrow, step.placement);
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+
+    backdrop.onclick = step.waitForAction ? null : () => this.dismiss();
+    this._escHandler = (e) => { if (e.key === 'Escape') this.dismiss(); };
+    document.addEventListener('keydown', this._escHandler);
+
+    if (!step.waitForAction) {
+      requestAnimationFrame(() => btn.focus());
+    }
+  },
+
+  _showSingle(step) {
+    const targetEl = step.target();
+    if (!targetEl) { this.dismiss(); return; }
+
+    const backdrop = document.getElementById('ab-coach-backdrop');
+    const tooltip = document.getElementById('ab-coach-mark');
+    const textEl = tooltip.querySelector('.ab-coach-text');
+    const counterEl = tooltip.querySelector('.ab-coach-step-counter');
+    const btn = tooltip.querySelector('.ab-coach-btn');
+    const arrow = tooltip.querySelector('.ab-coach-arrow');
+
+    this.cleanup();
+    targetEl.classList.add('ab-coach-highlight');
+    this.highlightedEl = targetEl;
+
+    textEl.textContent = typeof step.text === 'function' ? step.text() : step.text;
+    counterEl.textContent = '';
+    btn.style.display = '';
+    btn.textContent = step.btnLabel || 'Got it!';
+    btn.onclick = () => this.dismiss();
+
+    backdrop.classList.add('visible');
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '';
+    tooltip.style.transform = '';
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+    this._position(targetEl, tooltip, arrow, step.placement);
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+
+    backdrop.onclick = () => this.dismiss();
+    this._escHandler = (e) => { if (e.key === 'Escape') this.dismiss(); };
+    document.addEventListener('keydown', this._escHandler);
+    requestAnimationFrame(() => btn.focus());
+  },
+
+  _position(targetEl, tooltip, arrow, placement) {
+    const rect = targetEl.getBoundingClientRect();
+    const tooltipW = 280;
+    const gap = 12;
+    let left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, window.innerWidth - tooltipW - 16));
+
+    if (placement === 'top') {
+      tooltip.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+      tooltip.style.top = '';
+      arrow.setAttribute('data-dir', 'bottom');
+    } else {
+      tooltip.style.top = (rect.bottom + gap) + 'px';
+      tooltip.style.bottom = '';
+      arrow.setAttribute('data-dir', 'top');
+    }
+    tooltip.style.left = left + 'px';
+
+    const arrowLeft = Math.max(16, Math.min(rect.left + rect.width / 2 - left - 8, tooltipW - 32));
+    arrow.style.left = arrowLeft + 'px';
+  },
+
+  advance() {
+    this.activeStep++;
+    const seq = this.SEQUENCES[this.activeSequence];
+    if (!seq || this.activeStep >= seq.steps.length) {
+      this.dismiss();
+      return;
+    }
+    this._showNextValid();
+  },
+
+  dismiss() {
+    const tab = this.activeSequence;
+    this.cleanup();
+    const backdrop = document.getElementById('ab-coach-backdrop');
+    backdrop.classList.remove('visible');
+    backdrop.style.pointerEvents = '';
+    const tooltip = document.getElementById('ab-coach-mark');
+    tooltip.classList.remove('visible');
+    tooltip.style.display = '';
+    if (tab) this.markSeen(tab);
+    this.activeSequence = null;
+    this.activeStep = 0;
+  },
+
+  cleanup() {
+    if (this.highlightedEl) {
+      this.highlightedEl.classList.remove('ab-coach-highlight');
+      this.highlightedEl = null;
+    }
+    if (this._escHandler) {
+      document.removeEventListener('keydown', this._escHandler);
+      this._escHandler = null;
+    }
   }
-});
+};
 
 
 // ── Init ──
@@ -1982,6 +2225,10 @@ function setupCoreDelegation() {
     addWordToMessage(speakText, btn.id);
     renderPredictions(btn.id);
     recordUsageEvent(btn.id, 'independent');
+
+    if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'talk' && ABCoachMarks.activeStep === 0) {
+      requestAnimationFrame(() => ABCoachMarks.advance());
+    }
   });
 }
 
@@ -2905,6 +3152,10 @@ function setupPredictionDelegation() {
     } else {
       renderPredictions(null);
     }
+
+    if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'talk' && ABCoachMarks.activeStep === 2) {
+      requestAnimationFrame(() => ABCoachMarks.advance());
+    }
   });
 }
 
@@ -3199,6 +3450,10 @@ document.getElementById('btn-speak').addEventListener('click', () => {
   if (messageWords.length === 0) return;
   speak(applyGrammar(messageWords, messageButtonIds));
   clearPredictions();
+
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'talk' && ABCoachMarks.activeStep === 3) {
+    requestAnimationFrame(() => ABCoachMarks.advance());
+  }
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
@@ -3208,6 +3463,10 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   lastTapTime = 0;
   renderMessage();
   clearPredictions();
+
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'talk' && ABCoachMarks.activeStep === 4) {
+    requestAnimationFrame(() => ABCoachMarks.advance());
+  }
 });
 
 document.getElementById('btn-backspace').addEventListener('click', () => {
@@ -3406,6 +3665,11 @@ function getTabViewMap() {
 function switchTab(tabId) {
   const tabInfo = getTabViewMap()[tabId];
   if (!tabInfo) return;
+  // Don't dismiss activities coach marks when startActivity auto-switches to Talk
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence
+      && !(ABCoachMarks.activeSequence === 'activities' && ABCoachMarks.activeStep >= 1)) {
+    ABCoachMarks.dismiss();
+  }
 
   document.querySelectorAll('.tab-btn').forEach(t => {
     t.classList.remove('active');
@@ -3421,6 +3685,10 @@ function switchTab(tabId) {
   activeTab = tabId.replace('tab-', '');
 
   if (activeTab === 'activities') renderActivitiesTab();
+
+  if (typeof ABCoachMarks !== 'undefined' && Onboarding.isComplete()) {
+    requestAnimationFrame(() => ABCoachMarks.tryShow(activeTab));
+  }
 }
 
 document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -3576,6 +3844,7 @@ function updateAllAccordionSummaries() {
 
 // ── Parental Gate (press-and-hold to open settings) ──
 function openSettingsPanel() {
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence) ABCoachMarks.dismiss();
   updateAllAccordionSummaries();
   document.getElementById('settings-overlay').classList.add('open');
   updateGridSizeSelect();
@@ -4511,6 +4780,11 @@ function openActivityPreview(activityId) {
 
   overlay.classList.add('open');
   overlay.dataset.activityId = activityId;
+
+  // Advance activities coach marks when preview opens
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'activities' && ABCoachMarks.activeStep === 0) {
+    requestAnimationFrame(() => ABCoachMarks.advance());
+  }
 }
 
 document.getElementById('btn-activity-cancel').addEventListener('click', () => {
@@ -4578,6 +4852,11 @@ function startActivity(activityId) {
 
   renderGrid();
   showToast(`${activity.icon} ${activity.name} activity started`);
+
+  // Advance activities coach marks when activity starts (step 1 → step 2)
+  if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence === 'activities' && ABCoachMarks.activeStep === 1) {
+    requestAnimationFrame(() => ABCoachMarks.advance());
+  }
 }
 
 function endActivity() {
@@ -6651,11 +6930,9 @@ if (screen.orientation) {
   screen.orientation.addEventListener('change', updateLandscapeGrid);
 }
 
-// ── PWA Install Prompt ──
+// ── PWA Install Prompt (removed — now a native app) ──
 (function() {
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    || navigator.standalone === true;
-  if (isStandalone) return;
+  return; // No-op: PWA install banner removed for native iOS app
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const banner = document.getElementById('pwa-install-banner');

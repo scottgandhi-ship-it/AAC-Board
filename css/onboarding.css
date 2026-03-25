@@ -124,51 +124,48 @@
   background: var(--chrome-primary);
 }
 
-/* Coach Marks Overlay (onboarding step 3) */
-#coach-marks-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 350;
-  pointer-events: none;
+/* Tab-Scoped Coach Marks */
+#ab-coach-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.25);
 }
-#coach-marks-overlay.visible { display: block; }
-
-.coach-marks-message {
-  position: fixed;
-  bottom: 60px;
-  left: 12px;
-  right: 12px;
-  background: rgba(250,248,255,0.97);
-  backdrop-filter: blur(8px);
-  padding: 14px 20px;
-  text-align: center;
-  pointer-events: auto;
-  z-index: 351;
-  border-radius: 16px;
+#ab-coach-backdrop.visible { display: block; }
+#ab-coach-mark {
+  display: none; position: fixed; z-index: 1110;
+  background: rgba(250,248,255,0.97); backdrop-filter: blur(8px);
+  padding: 16px 20px 12px; border-radius: 14px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  max-width: 280px; text-align: center;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
-.coach-marks-headline {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--chrome-text);
-  margin: 0 0 4px;
+#ab-coach-mark.visible { display: block; opacity: 1; transform: translateY(0); }
+.ab-coach-text { font-size: 1rem; font-weight: 600; color: var(--chrome-text); line-height: 1.4; margin: 0; }
+.ab-coach-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.ab-coach-step-counter { font-size: 0.8rem; color: #999; font-weight: 500; }
+.ab-coach-btn {
+  background: var(--chrome-primary); color: #fff; border: none; border-radius: 20px;
+  padding: 10px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  min-height: 44px; min-width: 44px; margin-left: auto;
+  transition: background 0.15s;
 }
-.coach-marks-body {
-  font-size: 0.9rem;
-  color: var(--chrome-text-secondary);
-  margin: 0;
+.ab-coach-btn:active { background: var(--chrome-primary-dark); }
+.ab-coach-btn:focus-visible { outline: 3px solid var(--chrome-primary); outline-offset: 2px; }
+.ab-coach-arrow {
+  position: absolute; width: 16px; height: 16px;
+  background: rgba(250,248,255,0.97);
+  transform: rotate(45deg); border-radius: 2px;
 }
-.coach-marks-message .onboarding-dots {
-  position: static;
-  margin-top: 12px;
+.ab-coach-arrow[data-dir="top"] { top: -7px; left: calc(50% - 8px); }
+.ab-coach-arrow[data-dir="bottom"] { bottom: -7px; left: calc(50% - 8px); }
+.ab-coach-highlight {
+  position: relative; z-index: 1105 !important;
+  box-shadow: 0 0 0 4px rgba(124,116,255,0.5), 0 4px 16px rgba(124,116,255,0.3) !important;
+  border-radius: 12px;
 }
-
-.coach-marks-counter {
-  font-size: 0.85rem;
-  color: var(--chrome-primary);
-  font-weight: 600;
-  margin: 8px 0 0;
+@media (prefers-reduced-motion: reduce) {
+  #ab-coach-mark { transition: none; }
+  #ab-coach-mark.visible { transform: none; }
 }
 
 
