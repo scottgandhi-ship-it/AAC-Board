@@ -4165,7 +4165,7 @@ const STORY_SVGS = {
 // -- Auto Story Generation Constants --
 const SENSORY_TRIGGERS = {
   auditory: { keywords: ['loud', 'noise', 'buzz', 'beep', 'ring', 'siren', 'music', 'clippers', 'drill', 'alarm', 'bark', 'honk', 'cry', 'yell', 'scream'], prep: 'It might be loud. That is okay. {name} can cover {poss} ears if {name} {verb2} to.' },
-  tactile: { keywords: ['touch', 'poke', 'stick', 'needle', 'cut', 'wash', 'brush', 'cold', 'wet', 'sticky', 'squeeze', 'rub', 'scratch', 'sting', 'tickle', 'shot'], prep: 'Someone might touch {obj}. It might feel different. It will not hurt for long.' },
+  tactile: { keywords: ['touch', 'poke', 'stick', 'needle', 'cut', 'wash', 'brush', 'cold', 'wet', 'sticky', 'squeeze', 'rub', 'scratch', 'sting', 'tickle', 'shot'], prep: 'Someone might touch {obj}. It might feel different. That is okay.' },
   visual: { keywords: ['bright', 'flash', 'dark', 'lights', 'strobe', 'sparkle'], prep: 'The lights might be bright. {name} can look away or close {poss} eyes for a moment.' },
   vestibular: { keywords: ['spin', 'swing', 'ride', 'fast', 'high', 'elevator', 'escalator', 'slide'], prep: 'It might feel like moving fast. {name} can hold on tight and it will be okay.' }
 };
@@ -4280,7 +4280,7 @@ function getBaseVerb(verb) {
 // Sentence builder: transforms parent shorthand into complete social story sentences
 var STEP_TRANSITIONS = [
   'Today, ',
-  'When {name} {verb2} there, ',
+  'When {name} {verb:get} there, ',
   'Then, ',
   'Next, ',
   'After that, ',
@@ -4459,8 +4459,9 @@ function generateStoryFromSteps(steps, story) {
       });
     }
     if (ep.coping && pages.length < 11) {
+      var supportText = ep.coping.includes('come back') ? '{parent} always comes back.' : '{parent} will be there to help.';
       pages.push({
-        text: 'If {name} {verb} feeling worried, {name} can ' + ep.coping + '. {parent} will be there to help.',
+        text: 'If {name} {verb} feeling ' + ep.feeling + ', {name} can ' + ep.coping + '. ' + supportText,
         sentenceType: 'cooperative',
         imageType: 'stock',
         stockKey: 'coping-squeeze',
@@ -4470,7 +4471,7 @@ function generateStoryFromSteps(steps, story) {
   }
 
   pages.push({
-    text: 'When it is all done, {name} did it! {name} can feel proud.',
+    text: '{name} can do it! {name} will feel so proud.',
     sentenceType: 'affirmative',
     imageType: 'stock',
     stockKey: 'generic-positive',
@@ -4513,7 +4514,7 @@ const DEFAULT_STORY_TEMPLATES = [
       { text: 'The doctor might use tools to listen to {poss} heart and look in {poss} ears.', sentenceType: 'descriptive', stockKey: 'doctor-checkup' },
       { text: 'Sometimes this might feel a little scary, and that is okay.', sentenceType: 'perspective', stockKey: 'feelings-nervous' },
       { text: '{parent} will be right there with {obj}.', sentenceType: 'cooperative', stockKey: 'doctor-checkup' },
-      { text: '{name} can squeeze {poss} favorite toy if {name} {verb2} nervous.', sentenceType: 'directive', stockKey: 'coping-squeeze' },
+      { text: '{name} can squeeze {poss} favorite toy if {name} {verb:feel} nervous.', sentenceType: 'directive', stockKey: 'coping-squeeze' },
       { text: 'When it is all done, {name} can feel proud for being so brave!', sentenceType: 'affirmative', stockKey: 'doctor-brave' }
     ]
   },
@@ -4525,10 +4526,10 @@ const DEFAULT_STORY_TEMPLATES = [
       { text: 'Today {name} {verb} going to the dentist.', sentenceType: 'descriptive', stockKey: 'dentist-building' },
       { text: 'The dentist has a special chair that goes up and down.', sentenceType: 'descriptive', stockKey: 'dentist-chair' },
       { text: 'The dentist will count {poss} teeth with a small mirror.', sentenceType: 'descriptive', stockKey: 'dentist-mirror' },
-      { text: 'It is important to take care of our teeth.', sentenceType: 'affirmative', stockKey: 'dentist-mirror' },
       { text: 'The chair and tools might feel different, and that is okay.', sentenceType: 'perspective', stockKey: 'feelings-nervous' },
+      { text: 'Taking care of our teeth helps them stay strong.', sentenceType: 'affirmative', stockKey: 'dentist-mirror' },
       { text: '{parent} will be right there the whole time.', sentenceType: 'cooperative', stockKey: 'dentist-chair' },
-      { text: '{name} can try to sit still and open {poss} mouth wide.', sentenceType: 'directive', stockKey: 'dentist-mirror' },
+      { text: '{name} can try to keep {poss} body calm and open {poss} mouth wide.', sentenceType: 'directive', stockKey: 'dentist-mirror' },
       { text: 'When it is done, {poss} teeth will be clean and healthy!', sentenceType: 'affirmative', stockKey: 'dentist-done' }
     ]
   },
@@ -4539,9 +4540,10 @@ const DEFAULT_STORY_TEMPLATES = [
     pages: [
       { text: 'Today {name} {verb} getting a haircut.', sentenceType: 'descriptive', stockKey: 'haircut-shop' },
       { text: '{name} will sit in a special chair and wear a cape.', sentenceType: 'descriptive', stockKey: 'haircut-cape' },
-      { text: 'The person will use scissors or clippers to cut {poss} hair.', sentenceType: 'descriptive', stockKey: 'haircut-scissors' },
+      { text: 'The hairdresser will use scissors or clippers to cut {poss} hair.', sentenceType: 'descriptive', stockKey: 'haircut-scissors' },
       { text: 'The clippers might buzz and feel tingly. That is just what they do.', sentenceType: 'perspective', stockKey: 'haircut-scissors' },
       { text: 'Some kids feel nervous about haircuts, and that is okay.', sentenceType: 'perspective', stockKey: 'feelings-nervous' },
+      { text: '{parent} will be right there the whole time.', sentenceType: 'cooperative', stockKey: 'haircut-cape' },
       { text: '{name} can hold {poss} favorite toy or squeeze {parent}\'s hand.', sentenceType: 'directive', stockKey: 'coping-squeeze' },
       { text: 'When it is done, {poss} hair will look great!', sentenceType: 'affirmative', stockKey: 'haircut-done' }
     ]
@@ -4584,7 +4586,7 @@ const DEFAULT_STORY_TEMPLATES = [
       { text: '{name} {verb} going to a birthday party!', sentenceType: 'descriptive', stockKey: 'party-invite' },
       { text: 'There will be other kids at the party.', sentenceType: 'descriptive', stockKey: 'party-kids' },
       { text: 'There might be music, games, and cake.', sentenceType: 'descriptive', stockKey: 'party-cake' },
-      { text: 'Parties can be loud and busy. That is just how parties are.', sentenceType: 'perspective', stockKey: 'party-kids' },
+      { text: 'Parties can be loud and busy. That might feel like a lot, and that is okay.', sentenceType: 'perspective', stockKey: 'party-kids' },
       { text: 'If it feels too loud or too busy, {name} can take a break in a quiet spot.', sentenceType: 'directive', stockKey: 'coping-squeeze' },
       { text: '{parent} will be there or nearby.', sentenceType: 'cooperative', stockKey: 'party-kids' },
       { text: 'When the party is over, {name} will go home.', sentenceType: 'descriptive', stockKey: 'party-home' },
@@ -4601,8 +4603,8 @@ const DEFAULT_STORY_TEMPLATES = [
       { text: '{parent} will push a cart and put food inside it.', sentenceType: 'descriptive', stockKey: 'grocery-cart' },
       { text: '{name} can help by holding the list or putting things in the cart.', sentenceType: 'directive', stockKey: 'grocery-list' },
       { text: 'Sometimes the store is loud or crowded, and that is okay.', sentenceType: 'perspective', stockKey: 'feelings-nervous' },
-      { text: 'We buy the things on our list. We do not buy everything we see.', sentenceType: 'descriptive', stockKey: 'grocery-list' },
-      { text: 'When we are done, we go home with our groceries.', sentenceType: 'descriptive', stockKey: 'grocery-done' }
+      { text: '{name} and {parent} will find everything on the list and then be all done!', sentenceType: 'descriptive', stockKey: 'grocery-list' },
+      { text: 'Then {name} and {parent} will go home with the groceries.', sentenceType: 'descriptive', stockKey: 'grocery-done' }
     ]
   },
   {
@@ -4611,8 +4613,8 @@ const DEFAULT_STORY_TEMPLATES = [
     description: 'Prepare for visiting family members',
     pages: [
       { text: 'Today {name} {verb} going to visit family.', sentenceType: 'descriptive', stockKey: 'relatives-car' },
-      { text: 'We will go to their house. It looks different from our house.', sentenceType: 'descriptive', stockKey: 'relatives-house' },
-      { text: 'Family people love {obj} very much.', sentenceType: 'affirmative', stockKey: 'relatives-people' },
+      { text: 'Their house looks different from home. That is okay.', sentenceType: 'descriptive', stockKey: 'relatives-house' },
+      { text: 'The family loves {obj} very much.', sentenceType: 'affirmative', stockKey: 'relatives-people' },
       { text: 'They might want to hug or talk to {obj}. It is okay to say hi in {poss} own way.', sentenceType: 'perspective', stockKey: 'relatives-people' },
       { text: 'The house might have different sounds, smells, and rules. That is okay.', sentenceType: 'perspective', stockKey: 'relatives-house' },
       { text: '{parent} will be there the whole time.', sentenceType: 'cooperative', stockKey: 'relatives-people' },
@@ -4622,11 +4624,24 @@ const DEFAULT_STORY_TEMPLATES = [
   }
 ];
 
+// Conjugate a base verb to third-person singular present tense
+function conjugateThirdPerson(base) {
+  const irregulars = { be: 'is', have: 'has', do: 'does', go: 'goes' };
+  if (irregulars[base]) return irregulars[base];
+  if (base.endsWith('sh') || base.endsWith('ch') || base.endsWith('x') || base.endsWith('o') || base.endsWith('ss') || base.endsWith('zz')) return base + 'es';
+  if (base.endsWith('y') && !/[aeiou]y$/.test(base)) return base.slice(0, -1) + 'ies';
+  return base + 's';
+}
+
 function personalizeStoryText(text, childName, personMode, parentName) {
   const isFirst = personMode === 'first';
   return text
     .replace(/\{name\}/g, isFirst ? 'I' : childName)
     .replace(/\{verb\}/g, isFirst ? 'am' : 'is')
+    .replace(/\{verb:(\w+)\}/g, function(_, base) {
+      if (base === 'be') return isFirst ? 'am' : 'is';
+      return isFirst ? base : conjugateThirdPerson(base);
+    })
     .replace(/\{verb2\}/g, isFirst ? 'need' : 'needs')
     .replace(/\{poss\}/g, isFirst ? 'my' : (childName + '\'s'))
     .replace(/\{obj\}/g, isFirst ? 'me' : childName)
@@ -8526,14 +8541,15 @@ function generateStoryFromHelper() {
   });
 
   helperData.steps.filter(s => s.trim()).forEach(step => {
+    const inferred = inferSentenceType(step.trim());
     pages.push({
       text: step.trim(),
-      sentenceType: 'descriptive', imageType: 'stock', stockKey: null, customImageKey: null
+      sentenceType: inferred || 'descriptive', imageType: 'stock', stockKey: null, customImageKey: null
     });
   });
 
   if (helperData.feelings.length > 0) {
-    let feelText = '{name} might feel ' + joinWords(helperData.feelings) + '. That\'s okay.';
+    let feelText = '{name} might feel ' + joinWords(helperData.feelings) + '. That is okay.';
     if (helperData.othersFeelings) {
       feelText += ' ' + helperData.othersFeelings;
     }
@@ -8547,7 +8563,8 @@ function generateStoryFromHelper() {
   if (helperData.customCoping) strategies.push(helperData.customCoping);
   if (strategies.length > 0) {
     const helper = helperData.whoHelps || '{parent}';
-    let copeText = 'If {name} {verb} feeling worried, {name} can ' + joinWords(strategies) + '.';
+    const feelingWord = helperData.feelings.length > 0 ? helperData.feelings[0] : 'worried';
+    let copeText = 'If {name} {verb} feeling ' + feelingWord + ', {name} can ' + joinWords(strategies) + '.';
     copeText += ' ' + helper + ' can help.';
     pages.push({
       text: copeText,
