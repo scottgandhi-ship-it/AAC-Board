@@ -9,7 +9,7 @@
 ## Implementation Checklist
 
 ### Stream 1: Branding & Identity
-- [ ] App names finalized (deferred to Week 6-7)
+- [x] App names finalized -- Yappie (AAC) + Guiding Steps
 - [ ] Icons reviewed and approved
 - [ ] App Store copy written (both apps)
 - [ ] Screenshots created (both apps)
@@ -20,7 +20,7 @@
 
 ### Stream 3: Git Branching
 - [x] Create develop branch
-- [ ] Update Fastlane for Internal/External TestFlight groups
+- [x] Fastlane TestFlight pipeline automated (external group distribution)
 - [ ] Push develop to remote
 
 ### Stream 4: Quality Assurance
@@ -49,7 +49,7 @@
 - [x] Toileting vocabulary (wet, wipe, pull up added to My Body) (2026-03-20)
 - [x] Privacy statement visible in app (2026-03-20)
 - [x] Session export for SLP documentation (2026-03-21) -- combined with #26 as SLP Progress Report
-- [ ] Use child's name more throughout (promoted from v1.1)
+- [ ] Use child's name more throughout (deferred to v1.1)
 - [x] Therapist sharing features -- board/folder export already exists; SLP report added (2026-03-21)
 - [x] Search finds core words and folders (2026-03-21)
 
@@ -57,17 +57,17 @@
 - [x] Parental gate -- tap+hold, same solution as AAC Board (2026-03-21)
 - [x] Pre-load sample schedule, reward track at first boot (2026-03-21)
 - [x] Surface story templates on Stories tab at first boot + Create Story card (2026-03-21)
-- [ ] Auto-assign sentence types in quick-create story flow
+- [x] Auto-assign sentence types in story editor (2026-03-21)
 - [x] Rename "Start Schedule" to "Set Up a Schedule" (2026-03-21)
 - [x] Rename "track" to "chart" throughout reward system (2026-03-21)
 - [x] Reward creation contextual labels (2026-03-21)
-- [ ] Add confirmation dialog to "Reset all to defaults"
-- [ ] Guide users through pre-loaded sample on first use
+- [x] Add confirmation dialog to "Reset all to defaults" (already existed, verified 2026-03-21)
+- [ ] Guide users through pre-loaded sample on first use (PRIORITY)
 - [x] Schedule empty state clarification text (2026-03-21)
 - [x] Privacy statement visible in app (2026-03-21)
-- [ ] Communication log / narrative summary (promoted from v1.1)
-- [ ] Auto-read for social stories -- play all, page by page (promoted from v1.1)
-- [ ] Reorder steps in active schedule without restarting (promoted from v1.1)
+- [ ] Communication log / narrative summary
+- [ ] Auto-read for social stories -- play all, page by page
+- [ ] Reorder steps in active schedule without restarting
 
 ### Stream 5D: Cross-App (when naming decided)
 - [ ] Cross-promote each other within apps
@@ -80,10 +80,10 @@
 - [ ] Guiding Steps Stories tab tutorial
 
 ### Stream 7: Marketing Website
-- [ ] Website built and deployed
-- [ ] PayPal donate button integrated
-- [ ] Privacy Policy page
-- [ ] Terms of Service page
+- [x] Website built and deployed (yappieapp.com)
+- [ ] PayPal donate button integrated (placeholder in footer)
+- [ ] Privacy Policy page (link exists, page needed)
+- [ ] Terms of Service page (link exists, page needed)
 
 ### Stream 8: Marketing Plan
 - [ ] Social media content (existing accounts: IG, FB, Twitter)
@@ -103,10 +103,10 @@
 - [x] Kids category -- YES, listing in Kids category
 
 ### Stream 11: Pre-Launch Infrastructure
-- [ ] Support email set up
+- [x] Support email set up (support@yappieapp.com)
 - [ ] Firebase Crashlytics configured (COPPA-compliant)
 - [ ] Data persistence safeguards (version flags, locked contract, migration framework)
-- [ ] TestFlight beta program launched
+- [x] TestFlight beta program launched (both apps, external links live on website)
 - [x] Steve pre-commit hook configured
 
 ### Stream 12: Launch

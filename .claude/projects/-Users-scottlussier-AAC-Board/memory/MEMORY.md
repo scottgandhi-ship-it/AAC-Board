@@ -9,3 +9,6 @@
 ## Feedback
 - [Branching workflow rules](feedback_branching_workflow.md) -- Always develop in develop first, merge to master only for releases. Fastlane lanes need updating for TestFlight groups.
 - [Modularization Phase 4 approach](feedback_modularization_approach.md) -- Extract remaining JS modules opportunistically when working on that feature, not as dedicated refactoring
+
+## Project (cont.)
+- [Signie future ASL app](project_signie_future_app.md) -- Third app planned post-launch. ASL communication board for deaf/HoH kids. Research at ~/Signie/.project/features/MarketResearch.md

@@ -220,20 +220,48 @@ body {
 .gs-feature-card-desc { font-size: 0.85rem; color: var(--chrome-text-secondary); margin-top: 2px; }
 
 /* -- Coach Mark Tooltip -- */
-#gs-coach-mark {
-  display: none; position: fixed; z-index: 360;
-  background: rgba(250,248,255,0.97); backdrop-filter: blur(8px);
-  padding: 16px 20px; border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  max-width: 280px; text-align: center;
-}
-#gs-coach-mark.visible { display: block; }
-.gs-coach-text { font-size: 1rem; font-weight: 600; color: var(--chrome-text); line-height: 1.4; }
 #gs-coach-backdrop {
-  display: none; position: fixed; inset: 0; z-index: 350;
+  display: none; position: fixed; inset: 0; z-index: 1100;
   background: rgba(0,0,0,0.25);
 }
 #gs-coach-backdrop.visible { display: block; }
+#gs-coach-mark {
+  display: none; position: fixed; z-index: 1110;
+  background: rgba(250,248,255,0.97); backdrop-filter: blur(8px);
+  padding: 16px 20px 12px; border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  max-width: 280px; text-align: center;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#gs-coach-mark.visible { display: block; opacity: 1; transform: translateY(0); }
+.gs-coach-text { font-size: 1rem; font-weight: 600; color: var(--chrome-text); line-height: 1.4; margin: 0; }
+.gs-coach-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.gs-coach-step-counter { font-size: 0.8rem; color: #999; font-weight: 500; }
+.gs-coach-btn {
+  background: var(--chrome-primary); color: #fff; border: none; border-radius: 20px;
+  padding: 10px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  min-height: 44px; min-width: 44px; margin-left: auto;
+  transition: background 0.15s;
+}
+.gs-coach-btn:active { background: var(--chrome-primary-dark); }
+.gs-coach-btn:focus-visible { outline: 3px solid var(--chrome-primary); outline-offset: 2px; }
+.gs-coach-arrow {
+  position: absolute; width: 16px; height: 16px;
+  background: rgba(250,248,255,0.97);
+  transform: rotate(45deg); border-radius: 2px;
+}
+.gs-coach-arrow[data-dir="top"] { top: -7px; left: calc(50% - 8px); }
+.gs-coach-arrow[data-dir="bottom"] { bottom: -7px; left: calc(50% - 8px); }
+.gs-coach-highlight {
+  position: relative; z-index: 1105 !important;
+  box-shadow: 0 0 0 4px rgba(124,116,255,0.5), 0 4px 16px rgba(124,116,255,0.3) !important;
+  border-radius: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #gs-coach-mark { transition: none; }
+  #gs-coach-mark.visible { transform: none; }
+}
 
 @media (max-width: 500px) {
   .gs-onboarding-headline { font-size: 1.4rem; }
@@ -2649,6 +2677,12 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="editor-step-setup" class="editor-step">
       <h3 style="margin-bottom:16px;color:#555;">Story Details</h3>
       <div class="editor-field">
+        <label for="editor-template-select">Start from Template</label>
+        <select id="editor-template-select" style="width:100%;padding:12px;border:2px solid #E0E0E0;border-radius:10px;font-size:1rem;background:#fff;color:var(--chrome-text);appearance:auto;">
+          <option value="">Create from scratch</option>
+        </select>
+      </div>
+      <div class="editor-field">
         <label for="editor-story-title">Story Title</label>
         <input type="text" id="editor-story-title">
       </div>
@@ -3231,10 +3265,15 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   </div>
 </div>
 
-<!-- Coach Mark -->
+<!-- Coach Marks -->
 <div id="gs-coach-backdrop"></div>
-<div id="gs-coach-mark">
-  <p class="gs-coach-text">Start here -- tap to begin your child's first schedule.</p>
+<div id="gs-coach-mark" role="dialog" aria-label="Guided tip">
+  <p class="gs-coach-text"></p>
+  <div class="gs-coach-footer">
+    <span class="gs-coach-step-counter"></span>
+    <button type="button" class="gs-coach-btn">Next</button>
+  </div>
+  <div class="gs-coach-arrow"></div>
 </div>
 
 <!-- Toast -->
@@ -3543,6 +3582,7 @@ function getTabViewMap() {
 function switchTab(tabId) {
   const tabInfo = getTabViewMap()[tabId];
   if (!tabInfo) return;
+  if (typeof GSCoachMarks !== 'undefined' && GSCoachMarks.activeSequence) GSCoachMarks.dismiss();
   document.querySelectorAll('.tab-btn').forEach(t => {
     t.classList.remove('active');
     t.setAttribute('aria-selected', 'false');
@@ -3553,6 +3593,11 @@ function switchTab(tabId) {
   document.getElementById(tabInfo.view).classList.add('active');
   document.getElementById('app-header-title').textContent = tabInfo.title;
   activeTab = tabId.replace('tab-', '');
+  // Trigger tab-scoped coach marks on first visit
+  if (typeof GSCoachMarks !== 'undefined' && typeof GSOnboarding !== 'undefined' && GSOnboarding.isComplete()) {
+    const coachTab = tabId === 'tab-rewards' ? 'steps' : tabId.replace('tab-', '');
+    requestAnimationFrame(() => GSCoachMarks.tryShow(coachTab));
+  }
 }
 
 document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -4765,6 +4810,11 @@ async function completeCurrentStep(idx) {
 
   await saveActiveSchedule(activeSchedule);
   renderSchedule();
+
+  // Advance coach marks if waiting for step completion
+  if (typeof GSCoachMarks !== 'undefined' && GSCoachMarks.activeSequence === 'schedule' && GSCoachMarks.activeStep === 1) {
+    requestAnimationFrame(() => GSCoachMarks.advance());
+  }
 }
 
 // Start schedule (pick template)
@@ -7160,6 +7210,11 @@ function openStoryReader(story, previewPages) {
 
   reader._pages = pages;
   reader._isPreview = !!previewPages;
+
+  // Advance stories coach marks when reader opens
+  if (typeof GSCoachMarks !== 'undefined' && GSCoachMarks.activeSequence === 'stories' && GSCoachMarks.activeStep === 0) {
+    requestAnimationFrame(() => GSCoachMarks.advance());
+  }
 }
 
 function renderReaderPage(pages, direction) {
@@ -7635,6 +7690,19 @@ function openStoryEditor(story) {
   editingPageIdx = 0;
   editorPersonMode = editingStory.personMode || 'first';
 
+  // Populate template dropdown
+  const tmplSelect = document.getElementById('editor-template-select');
+  tmplSelect.innerHTML = '<option value="">Create from scratch</option>';
+  DEFAULT_STORY_TEMPLATES.forEach(tmpl => {
+    const opt = document.createElement('option');
+    opt.value = tmpl.key;
+    opt.textContent = tmpl.title;
+    tmplSelect.appendChild(opt);
+  });
+  tmplSelect.value = editingStory.templateKey || '';
+  // Show dropdown only for new stories, hide when editing existing
+  tmplSelect.closest('.editor-field').style.display = (story && story.title) ? 'none' : '';
+
   document.getElementById('editor-story-title').value = editingStory.title;
   const childNameField = document.getElementById('editor-child-name-field');
   const childNameInput = document.getElementById('editor-child-name');
@@ -7720,6 +7788,26 @@ document.getElementById('editor-child-age').addEventListener('click', (e) => {
     b.setAttribute('aria-checked', String(parseInt(b.dataset.age) === editingStory.childAge));
   });
   updateSetupNextState();
+});
+
+document.getElementById('editor-template-select').addEventListener('change', function() {
+  const key = this.value;
+  if (!key) {
+    // Switched to "Create from scratch"
+    editingStory.isTemplate = false;
+    editingStory.templateKey = null;
+    editingStory.title = '';
+    pendingTemplateSteps = null;
+    document.getElementById('editor-story-title').value = '';
+    return;
+  }
+  const tmpl = DEFAULT_STORY_TEMPLATES.find(t => t.key === key);
+  if (!tmpl) return;
+  editingStory.isTemplate = true;
+  editingStory.templateKey = tmpl.key;
+  editingStory.title = tmpl.title;
+  pendingTemplateSteps = TEMPLATE_STEPS[tmpl.key] || null;
+  document.getElementById('editor-story-title').value = tmpl.title;
 });
 
 document.getElementById('editor-setup-next').addEventListener('click', () => {
@@ -8563,34 +8651,318 @@ const GSOnboarding = {
   },
 
   showCoachMark() {
-    this.setState({ currentStep: 4 });
-    const btn = document.getElementById('btn-start-schedule');
-    if (!btn) { this.complete(); return; }
-
-    const backdrop = document.getElementById('gs-coach-backdrop');
-    const tooltip = document.getElementById('gs-coach-mark');
-    backdrop.classList.add('visible');
-    tooltip.classList.add('visible');
-
-    const rect = btn.getBoundingClientRect();
-    tooltip.style.left = Math.max(16, rect.left + rect.width / 2 - 140) + 'px';
-    tooltip.style.bottom = (window.innerHeight - rect.top + 12) + 'px';
-
-    const dismiss = () => {
-      backdrop.classList.remove('visible');
-      tooltip.classList.remove('visible');
-      this.complete();
-    };
-
-    btn.addEventListener('click', dismiss, { once: true });
-    backdrop.addEventListener('click', dismiss, { once: true });
+    this.complete();
+    requestAnimationFrame(() => GSCoachMarks.tryShow('schedule'));
   },
 
   complete() {
     this.setState({ complete: true });
     document.getElementById('gs-onboarding-overlay').classList.remove('visible');
+  }
+};
+
+// -- Tab-Scoped Coach Marks --
+const GSCoachMarks = {
+  activeSequence: null,
+  activeStep: 0,
+  highlightedEl: null,
+
+  _childName() {
+    const name = localStorage.getItem('gs-child-name');
+    return name ? name + "'s" : "your child's";
+  },
+
+  SEQUENCES: {
+    schedule: {
+      steps: [
+        {
+          target: () => document.querySelector('#view-schedule .sched-step.current'),
+          text: () => 'This is ' + GSCoachMarks._childName() + ' current step. The highlighted row shows what to do now.',
+          placement: 'bottom',
+          btnLabel: 'Next',
+          waitForAction: false,
+          guard: () => !!document.querySelector('#view-schedule .sched-step.current')
+        },
+        {
+          target: () => document.querySelector('#view-schedule .sched-step.current .sched-step-done-btn'),
+          text: () => 'When they finish, tap Done! to move to the next step.',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => !!document.querySelector('#view-schedule .sched-step.current .sched-step-done-btn')
+        },
+        {
+          target: () => document.querySelector('#view-schedule .sched-step.current'),
+          text: () => 'See how the next step lights up? Keep going until you\'re all done!',
+          placement: 'bottom',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => !!document.querySelector('#view-schedule .sched-step.current')
+        }
+      ],
+      fallback: {
+        target: () => document.getElementById('btn-start-schedule'),
+        text: () => 'Tap here to set up ' + GSCoachMarks._childName() + ' first schedule.',
+        placement: 'top',
+        btnLabel: 'Got it!'
+      }
+    },
+    steps: {
+      steps: [
+        {
+          target: () => document.querySelector('#view-rewards .sched-step.current'),
+          text: () => 'Task strips work just like schedules \u2014 each step shows what to do next.',
+          placement: 'bottom',
+          btnLabel: 'Next',
+          waitForAction: false,
+          guard: () => !!document.querySelector('#view-rewards .sched-step.current')
+        },
+        {
+          target: () => document.querySelector('#view-rewards .sched-step.current .sched-step-done-btn'),
+          text: () => 'Tap Done! to complete each step and work toward the reward.',
+          placement: 'bottom',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => !!document.querySelector('#view-rewards .sched-step.current .sched-step-done-btn')
+        }
+      ],
+      fallback: {
+        target: () => document.getElementById('btn-new-track'),
+        text: () => 'Create a task strip to break activities into simple steps with a reward at the end.',
+        placement: 'top',
+        btnLabel: 'Got it!'
+      }
+    },
+    stories: {
+      steps: [
+        {
+          target: () => document.querySelector('#stories-grid .story-card'),
+          text: () => 'Social stories help prepare ' + GSCoachMarks._childName().replace("'s", '') + ' for new experiences. Tap a story to read it together.',
+          placement: 'bottom',
+          btnLabel: null,
+          waitForAction: true,
+          guard: () => !!document.querySelector('#stories-grid .story-card')
+        },
+        {
+          target: () => document.getElementById('reader-text-area'),
+          text: () => 'Each page tells part of the story. Tap the speaker icon to read it aloud.',
+          placement: 'top',
+          btnLabel: 'Next',
+          waitForAction: false,
+          guard: () => document.getElementById('story-reader')?.classList.contains('open')
+        },
+        {
+          target: () => document.getElementById('reader-next'),
+          text: () => 'Tap here to turn the page. Read through the story together!',
+          placement: 'top',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => document.getElementById('story-reader')?.classList.contains('open')
+        }
+      ],
+      fallback: {
+        target: () => document.getElementById('stories-empty-new'),
+        text: () => 'Tap here to create your first social story. Stories help prepare your child for new experiences.',
+        placement: 'top',
+        btnLabel: 'Got it!'
+      }
+    }
+  },
+
+  keyFor(tab) { return 'gs-coach-' + tab + '-seen'; },
+  hasSeen(tab) { return localStorage.getItem(this.keyFor(tab)) === 'true'; },
+  markSeen(tab) { localStorage.setItem(this.keyFor(tab), 'true'); },
+
+  tryShow(tab) {
+    if (this.hasSeen(tab)) return;
+    if (kidsMode) return;
+    if (!GSOnboarding.isComplete()) return;
+    if (this.activeSequence) return;
+    this.start(tab);
+  },
+
+  start(tab) {
+    const seq = this.SEQUENCES[tab];
+    if (!seq) return;
+
+    // Check if any steps have valid targets; if not, try fallback
+    const validSteps = seq.steps.filter(s => s.guard());
+    if (validSteps.length === 0) {
+      if (seq.fallback && seq.fallback.target()) {
+        this.activeSequence = tab;
+        this.activeStep = 0;
+        this._showSingle(seq.fallback);
+        return;
+      }
+      this.markSeen(tab);
+      return;
+    }
+
+    this.activeSequence = tab;
+    this.activeStep = 0;
+    this._showNextValid();
+  },
+
+  _showNextValid() {
+    const seq = this.SEQUENCES[this.activeSequence];
+    while (this.activeStep < seq.steps.length) {
+      const step = seq.steps[this.activeStep];
+      if (step.guard() && step.target()) {
+        this._renderStep(step, this.activeStep, seq.steps.length);
+        return;
+      }
+      this.activeStep++;
+    }
+    this.dismiss();
+  },
+
+  _renderStep(step, idx, total) {
+    const targetEl = step.target();
+    const backdrop = document.getElementById('gs-coach-backdrop');
+    const tooltip = document.getElementById('gs-coach-mark');
+    const textEl = tooltip.querySelector('.gs-coach-text');
+    const counterEl = tooltip.querySelector('.gs-coach-step-counter');
+    const btn = tooltip.querySelector('.gs-coach-btn');
+    const arrow = tooltip.querySelector('.gs-coach-arrow');
+
+    // Clear previous state
+    this.cleanup();
+
+    // Highlight target
+    targetEl.classList.add('gs-coach-highlight');
+    this.highlightedEl = targetEl;
+
+    // Set content
+    textEl.textContent = typeof step.text === 'function' ? step.text() : step.text;
+    counterEl.textContent = total > 1 ? (idx + 1) + ' of ' + total : '';
+
+    if (step.waitForAction) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+      btn.textContent = step.btnLabel || 'Next';
+      btn.onclick = () => this.advance();
+    }
+
+    // Show backdrop + tooltip
+    backdrop.classList.add('visible');
+    // Force reflow for transition
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '';
+    tooltip.style.transform = '';
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+
+    // Position tooltip
+    this._position(targetEl, tooltip, arrow, step.placement);
+
+    // Trigger transition
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+
+    // Backdrop dismiss
+    backdrop.onclick = () => this.dismiss();
+
+    // Escape key
+    this._escHandler = (e) => { if (e.key === 'Escape') this.dismiss(); };
+    document.addEventListener('keydown', this._escHandler);
+
+    // Focus the button for accessibility
+    if (!step.waitForAction) {
+      requestAnimationFrame(() => btn.focus());
+    }
+  },
+
+  _showSingle(step) {
+    const targetEl = step.target();
+    if (!targetEl) { this.dismiss(); return; }
+
+    const backdrop = document.getElementById('gs-coach-backdrop');
+    const tooltip = document.getElementById('gs-coach-mark');
+    const textEl = tooltip.querySelector('.gs-coach-text');
+    const counterEl = tooltip.querySelector('.gs-coach-step-counter');
+    const btn = tooltip.querySelector('.gs-coach-btn');
+    const arrow = tooltip.querySelector('.gs-coach-arrow');
+
+    this.cleanup();
+    targetEl.classList.add('gs-coach-highlight');
+    this.highlightedEl = targetEl;
+
+    textEl.textContent = typeof step.text === 'function' ? step.text() : step.text;
+    counterEl.textContent = '';
+    btn.style.display = '';
+    btn.textContent = step.btnLabel || 'Got it!';
+    btn.onclick = () => this.dismiss();
+
+    backdrop.classList.add('visible');
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '';
+    tooltip.style.transform = '';
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+    this._position(targetEl, tooltip, arrow, step.placement);
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+
+    backdrop.onclick = () => this.dismiss();
+    this._escHandler = (e) => { if (e.key === 'Escape') this.dismiss(); };
+    document.addEventListener('keydown', this._escHandler);
+    requestAnimationFrame(() => btn.focus());
+  },
+
+  _position(targetEl, tooltip, arrow, placement) {
+    const rect = targetEl.getBoundingClientRect();
+    const tooltipW = 280;
+    const gap = 12;
+    let left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, window.innerWidth - tooltipW - 16));
+
+    if (placement === 'top') {
+      tooltip.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+      tooltip.style.top = '';
+      arrow.setAttribute('data-dir', 'bottom');
+    } else {
+      tooltip.style.top = (rect.bottom + gap) + 'px';
+      tooltip.style.bottom = '';
+      arrow.setAttribute('data-dir', 'top');
+    }
+    tooltip.style.left = left + 'px';
+
+    // Adjust arrow horizontal position to point at target center
+    const arrowLeft = Math.max(16, Math.min(rect.left + rect.width / 2 - left - 8, tooltipW - 32));
+    arrow.style.left = arrowLeft + 'px';
+  },
+
+  advance() {
+    this.activeStep++;
+    const seq = this.SEQUENCES[this.activeSequence];
+    if (!seq || this.activeStep >= seq.steps.length) {
+      this.dismiss();
+      return;
+    }
+    this._showNextValid();
+  },
+
+  dismiss() {
+    const tab = this.activeSequence;
+    this.cleanup();
     document.getElementById('gs-coach-backdrop').classList.remove('visible');
-    document.getElementById('gs-coach-mark').classList.remove('visible');
+    const tooltip = document.getElementById('gs-coach-mark');
+    tooltip.classList.remove('visible');
+    tooltip.style.display = '';
+    if (tab) this.markSeen(tab);
+    this.activeSequence = null;
+    this.activeStep = 0;
+  },
+
+  cleanup() {
+    if (this.highlightedEl) {
+      this.highlightedEl.classList.remove('gs-coach-highlight');
+      this.highlightedEl = null;
+    }
+    if (this._escHandler) {
+      document.removeEventListener('keydown', this._escHandler);
+      this._escHandler = null;
+    }
   }
 };
 
