@@ -9,8 +9,8 @@
   font-weight: 700;
   font-size: 0.95rem;
   color: #fff;
-  background: linear-gradient(135deg, #7C74FF, #6C63FF);
-  box-shadow: 0 2px 8px rgba(108,99,255,0.25);
+  background: #615fff;
+  box-shadow: 0 2px 8px rgba(97,95,255,0.20);
   animation: activitySlideIn 0.3s ease;
 }
 #activity-banner.active { display: flex; }
@@ -40,7 +40,7 @@
   background: rgba(255,255,255,0.4);
 }
 body.activity-mode #grid-container {
-  background: rgba(108,99,255,0.03);
+  background: rgba(97,95,255,0.03);
   border-radius: var(--radius-md);
 }
 @keyframes activitySlideIn {

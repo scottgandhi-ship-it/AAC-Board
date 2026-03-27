@@ -1,27 +1,58 @@
 /* ── Message Bar ── */
 #message-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--chrome-text);
+  flex-shrink: 0;
+}
+
+/* Row 1: Action buttons centered */
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  order: -1;
+}
+
+/* Row 2: Back button (if visible) + Sentence bar + Export (if visible) */
+.sentence-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
-  background: #f8f7ff;
+}
+
+/* Since we can't add wrapper divs (no HTML changes), use CSS grid areas.
+   The message-bar is a flex-wrap container: action buttons on top row,
+   sentence bar + back button on bottom row. */
+#message-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
   color: var(--chrome-text);
-  min-height: 60px;
   flex-shrink: 0;
-  border-bottom: 2px solid rgba(124, 116, 255, 0.25);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 #message-words {
+  order: 1;
   flex: 1;
+  min-width: 60%;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   min-height: 40px;
   align-items: center;
   padding: 6px 10px;
-  background: #f3f2ff;
-  border-radius: var(--radius-md);
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--chrome-text);
@@ -30,56 +61,83 @@
 }
 #message-words:empty::after {
   content: 'Tap words to build a sentence';
-  color: var(--chrome-text-muted);
+  color: #9f9f9f;
   font-size: 0.9rem;
   font-weight: 600;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 #message-words .word-chip {
-  background: rgba(108,99,255,0.08);
+  background: rgba(97,95,255,0.08);
   padding: 3px 10px;
   border-radius: 8px;
   letter-spacing: 0.02em;
   color: var(--chrome-text);
 }
 
+/* ── Action Buttons (shared base) ── */
 .bar-btn {
-  width: 50px;
-  height: 50px;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
 }
 
 .bar-btn:active {
   transform: scale(0.9);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Action row buttons — circular, top row */
+#btn-backspace,
+#btn-search,
+#btn-speak,
+#btn-clear {
+  order: -1;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
 }
 
 #btn-speak {
-  background: linear-gradient(135deg, var(--color-green-dark), var(--chrome-success));
+  background: #58b05c;
   color: #fff;
 }
 
 #btn-clear {
-  background: linear-gradient(135deg, var(--color-red-dark), var(--chrome-danger));
+  background: #e0403e;
   color: #fff;
 }
 
 #btn-backspace {
-  background: linear-gradient(135deg, var(--color-orange-dark), var(--chrome-warning));
+  background: #6d65ed;
   color: #fff;
 }
 
 #btn-search {
-  background: linear-gradient(135deg, var(--chrome-primary), var(--chrome-primary-dark));
+  background: #6d65ed;
   color: #fff;
+}
+
+/* ── Back button — first item in action row, far left ── */
+#btn-back-nav {
+  order: -2;
+  background: #fd9d18;
+  color: #fff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+}
+
+/* ── Export button — sentence row, parent mode only ── */
+#btn-export-folder {
+  order: 0;
+  border-radius: var(--radius-md);
+  width: 44px;
+  height: 44px;
 }

@@ -73,10 +73,10 @@ body.sensory-reduced-motion *::after {
   animation-iteration-count: 1 !important;
   transition-duration: 0.05s !important;
 }
-body.sensory-reduced-motion .grid-cell:active {
+body.sensory-reduced-motion .cell:active {
   transform: none !important;
 }
-body.sensory-reduced-motion .core-word-btn:active {
+body.sensory-reduced-motion .core-strip-btn:active {
   transform: none !important;
 }
 
@@ -90,19 +90,19 @@ body.sensory-high-contrast {
   --color-orange: #FF6D00;
   --color-home: #78909C;
 }
-body.sensory-high-contrast .grid-cell {
+body.sensory-high-contrast .cell {
   border: 2px solid rgba(0,0,0,0.3) !important;
   box-shadow: none !important;
   font-weight: 700;
 }
-body.sensory-high-contrast .grid-cell .cell-label {
+body.sensory-high-contrast .cell .cell-label {
   color: #111;
 }
-body.sensory-high-contrast .core-word-btn {
+body.sensory-high-contrast .core-strip-btn {
   border: 2px solid rgba(0,0,0,0.3) !important;
   font-weight: 700;
 }
-body.sensory-high-contrast #message-display {
+body.sensory-high-contrast #message-words {
   color: #111;
 }
 body.sensory-high-contrast *:focus {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aac-board-v61';
+const CACHE_NAME = 'aac-board-v62';
 const ASSETS = [
   './',
   './index.html',
@@ -20,7 +20,8 @@ const ASSETS = [
   './css/settings.css',
   './css/activities.css',
   './css/insights.css',
-  './css/responsive.css'
+  './css/responsive.css',
+  './assets/fonts/Inter.woff2'
 ];
 
 // Install — pre-cache shell assets

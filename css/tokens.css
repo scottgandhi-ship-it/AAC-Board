@@ -1,18 +1,27 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Self-hosted Inter Font ── */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/Inter.woff2') format('woff2');
+}
+
 :root {
-  /* ── Fitzgerald Key Colors (AAC category system -- DO NOT MODIFY) ── */
-  --color-yellow: #FFE082;
-  --color-green: #81C784;
-  --color-red: #EF9A9A;
-  --color-blue: #90CAF9;
-  --color-pink: #F06292;
-  --color-orange: #FFCC80;
-  --color-home: #CFD8DC;
+  /* ── Fitzgerald Key Colors (AAC category system -- semantic mapping preserved) ── */
+  --color-yellow: #ffe990;
+  --color-green: #addbae;
+  --color-red: #f89597;
+  --color-blue: #85c4f8;
+  --color-pink: #f8c3d5;
+  --color-orange: #ffbb57;
+  --color-home: #eceff1;
 
   /* ── App Chrome Colors ── */
-  --chrome-primary: #7C74FF;
-  --chrome-primary-dark: #5A52D5;
+  --chrome-primary: #615fff;
+  --chrome-primary-dark: #4a48cc;
   --chrome-accent: #F5A623;
   --chrome-bg: #f5f5f5;
   --chrome-surface: #ffffff;
@@ -61,25 +70,25 @@
   --space-7: 32px;
   --space-8: 40px;
 
-  /* ── Fitzgerald Gradient Pairs ── */
-  --color-yellow-light: #FFF9C4;
-  --color-yellow-dark: #FFD54F;
-  --color-green-light: #C8E6C9;
-  --color-green-dark: #66BB6A;
-  --color-red-light: #FFCDD2;
-  --color-red-dark: #EF5350;
-  --color-blue-light: #BBDEFB;
-  --color-blue-dark: #42A5F5;
-  --color-pink-light: #F8BBD0;
-  --color-pink-dark: #E91E90;
-  --color-orange-light: #FFE0B2;
-  --color-orange-dark: #FFA726;
-  --color-home-light: #ECEFF1;
-  --color-home-dark: #B0BEC5;
+  /* ── Fitzgerald Flat Pairs (kept for var() compatibility, now same value) ── */
+  --color-yellow-light: #ffe990;
+  --color-yellow-dark: #ffe990;
+  --color-green-light: #addbae;
+  --color-green-dark: #addbae;
+  --color-red-light: #f89597;
+  --color-red-dark: #f89597;
+  --color-blue-light: #85c4f8;
+  --color-blue-dark: #85c4f8;
+  --color-pink-light: #f8c3d5;
+  --color-pink-dark: #f8c3d5;
+  --color-orange-light: #ffbb57;
+  --color-orange-dark: #ffbb57;
+  --color-home-light: #eceff1;
+  --color-home-dark: #eceff1;
 
   /* ── Layout Tokens ── */
-  --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lifted: 0 6px 20px rgba(0,0,0,0.12);
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lifted: 0 4px 12px rgba(0,0,0,0.08);
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
@@ -93,8 +102,8 @@ body {
   height: 100%;
   min-height: -webkit-fill-available;
   overflow: hidden;
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(160deg, #e8eaf6 0%, #fce4ec 40%, #fff8e1 80%, #e8f5e9 100%);
+  font-family: 'Inter', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #edeaf8;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
