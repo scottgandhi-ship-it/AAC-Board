@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/scottgandhi-ship-it/AAC-Board#readme",
   "dependencies": {
+    "@capacitor-firebase/app": "^8.1.0",
+    "@capacitor-firebase/crashlytics": "^8.1.0",
     "@capacitor/cli": "8.2.0",
     "@capacitor/core": "8.2.0",
     "@capacitor/haptics": "8.0.1",

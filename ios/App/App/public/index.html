@@ -2058,6 +2058,7 @@ const ABCoachMarks = {
 
 // ── Init ──
 async function init() {
+  await runDataMigrations();
   const gridSize = getGridSize();
   const hasStoredSize = localStorage.getItem('aac-grid-size') !== null;
 
@@ -3740,9 +3741,56 @@ renderGrid = function() {
 
 updateBackButton();
 
+// ── Firebase Crashlytics (COPPA: disabled by default, enabled in parent mode) ──
+const CrashlyticsManager = (() => {
+  let enabled = false;
+  const plugin = () => window.Capacitor?.Plugins?.FirebaseCrashlytics;
+
+  async function enable() {
+    if (enabled || !plugin()) return;
+    try {
+      await plugin().setEnabled({ enabled: true });
+      enabled = true;
+    } catch (_) { /* not available */ }
+  }
+
+  async function disable() {
+    if (!enabled || !plugin()) return;
+    try {
+      await plugin().setEnabled({ enabled: false });
+      await plugin().deleteUnsentReports();
+      enabled = false;
+    } catch (_) {}
+  }
+
+  async function log(message) {
+    if (!enabled || !plugin()) return;
+    try { await plugin().log({ message }); } catch (_) {}
+  }
+
+  async function recordError(message) {
+    if (!enabled || !plugin()) return;
+    try { await plugin().recordException({ message }); } catch (_) {}
+  }
+
+  // Listeners always attached; recordError no-ops when disabled
+  if (window.Capacitor?.isNativePlatform()) {
+    window.addEventListener('error', (e) => {
+      recordError(`${e.message} at ${e.filename}:${e.lineno}`);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      recordError(`Unhandled promise: ${String(e.reason).slice(0, 200)}`);
+    });
+  }
+
+  return { enable, disable, log, recordError };
+})();
+
 // ── Parent Mode ──
 function setParentMode(enabled) {
   parentMode = enabled;
+  // COPPA: only collect crash data when parent is present
+  enabled ? CrashlyticsManager.enable() : CrashlyticsManager.disable();
   const header = document.getElementById('app-header');
   const settingsBtn = document.getElementById('btn-parent-settings');
   const toggleBtn = document.getElementById('btn-toggle-parent-mode');

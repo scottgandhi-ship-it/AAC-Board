@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>15</string>
+	<string>21</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -53,5 +53,9 @@
 	<string>Yappie needs camera access to take photos for communication buttons.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Yappie needs photo library access to add images to communication buttons.</string>
+	<key>FIREBASE_CRASHLYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
 </dict>
 </plist>

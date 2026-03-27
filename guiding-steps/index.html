@@ -3301,6 +3301,41 @@ const DEFAULT_VISIBLE_STEPS = 3;
 let stories = [];
 let visibleStepsCount = parseInt(localStorage.getItem('gs-visible-steps'), 10) || DEFAULT_VISIBLE_STEPS;
 
+/*
+ * ═══════════════════════════════════════════════════════════
+ * STORAGE CONTRACT — LOCKED POST-LAUNCH (v1.0)
+ * ═══════════════════════════════════════════════════════════
+ *
+ * These keys and schemas are used by live App Store users.
+ * NEVER rename, remove, or change the shape of these without
+ * adding a migration in DATA_MIGRATIONS[].
+ *
+ * IndexedDB: "guiding-steps" v4
+ *   - images            (out-of-line keys)
+ *   - rewardTracks      { keyPath: 'id' }
+ *   - scheduleTemplates { keyPath: 'id' }
+ *   - activeSchedule    { keyPath: 'id' }
+ *   - socialStories     { keyPath: 'id' }
+ *   - rewardTemplates   { keyPath: 'id' }
+ *   - sessionLog        { keyPath: 'id', autoIncrement }
+ *                        indexes: date, type
+ *
+ * localStorage (static):
+ *   gs-child-name, gs-kids-mode, gs-visible-steps,
+ *   gs-voice, gs-sample-loaded,
+ *   gs-taskstrip-templates-version, gs-story-draft-steps,
+ *   gs-onboarding, gs-sensory-reduced-motion,
+ *   gs-sensory-high-contrast, gs-sensory-quiet,
+ *   gs-data-version
+ *
+ * localStorage (dynamic patterns):
+ *   gs-coach-{tab}-seen
+ *
+ * Adding NEW keys is safe. Changing or removing existing
+ * keys requires a migration entry.
+ * ═══════════════════════════════════════════════════════════
+ */
+
 // -- IndexedDB --
 const DB_NAME = 'guiding-steps';
 const DB_VERSION = 4;
@@ -3311,6 +3346,32 @@ const STORE_ACTIVE_SCHED = 'activeSchedule';
 const STORE_STORIES = 'socialStories';
 const STORE_REWARD_TMPLS = 'rewardTemplates';
 const STORE_SESSION_LOG = 'sessionLog';
+
+// -- Data Migration Framework --
+const GS_DATA_VERSION_KEY = 'gs-data-version';
+const GS_CURRENT_DATA_VERSION = 1;
+
+// Migrations run in order. Each migrates FROM (toVersion - 1) TO toVersion.
+const GS_DATA_MIGRATIONS = [
+  // { toVersion: 2, run: async () => { /* rename key, transform data, etc. */ } },
+];
+
+async function runDataMigrations() {
+  const stored = parseInt(localStorage.getItem(GS_DATA_VERSION_KEY), 10);
+  if (isNaN(stored)) {
+    localStorage.setItem(GS_DATA_VERSION_KEY, String(GS_CURRENT_DATA_VERSION));
+    return;
+  }
+  if (stored >= GS_CURRENT_DATA_VERSION) return;
+  for (const m of GS_DATA_MIGRATIONS) {
+    if (m.toVersion > stored) {
+      try {
+        await m.run();
+        localStorage.setItem(GS_DATA_VERSION_KEY, String(m.toVersion));
+      } catch (e) { break; }
+    }
+  }
+}
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -3731,9 +3792,56 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('settings-overlay').classList.remove('open');
 });
 
+// -- Firebase Crashlytics (COPPA: disabled by default, enabled in parent mode) --
+const CrashlyticsManager = (() => {
+  let enabled = false;
+  const plugin = () => window.Capacitor?.Plugins?.FirebaseCrashlytics;
+
+  async function enable() {
+    if (enabled || !plugin()) return;
+    try {
+      await plugin().setEnabled({ enabled: true });
+      enabled = true;
+    } catch (_) { /* not available */ }
+  }
+
+  async function disable() {
+    if (!enabled || !plugin()) return;
+    try {
+      await plugin().setEnabled({ enabled: false });
+      await plugin().deleteUnsentReports();
+      enabled = false;
+    } catch (_) {}
+  }
+
+  async function log(message) {
+    if (!enabled || !plugin()) return;
+    try { await plugin().log({ message }); } catch (_) {}
+  }
+
+  async function recordError(message) {
+    if (!enabled || !plugin()) return;
+    try { await plugin().recordException({ message }); } catch (_) {}
+  }
+
+  // Listeners always attached; recordError no-ops when disabled
+  if (window.Capacitor?.isNativePlatform()) {
+    window.addEventListener('error', (e) => {
+      recordError(`${e.message} at ${e.filename}:${e.lineno}`);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      recordError(`Unhandled promise: ${String(e.reason).slice(0, 200)}`);
+    });
+  }
+
+  return { enable, disable, log, recordError };
+})();
+
 // -- Kids Mode --
 function setKidsMode(enabled) {
   kidsMode = enabled;
+  // COPPA: only collect crash data when parent is present (kids mode off)
+  enabled ? CrashlyticsManager.disable() : CrashlyticsManager.enable();
   localStorage.setItem('gs-kids-mode', enabled ? 'true' : 'false');
   const toggle = document.getElementById('toggle-kids-mode');
   if (enabled) {
@@ -9267,6 +9375,7 @@ document.getElementById('gs-onboarding-overlay').addEventListener('click', (e) =
 
 // -- Init --
 async function init() {
+  await runDataMigrations();
   applySensoryPreferences();
   if (kidsMode) setKidsMode(true);
   initSpeech();

@@ -1,3 +1,38 @@
+/*
+ * ═══════════════════════════════════════════════════════════
+ * STORAGE CONTRACT — LOCKED POST-LAUNCH (v1.0)
+ * ═══════════════════════════════════════════════════════════
+ *
+ * These keys and schemas are used by live App Store users.
+ * NEVER rename, remove, or change the shape of these without
+ * adding a migration in DATA_MIGRATIONS[].
+ *
+ * IndexedDB: "aac-board" v4
+ *   - buttons    { keyPath: 'id' }
+ *   - images     (out-of-line keys)
+ *   - backups    (out-of-line keys)
+ *
+ * localStorage (static):
+ *   aac-grid-size, aac-voice, aac-speed, aac-pitch,
+ *   aac-language, aac-grammar-plurals, aac-grammar-verbs,
+ *   aac-grammar-articles, aac-auto-speak,
+ *   aac-sensory-reduced-motion, aac-sensory-high-contrast,
+ *   aac-sensory-quiet, aac-child-name, aac-custom-es-labels,
+ *   aac-custom-images, aac-custom-activities,
+ *   aac-bigram-counts, aac-usage-log, aac-usage-summary,
+ *   aac-activity-level-overrides, aac-vocab-level,
+ *   aac-onboarding, aac-getting-started-expanded,
+ *   aac-data-version
+ *
+ * localStorage (dynamic patterns):
+ *   aac-activity-positions-{id}, aac-guided-step-{id},
+ *   aac-early-words-{size}
+ *
+ * Adding NEW keys is safe. Changing or removing existing
+ * keys requires a migration entry.
+ * ═══════════════════════════════════════════════════════════
+ */
+
 // ── Parent Mode ──
 const PARENT_AUTO_LOCK_MS = 5 * 60 * 1000;
 const DB_NAME = 'aac-board';
@@ -5,6 +40,32 @@ const DB_VERSION = 4;
 const STORE_BUTTONS = 'buttons';
 const STORE_IMAGES = 'images';
 const STORE_BACKUPS = 'backups';
+
+// ── Data Migration Framework ──
+const AAC_DATA_VERSION_KEY = 'aac-data-version';
+const AAC_CURRENT_DATA_VERSION = 1;
+
+// Migrations run in order. Each migrates FROM (toVersion - 1) TO toVersion.
+const AAC_DATA_MIGRATIONS = [
+  // { toVersion: 2, run: async () => { /* rename key, transform data, etc. */ } },
+];
+
+async function runDataMigrations() {
+  const stored = parseInt(localStorage.getItem(AAC_DATA_VERSION_KEY), 10);
+  if (isNaN(stored)) {
+    localStorage.setItem(AAC_DATA_VERSION_KEY, String(AAC_CURRENT_DATA_VERSION));
+    return;
+  }
+  if (stored >= AAC_CURRENT_DATA_VERSION) return;
+  for (const m of AAC_DATA_MIGRATIONS) {
+    if (m.toVersion > stored) {
+      try {
+        await m.run();
+        localStorage.setItem(AAC_DATA_VERSION_KEY, String(m.toVersion));
+      } catch (e) { break; }
+    }
+  }
+}
 
 // ── IndexedDB ──
 function openDB() {

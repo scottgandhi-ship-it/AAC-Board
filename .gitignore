@@ -4,9 +4,17 @@
 # Capacitor / iOS build artifacts
 node_modules/
 ios/
+!ios/App/App.xcodeproj/
+!ios/App/App/GoogleService-Info.plist
+!ios/App/App/Info.plist
+!ios/App/App/AppDelegate.swift
 www/
 guiding-steps/node_modules/
 guiding-steps/ios/
+!guiding-steps/ios/App/App.xcodeproj/
+!guiding-steps/ios/App/App/GoogleService-Info.plist
+!guiding-steps/ios/App/App/Info.plist
+!guiding-steps/ios/App/App/AppDelegate.swift
 guiding-steps/www/
 DerivedData/
 *.xcworkspace/xcuserdata/
