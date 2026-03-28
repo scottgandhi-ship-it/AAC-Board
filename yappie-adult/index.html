@@ -90,7 +90,7 @@
       <h3>Edit Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
       <button type="button" class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Edit Mode</button>
-      <button type="button" class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
+      <button type="button" class="settings-btn" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
     </div>
 
     <div class="settings-section" id="getting-started-section">
@@ -456,6 +456,17 @@
 <script src="../js/grammar.js"></script>
 <script src="../js/tts.js"></script>
 <script>
+// ── Adult override: all grid sizes get full core words in strip ──
+const _origGetTemplate = getTemplate;
+function getTemplate(size) {
+  const _tc = {};
+  if (size === 3 || size === 4 || size === 5) {
+    const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
+    return [...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...HOME_GRID_6X6_EXTRAS, ...folderContents].map(b => ({...b}));
+  }
+  return _origGetTemplate(size);
+}
+
 // ── Init ──
 async function init() {
   await runDataMigrations();
