@@ -1820,6 +1820,14 @@ const ABCoachMarks = {
           btnLabel: null,
           waitForAction: true,
           guard: () => true
+        },
+        {
+          target: () => document.getElementById('btn-parent-settings'),
+          text: () => 'One more thing! Hold the Settings tab to unlock Parent Mode. From there you can add custom photos, edit words, and make this board truly ' + ABCoachMarks._childName() + ' own.',
+          placement: 'top',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => !!document.getElementById('btn-parent-settings')
         }
       ],
       fallback: {
