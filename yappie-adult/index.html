@@ -691,6 +691,8 @@ function renderGrid() {
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     grid.style.flex = '1';
   }
+
+  document.getElementById('grid-container').scrollTop = 0;
 }
 
 // ── Predictive Next-Word ──
