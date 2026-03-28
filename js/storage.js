@@ -126,7 +126,7 @@ function isEarlyLearnerGrid(size) { return size === 1 || size === 21 || size ===
 function getGridSize() {
   const stored = localStorage.getItem('aac-grid-size');
   if (['1', '21', '2', '3', '4', '5', '6'].includes(stored)) return parseInt(stored);
-  return 3;
+  return 4;
 }
 
 function setGridSize(size) {
@@ -162,13 +162,7 @@ function getTemplate(size) {
   if (_templateCache[size]) return _templateCache[size].map(b => ({...b}));
   const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
   let template;
-  if (size === 3) {
-    const filtered = folderContents.filter(b => THREE_BY_THREE_FOLDERS.has(b.folderId));
-    template = [...CORE_WORD_DEFS, ...HOME_GRID_3X3_FOLDERS, ...filtered];
-  } else if (size === 4) {
-    const filtered = folderContents.filter(b => FOUR_BY_FOUR_FOLDERS.has(b.folderId));
-    template = [...CORE_WORD_DEFS, ...HOME_GRID_4X4_FOLDERS, ...filtered];
-  } else if (size === 5) {
+  if (size === 3 || size === 4 || size === 5) {
     template = [...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...folderContents];
   } else if (size === 6) {
     const homeFolders = DEFAULT_BUTTONS.filter(b => b.folderId === null && b.type !== 'core');
