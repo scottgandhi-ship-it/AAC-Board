@@ -4,7 +4,7 @@ const ASSETS = [
   './index.html',
   './manifest.json',
   '../js/state.js',
-  '../js/vocabulary.js',
+  './js/vocabulary.js',
   '../js/ui-shared.js',
   '../js/storage.js',
   '../js/i18n.js',
