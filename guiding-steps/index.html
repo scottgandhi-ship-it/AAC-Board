@@ -2374,6 +2374,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 .describe-step-input {
   width: 100%; padding: 12px; border: 2px solid var(--chrome-border);
   border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem; box-sizing: border-box;
+  resize: none; overflow: hidden; line-height: 1.4;
 }
 .describe-step-remove {
   width: 36px; height: 36px; border: none; background: none;
@@ -4646,6 +4647,7 @@ var WAITING_PATTERNS = [
 // Patterns that indicate the step is already a complete sentence
 var COMPLETE_SENTENCE_PATTERNS = [
   /^(I |we |{name} |there |a |an |my |our |it |this |that |sometimes |maybe |finally |when |at |everyone |if |after )/i,
+  /^(then |next |first |after that |and then |and )(I |we |my |our |the |a |it |they |he |she )/i,
   /^\w+ (might|could|should|would) /i
 ];
 
@@ -4724,7 +4726,9 @@ function buildSentence(step, stepIndex, totalSteps) {
   } else if (isComplete) {
     // Already a complete sentence -- add transition but don't restructure
     var cleanRaw = raw.charAt(0).toUpperCase() + raw.slice(1);
-    if (stepIndex > 0) {
+    // If the input already starts with a transition word, don't add another
+    var hasOwnTransition = /^(then |next |after that |first |finally |and then |and |when |once |before |after |while )/i.test(raw);
+    if (stepIndex > 0 && !hasOwnTransition) {
       sentence = transition + cleanRaw.charAt(0).toLowerCase() + cleanRaw.slice(1);
       sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
     } else {
@@ -8266,12 +8270,17 @@ function addDescribeStep(value) {
   label.textContent = DESCRIBE_STEP_LABELS[idx] || DESCRIBE_STEP_LABELS[idx % DESCRIBE_STEP_LABELS.length];
   body.appendChild(label);
 
-  var input = document.createElement('input');
-  input.type = 'text';
+  var input = document.createElement('textarea');
   input.className = 'describe-step-input';
   input.setAttribute('aria-label', 'Step ' + describeStepCount);
+  input.setAttribute('rows', '1');
   input.value = value || '';
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+  });
   body.appendChild(input);
+  if (value) { setTimeout(function() { input.style.height = input.scrollHeight + 'px'; }, 0); }
 
   item.appendChild(body);
 
@@ -8289,7 +8298,7 @@ function addDescribeStep(value) {
   }
 
   list.appendChild(item);
-  if (value === '' && describeStepCount > 1) input.focus();
+  if (value === '' && describeStepCount === 1) input.focus();
 }
 
 function renumberDescribeSteps() {
