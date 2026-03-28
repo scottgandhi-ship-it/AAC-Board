@@ -190,6 +190,15 @@ const DEFAULT_BUTTONS = [
   { id: 'gen-want-play',  label: 'want to play?',color:'green',  type: 'fringe', folderId: 'general', position: 37 },
   { id: 'gen-your-turn',  label: 'your turn',  color: 'yellow', type: 'fringe', folderId: 'general', position: 38 },
   { id: 'gen-tell-me',    label: 'tell me more',color:'green',   type: 'fringe', folderId: 'general', position: 39 },
+  { id: 'gen-come-here',  label: 'come here',  color: 'pink',   type: 'fringe', folderId: 'general', position: 40 },
+  { id: 'gen-follow-me',  label: 'follow me',  color: 'pink',   type: 'fringe', folderId: 'general', position: 41 },
+  { id: 'gen-watch-me',   label: 'watch me',   color: 'pink',   type: 'fringe', folderId: 'general', position: 42 },
+  { id: 'gen-by-myself',  label: 'by myself',  color: 'yellow', type: 'fringe', folderId: 'general', position: 43 },
+  { id: 'gen-mine',       label: 'mine',       color: 'yellow', type: 'fringe', folderId: 'general', position: 44 },
+  { id: 'gen-i-cant',     label: "I can't",    color: 'red',    type: 'fringe', folderId: 'general', position: 45 },
+  { id: 'gen-let-me',     label: 'let me',     color: 'pink',   type: 'fringe', folderId: 'general', position: 46 },
+  { id: 'gen-not-yet',    label: 'not yet',    color: 'red',    type: 'fringe', folderId: 'general', position: 47 },
+  { id: 'gen-ready',      label: 'ready',      color: 'pink',   type: 'fringe', folderId: 'general', position: 48 },
 
   // ── Food (child-friendly) ──
   { id: 'food-apple',     label: 'apple',          color: 'orange', type: 'fringe', folderId: 'food', position: 0 },
@@ -464,6 +473,17 @@ const DEFAULT_BUTTONS = [
   { id: 'act-spit',     label: 'spit',     color: 'green', type: 'fringe', folderId: 'actions', position: 88 },
   { id: 'act-take',     label: 'take',     color: 'green', type: 'fringe', folderId: 'actions', position: 89 },
   { id: 'act-reach',    label: 'reach',    color: 'green', type: 'fringe', folderId: 'actions', position: 90 },
+  { id: 'act-come',     label: 'come',     color: 'green', type: 'fringe', folderId: 'actions', position: 91 },
+  { id: 'act-follow',   label: 'follow',   color: 'green', type: 'fringe', folderId: 'actions', position: 92 },
+  { id: 'act-fix',      label: 'fix',      color: 'green', type: 'fringe', folderId: 'actions', position: 93 },
+  { id: 'act-make',     label: 'make',     color: 'green', type: 'fringe', folderId: 'actions', position: 94 },
+  { id: 'act-clean-up', label: 'clean up', color: 'green', type: 'fringe', folderId: 'actions', position: 95 },
+  { id: 'act-move',     label: 'move',     color: 'green', type: 'fringe', folderId: 'actions', position: 96 },
+  { id: 'act-bring',    label: 'bring',    color: 'green', type: 'fringe', folderId: 'actions', position: 97 },
+  { id: 'act-fall',     label: 'fall',     color: 'green', type: 'fringe', folderId: 'actions', position: 98 },
+  { id: 'act-drop',     label: 'drop',     color: 'green', type: 'fringe', folderId: 'actions', position: 99 },
+  { id: 'act-knock',    label: 'knock',    color: 'green', type: 'fringe', folderId: 'actions', position: 100 },
+  { id: 'act-stack',    label: 'stack',    color: 'green', type: 'fringe', folderId: 'actions', position: 101 },
 
   // ── Toys ──
   { id: 'toy-ball',       label: 'ball',       color: 'orange', type: 'fringe', folderId: 'toys', position: 0 },
@@ -560,6 +580,9 @@ const DEFAULT_BUTTONS = [
   { id: 'thg-paper',      label: 'paper',      color: 'orange', type: 'fringe', folderId: 'things', position: 17 },
   { id: 'thg-light',      label: 'light',      color: 'orange', type: 'fringe', folderId: 'things', position: 18 },
   { id: 'thg-fan',        label: 'fan',        color: 'orange', type: 'fringe', folderId: 'things', position: 19 },
+  { id: 'thg-door',       label: 'door',       color: 'orange', type: 'fringe', folderId: 'things', position: 20 },
+  { id: 'thg-bowl',       label: 'bowl',       color: 'orange', type: 'fringe', folderId: 'things', position: 21 },
+  { id: 'thg-bandaid',    label: 'bandaid',    color: 'orange', type: 'fringe', folderId: 'things', position: 22 },
 
   // ── Animals ──
   { id: 'ppl-dog',       label: 'dog',       color: 'orange', type: 'fringe', folderId: 'animals', position: 0 },
@@ -641,6 +664,9 @@ const DEFAULT_BUTTONS = [
   { id: 'where-there',   label: 'there',    color: 'purple', type: 'fringe', folderId: 'where', position: 11 },
   { id: 'where-away',    label: 'away',     color: 'purple', type: 'fringe', folderId: 'where', position: 12 },
   { id: 'where-between', label: 'between',  color: 'purple', type: 'fringe', folderId: 'where', position: 13 },
+  { id: 'where-with',    label: 'with',     color: 'purple', type: 'fringe', folderId: 'where', position: 14 },
+  { id: 'where-for',     label: 'for',      color: 'purple', type: 'fringe', folderId: 'where', position: 15 },
+  { id: 'where-to',      label: 'to',       color: 'purple', type: 'fringe', folderId: 'where', position: 16 },
 
   // ── Nature / Weather ──
   { id: 'nat-sun',    label: 'sun',    color: 'orange', type: 'fringe', folderId: 'nature', position: 0 },
@@ -695,6 +721,7 @@ const DEFAULT_BUTTONS = [
   { id: 'sense-cover-ears', label: 'cover ears', color: 'green',  type: 'fringe', folderId: 'senses', position: 15 },
   { id: 'sense-close-eyes', label: 'close eyes', color: 'green',  type: 'fringe', folderId: 'senses', position: 16 },
   { id: 'sense-deep-breath',label: 'deep breath',color: 'green',  type: 'fringe', folderId: 'senses', position: 17 },
+  { id: 'sense-stuck',     label: 'stuck',      color: 'blue',   type: 'fringe', folderId: 'senses', position: 18 },
 
   // ── Quick Phrases (auto-speak on tap) ──
   // Urgent/safety (red)
@@ -736,6 +763,9 @@ const DEFAULT_BUTTONS = [
   { id: 'qp-want-hug',   label: 'can I have a hug',   color: 'pink',  type: 'fringe', folderId: 'quick', position: 29 },
   { id: 'qp-where-going',label: 'where are we going',  color: 'blue',  type: 'fringe', folderId: 'quick', position: 30 },
   { id: 'qp-thats-funny',label: "that's funny",        color: 'pink',  type: 'fringe', folderId: 'quick', position: 31 },
+  { id: 'qp-pick-me-up', label: 'pick me up',         color: 'green', type: 'fringe', folderId: 'quick', position: 32 },
+  { id: 'qp-carry-me',   label: 'carry me',           color: 'green', type: 'fringe', folderId: 'quick', position: 33 },
+  { id: 'qp-not-working',label: "it's not working",   color: 'red',   type: 'fringe', folderId: 'quick', position: 34 },
 
   // ── Entertainment (screen time & media) ──
   { id: 'ent-watch',      label: 'watch',          color: 'green',  type: 'fringe', folderId: 'entertainment', position: 0 },
@@ -876,6 +906,36 @@ const VOCAB_WORD_POOL = {
   'chew':       { labelEs: 'masticar',    color: 'green',  icon: '😋',  symbolKw: 'chew' },
   'try':        { labelEs: 'intentar',    color: 'green',  icon: '💪',  symbolKw: 'try' },
   'reach':      { labelEs: 'alcanzar',    color: 'green',  icon: '🙌',  symbolKw: 'reach' },
+  'come':       { labelEs: 'ven',         color: 'green',  icon: '🫴',  symbolKw: 'come' },
+  'follow':     { labelEs: 'seguir',      color: 'green',  icon: '👣',  symbolKw: 'follow' },
+  'fix':        { labelEs: 'arreglar',    color: 'green',  icon: '🔧',  symbolKw: 'fix' },
+  'make':       { labelEs: 'hacer',       color: 'green',  icon: '🏗️',  symbolKw: 'make' },
+  'clean up':   { labelEs: 'recoger',     color: 'green',  icon: '🧹',  symbolKw: 'clean' },
+  'move':       { labelEs: 'mover',       color: 'green',  icon: '🏃‍♂️',  symbolKw: 'move' },
+  'bring':      { labelEs: 'traer',       color: 'green',  icon: '📦',  symbolKw: 'bring' },
+  'fall':       { labelEs: 'caer',        color: 'green',  icon: '🤾',  symbolKw: 'fall' },
+  'drop':       { labelEs: 'soltar',      color: 'green',  icon: '⬇️',  symbolKw: 'drop' },
+  'knock':      { labelEs: 'tocar',       color: 'green',  icon: '🤛',  symbolKw: 'knock' },
+  'stack':      { labelEs: 'apilar',      color: 'green',  icon: '🧱',  symbolKw: 'stack' },
+  'come here':  { labelEs: 'ven aquí',    color: 'pink',   icon: '🫳',  symbolKw: 'come' },
+  'follow me':  { labelEs: 'sígueme',     color: 'pink',   icon: '🚶',  symbolKw: 'follow' },
+  'watch me':   { labelEs: 'mírame',      color: 'pink',   icon: '👁️',  symbolKw: 'watch' },
+  'by myself':  { labelEs: 'yo solo',     color: 'yellow', icon: '💁',  symbolKw: 'myself' },
+  'mine':       { labelEs: 'mío',         color: 'yellow', icon: '✊',  symbolKw: 'mine' },
+  "I can't":    { labelEs: 'no puedo',    color: 'red',    icon: '🙅',  symbolKw: 'cannot' },
+  'let me':     { labelEs: 'déjame',      color: 'pink',   icon: '🔓',  symbolKw: 'allow' },
+  'not yet':    { labelEs: 'todavía no',  color: 'red',    icon: '⏰',  symbolKw: 'wait' },
+  'ready':      { labelEs: 'listo',       color: 'pink',   icon: '🟢',  symbolKw: 'ready' },
+  'pick me up': { labelEs: 'cárgame',     color: 'green',  icon: '🙌',  symbolKw: 'carry' },
+  'carry me':   { labelEs: 'llévame',     color: 'green',  icon: '🦥',  symbolKw: 'carry' },
+  "it's not working": { labelEs: 'no funciona', color: 'red', icon: '💔', symbolKw: 'broken' },
+  'stuck':      { labelEs: 'atascado',    color: 'blue',   icon: '😩',  symbolKw: 'stuck' },
+  'door':       { labelEs: 'puerta',      color: 'orange', icon: '🚪',  symbolKw: 'door' },
+  'bowl':       { labelEs: 'tazón',       color: 'orange', icon: '🥣',  symbolKw: 'bowl' },
+  'bandaid':    { labelEs: 'curita',      color: 'orange', icon: '🩹',  symbolKw: 'bandage' },
+  'with':       { labelEs: 'con',         color: 'purple', icon: '👥',  symbolKw: 'with' },
+  'for':        { labelEs: 'para',        color: 'purple', icon: '🎁',  symbolKw: 'for' },
+  'to':         { labelEs: 'a',           color: 'purple', icon: '➡️',  symbolKw: 'to' },
   'shake':      { labelEs: 'agitar',      color: 'green',  icon: '🫨',  symbolKw: 'shake' },
   'smell':      { labelEs: 'oler',        color: 'green',  icon: '👃',  symbolKw: 'smell' },
   'mix':        { labelEs: 'mezclar',     color: 'green',  icon: '🥣',  symbolKw: 'mix' },
@@ -2186,6 +2246,8 @@ const BUTTON_ICONS = {
   'gen-yr-welcome': '😊', 'gen-no-thank-you': '🙅', 'gen-cool': '😎', 'gen-awesome': '🌟',
   'gen-thats-funny': '😂', 'gen-me-too': '🤝', 'gen-wow': '😮', 'gen-i-did-it': '🎉',
   'gen-i-like-it': '👍', 'gen-want-play': '🎮', 'gen-your-turn': '👉', 'gen-tell-me': '👂',
+  'gen-come-here': '🫳', 'gen-follow-me': '🚶', 'gen-watch-me': '👁️', 'gen-by-myself': '💁',
+  'gen-mine': '✊', 'gen-i-cant': '🙅', 'gen-let-me': '🔓', 'gen-not-yet': '⏰', 'gen-ready': '🟢',
   // Food
   'food-apple': '🍎', 'food-banana': '🍌', 'food-cookie': '🍪', 'food-crackers': '🍘',
   'food-pizza': '🍕', 'food-nuggets': '🍗', 'food-pasta': '🍝', 'food-sandwich': '🥪',
@@ -2264,6 +2326,9 @@ const BUTTON_ICONS = {
   'act-read': '📖', 'act-watch': '👀', 'act-play': '🎮', 'act-wash': '🧼', 'act-open': '📂',
   'act-close': '📁', 'act-give': '🤲', 'act-pull': '🤏', 'act-push': '🤲', 'act-go': '▶️',
   'act-stop': '🛑', 'act-eat': '🍽️', 'act-drink': '🥤', 'act-help': '🆘',
+  'act-come': '🫴', 'act-follow': '👣', 'act-fix': '🔧', 'act-make': '🏗️',
+  'act-clean-up': '🧹', 'act-move': '🏃‍♂️', 'act-bring': '📦', 'act-fall': '🤾',
+  'act-drop': '⬇️', 'act-knock': '🤛', 'act-stack': '🧱',
   // Toys
   'toy-ball': '⚽', 'toy-blocks': '🧱', 'toy-doll': '🪆', 'toy-car': '🚗',
   'toy-train': '🚂', 'toy-puzzle': '🧩', 'toy-bubbles': '🫧', 'toy-crayons': '🖍️',
@@ -2292,6 +2357,7 @@ const BUTTON_ICONS = {
   'thg-towel': '🏖️', 'thg-backpack': '🎒', 'thg-scissors': '✂️', 'thg-phone': '📱',
   'thg-tv': '📺', 'thg-headphones': '🎧', 'thg-tissue': '🧻', 'thg-soap': '🧴',
   'thg-pencil': '✏️', 'thg-paper': '📄', 'thg-light': '💡', 'thg-fan': '🌀',
+  'thg-door': '🚪', 'thg-bowl': '🥣', 'thg-bandaid': '🩹',
   // Animals
   'ani-fish': '🐟', 'ani-bird': '🐦', 'ani-horse': '🐴', 'ani-bunny': '🐰',
   'ani-bear': '🐻', 'ani-frog': '🐸', 'ani-butterfly': '🦋', 'ani-dinosaur': '🦕',
@@ -2317,6 +2383,7 @@ const BUTTON_ICONS = {
   'where-down': '👇', 'where-out': '📤', 'where-off': '❌',
   'where-over': '🏔️', 'where-here': '📍', 'where-there': '👉',
   'where-away': '🛫', 'where-between': '↕️',
+  'where-with': '👥', 'where-for': '🎁', 'where-to': '➡️',
   // Nature
   'nat-sun': '☀️', 'nat-rain': '🌧️', 'nat-snow': '❄️',
   'nat-cloud': '☁️', 'nat-wind': '💨', 'nat-tree': '🌳',
@@ -2335,7 +2402,7 @@ const BUTTON_ICONS = {
   'sense-too-much': '😵', 'sense-stinky': '🤢',
   'sense-need-squeeze': '🤗', 'sense-need-quiet': '🤫', 'sense-need-space': '🙅',
   'sense-want-hug': '🫂', 'sense-want-blanket': '🛏️', 'sense-cover-ears': '🙉',
-  'sense-close-eyes': '😌', 'sense-deep-breath': '🌬️',
+  'sense-close-eyes': '😌', 'sense-deep-breath': '🌬️', 'sense-stuck': '😩',
   // Quick Phrases
   'qp-potty': '🚽', 'qp-hurts': '🤕', 'qp-dont-like': '👎', 'qp-stop-it': '🛑',
   'qp-scared': '😨', 'qp-more-please': '🙏', 'qp-help-me': '🆘', 'qp-want-that': '👉',
@@ -2347,6 +2414,7 @@ const BUTTON_ICONS = {
   'qp-wait-please': '✋', 'qp-want-mommy': '👩', 'qp-want-daddy': '👨',
   'qp-leave-alone': '🙅', 'qp-look-at-this': '👀', 'qp-want-hug': '🤗',
   'qp-where-going': '🗺️', 'qp-thats-funny': '😂',
+  'qp-pick-me-up': '🙌', 'qp-carry-me': '🦥', 'qp-not-working': '💔',
   // Entertainment
   'ent-watch': '👀', 'ent-movie': '🎬', 'ent-show': '📺', 'ent-video': '▶️',
   'ent-cartoon': '🎨', 'ent-music': '🎵', 'ent-song': '🎶', 'ent-remote': '🎮',
