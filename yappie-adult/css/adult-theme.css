@@ -1,0 +1,46 @@
+/* ── Yappie Adult Color Overrides ──
+   Fitzgerald Key semantic mapping preserved, palette matured for adult users.
+   Loaded after tokens.css to override kid-friendly pastels. */
+
+:root {
+  /* ── Fitzgerald Key Colors (adult palette — balanced pop) ── */
+  --color-yellow: #e8d478;
+  --color-green: #8cc78f;
+  --color-red: #db8583;
+  --color-blue: #78b4da;
+  --color-pink: #d9a8b3;
+  --color-orange: #e4b87e;
+  --color-home: #e2dfda;
+
+  /* ── App Chrome Colors ── */
+  --chrome-primary: #4a6274;
+  --chrome-primary-dark: #3a4f5e;
+  --chrome-accent: #c9a272;
+  --chrome-bg: #eceae5;
+  --chrome-surface: #ffffff;
+  --chrome-surface-alt: #f7f5f2;
+
+  /* Backward-compatible aliases */
+  --bar-bg: var(--chrome-primary);
+  --bar-bg-dark: var(--chrome-primary-dark);
+
+  /* ── Fitzgerald Flat Pairs (adult) ── */
+  --color-yellow-light: #e8d478;
+  --color-yellow-dark: #e8d478;
+  --color-green-light: #8cc78f;
+  --color-green-dark: #8cc78f;
+  --color-red-light: #db8583;
+  --color-red-dark: #db8583;
+  --color-blue-light: #78b4da;
+  --color-blue-dark: #78b4da;
+  --color-pink-light: #d9a8b3;
+  --color-pink-dark: #d9a8b3;
+  --color-orange-light: #e4b87e;
+  --color-orange-dark: #e4b87e;
+  --color-home-light: #e2dfda;
+  --color-home-dark: #e2dfda;
+}
+
+body {
+  background: #eceae5;
+}

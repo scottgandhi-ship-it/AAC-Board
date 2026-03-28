@@ -5,8 +5,8 @@
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#edeaf8",
-  "theme_color": "#615fff",
+  "background_color": "#e8e6e1",
+  "theme_color": "#4a6274",
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23615fff'/><path d='M48 56c0-8.8 7.2-16 16-16h64c8.8 0 16 7.2 16 16v48c0 8.8-7.2 16-16 16H96l-24 20v-20H64c-8.8 0-16-7.2-16-16V56z' fill='white'/><circle cx='80' cy='80' r='6' fill='%23615fff'/><circle cx='96' cy='80' r='6' fill='%23615fff'/><circle cx='112' cy='80' r='6' fill='%23615fff'/></svg>",
