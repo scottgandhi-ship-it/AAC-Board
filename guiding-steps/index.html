@@ -1629,16 +1629,18 @@ body {
 }
 
 .tmpl-step-img {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f0f0f0;
+  cursor: pointer;
 }
+.tmpl-step-img:active { opacity: 0.7; }
 
 .tmpl-step-img svg, .tmpl-step-img img {
   width: 100%;
@@ -3130,6 +3132,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   <div id="tmpl-list-panel">
     <h2 id="tmpl-list-title">Choose Schedule</h2>
     <div id="tmpl-list-items"></div>
+    <input type="file" id="schedule-import-input" accept=".gsschedule,.json" style="display:none">
     <button type="button" id="btn-close-tmpl-list">Cancel</button>
   </div>
 </div>
@@ -3146,10 +3149,12 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div class="tmpl-btn-row">
       <button type="button" id="btn-tmpl-cancel">Cancel</button>
       <button type="button" id="btn-tmpl-delete" style="display:none">Delete</button>
+      <button type="button" id="btn-tmpl-export" style="display:none">Export</button>
       <button type="button" id="btn-tmpl-save">Save</button>
     </div>
   </div>
 </div>
+<input type="file" id="sched-step-image-input" accept="image/png,image/jpeg" style="display:none">
 
 <!-- Activity Picker Modal -->
 <div id="activity-picker-overlay">
@@ -4394,6 +4399,7 @@ let schedTemplates = [];
 let activeSchedule = null;
 let editorSteps = [];
 let editingTemplateId = null;
+let schedStepImageTargetIdx = null;
 let customStepImageBlob = null;
 
 function makeStep(label, key) {
@@ -5241,6 +5247,19 @@ function openTemplateList(mode) {
     itemsEl.appendChild(newBtn);
   }
 
+  {
+    const importBtn = document.createElement('button');
+    importBtn.className = 'tmpl-list-item';
+    importBtn.style.justifyContent = 'center';
+    importBtn.style.color = '#43A047';
+    importBtn.style.fontWeight = '700';
+    importBtn.textContent = 'Import Schedule';
+    importBtn.addEventListener('click', () => {
+      document.getElementById('schedule-import-input').click();
+    });
+    itemsEl.appendChild(importBtn);
+  }
+
   document.getElementById('tmpl-list-overlay').classList.add('open');
 }
 
@@ -5289,6 +5308,7 @@ function openTemplateEditor(templateId) {
   document.getElementById('tmpl-editor-title').textContent = tmpl ? 'Edit Schedule' : 'New Schedule';
   document.getElementById('tmpl-name-input').value = tmpl ? tmpl.name : '';
   document.getElementById('btn-tmpl-delete').style.display = tmpl ? '' : 'none';
+  document.getElementById('btn-tmpl-export').style.display = tmpl ? '' : 'none';
   editorSteps = tmpl ? JSON.parse(JSON.stringify(tmpl.steps)) : [];
 
   renderEditorSteps();
@@ -5305,6 +5325,9 @@ function renderEditorSteps() {
 
     const imgDiv = document.createElement('div');
     imgDiv.className = 'tmpl-step-img';
+    imgDiv.setAttribute('role', 'button');
+    imgDiv.setAttribute('aria-label', 'Change image for ' + step.label);
+    imgDiv.addEventListener('click', () => { openScheduleStepImagePicker(idx); });
     if (step.imageType === 'default' && step.defaultImageKey) {
       const act = DEFAULT_SCHEDULE_ACTIVITIES.find(a => a.key === step.defaultImageKey);
       if (act) imgDiv.innerHTML = act.svg;
@@ -5318,6 +5341,8 @@ function renderEditorSteps() {
           imgDiv.appendChild(img);
         }
       });
+    } else {
+      imgDiv.innerHTML = '<span style="font-size:1.2rem;color:#aaa;font-weight:700;">+</span>';
     }
     row.appendChild(imgDiv);
 
@@ -5417,6 +5442,12 @@ document.getElementById('btn-tmpl-delete').addEventListener('click', async () =>
   editingTemplateId = null;
   renderSchedule();
   showToast('Template deleted');
+});
+
+document.getElementById('btn-tmpl-export').addEventListener('click', async () => {
+  if (!editingTemplateId) return;
+  const tmpl = schedTemplates.find(t => t.id === editingTemplateId);
+  if (tmpl) await exportSchedule(tmpl);
 });
 
 // Activity picker
@@ -5541,6 +5572,103 @@ document.getElementById('btn-close-picker').addEventListener('click', () => {
 
 document.getElementById('activity-picker-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('activity-picker-overlay').classList.remove('open');
+});
+
+// -- Schedule Step Image Picker --
+function openScheduleStepImagePicker(idx) {
+  schedStepImageTargetIdx = idx;
+  let overlay = document.getElementById('sched-step-image-picker');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'sched-step-image-picker';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:960;background:rgba(0,0,0,0.4);align-items:flex-end;justify-content:center;padding:0;';
+    overlay.innerHTML = '<div id="sched-step-image-panel" style="background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:70vh;overflow-y:auto;padding:16px 12px 24px;box-shadow:0 -4px 24px rgba(0,0,0,0.2);"></div>';
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.style.display = 'none'; });
+    document.body.appendChild(overlay);
+  }
+  const panel = document.getElementById('sched-step-image-panel');
+  panel.innerHTML = '<h3 style="font-size:1rem;font-weight:800;color:#333;margin:0 0 12px;text-align:center;">Choose Step Image</h3>';
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:8px;';
+
+  // Upload photo option
+  const uploadCard = document.createElement('button');
+  uploadCard.type = 'button';
+  uploadCard.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:2px dashed #ccc;border-radius:10px;background:#fafafa;cursor:pointer;min-height:72px;font-family:inherit;';
+  uploadCard.innerHTML = '<div style="font-size:1.3rem;">&#x1F4F7;</div><div style="font-size:0.65rem;font-weight:600;color:#666;">Photo</div>';
+  uploadCard.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    document.getElementById('sched-step-image-input').click();
+  });
+  grid.appendChild(uploadCard);
+
+  // Default schedule activity images
+  DEFAULT_SCHEDULE_ACTIVITIES.forEach(act => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;cursor:pointer;min-height:72px;font-family:inherit;';
+    card.innerHTML = '<div style="width:36px;height:36px;">' + act.svg + '</div><div style="font-size:0.55rem;font-weight:600;color:#666;text-align:center;line-height:1.1;">' + act.label + '</div>';
+    card.addEventListener('click', async () => {
+      if (editorSteps[idx].imageType === 'custom' && editorSteps[idx].customImageKey) {
+        await deleteImage(editorSteps[idx].customImageKey);
+      }
+      editorSteps[idx].imageType = 'default';
+      editorSteps[idx].defaultImageKey = act.key;
+      editorSteps[idx].customImageKey = null;
+      overlay.style.display = 'none';
+      renderEditorSteps();
+    });
+    grid.appendChild(card);
+  });
+
+  panel.appendChild(grid);
+
+  // Remove button if image exists
+  if (editorSteps[idx].imageType !== 'none') {
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.style.cssText = 'width:100%;padding:12px;margin-top:12px;border:1px solid #FFCDD2;border-radius:10px;background:#fff;color:#D32F2F;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;';
+    removeBtn.textContent = 'Remove Image';
+    removeBtn.addEventListener('click', async () => {
+      if (editorSteps[idx].imageType === 'custom' && editorSteps[idx].customImageKey) {
+        await deleteImage(editorSteps[idx].customImageKey);
+      }
+      editorSteps[idx].imageType = 'none';
+      editorSteps[idx].defaultImageKey = null;
+      editorSteps[idx].customImageKey = null;
+      overlay.style.display = 'none';
+      renderEditorSteps();
+    });
+    panel.appendChild(removeBtn);
+  }
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.style.cssText = 'width:100%;padding:10px;margin-top:8px;border:none;border-radius:10px;background:#eee;color:#666;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+  panel.appendChild(cancelBtn);
+
+  overlay.style.display = 'flex';
+}
+
+document.getElementById('sched-step-image-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file || schedStepImageTargetIdx === null) return;
+  const compressed = await compressImage(file);
+  const stepId = editorSteps[schedStepImageTargetIdx].stepId;
+  const templateId = editingTemplateId || 'tmpl-new';
+  const imageKey = 'sched-' + templateId + '-' + stepId;
+  if (editorSteps[schedStepImageTargetIdx].imageType === 'custom' && editorSteps[schedStepImageTargetIdx].customImageKey) {
+    await deleteImage(editorSteps[schedStepImageTargetIdx].customImageKey);
+  }
+  await saveImage(imageKey, compressed);
+  editorSteps[schedStepImageTargetIdx].imageType = 'custom';
+  editorSteps[schedStepImageTargetIdx].defaultImageKey = null;
+  editorSteps[schedStepImageTargetIdx].customImageKey = imageKey;
+  renderEditorSteps();
+  e.target.value = '';
 });
 
 // -- Reward Tracker State --
@@ -7830,6 +7958,136 @@ async function exportStory(story) {
     showToast('Story exported');
   }
 }
+
+async function exportSchedule(tmpl) {
+  showToast('Preparing schedule...');
+  const steps = tmpl.steps || [];
+  const images = {};
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    if (step.imageType === 'custom' && step.customImageKey) {
+      const blob = await loadImage(step.customImageKey);
+      if (blob) {
+        const dataUri = await new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        });
+        images[step.customImageKey] = dataUri;
+      }
+    }
+  }
+  const exportData = {
+    format: 'guiding-steps-schedule',
+    version: 1,
+    exportDate: new Date().toISOString(),
+    schedule: {
+      name: tmpl.name,
+      steps: steps.map(s => ({
+        stepId: s.stepId,
+        label: s.label,
+        imageType: s.imageType,
+        defaultImageKey: s.defaultImageKey || null,
+        customImageKey: s.customImageKey || null,
+      }))
+    },
+    images,
+  };
+  const json = JSON.stringify(exportData);
+  const blob = new Blob([json], { type: 'application/json' });
+  const safeName = (tmpl.name || 'schedule').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const fileName = safeName + '_' + dateStr + '.gsschedule';
+  const file = new File([blob], fileName, { type: 'application/json' });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title: tmpl.name, files: [file] });
+    } catch (e) {
+      if (e.name !== 'AbortError') showToast('Could not share');
+    }
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    showToast('Schedule exported');
+  }
+}
+
+document.getElementById('schedule-import-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('File too large (10MB max)');
+    return;
+  }
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (data.format !== 'guiding-steps-schedule' || !data.schedule || !data.schedule.steps) {
+      showToast('Not a valid Guiding Steps schedule file');
+      return;
+    }
+    const s = data.schedule;
+    const newId = 'tmpl-' + Date.now();
+    const images = data.images || {};
+    const processedSteps = [];
+    for (let i = 0; i < s.steps.length; i++) {
+      const step = s.steps[i];
+      const newStepId = step.stepId || ('step-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6));
+      if (step.imageType === 'custom' && step.customImageKey) {
+        const dataUri = images[step.customImageKey];
+        if (dataUri) {
+          const newKey = 'sched-' + newId + '-' + newStepId;
+          const resp = await fetch(dataUri);
+          const blob = await resp.blob();
+          await saveImage(newKey, blob);
+          processedSteps.push({
+            stepId: newStepId,
+            label: step.label,
+            imageType: 'custom',
+            defaultImageKey: null,
+            customImageKey: newKey,
+          });
+        } else {
+          processedSteps.push({
+            stepId: newStepId,
+            label: step.label,
+            imageType: 'none',
+            defaultImageKey: null,
+            customImageKey: null,
+          });
+        }
+      } else {
+        processedSteps.push({
+          stepId: newStepId,
+          label: step.label,
+          imageType: step.imageType || 'none',
+          defaultImageKey: step.defaultImageKey || null,
+          customImageKey: null,
+        });
+      }
+    }
+    const newTmpl = {
+      id: newId,
+      name: s.name || 'Imported Schedule',
+      steps: processedSteps,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await saveTemplate(newTmpl);
+    schedTemplates.push(newTmpl);
+    openTemplateList(tmplListMode);
+    showToast('"' + newTmpl.name + '" imported');
+  } catch (err) {
+    showToast('Could not import schedule');
+  }
+});
 
 document.getElementById('btn-import-story').addEventListener('click', () => {
   document.getElementById('story-import-input').click();
