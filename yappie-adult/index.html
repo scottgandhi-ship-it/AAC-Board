@@ -54,7 +54,7 @@
 
 
 
-<!-- Quick-Add FAB (visible in parent mode) -->
+<!-- Quick-Add FAB (visible in edit mode) -->
 <button type="button" id="fab-quick-add" aria-label="Quick add button">+</button>
 
 <!-- Tab Bar -->
@@ -63,10 +63,8 @@
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="tab-label">Talk</span>
   </button>
-  <button type="button" class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Hold for settings">
+  <button type="button" class="tab-btn tab-btn-gear" id="btn-parent-settings" aria-label="Settings">
     <svg class="gear-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <svg class="parental-gate-ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/></svg>
-    <span class="gate-hint" id="gate-hint">Hold for settings</span>
     <span class="tab-label">Settings</span>
   </button>
 </nav>
@@ -88,9 +86,9 @@
 
     <!-- Top-level: always visible -->
     <div class="settings-section">
-      <h3>Parent Mode</h3>
+      <h3>Edit Mode</h3>
       <p style="font-size:0.85rem;color:#888;margin-bottom:8px;">Unlocks editing and customization</p>
-      <button type="button" class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Parent Mode</button>
+      <button type="button" class="settings-btn" id="btn-toggle-parent-mode" style="background:#fff3e0;color:#E65100;font-weight:600;">Enable Edit Mode</button>
       <button type="button" class="settings-btn parent-mode-only" id="btn-reorder-folders" style="background:#fff3e0;color:#E65100;margin-top:8px;">Reorder Home Grid</button>
     </div>
 
@@ -314,7 +312,7 @@
         <button type="button" class="settings-btn" id="btn-add-button">Add a new button to the current view</button>
         <button type="button" class="settings-btn" id="btn-quick-photo" style="background:#e8f5e9;color:#2E7D32;">Quick add with photo</button>
         <input type="file" id="quick-photo-input" accept="image/*" capture="environment" style="display:none">
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while parent mode is active.</p>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;">Press and hold any button on the board to edit it while edit mode is active.</p>
       </div>
     </div>
 
@@ -1465,7 +1463,7 @@ renderGrid = function() {
 
 updateBackButton();
 
-// ── Firebase Crashlytics (COPPA: disabled by default, enabled in parent mode) ──
+// ── Firebase Crashlytics ──
 const CrashlyticsManager = (() => {
   let enabled = false;
   const plugin = () => window.Capacitor?.Plugins?.FirebaseCrashlytics;
@@ -1510,11 +1508,9 @@ const CrashlyticsManager = (() => {
   return { enable, disable, log, recordError };
 })();
 
-// ── Parent Mode ──
+// ── Edit Mode ──
 function setParentMode(enabled) {
   parentMode = enabled;
-  // COPPA: only collect crash data when parent is present
-  enabled ? CrashlyticsManager.enable() : CrashlyticsManager.disable();
   const header = document.getElementById('app-header');
   const settingsBtn = document.getElementById('btn-parent-settings');
   const toggleBtn = document.getElementById('btn-toggle-parent-mode');
@@ -1524,40 +1520,22 @@ function setParentMode(enabled) {
     document.body.classList.add('parent-mode');
     settingsBtn.classList.add('parent-active');
     if (toggleBtn) {
-      toggleBtn.textContent = 'Disable Parent Mode';
+      toggleBtn.textContent = 'Disable Edit Mode';
       toggleBtn.style.background = '#ffccbc';
       toggleBtn.style.color = '#BF360C';
     }
-    showToast('Parent mode unlocked');
-    resetParentAutoLock();
+    showToast('Edit mode enabled');
   } else {
     header.classList.remove('parent-active');
     document.body.classList.remove('parent-mode');
     settingsBtn.classList.remove('parent-active');
     if (toggleBtn) {
-      toggleBtn.textContent = 'Enable Parent Mode';
+      toggleBtn.textContent = 'Enable Edit Mode';
       toggleBtn.style.background = '#fff3e0';
       toggleBtn.style.color = '#E65100';
     }
-    if (parentAutoLockTimer) {
-      clearTimeout(parentAutoLockTimer);
-      parentAutoLockTimer = null;
-    }
-    document.getElementById('settings-overlay').classList.remove('open');
   }
 }
-
-function resetParentAutoLock() {
-  if (parentAutoLockTimer) clearTimeout(parentAutoLockTimer);
-  if (!parentMode) return;
-  parentAutoLockTimer = setTimeout(() => {
-    setParentMode(false);
-    showToast('Parent mode locked (timeout)');
-  }, PARENT_AUTO_LOCK_MS);
-}
-
-document.addEventListener('touchstart', () => { if (parentMode) resetParentAutoLock(); }, { passive: true });
-document.addEventListener('click', () => { if (parentMode) resetParentAutoLock(); });
 
 document.getElementById('btn-toggle-parent-mode').addEventListener('click', () => {
   setParentMode(!parentMode);
@@ -1612,7 +1590,7 @@ function updateAllAccordionSummaries() {
   updateAacSensorySummary();
 }
 
-// ── Parental Gate (press-and-hold to open settings) ──
+// ── Settings ──
 function openSettingsPanel() {
   updateAllAccordionSummaries();
   document.getElementById('settings-overlay').classList.add('open');
@@ -1622,62 +1600,9 @@ function openSettingsPanel() {
   document.getElementById('child-name-status').style.display = 'none';
 }
 
-(function initParentalGate() {
-  const btn = document.getElementById('btn-parent-settings');
-  const ring = btn.querySelector('.parental-gate-ring');
-  const hint = document.getElementById('gate-hint');
-  const HOLD_MS = 2000;
-  const HINT_MS = 10000;
-  let timer = null;
-  let hintTimer = null;
-
-  function showHint() {
-    if (!hint) return;
-    hint.classList.add('visible');
-    clearTimeout(hintTimer);
-    hintTimer = setTimeout(() => hint.classList.remove('visible'), HINT_MS);
-  }
-
-  showHint();
-
-  function startGate(e) {
-    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-    if (e.type === 'keydown') e.preventDefault();
-    if (parentMode) { openSettingsPanel(); return; }
-    if (timer) return;
-    if (hint) { hint.classList.remove('visible'); clearTimeout(hintTimer); }
-    ring.classList.remove('complete');
-    ring.classList.add('active');
-    timer = setTimeout(() => {
-      ring.classList.add('complete');
-      if (navigator.vibrate) navigator.vibrate(50);
-      openSettingsPanel();
-      setTimeout(() => {
-        ring.classList.remove('active', 'complete');
-        ring.querySelector('circle').style.strokeDashoffset = '';
-      }, 300);
-      timer = null;
-    }, HOLD_MS);
-  }
-
-  function cancelGate() {
-    if (!timer) return;
-    clearTimeout(timer);
-    timer = null;
-    ring.classList.remove('active', 'complete');
-    showHint();
-  }
-
-  btn.addEventListener('pointerdown', startGate);
-  btn.addEventListener('pointerup', cancelGate);
-  btn.addEventListener('pointercancel', cancelGate);
-  btn.addEventListener('pointerleave', cancelGate);
-  btn.addEventListener('keydown', startGate);
-  btn.addEventListener('keyup', cancelGate);
-
-  btn.addEventListener('click', e => { e.preventDefault(); });
-  btn.addEventListener('contextmenu', e => { e.preventDefault(); });
-})();
+document.getElementById('btn-parent-settings').addEventListener('click', () => {
+  openSettingsPanel();
+});
 
 // ── Grid Size Settings ──
 function updateGridSizeSelect() {
@@ -1882,7 +1807,6 @@ document.getElementById('btn-add-button').addEventListener('click', () => {
 // Quick-add FAB — one-tap add button from board
 document.getElementById('fab-quick-add').addEventListener('click', () => {
   if (!parentMode) return;
-  resetParentAutoLock();
   const folder = currentFolder;
   const existing = buttons.filter(b => b.folderId === folder);
   const nextPos = existing.length > 0 ? Math.max(...existing.map(b => b.position)) + 1 : 0;
