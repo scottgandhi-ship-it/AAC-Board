@@ -1,0 +1,472 @@
+/* ── App Header (hidden — reclaimed for action buttons) ── */
+#app-header {
+  display: none;
+}
+
+#app-header.parent-active {
+  border-bottom-color: var(--color-orange-dark);
+  background: rgba(255,243,224,0.9);
+}
+
+#app-header-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--chrome-primary);
+  letter-spacing: 0.02em;
+}
+
+.parent-mode-only { display: none !important; }
+.parent-mode .parent-mode-only { display: block !important; }
+
+/* ── Quick-Add FAB (parent mode only) ── */
+#fab-quick-add {
+  display: none;
+  position: fixed;
+  bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  z-index: 99;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bar-bg);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(97,95,255,0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#fab-quick-add:active {
+  transform: scale(0.92);
+  box-shadow: 0 1px 6px rgba(108,99,255,0.3);
+}
+body.parent-mode #fab-quick-add { display: flex; align-items: center; justify-content: center; }
+body.parent-mode #fab-quick-add.hidden { display: none; }
+
+#btn-parent-settings.parent-active {
+  color: #FF8F00;
+}
+#btn-parent-settings.parent-active svg.gear-icon {
+  stroke: #FF8F00;
+}
+
+/* ── Parental Gate (press-and-hold) ── */
+#btn-parent-settings {
+  position: relative;
+}
+
+.parental-gate-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.parental-gate-ring circle {
+  fill: none;
+  stroke: var(--bar-bg, #6C63FF);
+  stroke-width: 3;
+  stroke-dasharray: 113;
+  stroke-dashoffset: 113;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 2s linear;
+}
+
+.parental-gate-ring.active {
+  opacity: 1;
+}
+
+.parental-gate-ring.active circle {
+  stroke-dashoffset: 0;
+}
+
+.parental-gate-ring.complete circle {
+  stroke: #43A047;
+}
+
+.gate-hint {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gate-hint.visible {
+  opacity: 1;
+}
+
+.gate-hint::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0,0,0,0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parental-gate-ring circle {
+    transition: none;
+  }
+  .parental-gate-ring.active circle {
+    stroke-dashoffset: 113;
+  }
+  .parental-gate-ring.complete circle {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── Back Button (inline in message bar) ── */
+#btn-back-nav {
+  background: #fd9d18;
+  color: #fff;
+  border: none;
+  min-width: 44px;
+  font-weight: 700;
+}
+#btn-back-nav:active {
+  background: #e8900f;
+  transform: scale(0.95);
+}
+#btn-back-nav.visible { display: flex; }
+#btn-back-nav svg {
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Folder Export Button (inline in message bar, parent mode only) ── */
+#btn-export-folder {
+  display: none;
+  background: #1976D2;
+  color: #fff;
+  border: none;
+  min-width: 44px;
+  font-weight: 700;
+}
+#btn-export-folder:active {
+  background: #1565C0;
+  transform: scale(0.95);
+}
+#btn-export-folder svg {
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Views ── */
+.view {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.view.active {
+  display: flex;
+}
+
+/* ── Tab Bar ── */
+#tab-bar {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--chrome-surface);
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 4px 12px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  gap: 4px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 0 4px;
+  min-height: 48px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #99a1af;
+  position: relative;
+  border-radius: 12px;
+  transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn:active { background: rgba(108,99,255,0.06); }
+
+.tab-btn.active {
+  color: var(--bar-bg);
+  background: none;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 3px;
+  background: var(--bar-bg);
+  border-radius: 0 0 3px 3px;
+}
+
+.tab-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab-btn.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.tab-label {
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+/* ── Placeholder Views ── */
+.view-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+.view-placeholder-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+
+.view-placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.view-placeholder-sub {
+  font-size: 0.9rem;
+}
+
+/* ── Type Tab ── */
+#view-type {
+  padding: 0;
+  gap: 0;
+}
+
+#type-history {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+}
+
+.type-history-empty {
+  text-align: center;
+  color: #888;
+  padding: 32px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.type-history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.type-history-item:active {
+  background: rgba(0,0,0,0.04);
+}
+
+.type-history-text {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+}
+
+.type-history-delete {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: none;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.type-history-delete:active {
+  background: rgba(224,64,62,0.1);
+  color: #e0403e;
+}
+
+#type-input-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+#type-input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border: 2px solid rgba(0,0,0,0.12);
+  border-radius: 14px;
+  background: #fafafa;
+  color: #333;
+  resize: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+#type-input:focus {
+  border-color: #4a6274;
+  box-shadow: 0 0 0 3px rgba(74,98,116,0.15);
+}
+
+#type-action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#type-speak-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 80px;
+  min-height: 48px;
+  padding: 8px 16px;
+  background: #58b05c;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#type-speak-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+#type-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #e8e6e1;
+  color: #666;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#type-clear-btn:active {
+  background: #e0403e;
+  color: #fff;
+}
+
+#type-undo-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #fafafa;
+  border: 2px solid rgba(0,0,0,0.12);
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+}
+
+#type-undo-btn {
+  padding: 6px 16px;
+  background: #4a6274;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+}
