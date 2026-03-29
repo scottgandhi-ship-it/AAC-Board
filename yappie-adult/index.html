@@ -704,6 +704,7 @@ function renderCoreStrip() {
     el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') + labelHtml;
     strip.appendChild(el);
   });
+  strip.scrollLeft = 0;
 }
 
 function renderGrid() {
