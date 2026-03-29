@@ -522,6 +522,51 @@ async function init() {
       }
     });
 
+    // Migrate: merge senses folder into feelings (I Feel → Feelings)
+    if (buttons.some(b => b.folderId === 'senses')) {
+      buttons.forEach(b => {
+        if (b.folderId === 'senses') {
+          b.folderId = 'feelings';
+          b.position = b.position + 33;
+        }
+      });
+      migrated = true;
+    }
+    const sensesIdx = buttons.findIndex(b => b.id === 'folder-senses');
+    if (sensesIdx !== -1) { buttons.splice(sensesIdx, 1); migrated = true; }
+
+    // Migrate: merge where folder into places (append prepositions after locations)
+    if (buttons.some(b => b.folderId === 'where')) {
+      buttons.forEach(b => {
+        if (b.folderId === 'where') {
+          b.folderId = 'places';
+          b.position = b.position + 14;
+        }
+      });
+      migrated = true;
+    }
+    const whereIdx = buttons.findIndex(b => b.id === 'folder-where');
+    if (whereIdx !== -1) { buttons.splice(whereIdx, 1); migrated = true; }
+
+    // Migrate: rename "My Body" → "Body", "Home Life" → "Home"
+    buttons.forEach(b => {
+      if (b.id === 'folder-body' && b.label === 'My Body') { b.label = 'Body'; migrated = true; }
+      if (b.id === 'folder-home-life' && b.label === 'Home Life') { b.label = 'Home'; migrated = true; }
+    });
+
+    // Migrate: force-update folder positions to new ADL-priority order
+    const templateFolders = HOME_GRID_5X5_FOLDERS;
+    templateFolders.forEach(tf => {
+      const existing = buttons.find(b => b.id === tf.id);
+      if (existing && existing.position !== tf.position) { existing.position = tf.position; migrated = true; }
+    });
+
+    // Migrate: update 6x6 extras positions (shifted to avoid folder overlap)
+    HOME_GRID_6X6_EXTRAS.forEach(te => {
+      const existing = buttons.find(b => b.id === te.id);
+      if (existing && existing.position !== te.position) { existing.position = te.position; migrated = true; }
+    });
+
     if (migrated) await saveButtons();
     setGridSize(gridSize);
     updateChildNamePhrase();
