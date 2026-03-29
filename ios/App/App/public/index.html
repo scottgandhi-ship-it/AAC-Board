@@ -419,9 +419,11 @@
           <option value="3">Let's Talk (3x3)</option>
           <option value="4">More to Say (4x4)</option>
           <option value="5">Big Talker (5x5)</option>
-          <option value="6">Chatterbox (6x6)</option>
         </select>
-        <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="grid-size-hint">Changing grid size resets buttons to defaults for that layout.</p>
+        <p style="font-size:0.85rem;color:#888;margin-top:4px;" id="grid-size-hint">Controls tile size. Larger tiles are easier to tap but require scrolling.</p>
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.95rem;cursor:pointer;" class="parent-only">
+          <input type="checkbox" id="setting-core-all" class="settings-checkbox"> Show all core words
+        </label>
       </div>
       <div class="settings-section">
         <button type="button" class="settings-accordion-btn" id="language-toggle" aria-expanded="false">
@@ -720,7 +722,6 @@
     <option value="3" selected>Let's Talk (3x3)</option>
     <option value="4">More to Say (4x4)</option>
     <option value="5">Big Talker (5x5)</option>
-    <option value="6">Chatterbox (6x6)</option>
   </select>
   <button type="button" class="grid-picker-continue" id="btn-grid-picker-continue">Continue</button>
   <div class="onboarding-dots grid-picker-dots" aria-hidden="true" style="display:none;"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
@@ -737,6 +738,57 @@
 <script src="js/grammar.js"></script>
 <script src="js/tts.js"></script>
 <script>
+// ── Focus Trap for Modals ──
+// Keeps Tab/Shift+Tab cycling within a dialog while it's open.
+function trapFocus(overlay) {
+  function handler(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = overlay.querySelectorAll('button:not([disabled]):not([style*="display:none"]):not([style*="display: none"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+  overlay.addEventListener('keydown', handler);
+  overlay._focusTrapHandler = handler;
+}
+function releaseFocusTrap(overlay) {
+  if (overlay._focusTrapHandler) {
+    overlay.removeEventListener('keydown', overlay._focusTrapHandler);
+    delete overlay._focusTrapHandler;
+  }
+}
+
+// ── Grid Arrow Key Navigation ──
+// Allows arrow keys to move between cells in the vocabulary grid.
+function setupGridArrowNav() {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  grid.addEventListener('keydown', function(e) {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    const cells = Array.from(grid.querySelectorAll('.cell:not([style*="display:none"]):not([style*="display: none"])'));
+    const idx = cells.indexOf(document.activeElement);
+    if (idx === -1) return;
+    const style = getComputedStyle(grid);
+    const cols = style.gridTemplateColumns.split(' ').length;
+    let next = -1;
+    if (e.key === 'ArrowRight') next = idx + 1 < cells.length ? idx + 1 : idx;
+    else if (e.key === 'ArrowLeft') next = idx - 1 >= 0 ? idx - 1 : idx;
+    else if (e.key === 'ArrowDown') next = idx + cols < cells.length ? idx + cols : idx;
+    else if (e.key === 'ArrowUp') next = idx - cols >= 0 ? idx - cols : idx;
+    if (next !== -1 && next !== idx) {
+      e.preventDefault();
+      cells[next].focus();
+    }
+  });
+}
+
 // ── Vocabulary Graph for Smart Activity Surfacing ──
 // Powers the parent walkthrough: parents describe an activity, the graph
 // surfaces clinically-appropriate vocabulary via keyword matching and
@@ -1527,6 +1579,7 @@ function openWordPicker(maxSelections, currentIds, onConfirm, slotIndex, wordSou
   renderWordPickerList('');
   updateWordPickerCount();
   overlay.classList.add('visible');
+  trapFocus(overlay);
   search.focus();
 }
 
@@ -1614,7 +1667,9 @@ function updateWordPickerCount() {
 }
 
 function closeWordPicker() {
-  document.getElementById('word-picker-overlay').classList.remove('visible');
+  const overlay = document.getElementById('word-picker-overlay');
+  releaseFocusTrap(overlay);
+  overlay.classList.remove('visible');
 }
 
 document.getElementById('word-picker-search').addEventListener('input', (e) => {
@@ -1820,6 +1875,14 @@ const ABCoachMarks = {
           btnLabel: null,
           waitForAction: true,
           guard: () => true
+        },
+        {
+          target: () => document.getElementById('btn-parent-settings'),
+          text: () => 'One more thing! Hold the Settings tab to unlock Parent Mode. From there you can add custom photos, edit words, and make this board truly ' + ABCoachMarks._childName() + ' own.',
+          placement: 'top',
+          btnLabel: 'Got it!',
+          waitForAction: false,
+          guard: () => !!document.getElementById('btn-parent-settings')
         }
       ],
       fallback: {
@@ -2166,6 +2229,7 @@ function finalizeInit() {
 
   // Custom photo images load per-cell via loadImage() in createCell()
 
+  setupGridArrowNav();
 }
 
 // ── Sensory Preferences ──
@@ -2237,7 +2301,11 @@ function renderCoreStrip() {
   const strip = document.getElementById('core-word-strip');
   setupCoreDelegation();
   strip.innerHTML = '';
-  coreWordsCache.forEach(btn => {
+  const showAll = localStorage.getItem('aac-core-all') === 'true';
+  const size = getGridSize();
+  const maxCore = showAll ? 99 : (size <= 3 ? 5 : size <= 4 ? 8 : 99);
+  const visible = coreWordsCache.filter(b => b.position < maxCore);
+  visible.forEach(btn => {
     const el = document.createElement('button');
     el.className = 'core-strip-btn';
     el.setAttribute('data-color', btn.color);
@@ -2249,6 +2317,7 @@ function renderCoreStrip() {
     el.innerHTML = (icon ? `<span class="core-icon">${icon}</span>` : '') + labelHtml;
     strip.appendChild(el);
   });
+  strip.scrollLeft = 0;
 }
 
 function renderGrid() {
@@ -2437,17 +2506,24 @@ function renderGrid() {
     });
   }
 
-  // Set grid rows dynamically — use scrollable fixed-height rows for large folders
+  // Set grid rows dynamically — use scrollable fixed-height rows for large content
   const totalCells = grid.children.length;
   const cols = getGridSize();
   const rows = Math.ceil(totalCells / cols);
-  if (rows > 6) {
+  if (cols <= 4 && !currentFolder && !activeActivity) {
+    // Home grid at 3x3/4x4: large square tiles, scroll to reveal all
+    const gap = cols === 3 ? 36 : 44;
+    const rowH = `calc((100vw - ${gap}px) / ${cols})`;
+    grid.style.gridTemplateRows = `repeat(${rows}, ${rowH})`;
+    grid.style.flex = '0 0 auto';
+  } else if (rows > 6) {
     grid.style.gridTemplateRows = `repeat(${rows}, minmax(70px, 80px))`;
     grid.style.flex = '0 0 auto';
   } else {
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     grid.style.flex = '1';
   }
+  document.getElementById('grid-container').scrollTop = 0;
 }
 
 // ── Predictive Next-Word ──
@@ -3387,6 +3463,7 @@ function showImagePreview(buttonId) {
     img.alt = btn.label;
     label.textContent = getPrimaryLabel(btn);
     overlay.classList.add('visible');
+    trapFocus(overlay);
     overlay.focus();
     _imagePreviewTimer = setTimeout(hideImagePreview, 3000);
     overlay.addEventListener('click', _imagePreviewClickHandler);
@@ -3396,6 +3473,7 @@ function showImagePreview(buttonId) {
 
 function hideImagePreview() {
   const overlay = document.getElementById('image-preview-overlay');
+  releaseFocusTrap(overlay);
   overlay.classList.remove('visible');
   overlay.removeEventListener('click', _imagePreviewClickHandler);
   if (_imagePreviewTimer) { clearTimeout(_imagePreviewTimer); _imagePreviewTimer = null; }
@@ -3585,7 +3663,9 @@ function createSearchCell(btn, folderLabels) {
 }
 
 document.getElementById('btn-search').addEventListener('click', () => {
-  document.getElementById('search-overlay').classList.add('open');
+  const _searchOvl = document.getElementById('search-overlay');
+  _searchOvl.classList.add('open');
+  trapFocus(_searchOvl);
   const input = document.getElementById('search-input');
   input.value = '';
   renderSearchBrowse();
@@ -3593,12 +3673,16 @@ document.getElementById('btn-search').addEventListener('click', () => {
 });
 
 document.getElementById('btn-close-search').addEventListener('click', () => {
-  document.getElementById('search-overlay').classList.remove('open');
+  const _searchOvl = document.getElementById('search-overlay');
+  releaseFocusTrap(_searchOvl);
+  _searchOvl.classList.remove('open');
 });
 
 document.getElementById('search-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) {
-    document.getElementById('search-overlay').classList.remove('open');
+    const _searchOvl = document.getElementById('search-overlay');
+    releaseFocusTrap(_searchOvl);
+    _searchOvl.classList.remove('open');
   }
 });
 
@@ -3910,8 +3994,11 @@ function updateAllAccordionSummaries() {
 function openSettingsPanel() {
   if (typeof ABCoachMarks !== 'undefined' && ABCoachMarks.activeSequence) ABCoachMarks.dismiss();
   updateAllAccordionSummaries();
-  document.getElementById('settings-overlay').classList.add('open');
+  const _settingsOvl = document.getElementById('settings-overlay');
+  _settingsOvl.classList.add('open');
+  trapFocus(_settingsOvl);
   updateGridSizeSelect();
+  document.getElementById('setting-core-all').checked = localStorage.getItem('aac-core-all') === 'true';
   const saved = localStorage.getItem('aac-child-name') || '';
   document.getElementById('child-name-input').value = saved;
   document.getElementById('child-name-status').style.display = 'none';
@@ -3999,8 +4086,7 @@ document.getElementById('settings-grid-select').addEventListener('change', async
   const names = {
     1: t('grid.1', 'First Words'), 21: t('grid.21', 'This or That'),
     2: t('grid.2', 'My Picks'), 3: t('grid.3', 'Let\'s Talk'),
-    4: t('grid.4', 'More to Say'), 5: t('grid.5', 'Big Talker'),
-    6: t('grid.6', 'Chatterbox')
+    4: t('grid.4', 'More to Say'), 5: t('grid.5', 'Big Talker')
   };
 
   if (isEarlyLearnerGrid(newSize)) {
@@ -4026,6 +4112,20 @@ document.getElementById('settings-grid-select').addEventListener('change', async
       sel.value = String(currentSize);
       return;
     }
+  }
+
+  // Standard-to-standard: same content, just resize tiles
+  if (!isEarlyLearnerGrid(currentSize) && !isEarlyLearnerGrid(newSize)) {
+    setGridSize(newSize);
+    const newTemplate = getTemplate(newSize);
+    const existingIds = new Set(buttons.map(b => b.id));
+    const newItems = newTemplate.filter(b => !existingIds.has(b.id));
+    if (newItems.length > 0) buttons.push(...newItems);
+    currentFolder = null;
+    renderGrid();
+    await saveButtons();
+    showToast(names[newSize]);
+    return;
   }
 
   showGridSwitchModal(newSize, names[newSize], sel);
@@ -4135,7 +4235,9 @@ document.querySelectorAll('.picker-lang-opt').forEach(btn => {
 });
 
 document.getElementById('btn-close-settings').addEventListener('click', () => {
-  document.getElementById('settings-overlay').classList.remove('open');
+  const _settingsOvl = document.getElementById('settings-overlay');
+  releaseFocusTrap(_settingsOvl);
+  _settingsOvl.classList.remove('open');
   AAC_ACCORDIONS.forEach(key => {
     document.getElementById(key + '-toggle').setAttribute('aria-expanded', 'false');
     document.getElementById(key + '-details').classList.remove('open');
@@ -4329,6 +4431,11 @@ document.getElementById('setting-auto-speak').addEventListener('change', (e) => 
   saveAutoSpeak(e.target.checked);
 });
 
+document.getElementById('setting-core-all').addEventListener('change', (e) => {
+  localStorage.setItem('aac-core-all', String(e.target.checked));
+  renderCoreStrip();
+});
+
 document.getElementById('btn-reset-predictions').addEventListener('click', () => {
   if (!confirm(t('confirm.resetPredictions', 'Reset all learned word predictions? This cannot be undone.'))) return;
   resetLearnedPredictions();
@@ -4508,11 +4615,15 @@ function openEditModal(buttonId) {
   document.getElementById('btn-edit-remove').style.display = isCoreWord ? 'none' : '';
   document.getElementById('edit-label').readOnly = isCoreWord;
 
-  document.getElementById('edit-overlay').classList.add('open');
+  const _editOvl = document.getElementById('edit-overlay');
+  _editOvl.classList.add('open');
+  trapFocus(_editOvl);
 }
 
 document.getElementById('btn-edit-cancel').addEventListener('click', () => {
-  document.getElementById('edit-overlay').classList.remove('open');
+  const _editOvl = document.getElementById('edit-overlay');
+  releaseFocusTrap(_editOvl);
+  _editOvl.classList.remove('open');
   editingButtonId = null;
 });
 

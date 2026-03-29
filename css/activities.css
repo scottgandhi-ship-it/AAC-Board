@@ -273,7 +273,8 @@ body.sensory-reduced-motion #activity-banner { animation: none; }
 }
 .walkthrough-step-input:focus {
   border-color: var(--chrome-primary);
-  outline: none;
+  outline: 2px solid var(--chrome-primary);
+  outline-offset: 2px;
 }
 .walkthrough-step-remove {
   width: 28px;

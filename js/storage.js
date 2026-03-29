@@ -162,14 +162,7 @@ function getTemplate(size) {
   if (_templateCache[size]) return _templateCache[size].map(b => ({...b}));
   const folderContents = DEFAULT_BUTTONS.filter(b => b.folderId !== null);
   let template;
-  if (size === 3 || size === 4 || size === 5) {
-    template = [...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...folderContents];
-  } else if (size === 6) {
-    const homeFolders = DEFAULT_BUTTONS.filter(b => b.folderId === null && b.type !== 'core');
-    template = [...CORE_WORD_DEFS, ...homeFolders, ...HOME_GRID_6X6_EXTRAS, ...folderContents];
-  } else {
-    template = [...DEFAULT_BUTTONS];
-  }
+  template = [...CORE_WORD_DEFS, ...HOME_GRID_5X5_FOLDERS, ...HOME_GRID_6X6_EXTRAS, ...folderContents];
   _templateCache[size] = template;
   return template.map(b => ({...b}));
 }
