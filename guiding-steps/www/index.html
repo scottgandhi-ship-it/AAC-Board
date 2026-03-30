@@ -7903,9 +7903,7 @@ function emailStory(story) {
     + 'You can read this story with your child, or open it in the Guiding Steps app.\n\n'
     + 'Sent from Guiding Steps';
   const mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  const a = document.createElement('a');
-  a.href = mailto;
-  a.click();
+  window.location.href = mailto;
 }
 
 function downloadStoryFile(story, exportData) {
