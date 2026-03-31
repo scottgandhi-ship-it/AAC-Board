@@ -2636,7 +2636,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div id="stories-parent-controls">
       <button type="button" class="stories-parent-btn" id="btn-new-story">New Story</button>
       <button type="button" class="stories-parent-btn" id="btn-import-story">Import Story</button>
-      <input type="file" id="story-import-input" accept=".gsstory,.json" style="display:none">
+      <input type="file" id="story-import-input" accept=".gsstory,.json,application/json,*/*" style="display:none">
     </div>
   </div>
 </div>
@@ -7911,7 +7911,7 @@ function downloadStoryFile(story, exportData) {
   const blob = new Blob([json], { type: 'application/json' });
   const safeName = (story.title || 'story').replace(/[^a-zA-Z0-9 ]/g, '').trim();
   const dateStr = new Date().toISOString().slice(0, 10);
-  const fileName = safeName + '_' + dateStr + '.gsstory';
+  const fileName = safeName + '_' + dateStr + '.json';
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
