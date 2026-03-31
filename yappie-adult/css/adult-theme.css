@@ -1,51 +1,305 @@
-/* ── Yappie Adult Color Overrides ──
-   Fitzgerald Key semantic mapping preserved, palette matured for adult users.
-   Loaded after tokens.css to override kid-friendly pastels. */
+/* ── Yappie Adult Visual Reskin ──
+   Figma-driven refresh: pastel Fitzgerald palette, circle-outline action buttons,
+   card-wrapped settings, warmer cream chrome. All overrides isolated here.
+   Loaded after tokens.css + all shared CSS to override kid-friendly defaults. */
 
 :root {
-  /* ── Fitzgerald Key Colors (adult palette — balanced pop) ── */
-  --color-yellow: #e8d478;
-  --color-green: #8cc78f;
-  --color-red: #db8583;
-  --color-blue: #78b4da;
-  --color-pink: #d9a8b3;
-  --color-orange: #e4b87e;
-  --color-home: #e2dfda;
+  /* ── Fitzgerald Key Colors (pastel palette for adult reskin) ── */
+  --color-yellow: #fdf6de;
+  --color-green: #e3f5e1;
+  --color-red: #fde5e4;
+  --color-blue: #e0f0fa;
+  --color-pink: #fce8ef;
+  --color-orange: #fef0dc;
+  --color-home: #f0eee9;
+
+  /* ── Fitzgerald Accent Borders ── */
+  --accent-yellow: #d4b94e;
+  --accent-green: #6aad6d;
+  --accent-red: #c96462;
+  --accent-blue: #5a9dc4;
+  --accent-pink: #c48a98;
+  --accent-orange: #d09a5a;
 
   /* ── App Chrome Colors ── */
   --chrome-primary: #4a6274;
   --chrome-primary-dark: #3a4f5e;
   --chrome-accent: #c9a272;
-  --chrome-bg: #eceae5;
+  --chrome-bg: #f7f5f0;
   --chrome-surface: #ffffff;
-  --chrome-surface-alt: #f7f5f2;
+  --chrome-surface-alt: #faf8f3;
 
   /* Backward-compatible aliases */
   --bar-bg: var(--chrome-primary);
   --bar-bg-dark: var(--chrome-primary-dark);
 
-  /* ── Fitzgerald Flat Pairs (adult) ── */
-  --color-yellow-light: #e8d478;
-  --color-yellow-dark: #e8d478;
-  --color-green-light: #8cc78f;
-  --color-green-dark: #8cc78f;
-  --color-red-light: #db8583;
-  --color-red-dark: #db8583;
-  --color-blue-light: #78b4da;
-  --color-blue-dark: #78b4da;
-  --color-pink-light: #d9a8b3;
-  --color-pink-dark: #d9a8b3;
-  --color-orange-light: #e4b87e;
-  --color-orange-dark: #e4b87e;
-  --color-home-light: #e2dfda;
-  --color-home-dark: #e2dfda;
+  /* ── Fitzgerald Flat Pairs (pastel — no light/dark distinction) ── */
+  --color-yellow-light: #fdf6de;
+  --color-yellow-dark: #fdf6de;
+  --color-green-light: #e3f5e1;
+  --color-green-dark: #e3f5e1;
+  --color-red-light: #fde5e4;
+  --color-red-dark: #fde5e4;
+  --color-blue-light: #e0f0fa;
+  --color-blue-dark: #e0f0fa;
+  --color-pink-light: #fce8ef;
+  --color-pink-dark: #fce8ef;
+  --color-orange-light: #fef0dc;
+  --color-orange-dark: #fef0dc;
+  --color-home-light: #f0eee9;
+  --color-home-dark: #f0eee9;
 }
 
 body {
-  background: #eceae5;
+  background: #f7f5f0;
 }
 
-/* ── Core Word Strip — adult theme ── */
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 2: Top Action Bar — circle-outline buttons
+   ══════════════════════════════════════════════════════════════ */
+
+.bar-btn {
+  background: transparent;
+  box-shadow: none;
+}
+
+#btn-speak {
+  background: transparent;
+  border: 2.5px solid #58b05c;
+  color: #58b05c;
+}
+#btn-speak svg { stroke: #58b05c; fill: none; }
+#btn-speak:active { background: #58b05c; color: #fff; }
+#btn-speak:active svg { stroke: #fff; }
+
+#btn-clear {
+  background: transparent;
+  border: 2.5px solid #e0403e;
+  color: #e0403e;
+}
+#btn-clear svg { stroke: #e0403e; fill: none; }
+#btn-clear:active { background: #e0403e; color: #fff; }
+#btn-clear:active svg { stroke: #fff; }
+
+#btn-backspace {
+  background: transparent;
+  border: 2.5px solid #6d65ed;
+  color: #6d65ed;
+}
+#btn-backspace svg { stroke: #6d65ed; fill: none; }
+#btn-backspace:active { background: #6d65ed; color: #fff; }
+#btn-backspace:active svg { stroke: #fff; }
+
+#btn-search {
+  background: transparent;
+  border: 2.5px solid #6d65ed;
+  color: #6d65ed;
+}
+#btn-search svg { stroke: #6d65ed; fill: none; }
+#btn-search:active { background: #6d65ed; color: #fff; }
+#btn-search:active svg { stroke: #fff; }
+
+#btn-back-nav {
+  background: transparent;
+  border: 2.5px solid #e8900f;
+  color: #e8900f;
+}
+#btn-back-nav svg { stroke: #e8900f; fill: none; }
+#btn-back-nav:active { background: #e8900f; color: #fff; }
+#btn-back-nav:active svg { stroke: #fff; }
+
+#message-words {
+  border: 1px solid #ddd8d0;
+  background: #fff;
+}
+
+.word-chip {
+  background: rgba(74, 98, 116, 0.08);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 3: Core Word Strip — pastel backgrounds + accent borders
+   ══════════════════════════════════════════════════════════════ */
+
 #core-word-strip {
-  background: #e8e6e1;
+  background: #f2f0eb;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.core-strip-btn {
+  border-radius: 20px;
+  border: 2px solid transparent;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.core-strip-btn[data-color="yellow"] { border-color: var(--accent-yellow); }
+.core-strip-btn[data-color="green"]  { border-color: var(--accent-green); }
+.core-strip-btn[data-color="red"]    { border-color: var(--accent-red); }
+.core-strip-btn[data-color="blue"]   { border-color: var(--accent-blue); }
+.core-strip-btn[data-color="pink"]   { border-color: var(--accent-pink); }
+.core-strip-btn[data-color="orange"] { border-color: var(--accent-orange); }
+
+.core-label {
+  color: #333;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4: Vocabulary Grid — larger cards, pastel fills, borders
+   ══════════════════════════════════════════════════════════════ */
+
+#grid {
+  gap: 10px;
+}
+
+.cell {
+  border-radius: 24px;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.cell .cell-label {
+  color: #333;
+}
+
+/* Per-color accent borders */
+.cell[data-color="yellow"] { border-color: var(--accent-yellow); }
+.cell[data-color="green"]  { border-color: var(--accent-green); }
+.cell[data-color="red"]    { border-color: var(--accent-red); }
+.cell[data-color="blue"]   { border-color: var(--accent-blue); }
+.cell[data-color="pink"]   { border-color: var(--accent-pink); }
+.cell[data-color="orange"] { border-color: var(--accent-orange); }
+.cell[data-color="home"]   { border-color: #ccc9c2; }
+.cell[data-color="purple"] { border-color: #a99cc4; }
+
+/* Folder background overrides — softened pastels (need !important to match grid.css) */
+.cell.folder-btn[data-folder="general"]     { background: #edf8eb !important; }
+.cell.folder-btn[data-folder="food"]        { background: #fff4e3 !important; }
+.cell.folder-btn[data-folder="drinks"]      { background: #e3f3fc !important; }
+.cell.folder-btn[data-folder="people"]      { background: #fdf9de !important; }
+.cell.folder-btn[data-folder="clothes"]     { background: #f3e6f7 !important; }
+.cell.folder-btn[data-folder="body"]        { background: #fde9ec !important; }
+.cell.folder-btn[data-folder="feelings"]    { background: #fce8ef !important; }
+.cell.folder-btn[data-folder="actions"]     { background: #e2f7f9 !important; }
+.cell.folder-btn[data-folder="toys"]        { background: #fef6de !important; }
+.cell.folder-btn[data-folder="places"]      { background: #e2e5f3 !important; }
+.cell.folder-btn[data-folder="colors"]      { background: #ecf5e0 !important; }
+.cell.folder-btn[data-folder="shapes"]      { background: #ede6f5 !important; }
+.cell.folder-btn[data-folder="123"]         { background: #e3eefb !important; }
+.cell.folder-btn[data-folder="abc"]         { background: #fde9e3 !important; }
+.cell.folder-btn[data-folder="questions"]   { background: #f5f7dd !important; }
+.cell.folder-btn[data-folder="things"]      { background: #ddf0ee !important; }
+.cell.folder-btn[data-folder="animals"]     { background: #fff4e3 !important; }
+.cell.folder-btn[data-folder="descriptors"] { background: #e3eefb !important; }
+.cell.folder-btn[data-folder="time"]        { background: #f3e6f7 !important; }
+.cell.folder-btn[data-folder="where"]       { background: #ede6f5 !important; }
+.cell.folder-btn[data-folder="nature"]      { background: #e5f2e6 !important; }
+.cell.folder-btn[data-folder="school"]      { background: #fef6de !important; }
+.cell.folder-btn[data-folder="medical"]     { background: #fde5e4 !important; }
+.cell.folder-btn[data-folder="personal-care"] { background: #e0f0fa !important; }
+.cell.folder-btn[data-folder="social"]      { background: #fce8ef !important; }
+.cell.folder-btn[data-folder="quick-phrases"] { background: #fde9ec !important; }
+
+/* Quick phrases — solid red accent border instead of dashed */
+.cell.quick-phrase {
+  border: 2px solid var(--accent-red);
+  border-style: solid;
+  background: #fef8f8;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 5: Bottom Tab Bar — navy tones
+   ══════════════════════════════════════════════════════════════ */
+
+#tab-bar {
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tab-btn {
+  color: #8a9099;
+}
+
+.tab-btn.active {
+  color: #3a4f5e;
+}
+
+.tab-btn.active::after {
+  background: #3a4f5e;
+}
+
+.tab-btn:active {
+  background: rgba(58, 79, 94, 0.06);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 6: Settings Panel — card-wrapped sections
+   ══════════════════════════════════════════════════════════════ */
+
+#settings-panel {
+  background: #faf8f3;
+}
+
+.settings-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.settings-section h3 {
+  border-bottom: none;
+  color: #3a4f5e;
+  font-weight: 700;
+}
+
+.settings-category-btn.active {
+  border-color: #4a6274;
+  background: rgba(74, 98, 116, 0.08);
+  color: #4a6274;
+  box-shadow: 0 2px 8px rgba(74, 98, 116, 0.12);
+}
+
+.settings-btn.active {
+  border-color: #4a6274;
+  background: rgba(74, 98, 116, 0.06);
+}
+
+#btn-close-settings {
+  background: linear-gradient(135deg, #4a6274, #3a4f5e);
+  box-shadow: 0 3px 12px rgba(74, 98, 116, 0.25);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 7: Type Tab — cream-themed polish
+   ══════════════════════════════════════════════════════════════ */
+
+#type-input {
+  background: #faf8f3;
+  border-radius: 16px;
+}
+
+#type-input:focus {
+  border-color: #4a6274;
+  box-shadow: 0 0 0 3px rgba(74, 98, 116, 0.12);
+}
+
+#type-clear-btn {
+  background: #f0ede8;
+}
+
+.type-history-item {
+  border-radius: 16px;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Prediction bar — match cream theme instead of purple tint */
+#prediction-bar {
+  background: #f5f3ee;
 }

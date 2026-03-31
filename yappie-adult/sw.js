@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yappie-adult-v6';
+const CACHE_NAME = 'yappie-adult-v7';
 const ASSETS = [
   './',
   './index.html',
