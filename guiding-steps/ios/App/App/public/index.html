@@ -2214,72 +2214,112 @@ body.sensory-high-contrast .task-tile {
 /* -- Story Reader -- */
 #story-reader {
   display: none; position: fixed; inset: 0; z-index: 1000;
-  background: #FFF8F0; flex-direction: column;
+  background: var(--gs-bg); flex-direction: column;
+  font-family: var(--gs-font-body);
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 18px calc(20px + env(safe-area-inset-bottom, 0px));
 }
 #story-reader.open { display: flex; }
 
-#reader-close {
-  position: absolute; top: 12px; left: 12px; z-index: 10;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(0,0,0,0.06); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-ink-soft); transition: background 0.15s;
+#reader-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 6px 12px; flex-shrink: 0;
 }
-#reader-close:active { background: rgba(0,0,0,0.12); }
+#reader-close, #reader-print {
+  width: 38px; height: 38px; border-radius: 99px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gs-ink); cursor: pointer;
+}
+#reader-close:active, #reader-print:active { background: var(--gs-bg-alt); }
+#reader-page-counter {
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  color: var(--gs-ink-muted); font-weight: 600;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  text-align: center; flex: 1;
+}
 
-#reader-print {
-  position: absolute; top: 12px; right: 12px; z-index: 10;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(0,0,0,0.06); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-ink-soft); transition: background 0.15s;
+#reader-card {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--gs-card);
+  border: 1px solid var(--gs-hair);
+  border-radius: 28px;
+  box-shadow: var(--gs-shadow);
+  overflow: hidden;
+  margin-bottom: 12px;
+  min-height: 0;
 }
-#reader-print:active { background: rgba(0,0,0,0.12); }
 
 #reader-image-area {
-  flex: 0 0 60%; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; padding: 20px;
+  flex: 1; min-height: 0;
+  background: var(--gs-accent-soft);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; position: relative;
 }
 #reader-image-area svg { width: 70%; height: 70%; max-width: 300px; }
-#reader-image-area img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: var(--radius-md); }
+#reader-image-area img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 12px; }
+
+#reader-speak {
+  position: absolute; bottom: 16px; right: 16px;
+  width: 44px; height: 44px; border-radius: 99px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  box-shadow: var(--gs-shadow);
+  color: var(--gs-accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+#reader-speak:active { background: var(--gs-bg-alt); }
 
 #reader-text-area {
-  flex: 1; display: flex; flex-direction: column; align-items: flex-start;
-  justify-content: center; padding: 16px 24px; position: relative;
+  flex: 0 0 auto;
+  padding: 20px 26px 24px;
+  background: var(--gs-card);
+}
+#reader-page-eyebrow {
+  font-family: var(--gs-font-body); font-size: 0.65625rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.4px; text-transform: uppercase;
+  margin-bottom: 8px;
 }
 #reader-text {
-  font-size: 1.4rem; font-weight: 700; color: var(--gs-ink); line-height: 1.5;
+  font-family: var(--gs-font-display); font-size: 1.375rem;
+  font-weight: 400; color: var(--gs-ink);
+  letter-spacing: -0.3px; line-height: 1.35;
   text-align: left; margin: 0;
-}
-#reader-speak {
-  position: absolute; top: 12px; right: 16px;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(124,116,255,0.1); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-accent);
 }
 
 #reader-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 16px 16px; flex-shrink: 0;
+  padding: 4px 10px; flex-shrink: 0;
 }
 #reader-prev, #reader-next {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(0,0,0,0.05); border: none; cursor: pointer;
+  width: 48px; height: 48px; border-radius: 99px;
+  border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--gray-700); transition: background 0.15s;
+  transition: background 0.15s;
 }
-#reader-prev:active, #reader-next:active { background: rgba(0,0,0,0.1); }
-#reader-prev:disabled, #reader-next:disabled { opacity: 0.2; pointer-events: none; }
+#reader-prev {
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  color: var(--gs-ink);
+}
+#reader-next {
+  background: var(--gs-accent); color: #fff;
+}
+#reader-prev:active { background: var(--gs-bg-alt); }
+#reader-next:active { background: var(--gs-accent-deep); }
+#reader-prev:disabled, #reader-next:disabled { opacity: 0.4; pointer-events: none; }
 
 #reader-dots {
   display: flex; gap: 6px; align-items: center; justify-content: center;
 }
 .reader-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.15);
-  transition: background 0.2s, transform 0.2s;
+  width: 6px; height: 6px; border-radius: 99px;
+  background: var(--gs-hair);
+  transition: width 0.2s, background 0.2s;
 }
-.reader-dot.active { background: var(--gs-accent); transform: scale(1.3); }
+.reader-dot.active {
+  background: var(--gs-accent);
+  width: 20px;
+}
 
 #reader-again {
   position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
@@ -2821,26 +2861,33 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 <!-- Story Reader (Full-Screen Overlay) -->
 <div id="story-reader" aria-label="Story reader" role="dialog">
-  <button type="button" id="reader-close" aria-label="Close story">
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <button type="button" id="reader-print" aria-label="Print story">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-  </button>
-  <div id="reader-image-area"></div>
-  <div id="reader-text-area">
-    <p id="reader-text"></p>
-    <button type="button" id="reader-speak" aria-label="Read this page aloud">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+  <div id="reader-header">
+    <button type="button" id="reader-close" aria-label="Close story">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
+    <div id="reader-page-counter" aria-live="polite"></div>
+    <button type="button" id="reader-print" aria-label="Print story">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
+  </div>
+  <div id="reader-card">
+    <div id="reader-image-area">
+      <button type="button" id="reader-speak" aria-label="Read this page aloud">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+    </div>
+    <div id="reader-text-area">
+      <div id="reader-page-eyebrow"></div>
+      <p id="reader-text"></p>
+    </div>
   </div>
   <div id="reader-nav">
     <button type="button" id="reader-prev" aria-label="Previous page">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <div id="reader-dots"></div>
     <button type="button" id="reader-next" aria-label="Next page">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
     </button>
   </div>
   <button type="button" id="reader-again" style="display:none">Read Again</button>
@@ -8256,7 +8303,10 @@ function openStoryReader(story, previewPages) {
 function renderReaderPage(pages, direction) {
   const page = pages[currentReaderPage];
   const imgArea = document.getElementById('reader-image-area');
+  const speakBtn = document.getElementById('reader-speak');
   const textEl = document.getElementById('reader-text');
+  const eyebrowEl = document.getElementById('reader-page-eyebrow');
+  const counterEl = document.getElementById('reader-page-counter');
   const prevBtn = document.getElementById('reader-prev');
   const nextBtn = document.getElementById('reader-next');
   const againBtn = document.getElementById('reader-again');
@@ -8264,22 +8314,45 @@ function renderReaderPage(pages, direction) {
 
   const animClass = direction === 'forward' ? 'reader-slide-enter' : direction === 'back' ? 'reader-slide-enter-back' : '';
 
-  imgArea.innerHTML = '';
-  imgArea.className = 'reader-image-area-inner';
+  // Replace image content while preserving the speaker button (which lives inside the image area)
+  const children = Array.from(imgArea.childNodes);
+  for (const child of children) {
+    if (child !== speakBtn) imgArea.removeChild(child);
+  }
   if (page.imageType === 'custom' && page.customImageKey) {
     loadImage(page.customImageKey).then(blob => {
-      if (blob) { const img = document.createElement('img'); img.src = URL.createObjectURL(blob); img.alt = ''; imgArea.appendChild(img); }
+      if (blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.alt = '';
+        imgArea.insertBefore(img, speakBtn);
+      }
     });
   } else if (page.stockKey && STORY_SVGS[page.stockKey]) {
-    imgArea.innerHTML = STORY_SVGS[page.stockKey];
+    const svgWrap = document.createElement('div');
+    svgWrap.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
+    svgWrap.innerHTML = STORY_SVGS[page.stockKey];
+    imgArea.insertBefore(svgWrap, speakBtn);
   }
-  if (animClass) { imgArea.parentElement.querySelector('#reader-image-area').classList.remove('reader-slide-enter', 'reader-slide-enter-back'); void imgArea.offsetWidth; }
 
   let displayText = page.text || '';
   if (currentReaderStory) {
     displayText = personalizeStoryText(displayText, currentReaderStory.childName || '', currentReaderStory.personMode || 'first', currentReaderStory.parentName || 'Mommy');
   }
   textEl.textContent = displayText;
+
+  // Page counter and eyebrow
+  const total = pages.length;
+  const pageNum = currentReaderPage + 1;
+  if (counterEl) {
+    const title = currentReaderStory && currentReaderStory.title ? currentReaderStory.title : 'Story';
+    counterEl.textContent = title + ' - ' + pageNum + ' / ' + total;
+  }
+  if (eyebrowEl) {
+    const ordinals = ['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen'];
+    const word = ordinals[currentReaderPage] || String(pageNum);
+    eyebrowEl.textContent = 'Page ' + word;
+  }
 
   if (animClass) {
     const textArea = document.getElementById('reader-text-area');
