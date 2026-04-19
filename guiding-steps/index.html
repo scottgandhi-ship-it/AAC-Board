@@ -2636,7 +2636,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 <!-- Schedule View -->
 <div id="view-schedule" class="view active" role="tabpanel" aria-labelledby="tab-schedule">
-  <div id="schedule-content">
+  <div id="schedule-content" class="state-idle">
     <div id="schedule-header-bar">
       <span id="schedule-date-eyebrow"></span>
       <span id="schedule-name"></span>
@@ -2646,10 +2646,10 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <span id="schedule-progress-rule" aria-hidden="true"></span>
     </div>
     <div id="schedule-steps-list"></div>
-    <div id="schedule-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <div style="font-size:1.1rem;font-weight:600;">No schedule for today</div>
-      <div style="font-size:0.9rem;">Pick from built-in templates or create your own routine</div>
+    <div id="schedule-empty" style="display:flex;">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#8F8FA3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <div style="font-family:var(--gs-font-display);font-size:1.5rem;font-weight:400;color:var(--gs-ink);letter-spacing:-0.3px;">No schedule for today</div>
+      <div style="font-family:var(--gs-font-body);font-size:0.9375rem;color:var(--gs-ink-soft);max-width:280px;line-height:1.4;">Pick from built-in templates or create your own routine</div>
     </div>
     <div id="schedule-all-done">
       <div class="schedule-done-icon">
