@@ -4,7 +4,7 @@
   "description": "",
   "main": "sw.js",
   "scripts": {
-    "sync": "mkdir -p www && cp index.html manifest.json www/ && npx cap sync",
+    "sync": "mkdir -p www/fonts && cp index.html manifest.json sw.js www/ && cp -R fonts/*.woff2 www/fonts/ && npx cap sync",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
