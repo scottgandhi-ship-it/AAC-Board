@@ -158,7 +158,7 @@ body {
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   flex-shrink: 0;
   border-top: 1px solid var(--gs-hair);
-  padding: 0 12px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding: 0 12px env(safe-area-inset-bottom, 6px);
   gap: 0;
 }
 .tab-btn {
@@ -430,31 +430,17 @@ body {
   margin-top: 4px;
 }
 
-/* -- Long-press Done button (Storybook Canvas) -- */
-.gs-lp-btn {
-  position: relative; width: 52px; height: 52px;
+/* -- Done button (Storybook Canvas) -- */
+.gs-done-btn {
+  width: 52px; height: 52px;
   border-radius: 99px; border: none;
   background: var(--gs-accent); color: #fff;
   cursor: pointer; padding: 0; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  touch-action: none;
+  transition: background 0.15s, transform 0.1s ease;
 }
-.gs-lp-btn:focus-visible { outline: 2px solid var(--gs-accent-deep); outline-offset: 3px; }
-.gs-lp-ring-svg {
-  position: absolute; inset: 0;
-  transform: rotate(-90deg);
-  pointer-events: none;
-  width: 52px; height: 52px;
-}
-.gs-lp-ring {
-  fill: none; stroke: var(--gs-accent-deep); stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-dasharray: 150.8;
-  stroke-dashoffset: 150.8;
-}
-@media (prefers-reduced-motion: reduce) {
-  .gs-lp-ring { transition: none; }
-}
+.gs-done-btn:active { background: var(--gs-accent-deep); transform: scale(0.96); }
+.gs-done-btn:focus-visible { outline: 2px solid var(--gs-accent-deep); outline-offset: 3px; }
 
 /* -- Coach Mark Tooltip -- */
 #gs-coach-backdrop {
@@ -1013,57 +999,56 @@ body {
 #rewards-task-header {
   display: none;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto 4px;
+  gap: 12px;
+  padding: 14px 24px 4px;
+  flex-shrink: 0;
 }
-
-#rewards-task-header.visible {
-  display: flex;
-}
+#rewards-task-header.visible { display: flex; }
 
 #rewards-task-image {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: #f0f0f0;
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  display: none; align-items: center; justify-content: center;
+  background: var(--gs-bg-alt);
   overflow: hidden;
   flex-shrink: 0;
 }
-
 #rewards-task-image.visible { display: flex; }
-
-#rewards-task-image svg {
-  width: 100%;
-  height: 100%;
-}
-
-#rewards-task-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-md);
-}
+#rewards-task-image svg { width: 100%; height: 100%; }
+#rewards-task-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
 #rewards-task-header-text {
-  flex: 1;
-  min-width: 0;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
 }
-
+#rewards-task-eyebrow {
+  font-family: var(--gs-font-body); font-size: 0.6875rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.4px; text-transform: uppercase;
+  margin-bottom: 4px;
+}
 #rewards-task-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--gs-ink-muted);
+  font-family: var(--gs-font-display); font-weight: 400;
+  font-size: 1.75rem; color: var(--gs-ink);
+  letter-spacing: -0.6px; line-height: 1.05;
 }
 
+#rewards-progress-row {
+  display: none; align-items: center; gap: 10px;
+  padding: 4px 24px 8px;
+  flex-shrink: 0;
+}
+#rewards-progress-row.visible { display: flex; }
 #rewards-progress-text {
-  font-size: 0.85rem;
-  color: var(--gs-ink-muted);
-  margin-top: 1px;
+  font-family: var(--gs-font-body); font-size: 0.8125rem; font-weight: 600;
+  color: var(--gs-accent); letter-spacing: 0.1px;
+}
+#rewards-progress-rule {
+  flex: 1; height: 1px; background: var(--gs-hair);
+}
+#rewards-reward-label {
+  font-family: var(--gs-font-body); font-size: 0.8125rem;
+  color: var(--gs-ink-muted); font-weight: 500;
 }
 
 /* btn-did-it removed — tapping tiles directly replaces it */
@@ -1108,10 +1093,105 @@ body {
   flex-shrink: 0;
 }
 
+/* -- Steps All Done (Storybook Canvas) -- */
 #steps-all-done {
-  flex: 1; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; padding: 40px; text-align: center;
+  position: relative; flex: 1;
+  display: none; flex-direction: column;
+  padding: 0; overflow: hidden;
+  background: var(--gs-bg);
 }
+.gs-alldone-wash {
+  position: absolute; border-radius: 9999px;
+  pointer-events: none;
+}
+.gs-alldone-wash-warm {
+  top: -40px; right: -60px; width: 280px; height: 280px;
+  background: radial-gradient(circle at 40% 40%, var(--gs-icon-warm-pale) 0%, rgba(247,217,191,0) 70%);
+}
+.gs-alldone-wash-indigo {
+  bottom: -80px; left: -40px; width: 320px; height: 320px;
+  background: radial-gradient(circle at 50% 50%, var(--gs-accent-soft) 0%, rgba(226,223,246,0) 65%);
+}
+.gs-alldone-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 56px 32px 0;
+}
+.gs-alldone-eyebrow {
+  font-family: var(--gs-font-body); font-size: 0.6875rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.4px; text-transform: uppercase;
+}
+.gs-alldone-medal {
+  margin-top: 26px; position: relative;
+  width: 132px; height: 132px;
+}
+.gs-alldone-ring { position: absolute; inset: 0; }
+.gs-alldone-medal-inner {
+  position: absolute; inset: 14px; border-radius: 9999px;
+  background: var(--gs-accent);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 30px rgba(79, 70, 184, 0.28);
+}
+.gs-alldone-confetti {
+  position: absolute; border-radius: 99px;
+  display: block;
+}
+.gs-alldone-confetti-a { top: -6px; left: 20px; width: 8px; height: 8px; background: var(--gs-icon-warm); }
+.gs-alldone-confetti-b { top: 10px; right: -8px; width: 6px; height: 6px; background: var(--gs-accent); }
+.gs-alldone-confetti-c { bottom: -8px; right: 30px; width: 5px; height: 5px; background: var(--gs-icon-warm); opacity: 0.7; }
+.gs-alldone-confetti-d { bottom: 8px; left: -6px; width: 7px; height: 7px; background: var(--gs-accent-soft); }
+.gs-alldone-title {
+  margin-top: 30px;
+  font-family: var(--gs-font-display); font-size: 2.625rem;
+  font-weight: 400; color: var(--gs-ink);
+  letter-spacing: -1px; line-height: 1;
+}
+.gs-alldone-body {
+  margin-top: 12px; max-width: 280px;
+  font-family: var(--gs-font-body); font-size: 1rem;
+  color: var(--gs-ink-soft); font-weight: 400; line-height: 1.4;
+}
+.gs-alldone-body .gs-alldone-body-em {
+  color: var(--gs-ink); font-weight: 500;
+}
+.gs-alldone-chips {
+  margin-top: 22px;
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+.gs-alldone-chip {
+  padding: 6px 12px; border-radius: 99px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  font-weight: 500; color: var(--gs-ink-soft);
+}
+.gs-alldone-chip-accent {
+  background: var(--gs-accent-soft); border-color: var(--gs-accent-soft);
+  color: var(--gs-accent);
+}
+.gs-alldone-actions {
+  position: absolute; bottom: 24px; left: 24px; right: 24px; z-index: 2;
+}
+.gs-alldone-primary {
+  width: 100%; padding: 16px; border-radius: 14px;
+  background: var(--gs-accent); color: #fff; border: none;
+  font-family: var(--gs-font-body); font-weight: 600; font-size: 1rem;
+  cursor: pointer; min-height: 48px;
+  box-shadow: 0 6px 18px rgba(79, 70, 184, 0.25);
+  margin-bottom: 10px;
+}
+.gs-alldone-primary:active { background: var(--gs-accent-deep); }
+.gs-alldone-secondary-row {
+  display: flex; gap: 8px;
+}
+.gs-alldone-secondary {
+  flex: 1; padding: 12px; border-radius: 12px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  color: var(--gs-ink);
+  font-family: var(--gs-font-body); font-weight: 500; font-size: 0.8125rem;
+  cursor: pointer; min-height: 44px;
+}
+.gs-alldone-secondary:active { background: var(--gs-bg-alt); }
 
 .rewards-more-btn {
   flex: 0 0 44px !important;
@@ -1681,6 +1761,30 @@ body {
   padding: 12px;
   box-shadow: var(--gs-shadow);
 }
+
+/* Task-strip (Steps tab) variant: every row is a card, active has indigo border */
+.sched-step.is-strip { padding: 0 4px; margin-bottom: 10px; }
+.sched-step.is-strip .gs-step-card {
+  background: var(--gs-card);
+  border: 1px solid var(--gs-hair);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 0;
+  min-height: 72px;
+}
+.sched-step.is-strip.current .gs-step-card {
+  border: 2px solid var(--gs-accent);
+  padding: 11px 15px;
+  box-shadow: var(--gs-shadow);
+}
+.sched-step.is-strip .sched-step-img { background: var(--gs-bg-alt); }
+.sched-step.is-strip.current .sched-step-img { background: var(--gs-accent-soft); }
+.sched-step.is-strip .sched-step-label { font-size: 1.375rem; font-weight: 500; }
+
+/* Hide the spine col + connector when is-strip (Steps has no spine) */
+.sched-step.is-strip .gs-spine-col,
+.sched-step.is-strip .gs-spine-connector { display: none; }
+
 .sched-step.done { opacity: 0.55; }
 .sched-step.done .sched-step-label { text-decoration: line-through; }
 .sched-step:not(.current):not(.done) { opacity: 0.85; }
@@ -2857,9 +2961,14 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="rewards-task-header">
         <div id="rewards-task-image" role="img" aria-label=""></div>
         <div id="rewards-task-header-text">
+          <div id="rewards-task-eyebrow"></div>
           <div id="rewards-task-label"></div>
-          <div id="rewards-progress-text" aria-live="polite"></div>
         </div>
+      </div>
+      <div id="rewards-progress-row">
+        <span id="rewards-progress-text" aria-live="polite"></span>
+        <span id="rewards-progress-rule" aria-hidden="true"></span>
+        <span id="rewards-reward-label"></span>
       </div>
       <div id="rewards-path" style="display:none"></div>
       <div id="rewards-reward-card" style="display:none"></div>
@@ -2871,15 +2980,38 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
       <div id="reward-timer-status"></div>
     </div>
     <div id="steps-all-done" style="display:none;">
-      <div class="schedule-done-icon">
-        <svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+      <div class="gs-alldone-wash gs-alldone-wash-warm" aria-hidden="true"></div>
+      <div class="gs-alldone-wash gs-alldone-wash-indigo" aria-hidden="true"></div>
+      <div class="gs-alldone-content">
+        <div id="steps-alldone-eyebrow" class="gs-alldone-eyebrow">Complete</div>
+        <div class="gs-alldone-medal" aria-hidden="true">
+          <svg class="gs-alldone-ring" viewBox="0 0 132 132" width="132" height="132" fill="none">
+            <circle cx="66" cy="66" r="60" stroke="var(--gs-accent-soft)" stroke-width="3"/>
+            <circle cx="66" cy="66" r="60" stroke="var(--gs-accent)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 66 66)"/>
+          </svg>
+          <div class="gs-alldone-medal-inner">
+            <svg viewBox="0 0 48 48" width="60" height="60" fill="none">
+              <path d="M24 8 L29 19 L41 20 L32 28 L35 40 L24 34 L13 40 L16 28 L7 20 L19 19 Z" fill="#fff"/>
+            </svg>
+          </div>
+          <span class="gs-alldone-confetti gs-alldone-confetti-a"></span>
+          <span class="gs-alldone-confetti gs-alldone-confetti-b"></span>
+          <span class="gs-alldone-confetti gs-alldone-confetti-c"></span>
+          <span class="gs-alldone-confetti gs-alldone-confetti-d"></span>
+        </div>
+        <div class="gs-alldone-title">All done.</div>
+        <div id="steps-done-msg" class="gs-alldone-body"></div>
+        <div class="gs-alldone-chips">
+          <div class="gs-alldone-chip" id="steps-alldone-chip-count"></div>
+          <div class="gs-alldone-chip gs-alldone-chip-accent" id="steps-alldone-chip-reward" style="display:none;"></div>
+        </div>
       </div>
-      <div style="font-size:1.6rem;font-weight:800;">All Done!</div>
-      <div id="steps-done-msg" style="font-size:1rem;color:#555;"></div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;width:100%;max-width:240px;">
-        <button type="button" class="sched-parent-btn" id="btn-steps-reset" style="background:linear-gradient(135deg,#66BB6A,#43A047);color:#fff;border:none;box-shadow:0 4px 12px rgba(67,160,71,0.3);">Reset Steps</button>
-        <button type="button" class="sched-parent-btn" id="btn-steps-new">Start Another</button>
-        <button type="button" class="sched-parent-btn" id="btn-steps-configure">Configure</button>
+      <div class="gs-alldone-actions">
+        <button type="button" class="gs-alldone-primary" id="btn-steps-new">Start another strip</button>
+        <div class="gs-alldone-secondary-row">
+          <button type="button" class="gs-alldone-secondary" id="btn-steps-reset">Reset steps</button>
+          <button type="button" class="gs-alldone-secondary" id="btn-steps-configure">Configure</button>
+        </div>
       </div>
     </div>
     <div id="rewards-parent-controls">
@@ -3262,12 +3394,6 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
-        </div>
-        <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin:16px 0 8px;">Long-press Done duration</label>
-        <div class="seg-group" id="long-press-group" role="radiogroup" aria-label="Long-press Done duration">
-          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="200">0.2s</button>
-          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="300">0.3s</button>
-          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="400">0.4s</button>
         </div>
       </div>
     </div>
@@ -4569,39 +4695,6 @@ document.getElementById('visible-steps-group').addEventListener('keydown', (e) =
   if (next !== -1) { e.preventDefault(); btns[next].focus(); btns[next].click(); }
 });
 
-// -- Long-press Done duration setting --
-// Reads duration via a local helper so this block does not depend on GSLongPress
-// being defined yet (GSLongPress is declared much later in the file).
-function _gsLongPressDurationFromStorage() {
-  const raw = parseInt(localStorage.getItem('gs-long-press-duration') || '', 10);
-  if (!Number.isFinite(raw)) return 300;
-  return Math.min(400, Math.max(200, raw));
-}
-function applyLongPressDurationSetting() {
-  const current = _gsLongPressDurationFromStorage();
-  document.querySelectorAll('#long-press-group .seg-btn').forEach(btn => {
-    btn.setAttribute('aria-checked', String(parseInt(btn.dataset.value, 10) === current));
-  });
-}
-applyLongPressDurationSetting();
-
-document.getElementById('long-press-group').addEventListener('click', (e) => {
-  const btn = e.target.closest('.seg-btn');
-  if (!btn) return;
-  const ms = parseInt(btn.dataset.value, 10);
-  const clamped = Math.min(400, Math.max(200, ms));
-  localStorage.setItem('gs-long-press-duration', String(clamped));
-  applyLongPressDurationSetting();
-});
-document.getElementById('long-press-group').addEventListener('keydown', (e) => {
-  const btns = [...document.querySelectorAll('#long-press-group .seg-btn')];
-  const idx = btns.indexOf(e.target);
-  if (idx === -1) return;
-  let next = -1;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % btns.length;
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + btns.length) % btns.length;
-  if (next !== -1) { e.preventDefault(); btns[next].focus(); btns[next].click(); }
-});
 
 // -- Speech (TTS) --
 let voices = [];
@@ -5614,21 +5707,18 @@ function renderSchedule() {
 
     row.appendChild(card);
 
-    // Long-press Done button on current step
+    // Done button on current step (single tap)
     if (step.status === 'current') {
       const doneBtn = document.createElement('button');
-      doneBtn.className = 'sched-step-done-btn gs-lp-btn';
+      doneBtn.className = 'sched-step-done-btn gs-done-btn';
       doneBtn.type = 'button';
-      doneBtn.setAttribute('aria-label', 'Hold to mark ' + step.label + ' as done');
+      doneBtn.setAttribute('aria-label', 'Mark ' + step.label + ' as done');
       doneBtn.innerHTML =
-        '<svg class="gs-lp-ring-svg" viewBox="0 0 52 52">' +
-        '<circle class="gs-lp-ring" cx="26" cy="26" r="24"/>' +
-        '</svg>' +
-        '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="position:relative;z-index:1;">' +
+        '<svg viewBox="0 0 24 24" width="22" height="22" fill="none">' +
         '<path d="M5 12 L10 17 L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
         '</svg>';
+      doneBtn.addEventListener('click', (e) => { e.stopPropagation(); completeCurrentStep(idx); });
       row.appendChild(doneBtn);
-      GSLongPress.bind(doneBtn, () => completeCurrentStep(idx));
     }
 
     stepsEl.appendChild(row);
@@ -5861,7 +5951,7 @@ function renderEditorSteps() {
       upBtn.className = 'tmpl-step-btn';
       upBtn.innerHTML = '&#9650;';
       upBtn.setAttribute('aria-label', 'Move ' + step.label + ' up');
-      upBtn.addEventListener('click', () => { swapSteps(idx, idx - 1); });
+      upBtn.addEventListener('click', () => { swapEditorSteps(idx, idx - 1); });
       row.appendChild(upBtn);
     }
 
@@ -5870,7 +5960,7 @@ function renderEditorSteps() {
       downBtn.className = 'tmpl-step-btn';
       downBtn.innerHTML = '&#9660;';
       downBtn.setAttribute('aria-label', 'Move ' + step.label + ' down');
-      downBtn.addEventListener('click', () => { swapSteps(idx, idx + 1); });
+      downBtn.addEventListener('click', () => { swapEditorSteps(idx, idx + 1); });
       row.appendChild(downBtn);
     }
 
@@ -5889,7 +5979,7 @@ function renderEditorSteps() {
   });
 }
 
-function swapSteps(a, b) {
+function swapEditorSteps(a, b) {
   [editorSteps[a], editorSteps[b]] = [editorSteps[b], editorSteps[a]];
   renderEditorSteps();
 }
@@ -6363,6 +6453,7 @@ function renderRewards() {
     pathEl.style.display = 'none';
     rewardCard.style.display = 'none';
     taskHeader.classList.remove('visible');
+    document.getElementById('rewards-progress-row')?.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
     activeScreen.classList.remove('visible');
@@ -6391,15 +6482,39 @@ function renderRewards() {
     pathEl.style.display = 'none';
     rewardCard.style.display = 'none';
     taskHeader.classList.remove('visible');
+    document.getElementById('rewards-progress-row')?.classList.remove('visible');
     progressText.textContent = '';
     pathArea.style.display = 'none';
     activeScreen.classList.remove('visible');
     taskImgEl.classList.remove('visible');
     taskImgEl.innerHTML = '';
     stepsAllDone.style.display = 'flex';
-    document.getElementById('steps-done-msg').textContent = track.rewardLabel
-      ? 'You earned ' + track.rewardLabel + '!'
-      : 'Great job finishing ' + track.taskLabel + '!';
+
+    // Eyebrow: "<label> · Complete"
+    const eyebrow = document.getElementById('steps-alldone-eyebrow');
+    if (eyebrow) eyebrow.textContent = (track.taskLabel || 'Strip') + ' \u00B7 Complete';
+
+    // Body: "<N> steps of <label> — finished. <Reward> earned for the jar."
+    const body = document.getElementById('steps-done-msg');
+    const stepWord = tc === 1 ? 'step' : 'steps';
+    let bodyHtml = tc + ' ' + stepWord + ' of ' + escapeHtml(track.taskLabel || 'this strip') + ' \u2014 finished.';
+    if (track.rewardLabel) {
+      bodyHtml += '<br><span class="gs-alldone-body-em">' + escapeHtml(track.rewardLabel) + '</span> earned.';
+    }
+    if (body) body.innerHTML = bodyHtml;
+
+    // Chips
+    const countChip = document.getElementById('steps-alldone-chip-count');
+    if (countChip) countChip.textContent = tc + ' / ' + tc + ' ' + stepWord;
+    const rewardChip = document.getElementById('steps-alldone-chip-reward');
+    if (rewardChip) {
+      if (track.rewardLabel) {
+        rewardChip.textContent = '\u2605 ' + track.rewardLabel;
+        rewardChip.style.display = '';
+      } else {
+        rewardChip.style.display = 'none';
+      }
+    }
     return;
   }
 
@@ -6410,6 +6525,7 @@ function renderRewards() {
     pathEl.style.display = 'none';
     rewardCard.style.display = 'none';
     taskHeader.classList.remove('visible');
+    document.getElementById('rewards-progress-row')?.classList.remove('visible');
     taskLabel.textContent = '';
     progressText.textContent = '';
     pathArea.style.display = 'none';
@@ -6433,12 +6549,22 @@ function renderRewards() {
   if (!isTaskStrip(track)) renderTaskImage(track);
   else { document.getElementById('rewards-task-image').classList.remove('visible'); document.getElementById('rewards-task-image').innerHTML = ''; }
   taskHeader.classList.add('visible');
-  if (isTaskStrip(track) && track.rewardLabel) {
-    taskLabel.textContent = 'First ' + track.taskLabel + ', then ' + track.rewardLabel;
-  } else {
-    taskLabel.textContent = track.taskLabel;
+
+  // Eyebrow + title
+  const eyebrowEl = document.getElementById('rewards-task-eyebrow');
+  if (eyebrowEl) {
+    eyebrowEl.textContent = (track.taskLabel || '') + ' \u00B7 ' + (isTaskStrip(track) ? 'Task strip' : 'Counter');
   }
-  progressText.textContent = '';
+  taskLabel.textContent = track.taskLabel;
+
+  // Progress row: "Step N of M" + rule + reward
+  const progressRow = document.getElementById('rewards-progress-row');
+  const rewardLabelEl = document.getElementById('rewards-reward-label');
+  if (progressRow) progressRow.classList.add('visible');
+  progressText.textContent = 'Step ' + Math.min(track.currentCount + 1, tc) + ' of ' + tc;
+  if (rewardLabelEl) {
+    rewardLabelEl.textContent = track.rewardLabel ? ('Reward: ' + track.rewardLabel) : '';
+  }
 
   renderPath(track);
 }
@@ -6516,7 +6642,7 @@ function renderPath(track) {
     for (let i = 0; i < tc; i++) {
       const step = track.steps[i];
       const row = document.createElement('div');
-      row.className = 'sched-step';
+      row.className = 'sched-step is-strip';
 
       if (i < track.currentCount) {
         row.classList.add('done');
@@ -6580,21 +6706,18 @@ function renderPath(track) {
 
       row.appendChild(card);
 
-      // Done button (long-press ring, matches Schedule)
+      // Done button (single tap, matches Schedule)
       if (i === track.currentCount) {
         const doneBtn = document.createElement('button');
-        doneBtn.className = 'sched-step-done-btn gs-lp-btn';
+        doneBtn.className = 'sched-step-done-btn gs-done-btn';
         doneBtn.type = 'button';
-        doneBtn.setAttribute('aria-label', 'Hold to mark ' + step.label + ' as done');
+        doneBtn.setAttribute('aria-label', 'Mark ' + step.label + ' as done');
         doneBtn.innerHTML =
-          '<svg class="gs-lp-ring-svg" viewBox="0 0 52 52">' +
-          '<circle class="gs-lp-ring" cx="26" cy="26" r="24"/>' +
-          '</svg>' +
-          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="position:relative;z-index:1;">' +
+          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none">' +
           '<path d="M5 12 L10 17 L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
           '</svg>';
+        doneBtn.addEventListener('click', (e) => { e.stopPropagation(); handleTileTap(track); });
         row.appendChild(doneBtn);
-        GSLongPress.bind(doneBtn, () => handleTileTap(track));
       }
 
       pathEl.appendChild(row);
@@ -10254,7 +10377,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-schedule .sched-step.current .sched-step-done-btn'),
-          text: () => 'When they finish, hold the Done button to move to the next step.',
+          text: () => 'When they finish, tap Done to move to the next step.',
           placement: 'bottom',
           btnLabel: null,
           waitForAction: true,
@@ -10288,7 +10411,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-rewards .sched-step.current .sched-step-done-btn'),
-          text: () => 'Press and hold the Done button to complete each step and work toward the reward.',
+          text: () => 'Tap Done to complete each step and work toward the reward.',
           placement: 'bottom',
           btnLabel: 'Got it!',
           waitForAction: false,
