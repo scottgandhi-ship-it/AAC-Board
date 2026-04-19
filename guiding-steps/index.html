@@ -335,6 +335,139 @@ body {
   .gs-onboarding-btn, .gs-onboarding-dots .dot, .gs-onboarding-input { transition: none; }
 }
 
+/* -- Shared Modal Shell (Storybook Canvas) -- */
+.gs-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(27, 29, 46, 0.28);
+  backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px);
+  align-items: center; justify-content: center;
+  padding: 14px; font-family: var(--gs-font-body);
+}
+.gs-modal-overlay.open { display: flex; }
+.gs-modal-overlay.align-top {
+  align-items: flex-start;
+  padding-top: calc(60px + env(safe-area-inset-top, 0px));
+}
+.gs-modal-card {
+  background: var(--gs-bg);
+  border: 1px solid var(--gs-hair);
+  border-radius: var(--gs-radius-modal);
+  box-shadow: 0 8px 30px rgba(27,29,46,0.18), 0 24px 60px rgba(27,29,46,0.12);
+  width: 100%; max-width: 420px; max-height: 85vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.gs-modal-header { padding: 22px 22px 6px; }
+.gs-modal-title {
+  font-family: var(--gs-font-display);
+  font-size: 1.5rem; font-weight: 400; color: var(--gs-ink);
+  letter-spacing: -0.5px; line-height: 1;
+}
+.gs-modal-sub {
+  font-family: var(--gs-font-body); font-size: 0.8125rem;
+  color: var(--gs-ink-soft); padding: 0 22px 10px; line-height: 1.4;
+}
+.gs-modal-body {
+  flex: 1; overflow-y: auto;
+  padding: 14px 18px 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.gs-modal-section-label {
+  font-family: var(--gs-font-body); font-size: 0.6875rem;
+  color: var(--gs-ink-muted); font-weight: 600;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin-top: 14px; margin-bottom: 6px;
+}
+.gs-modal-section-label:first-child { margin-top: 0; }
+.gs-modal-footer {
+  padding: 14px 18px 18px;
+  display: grid; gap: 8px;
+  border-top: 1px solid var(--gs-hair);
+  background: var(--gs-bg);
+}
+.gs-modal-footer.two-col { grid-template-columns: 1fr 1fr; }
+.gs-modal-footer.three-col { grid-template-columns: 1fr 1fr 1.2fr; }
+.gs-modal-footer.four-col { grid-template-columns: 1fr 1fr 1fr 1.2fr; }
+.gs-modal-btn {
+  padding: 13px 8px; border-radius: 12px; border: none;
+  font-family: var(--gs-font-body); font-weight: 600; font-size: 0.8125rem;
+  cursor: pointer; min-height: 44px;
+}
+.gs-modal-btn:focus-visible { outline: 2px solid var(--gs-accent); outline-offset: 2px; }
+.gs-modal-btn-cancel {
+  background: var(--gs-bg-alt); color: var(--gs-ink-soft); font-weight: 500;
+}
+.gs-modal-btn-save {
+  background: var(--gs-accent); color: #fff;
+}
+.gs-modal-btn-save:active { background: var(--gs-accent-deep); }
+.gs-modal-btn-warn {
+  background: rgba(197, 85, 58, 0.12);
+  border: 1px solid rgba(197, 85, 58, 0.35);
+  color: var(--gs-warn);
+}
+.gs-modal-btn-outline {
+  background: var(--gs-card); border: 1px solid var(--gs-hair); color: var(--gs-ink);
+}
+.gs-modal-input {
+  width: 100%; padding: 14px 16px; border-radius: 12px;
+  border: 1px solid var(--gs-hair); background: var(--gs-card);
+  font-family: var(--gs-font-display); font-size: 1.0625rem;
+  color: var(--gs-ink); letter-spacing: -0.2px;
+}
+.gs-modal-input:focus { outline: none; border-color: var(--gs-accent); }
+.gs-modal-input::placeholder {
+  color: var(--gs-ink-muted); font-style: italic; font-family: var(--gs-font-display);
+}
+.gs-modal-list-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 14px 16px; margin-bottom: 8px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  border-radius: 12px;
+}
+.gs-modal-list-row-primary {
+  font-family: var(--gs-font-display); font-size: 1.0625rem;
+  font-weight: 500; color: var(--gs-ink); letter-spacing: -0.2px;
+}
+.gs-modal-list-row-meta {
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  color: var(--gs-ink-muted); font-weight: 500; margin-top: 3px;
+}
+.gs-modal-dashed-btn {
+  padding: 14px 16px; border: 1.5px dashed var(--gs-hair);
+  border-radius: 12px; text-align: center;
+  font-family: var(--gs-font-body); font-size: 0.875rem; font-weight: 600;
+  color: var(--gs-accent); background: var(--gs-card);
+  cursor: pointer; width: 100%; display: block;
+  margin-top: 4px;
+}
+
+/* -- Long-press Done button (Storybook Canvas) -- */
+.gs-lp-btn {
+  position: relative; width: 52px; height: 52px;
+  border-radius: 99px; border: none;
+  background: var(--gs-accent); color: #fff;
+  cursor: pointer; padding: 0; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+.gs-lp-btn:focus-visible { outline: 2px solid var(--gs-accent-deep); outline-offset: 3px; }
+.gs-lp-ring-svg {
+  position: absolute; inset: 0;
+  transform: rotate(-90deg);
+  pointer-events: none;
+  width: 52px; height: 52px;
+}
+.gs-lp-ring {
+  fill: none; stroke: var(--gs-accent-deep); stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 150.8;
+  stroke-dashoffset: 150.8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-lp-ring { transition: none; }
+}
+
 /* -- Coach Mark Tooltip -- */
 #gs-coach-backdrop {
   display: none; position: fixed; inset: 0; z-index: 1100;
@@ -9636,6 +9769,147 @@ function joinWords(arr) {
 }
 
 document.getElementById('helper-generate').addEventListener('click', generateStoryFromHelper);
+
+// -- Long-press Done helper --
+// Binds press-and-hold-to-confirm behavior to a button element. The button
+// must contain a <circle class="gs-lp-ring"> whose stroke-dashoffset is
+// animated from 150.8 -> 0 during the hold. Cancels on early release,
+// pointer movement, pointercancel, and page visibility loss.
+const GSLongPress = {
+  DURATION_KEY: 'gs-long-press-duration',
+  DEFAULT_MS: 300,
+  MIN_MS: 200,
+  MAX_MS: 400,
+  MOVE_THRESHOLD: 10,
+  DASH_TOTAL: 150.8,
+  _announceEl: null,
+  _visibilityBound: false,
+  _activeState: null,
+
+  getDuration() {
+    const raw = parseInt(localStorage.getItem(this.DURATION_KEY) || '', 10);
+    if (!Number.isFinite(raw)) return this.DEFAULT_MS;
+    return Math.min(this.MAX_MS, Math.max(this.MIN_MS, raw));
+  },
+
+  setDuration(ms) {
+    const clamped = Math.min(this.MAX_MS, Math.max(this.MIN_MS, ms));
+    localStorage.setItem(this.DURATION_KEY, String(clamped));
+    return clamped;
+  },
+
+  _announceRegion() {
+    if (!this._announceEl) {
+      let el = document.getElementById('gs-longpress-announce');
+      if (!el) {
+        el = document.createElement('span');
+        el.id = 'gs-longpress-announce';
+        el.className = 'gs-sr-only';
+        el.setAttribute('aria-live', 'polite');
+        document.body.appendChild(el);
+      }
+      this._announceEl = el;
+    }
+    return this._announceEl;
+  },
+
+  _announce(msg) {
+    const el = this._announceRegion();
+    // clear first so the same message fires on consecutive presses
+    el.textContent = '';
+    requestAnimationFrame(() => { el.textContent = msg; });
+  },
+
+  _bindVisibility() {
+    if (this._visibilityBound) return;
+    this._visibilityBound = true;
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this._activeState) {
+        this._activeState.cancel();
+      }
+    });
+  },
+
+  bind(button, onConfirm) {
+    this._bindVisibility();
+    const ring = button.querySelector('.gs-lp-ring');
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let state = null;
+
+    const cancel = () => {
+      if (!state) return;
+      clearTimeout(state.timer);
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      if (ring) {
+        ring.style.transition = '';
+        ring.style.strokeDashoffset = String(GSLongPress.DASH_TOTAL);
+      }
+      if (GSLongPress._activeState === state) GSLongPress._activeState = null;
+      state = null;
+    };
+
+    const start = (e) => {
+      // Only primary pointer
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      cancel();
+      const dur = GSLongPress.getDuration();
+      state = {
+        startX: e.clientX,
+        startY: e.clientY,
+        startTime: performance.now(),
+        pointerId: e.pointerId,
+        timer: null,
+        rafId: null,
+        cancel
+      };
+      GSLongPress._activeState = state;
+      GSLongPress._announce('Hold to confirm');
+      try { button.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+
+      if (ring) {
+        if (reducedMotion) {
+          ring.style.transition = 'none';
+          ring.style.strokeDashoffset = '0';
+        } else {
+          ring.style.transition = 'none';
+          ring.style.strokeDashoffset = String(GSLongPress.DASH_TOTAL);
+          // next frame: animate to 0 over duration
+          state.rafId = requestAnimationFrame(() => {
+            if (!state) return;
+            ring.style.transition = 'stroke-dashoffset ' + dur + 'ms linear';
+            ring.style.strokeDashoffset = '0';
+          });
+        }
+      }
+
+      state.timer = setTimeout(() => {
+        if (!state) return;
+        GSLongPress._announce('Confirmed.');
+        try { navigator.vibrate && navigator.vibrate(20); } catch { /* ignore */ }
+        cancel();
+        onConfirm();
+      }, dur);
+    };
+
+    const move = (e) => {
+      if (!state) return;
+      const dx = e.clientX - state.startX;
+      const dy = e.clientY - state.startY;
+      if (dx * dx + dy * dy > GSLongPress.MOVE_THRESHOLD * GSLongPress.MOVE_THRESHOLD) {
+        cancel();
+      }
+    };
+
+    button.addEventListener('pointerdown', start);
+    button.addEventListener('pointermove', move);
+    button.addEventListener('pointerup', cancel);
+    button.addEventListener('pointerleave', cancel);
+    button.addEventListener('pointercancel', cancel);
+    // Prevent click (since we use long-press instead of tap)
+    button.addEventListener('click', (e) => e.preventDefault());
+  }
+};
 
 // -- Onboarding --
 const GSOnboarding = {
