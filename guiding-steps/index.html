@@ -36,20 +36,8 @@
 }
 
 :root {
-  --chrome-primary: #7C74FF;
-  --chrome-primary-dark: #5A52D5;
-  --chrome-accent: #F5A623;
-  --chrome-bg: #f5f5f5;
-  --chrome-surface: #ffffff;
-  --chrome-surface-alt: #fafafa;
-  --chrome-text: #333333;
-  --chrome-text-secondary: #666666;
-  --chrome-text-muted: #888888;
-  --chrome-border: #e0e0e0;
-  --chrome-border-light: #eeeeee;
-  --chrome-success: #43A047;
-  --chrome-danger: #D32F2F;
-  --chrome-warning: #FB8C00;
+  /* Legacy --bar-bg kept for parental-gate-ring circle. --chrome-* tokens
+     fully retired as of Phase 3 (all selectors migrated to --gs-*). */
   --bar-bg: var(--gs-accent);
   --bar-bg-dark: var(--gs-accent-deep);
   /* ── Gray Scale ── */
@@ -90,8 +78,8 @@
   --radius-sm: 10px;
 }
 
-/* Storybook Canvas design tokens -- used by redesigned screens (PR-1 onward).
-   Coexists with --chrome-* until each tab is re-skinned. */
+/* Storybook Canvas design tokens -- single source of truth for all screens
+   as of Phase 3. Legacy --chrome-* tokens have been fully retired. */
 :root {
   --gs-bg: #FBF6EC;
   --gs-bg-alt: #F0E8D6;
@@ -530,59 +518,125 @@ body {
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* -- Settings Modal -- */
+/* -- Settings sheet (Storybook Canvas) -- */
 #settings-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(4px); z-index: 150; justify-content: center;
-  align-items: flex-start; padding-top: calc(20px + env(safe-area-inset-top, 0px)); overflow-y: auto;
+  display: none; position: fixed; inset: 0;
+  background: rgba(27, 29, 46, 0.28);
+  backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px);
+  z-index: 150;
+  justify-content: center; align-items: flex-start;
+  padding: calc(40px + env(safe-area-inset-top, 0px)) 14px env(safe-area-inset-bottom, 20px);
+  overflow-y: auto;
+  font-family: var(--gs-font-body);
 }
 #settings-overlay.open { display: flex; }
 #settings-panel {
-  background: #faf8ff; border-radius: var(--radius-lg); width: 92%; max-width: 420px;
-  max-height: 85vh; overflow-y: auto; padding: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3); margin-bottom: 20px;
+  background: var(--gs-bg);
+  border: 1px solid var(--gs-hair);
+  border-radius: var(--gs-radius-modal);
+  width: 100%; max-width: 420px;
+  max-height: 85vh; overflow-y: auto;
+  padding: 22px 18px 18px;
+  box-shadow: 0 8px 30px rgba(27,29,46,0.18), 0 24px 60px rgba(27,29,46,0.12);
+  margin-bottom: 20px;
 }
-#settings-panel h2 { margin-bottom: 16px; font-size: 1.3rem; color: var(--gs-ink); }
-.settings-section { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-200); }
-.settings-section h3 { font-size: 1rem; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
+#settings-panel h2 {
+  margin: 0 4px 18px;
+  font-family: var(--gs-font-display); font-weight: 400;
+  font-size: 1.75rem; color: var(--gs-ink);
+  letter-spacing: -0.6px; line-height: 1;
+}
+
+.settings-section {
+  background: var(--gs-card);
+  border: 1px solid var(--gs-hair);
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+  margin-bottom: 12px;
+}
+.settings-section h3 {
+  font-family: var(--gs-font-body); font-size: 0.6875rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.4px; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
 .settings-btn {
-  display: block; width: 100%; padding: 10px 16px; border: 2px solid var(--gray-200);
-  border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-  font-family: inherit; background: var(--gs-card); color: var(--gray-700); text-align: center; min-height: 44px;
+  display: block; width: 100%; padding: 12px 16px;
+  border: 1px solid var(--gs-hair); border-radius: 10px;
+  background: var(--gs-card); color: var(--gs-ink);
+  font-family: var(--gs-font-body); font-size: 0.875rem;
+  font-weight: 600; cursor: pointer;
+  text-align: center; min-height: 44px;
+  transition: background 0.15s;
 }
 .settings-btn:active { background: var(--gs-bg-alt); }
-.settings-checkbox { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--gs-accent); }
+.settings-btn.danger {
+  background: rgba(197, 85, 58, 0.08);
+  border-color: rgba(197, 85, 58, 0.3);
+  color: var(--gs-warn);
+}
+.settings-checkbox {
+  width: 20px; height: 20px; flex-shrink: 0;
+  accent-color: var(--gs-accent);
+}
+
 .seg-group {
-  display: flex; gap: 0; border-radius: var(--radius-sm); overflow: hidden;
-  border: 2px solid var(--gs-hair);
+  display: flex; gap: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--gs-hair);
+  background: var(--gs-card);
 }
 .seg-btn {
-  flex: 1; padding: 10px 0; border: none; background: var(--gs-card);
-  font-family: inherit; font-size: 1rem; font-weight: 700; color: var(--gs-ink-soft);
+  flex: 1; padding: 10px 0; border: none; background: transparent;
+  font-family: var(--gs-font-body); font-size: 0.875rem; font-weight: 600;
+  color: var(--gs-ink-soft);
   cursor: pointer; transition: background 0.15s, color 0.15s;
   min-width: 44px; min-height: 44px;
 }
 .seg-btn + .seg-btn { border-left: 1px solid var(--gs-hair); }
 .seg-btn[aria-checked="true"] { background: var(--gs-accent); color: #fff; }
 .seg-btn:active { background: var(--gs-accent-soft); }
+
 #btn-close-settings {
-  display: block; width: 100%; padding: 14px; border: none; border-radius: 10px;
-  font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+  display: block; width: 100%; padding: 14px;
+  border: none; border-radius: 12px;
+  font-family: var(--gs-font-body); font-size: 1rem; font-weight: 600;
+  cursor: pointer;
   background: var(--gs-accent); color: #fff; margin-top: 8px;
+  min-height: 48px;
 }
+#btn-close-settings:active { background: var(--gs-accent-deep); }
+
 .settings-accordion-btn {
   display: flex; align-items: center; gap: 8px; width: 100%;
-  background: none; border: none; padding: 4px 0; cursor: pointer; font-family: inherit;
+  background: none; border: none; padding: 4px 0;
+  cursor: pointer; font-family: var(--gs-font-body);
+  min-height: 36px;
 }
 .settings-accordion-btn:active { opacity: 0.7; }
+.settings-accordion-btn > span:first-child {
+  font-family: var(--gs-font-display) !important;
+  font-size: 1.0625rem !important; font-weight: 500 !important;
+  color: var(--gs-ink) !important; letter-spacing: -0.2px;
+}
 .accordion-chevron {
-  font-size: 0.8rem; color: #777; transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
+  font-size: 0.75rem; color: var(--gs-ink-muted);
+  transition: transform 0.2s; margin-left: auto; flex-shrink: 0;
 }
 .settings-accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
-.accordion-details { display: none; margin-top: 8px; }
+.accordion-details { display: none; margin-top: 10px; }
 .accordion-details.open { display: block; }
-.accordion-summary { flex: 1; text-align: left; }
-.progress-day-card { padding: 10px 12px; background: var(--gs-card); border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; line-height: 1.4; color: #555; border-left: 3px solid var(--gs-accent); }
-.progress-day-card h4 { font-size: 0.8rem; color: #999; margin: 0 0 4px; }
+.accordion-summary { flex: 1; text-align: left; color: var(--gs-ink-muted); font-size: 0.8125rem !important; }
+
+.progress-day-card {
+  padding: 10px 12px; background: var(--gs-bg-alt);
+  border-radius: 8px; margin-bottom: 8px;
+  font-size: 0.8125rem; line-height: 1.4;
+  color: var(--gs-ink-soft);
+  border-left: 3px solid var(--gs-accent);
+}
+.progress-day-card h4 { font-size: 0.75rem; color: var(--gs-ink-muted); margin: 0 0 4px; }
 
 /* ── Reward Tracker ── */
 #rewards-content {
@@ -676,9 +730,9 @@ body {
 
 .task-tile {
   aspect-ratio: 1;
-  border-radius: var(--radius-lg);
-  border: 3px solid #e0e0e0;
-  background: var(--gs-bg-alt);
+  border-radius: var(--gs-radius-lg);
+  border: 1px solid var(--gs-hair);
+  background: var(--gs-card);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -693,9 +747,10 @@ body {
 }
 
 .task-tile-number {
+  font-family: var(--gs-font-body);
   font-size: 1.4rem;
-  font-weight: 800;
-  color: #bbb;
+  font-weight: 700;
+  color: var(--gs-ink-muted);
   line-height: 1;
   transition: all 0.25s ease;
 }
@@ -740,20 +795,20 @@ body {
 
 /* Completed tile */
 .task-tile.completed {
-  border-color: #43A047;
-  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-color: var(--gs-accent);
+  background: var(--gs-accent-soft);
 }
 
 .task-tile.completed .task-tile-number {
   font-size: 0.75rem;
-  color: #81C784;
+  color: var(--gs-accent);
 }
 
 .task-tile-check {
   display: none;
   font-size: 2rem;
   line-height: 1;
-  color: #43A047;
+  color: var(--gs-accent);
 }
 
 .task-tile.completed .task-tile-check {
@@ -763,9 +818,10 @@ body {
 /* Active / next tile — tappable */
 .task-tile.active {
   border-color: var(--gs-accent);
+  border-width: 2px;
   background: var(--gs-card);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(79, 70, 184, 0.15);
   animation: tileGlow 2s ease-in-out 3;
   animation-fill-mode: forwards;
 }
@@ -792,8 +848,8 @@ body {
 }
 
 @keyframes tileGlow {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15); }
-  50% { box-shadow: 0 0 0 8px rgba(124, 77, 255, 0.25); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(79, 70, 184, 0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(79, 70, 184, 0.25); }
 }
 
 /* Step label for task strips */
@@ -2072,13 +2128,83 @@ body.sensory-high-contrast .task-tile {
   border: 2px solid rgba(0,0,0,0.3) !important;
 }
 
-/* -- Stories List -- */
-#stories-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-#stories-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-  padding: 12px; flex: 1; overflow-y: auto; align-content: start;
+/* -- Stories List (Storybook Canvas) -- */
+#stories-content {
+  display: flex; flex-direction: column; flex: 1;
+  overflow: hidden; background: var(--gs-bg);
+  font-family: var(--gs-font-body);
 }
-@media (min-width: 600px) { #stories-grid { grid-template-columns: repeat(3, 1fr); } }
+#stories-grid {
+  display: flex; flex-direction: column;
+  padding: 14px 24px 120px;
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gs-story-section-label {
+  font-family: var(--gs-font-body); font-size: 0.65625rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin: 14px 2px 8px;
+}
+.gs-story-section-label:first-child { margin-top: 4px; }
+.gs-story-row {
+  display: flex; gap: 14px; padding: 14px;
+  background: var(--gs-card); border-radius: 18px;
+  border: 1px solid var(--gs-hair);
+  margin-bottom: 10px; cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.gs-story-row:active { transform: scale(0.98); }
+.gs-story-row-icon {
+  width: 80px; height: 80px; border-radius: 14px;
+  flex-shrink: 0; overflow: hidden;
+  background: var(--gs-accent-soft);
+  display: flex; align-items: center; justify-content: center;
+}
+.gs-story-row-icon svg { width: 70%; height: 70%; }
+.gs-story-row-icon img { width: 100%; height: 100%; object-fit: cover; }
+.gs-story-row-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+.gs-story-row-title {
+  font-family: var(--gs-font-display); font-size: 1.125rem;
+  font-weight: 500; color: var(--gs-ink);
+  letter-spacing: -0.3px; line-height: 1.2;
+}
+.gs-story-row-meta {
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  color: var(--gs-ink-muted); margin-top: 2px; font-weight: 500;
+}
+.gs-story-row-actions {
+  display: flex; gap: 14px; margin-top: 10px;
+}
+.gs-story-row-action {
+  background: none; border: none; padding: 0;
+  font-family: var(--gs-font-body); font-size: 0.8125rem;
+  font-weight: 500; color: var(--gs-ink-soft);
+  cursor: pointer; min-height: 28px;
+}
+.gs-story-row-action.primary {
+  color: var(--gs-accent); font-weight: 600;
+}
+.gs-story-row-action.danger { color: var(--gs-warn); }
+.gs-story-row-action:focus-visible {
+  outline: 2px solid var(--gs-accent); outline-offset: 2px; border-radius: 4px;
+}
+.gs-story-row-create {
+  border: 1.5px dashed var(--gs-hair);
+  background: transparent;
+  margin-top: 10px;
+}
+.gs-story-row-create .gs-story-row-icon {
+  background: var(--gs-bg-alt);
+  color: var(--gs-accent);
+}
+.gs-story-row-icon-plus {
+  color: var(--gs-accent);
+}
+.gs-story-row-title-create { color: var(--gs-accent); }
 
 .story-card {
   background: var(--gs-card); border-radius: var(--radius-md); overflow: hidden;
@@ -2120,83 +2246,134 @@ body.sensory-high-contrast .task-tile {
 #stories-empty-new:active { transform: scale(0.97); }
 
 #stories-parent-controls {
-  display: flex; gap: 8px; padding: 8px 16px; flex-shrink: 0;
+  display: flex; gap: 10px;
+  padding: 10px 24px max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  flex-shrink: 0;
+  background: var(--gs-bg);
+  border-top: 1px solid var(--gs-hair);
 }
 .stories-parent-btn {
-  flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm);
-  background: var(--gs-accent); color: #fff; font-size: 0.95rem;
-  font-weight: 600; cursor: pointer; font-family: inherit;
+  flex: 1; padding: 13px 16px; border-radius: 12px;
+  font-family: var(--gs-font-body); font-size: 0.9375rem;
+  font-weight: 600; cursor: pointer; min-height: 48px;
+}
+#btn-new-story.stories-parent-btn {
+  background: var(--gs-accent); color: #fff; border: none;
+}
+#btn-import-story.stories-parent-btn {
+  background: var(--gs-card); color: var(--gs-ink);
+  border: 1px solid var(--gs-hair);
 }
 
 /* -- Story Reader -- */
 #story-reader {
   display: none; position: fixed; inset: 0; z-index: 1000;
-  background: #FFF8F0; flex-direction: column;
+  background: var(--gs-bg); flex-direction: column;
+  font-family: var(--gs-font-body);
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 18px calc(20px + env(safe-area-inset-bottom, 0px));
 }
 #story-reader.open { display: flex; }
 
-#reader-close {
-  position: absolute; top: 12px; left: 12px; z-index: 10;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(0,0,0,0.06); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-ink-soft); transition: background 0.15s;
+#reader-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 6px 12px; flex-shrink: 0;
 }
-#reader-close:active { background: rgba(0,0,0,0.12); }
+#reader-close, #reader-print {
+  width: 38px; height: 38px; border-radius: 99px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gs-ink); cursor: pointer;
+}
+#reader-close:active, #reader-print:active { background: var(--gs-bg-alt); }
+#reader-page-counter {
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  color: var(--gs-ink-muted); font-weight: 600;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  text-align: center; flex: 1;
+}
 
-#reader-print {
-  position: absolute; top: 12px; right: 12px; z-index: 10;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(0,0,0,0.06); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-ink-soft); transition: background 0.15s;
+#reader-card {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--gs-card);
+  border: 1px solid var(--gs-hair);
+  border-radius: 28px;
+  box-shadow: var(--gs-shadow);
+  overflow: hidden;
+  margin-bottom: 12px;
+  min-height: 0;
 }
-#reader-print:active { background: rgba(0,0,0,0.12); }
 
 #reader-image-area {
-  flex: 0 0 60%; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; padding: 20px;
+  flex: 1; min-height: 0;
+  background: var(--gs-accent-soft);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; position: relative;
 }
 #reader-image-area svg { width: 70%; height: 70%; max-width: 300px; }
-#reader-image-area img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: var(--radius-md); }
+#reader-image-area img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 12px; }
+
+#reader-speak {
+  position: absolute; bottom: 16px; right: 16px;
+  width: 44px; height: 44px; border-radius: 99px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  box-shadow: var(--gs-shadow);
+  color: var(--gs-accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+#reader-speak:active { background: var(--gs-bg-alt); }
 
 #reader-text-area {
-  flex: 1; display: flex; flex-direction: column; align-items: flex-start;
-  justify-content: center; padding: 16px 24px; position: relative;
+  flex: 0 0 auto;
+  padding: 20px 26px 24px;
+  background: var(--gs-card);
+}
+#reader-page-eyebrow {
+  font-family: var(--gs-font-body); font-size: 0.65625rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.4px; text-transform: uppercase;
+  margin-bottom: 8px;
 }
 #reader-text {
-  font-size: 1.4rem; font-weight: 700; color: var(--gs-ink); line-height: 1.5;
+  font-family: var(--gs-font-display); font-size: 1.375rem;
+  font-weight: 400; color: var(--gs-ink);
+  letter-spacing: -0.3px; line-height: 1.35;
   text-align: left; margin: 0;
-}
-#reader-speak {
-  position: absolute; top: 12px; right: 16px;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(124,116,255,0.1); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gs-accent);
 }
 
 #reader-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 16px 16px; flex-shrink: 0;
+  padding: 4px 10px; flex-shrink: 0;
 }
 #reader-prev, #reader-next {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(0,0,0,0.05); border: none; cursor: pointer;
+  width: 48px; height: 48px; border-radius: 99px;
+  border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--gray-700); transition: background 0.15s;
+  transition: background 0.15s;
 }
-#reader-prev:active, #reader-next:active { background: rgba(0,0,0,0.1); }
-#reader-prev:disabled, #reader-next:disabled { opacity: 0.2; pointer-events: none; }
+#reader-prev {
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  color: var(--gs-ink);
+}
+#reader-next {
+  background: var(--gs-accent); color: #fff;
+}
+#reader-prev:active { background: var(--gs-bg-alt); }
+#reader-next:active { background: var(--gs-accent-deep); }
+#reader-prev:disabled, #reader-next:disabled { opacity: 0.4; pointer-events: none; }
 
 #reader-dots {
   display: flex; gap: 6px; align-items: center; justify-content: center;
 }
 .reader-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.15);
-  transition: background 0.2s, transform 0.2s;
+  width: 6px; height: 6px; border-radius: 99px;
+  background: var(--gs-hair);
+  transition: width 0.2s, background 0.2s;
 }
-.reader-dot.active { background: var(--gs-accent); transform: scale(1.3); }
+.reader-dot.active {
+  background: var(--gs-accent);
+  width: 20px;
+}
 
 #reader-again {
   position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
@@ -2738,26 +2915,33 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 
 <!-- Story Reader (Full-Screen Overlay) -->
 <div id="story-reader" aria-label="Story reader" role="dialog">
-  <button type="button" id="reader-close" aria-label="Close story">
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <button type="button" id="reader-print" aria-label="Print story">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-  </button>
-  <div id="reader-image-area"></div>
-  <div id="reader-text-area">
-    <p id="reader-text"></p>
-    <button type="button" id="reader-speak" aria-label="Read this page aloud">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+  <div id="reader-header">
+    <button type="button" id="reader-close" aria-label="Close story">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
+    <div id="reader-page-counter" aria-live="polite"></div>
+    <button type="button" id="reader-print" aria-label="Print story">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
+  </div>
+  <div id="reader-card">
+    <div id="reader-image-area">
+      <button type="button" id="reader-speak" aria-label="Read this page aloud">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+    </div>
+    <div id="reader-text-area">
+      <div id="reader-page-eyebrow"></div>
+      <p id="reader-text"></p>
+    </div>
   </div>
   <div id="reader-nav">
     <button type="button" id="reader-prev" aria-label="Previous page">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <div id="reader-dots"></div>
     <button type="button" id="reader-next" aria-label="Next page">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
     </button>
   </div>
   <button type="button" id="reader-again" style="display:none">Read Again</button>
@@ -6366,6 +6550,10 @@ function renderPath(track) {
         row.classList.add('current');
       }
 
+      // Wrap inner content in gs-step-card so the active-row card styling applies
+      const card = document.createElement('div');
+      card.className = 'gs-step-card';
+
       // Step image
       const imgDiv = document.createElement('div');
       imgDiv.className = 'sched-step-img';
@@ -6382,29 +6570,31 @@ function renderPath(track) {
         const act = DEFAULT_TASK_IMAGES.find(a => a.key === step.imageKey);
         if (act) imgDiv.innerHTML = act.svg;
       }
-      row.appendChild(imgDiv);
+      card.appendChild(imgDiv);
 
       // Step label
       const label = document.createElement('span');
       label.className = 'sched-step-label';
       label.textContent = step.label;
-      row.appendChild(label);
+      card.appendChild(label);
 
-      // Done checkmark (for completed steps)
-      const check = document.createElement('div');
-      check.className = 'sched-step-check';
-      check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>';
-      row.appendChild(check);
+      row.appendChild(card);
 
-      // Done button (for current step)
+      // Done button (long-press ring, matches Schedule)
       if (i === track.currentCount) {
         const doneBtn = document.createElement('button');
-        doneBtn.className = 'sched-step-done-btn';
-        doneBtn.textContent = 'Done!';
-        doneBtn.addEventListener('click', (e) => { e.stopPropagation(); handleTileTap(track); });
+        doneBtn.className = 'sched-step-done-btn gs-lp-btn';
+        doneBtn.type = 'button';
+        doneBtn.setAttribute('aria-label', 'Hold to mark ' + step.label + ' as done');
+        doneBtn.innerHTML =
+          '<svg class="gs-lp-ring-svg" viewBox="0 0 52 52">' +
+          '<circle class="gs-lp-ring" cx="26" cy="26" r="24"/>' +
+          '</svg>' +
+          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="position:relative;z-index:1;">' +
+          '<path d="M5 12 L10 17 L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>';
         row.appendChild(doneBtn);
-        row.style.cursor = 'pointer';
-        row.addEventListener('click', () => handleTileTap(track));
+        GSLongPress.bind(doneBtn, () => handleTileTap(track));
       }
 
       pathEl.appendChild(row);
@@ -7980,79 +8170,163 @@ async function initStories() {
   renderStoriesList();
 }
 
+// Split stories into "Recent" (read in last 7 days) and "This month" (older or unread).
+// Declared as function so it is hoisted and safe to call from top-level code.
+function splitStoriesBySection(stories) {
+  const now = Date.now();
+  const sevenDaysAgo = now - 7 * 86400000;
+  const recent = [], older = [];
+  for (const s of stories) {
+    // Clamp future timestamps (clock skew) so they don't pin to Recent forever
+    const raw = typeof s.lastReadAt === 'number' && s.lastReadAt > 0 ? s.lastReadAt : 0;
+    const lastRead = raw > 0 ? Math.min(raw, now) : 0;
+    if (lastRead >= sevenDaysAgo) recent.push({ story: s, lastRead });
+    else older.push({ story: s, lastRead });
+  }
+  recent.sort((a, b) => b.lastRead - a.lastRead);
+  older.sort((a, b) => {
+    const la = a.lastRead || (a.story.createdAt || a.story.updatedAt || 0);
+    const lb = b.lastRead || (b.story.createdAt || b.story.updatedAt || 0);
+    return lb - la;
+  });
+  return { recent: recent.map(x => x.story), older: older.map(x => x.story) };
+}
+
+function formatRelativeRead(lastReadAt) {
+  if (!lastReadAt) return 'Not yet read';
+  const days = Math.floor((Date.now() - lastReadAt) / 86400000);
+  if (days <= 0) return 'Read today';
+  if (days === 1) return 'Read yesterday';
+  if (days < 7) return 'Read ' + days + ' days ago';
+  if (days < 14) return 'Read last week';
+  if (days < 30) return 'Read ' + Math.floor(days / 7) + ' weeks ago';
+  return 'Read ' + Math.floor(days / 30) + ' month' + (days < 60 ? '' : 's') + ' ago';
+}
+
 function renderStoriesList() {
-  const grid = document.getElementById('stories-grid');
+  const list = document.getElementById('stories-grid');
   const empty = document.getElementById('stories-empty');
-  grid.innerHTML = '';
+  list.innerHTML = '';
   if (stories.length === 0) {
-    grid.style.display = 'none';
+    list.style.display = 'none';
     empty.style.display = 'flex';
     return;
   }
   empty.style.display = 'none';
-  grid.style.display = 'grid';
-  const sorted = [...stories].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-  sorted.forEach(story => {
-    const card = document.createElement('div');
-    card.className = 'story-card';
-    const cover = document.createElement('div');
-    cover.className = 'story-card-cover';
-    const firstPage = story.pages[0];
+  list.style.display = '';
+
+  const { recent, older } = splitStoriesBySection(stories);
+
+  const appendSectionLabel = (text) => {
+    const label = document.createElement('div');
+    label.className = 'gs-story-section-label';
+    label.textContent = text;
+    list.appendChild(label);
+  };
+
+  const appendStoryRow = (story) => {
+    const row = document.createElement('div');
+    row.className = 'gs-story-row';
+
+    const icon = document.createElement('div');
+    icon.className = 'gs-story-row-icon';
+    const firstPage = story.pages && story.pages[0];
     if (firstPage && firstPage.imageType === 'custom' && firstPage.customImageKey) {
       loadImage(firstPage.customImageKey).then(blob => {
-        if (blob) { const img = document.createElement('img'); img.src = URL.createObjectURL(blob); img.alt = story.title; cover.innerHTML = ''; cover.appendChild(img); }
+        if (blob) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(blob);
+          img.alt = story.title;
+          icon.innerHTML = '';
+          icon.appendChild(img);
+        }
       });
     } else if (firstPage && firstPage.stockKey && STORY_SVGS[firstPage.stockKey]) {
-      cover.innerHTML = STORY_SVGS[firstPage.stockKey];
+      icon.innerHTML = STORY_SVGS[firstPage.stockKey];
     }
-    card.appendChild(cover);
+    row.appendChild(icon);
 
-    const info = document.createElement('div');
-    info.className = 'story-card-info';
+    const body = document.createElement('div');
+    body.className = 'gs-story-row-body';
+
     const title = document.createElement('div');
-    title.className = 'story-card-title';
+    title.className = 'gs-story-row-title';
     title.textContent = story.title;
-    info.appendChild(title);
+    body.appendChild(title);
+
     const meta = document.createElement('div');
-    meta.className = 'story-card-meta';
-    meta.textContent = (story.childName || '') + (story.readCount ? ' \u00B7 Read ' + story.readCount + 'x' : '');
-    info.appendChild(meta);
-    card.appendChild(info);
+    meta.className = 'gs-story-row-meta';
+    const pages = story.pages ? story.pages.length : 0;
+    const parts = [];
+    if (story.readCount) parts.push('Read ' + story.readCount + 'x');
+    parts.push(pages + (pages === 1 ? ' page' : ' pages'));
+    parts.push(formatRelativeRead(story.lastReadAt));
+    meta.textContent = parts.join(' \u00B7 ');
+    body.appendChild(meta);
 
     const actions = document.createElement('div');
-    actions.className = 'story-card-actions';
+    actions.className = 'gs-story-row-actions';
+    const openBtn = document.createElement('button');
+    openBtn.className = 'gs-story-row-action primary';
+    openBtn.textContent = 'Open';
+    openBtn.addEventListener('click', (e) => { e.stopPropagation(); openStoryReader(story); });
+    actions.appendChild(openBtn);
     const editBtn = document.createElement('button');
-    editBtn.className = 'story-card-action-btn';
+    editBtn.className = 'gs-story-row-action';
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => { e.stopPropagation(); openStoryEditor(story); });
     actions.appendChild(editBtn);
     const shareBtn = document.createElement('button');
-    shareBtn.className = 'story-card-action-btn';
+    shareBtn.className = 'gs-story-row-action';
     shareBtn.textContent = 'Share';
     shareBtn.addEventListener('click', (e) => { e.stopPropagation(); exportStory(story); });
     actions.appendChild(shareBtn);
     const delBtn = document.createElement('button');
-    delBtn.className = 'story-card-action-btn danger';
+    delBtn.className = 'gs-story-row-action danger';
     delBtn.textContent = 'Delete';
     delBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (confirm('Delete "' + story.title + '"?')) {
-        deleteStory(story.id).then(() => { stories = stories.filter(s => s.id !== story.id); renderStoriesList(); showToast('Story deleted'); });
+        deleteStory(story.id).then(() => {
+          stories = stories.filter(s => s.id !== story.id);
+          renderStoriesList();
+          showToast('Story deleted');
+        });
       }
     });
     actions.appendChild(delBtn);
-    card.appendChild(actions);
+    body.appendChild(actions);
 
-    card.addEventListener('click', () => openStoryReader(story));
-    grid.appendChild(card);
-  });
+    row.appendChild(body);
+    row.addEventListener('click', () => openStoryReader(story));
+    list.appendChild(row);
+  };
 
+  if (recent.length > 0) {
+    appendSectionLabel('Recent');
+    recent.forEach(appendStoryRow);
+  }
+  if (older.length > 0) {
+    appendSectionLabel(recent.length > 0 ? 'This month' : 'All stories');
+    older.forEach(appendStoryRow);
+  }
+
+  // Create-new dashed card at end of list
   const createCard = document.createElement('div');
-  createCard.className = 'story-card story-card-create';
-  createCard.innerHTML = '<div class="story-card-cover" style="display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#aaa;">+</div>'
-    + '<div class="story-card-info"><div class="story-card-title" style="color:#7C74FF;">Create Story</div></div>';
+  createCard.className = 'gs-story-row gs-story-row-create';
+  createCard.innerHTML =
+    '<div class="gs-story-row-icon gs-story-row-icon-plus">' +
+    '<svg viewBox="0 0 24 24" width="28" height="28" fill="none">' +
+    '<line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+    '<line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+    '</svg>' +
+    '</div>' +
+    '<div class="gs-story-row-body">' +
+    '<div class="gs-story-row-title gs-story-row-title-create">Create a new story</div>' +
+    '<div class="gs-story-row-meta">Walk your child through something new</div>' +
+    '</div>';
   createCard.addEventListener('click', () => openStoryEditor(null));
-  grid.appendChild(createCard);
+  list.appendChild(createCard);
 }
 
 // -- Story Reader --
@@ -8083,7 +8357,10 @@ function openStoryReader(story, previewPages) {
 function renderReaderPage(pages, direction) {
   const page = pages[currentReaderPage];
   const imgArea = document.getElementById('reader-image-area');
+  const speakBtn = document.getElementById('reader-speak');
   const textEl = document.getElementById('reader-text');
+  const eyebrowEl = document.getElementById('reader-page-eyebrow');
+  const counterEl = document.getElementById('reader-page-counter');
   const prevBtn = document.getElementById('reader-prev');
   const nextBtn = document.getElementById('reader-next');
   const againBtn = document.getElementById('reader-again');
@@ -8091,22 +8368,45 @@ function renderReaderPage(pages, direction) {
 
   const animClass = direction === 'forward' ? 'reader-slide-enter' : direction === 'back' ? 'reader-slide-enter-back' : '';
 
-  imgArea.innerHTML = '';
-  imgArea.className = 'reader-image-area-inner';
+  // Replace image content while preserving the speaker button (which lives inside the image area)
+  const children = Array.from(imgArea.childNodes);
+  for (const child of children) {
+    if (child !== speakBtn) imgArea.removeChild(child);
+  }
   if (page.imageType === 'custom' && page.customImageKey) {
     loadImage(page.customImageKey).then(blob => {
-      if (blob) { const img = document.createElement('img'); img.src = URL.createObjectURL(blob); img.alt = ''; imgArea.appendChild(img); }
+      if (blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.alt = '';
+        imgArea.insertBefore(img, speakBtn);
+      }
     });
   } else if (page.stockKey && STORY_SVGS[page.stockKey]) {
-    imgArea.innerHTML = STORY_SVGS[page.stockKey];
+    const svgWrap = document.createElement('div');
+    svgWrap.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
+    svgWrap.innerHTML = STORY_SVGS[page.stockKey];
+    imgArea.insertBefore(svgWrap, speakBtn);
   }
-  if (animClass) { imgArea.parentElement.querySelector('#reader-image-area').classList.remove('reader-slide-enter', 'reader-slide-enter-back'); void imgArea.offsetWidth; }
 
   let displayText = page.text || '';
   if (currentReaderStory) {
     displayText = personalizeStoryText(displayText, currentReaderStory.childName || '', currentReaderStory.personMode || 'first', currentReaderStory.parentName || 'Mommy');
   }
   textEl.textContent = displayText;
+
+  // Page counter and eyebrow
+  const total = pages.length;
+  const pageNum = currentReaderPage + 1;
+  if (counterEl) {
+    const title = currentReaderStory && currentReaderStory.title ? currentReaderStory.title : 'Story';
+    counterEl.textContent = title + ' - ' + pageNum + ' / ' + total;
+  }
+  if (eyebrowEl) {
+    const ordinals = ['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen'];
+    const word = ordinals[currentReaderPage] || String(pageNum);
+    eyebrowEl.textContent = 'Page ' + word;
+  }
 
   if (animClass) {
     const textArea = document.getElementById('reader-text-area');
@@ -9145,17 +9445,17 @@ function updateWordCounter(text) {
     warnEl.style.display = 'none';
     splitWrap.style.display = 'none';
   } else if (limitState.state === 'over') {
-    countEl.style.color = 'var(--chrome-accent)';
-    barEl.style.background = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
+    barEl.style.background = 'var(--gs-accent)';
     coachEl.textContent = 'Shorter pages are easier to follow -- you know your child best';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
     warnEl.style.display = 'none';
     splitWrap.style.display = 'none';
   } else if (limitState.state === 'nearcap') {
-    countEl.style.color = 'var(--chrome-accent)';
-    barEl.style.background = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
+    barEl.style.background = 'var(--gs-accent)';
     coachEl.textContent = 'Getting long -- splitting into two pages can help';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
     warnEl.style.display = 'none';
     splitWrap.style.display = '';
   } else if (limitState.state === 'hardcap') {
@@ -9472,9 +9772,9 @@ function renderHelperSeqList() {
       } else {
         hint.style.display = '';
         hint.querySelector('.word-counter-count').textContent = wc + ' / ' + ls.soft + ' words';
-        hint.querySelector('.word-counter-count').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--chrome-accent)';
+        hint.querySelector('.word-counter-count').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--gs-accent)';
         hint.querySelector('.word-counter-coaching').textContent = 'Shorter pages are easier to follow';
-        hint.querySelector('.word-counter-coaching').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--chrome-accent)';
+        hint.querySelector('.word-counter-coaching').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--gs-accent)';
       }
     });
     row.appendChild(input);
@@ -9564,9 +9864,9 @@ function updateHelperWordHint(hintId, text) {
     coachEl.textContent = 'Page is full -- try shorter sentences';
     coachEl.style.color = 'var(--gs-warn)';
   } else {
-    countEl.style.color = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
     coachEl.textContent = 'Shorter pages are easier to follow';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
   }
 }
 
@@ -9954,7 +10254,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-schedule .sched-step.current .sched-step-done-btn'),
-          text: () => 'When they finish, tap Done! to move to the next step.',
+          text: () => 'When they finish, hold the Done button to move to the next step.',
           placement: 'bottom',
           btnLabel: null,
           waitForAction: true,
@@ -9988,7 +10288,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-rewards .sched-step.current .sched-step-done-btn'),
-          text: () => 'Tap Done! to complete each step and work toward the reward.',
+          text: () => 'Press and hold the Done button to complete each step and work toward the reward.',
           placement: 'bottom',
           btnLabel: 'Got it!',
           waitForAction: false,
@@ -10005,12 +10305,12 @@ const GSCoachMarks = {
     stories: {
       steps: [
         {
-          target: () => document.querySelector('#stories-grid .story-card'),
+          target: () => document.querySelector('#stories-grid .gs-story-row'),
           text: () => 'Social stories help prepare ' + GSCoachMarks._childName().replace("'s", '') + ' for new experiences. Tap a story to read it together.',
           placement: 'bottom',
           btnLabel: null,
           waitForAction: true,
-          guard: () => !!document.querySelector('#stories-grid .story-card')
+          guard: () => !!document.querySelector('#stories-grid .gs-story-row')
         },
         {
           target: () => document.getElementById('reader-text-area'),
