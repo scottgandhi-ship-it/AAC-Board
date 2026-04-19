@@ -2,6 +2,38 @@ default_platform(:ios)
 
 platform :ios do
 
+  # REST-based latest-build lookup. Avoids fastlane's default spaceship
+  # call which hits the legacy iTunes Connect endpoint and can fail with
+  # "A required agreement is missing or has expired" even when the actual
+  # paid-apps agreement is in effect. Returns highest CFBundleVersion of
+  # any uploaded build for the given bundle id (0 if none).
+  def fetch_latest_build_via_rest(app_identifier:)
+    require "jwt"
+    require "net/http"
+    require "json"
+
+    key_data = File.read(File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]))
+    ec_key = OpenSSL::PKey::EC.new(key_data)
+    now = Time.now.to_i
+    payload = { iss: ENV["ASC_ISSUER_ID"], iat: now, exp: now + 1200, aud: "appstoreconnect-v1" }
+    token = JWT.encode(payload, ec_key, "ES256", { kid: ENV["ASC_KEY_ID"] })
+    headers = { "Authorization" => "Bearer #{token}" }
+
+    uri = URI("https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]=#{app_identifier}&fields[apps]=bundleId")
+    req = Net::HTTP::Get.new(uri, headers)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    app_data = JSON.parse(res.body)["data"]
+    UI.user_error!("No ASC app found for bundle id #{app_identifier}") if app_data.nil? || app_data.empty?
+    app_id = app_data[0]["id"]
+
+    uri = URI("https://api.appstoreconnect.apple.com/v1/builds?filter[app]=#{app_id}&sort=-uploadedDate&limit=1&fields[builds]=version")
+    req = Net::HTTP::Get.new(uri, headers)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |h| h.request(req) }
+    builds = JSON.parse(res.body)["data"]
+    return 0 if builds.nil? || builds.empty?
+    builds[0]["attributes"]["version"].to_i
+  end
+
   # Shared helper: wait for build processing, submit beta review, distribute to external group
   def distribute_to_external(api_key:, app_identifier:, build_number:)
     require "jwt"
@@ -158,12 +190,11 @@ platform :ios do
       key_filepath: File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]),
     )
 
-    # Auto-increment build number
-    current = latest_testflight_build_number(
-      api_key: api_key,
-      app_identifier: "com.lussier.guidingsteps",
-    )
-    new_build = current + 1
+    # Auto-increment build number via ASC REST API (bypasses legacy iTunes
+    # Connect endpoint that sometimes blocks on outdated paid-apps agreement).
+    new_build = fetch_latest_build_via_rest(
+      app_identifier: "com.lussier.guidingsteps"
+    ) + 1
     increment_build_number(
       build_number: new_build,
       xcodeproj: File.join(guiding_steps_dir, "ios/App/App.xcodeproj"),
@@ -195,7 +226,62 @@ platform :ios do
     )
   end
 
-  desc "Build and upload both apps to TestFlight"
+  desc "Build Yappie Adult, upload to TestFlight, and distribute to external testers"
+  lane :yappieadult do
+    yappie_adult_dir = File.join(ENV["PWD"], "yappie-adult")
+
+    # Sync web assets and iOS project for Yappie Adult
+    sh("cd #{yappie_adult_dir} && bash sync-www.sh && npx cap sync ios")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: File.join(ENV["PWD"], ENV["ASC_KEY_PATH"]),
+    )
+
+    # Auto-increment build number
+    current = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: "com.lussier.yappieadult",
+    )
+    new_build = current + 1
+    increment_build_number(
+      build_number: new_build,
+      xcodeproj: File.join(yappie_adult_dir, "ios/App/App.xcodeproj"),
+    )
+    UI.message("Yappie Adult build number: #{new_build}")
+
+    build_app(
+      project: File.join(yappie_adult_dir, "ios/App/App.xcodeproj"),
+      scheme: "App",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "2H6JBS4JF8",
+      },
+      output_directory: "build/yappieadult",
+      output_name: "YappieAdult.ipa",
+      clean: true,
+      xcargs: "-allowProvisioningUpdates",
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: "com.lussier.yappieadult",
+      skip_waiting_for_build_processing: true,
+    )
+
+    UI.success("Yappie Adult #{new_build} uploaded to TestFlight!")
+
+    # Auto-distribute to external testers
+    distribute_to_external(
+      api_key: api_key,
+      app_identifier: "com.lussier.yappieadult",
+      build_number: new_build,
+    )
+  end
+
+  desc "Build and upload all apps to TestFlight"
   lane :both do
     aacboard
     guidingsteps
