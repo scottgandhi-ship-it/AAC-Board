@@ -4386,8 +4386,15 @@ document.getElementById('visible-steps-group').addEventListener('keydown', (e) =
 });
 
 // -- Long-press Done duration setting --
+// Reads duration via a local helper so this block does not depend on GSLongPress
+// being defined yet (GSLongPress is declared much later in the file).
+function _gsLongPressDurationFromStorage() {
+  const raw = parseInt(localStorage.getItem('gs-long-press-duration') || '', 10);
+  if (!Number.isFinite(raw)) return 300;
+  return Math.min(400, Math.max(200, raw));
+}
 function applyLongPressDurationSetting() {
-  const current = GSLongPress.getDuration();
+  const current = _gsLongPressDurationFromStorage();
   document.querySelectorAll('#long-press-group .seg-btn').forEach(btn => {
     btn.setAttribute('aria-checked', String(parseInt(btn.dataset.value, 10) === current));
   });
@@ -4397,7 +4404,9 @@ applyLongPressDurationSetting();
 document.getElementById('long-press-group').addEventListener('click', (e) => {
   const btn = e.target.closest('.seg-btn');
   if (!btn) return;
-  GSLongPress.setDuration(parseInt(btn.dataset.value, 10));
+  const ms = parseInt(btn.dataset.value, 10);
+  const clamped = Math.min(400, Math.max(200, ms));
+  localStorage.setItem('gs-long-press-duration', String(clamped));
   applyLongPressDurationSetting();
 });
 document.getElementById('long-press-group').addEventListener('keydown', (e) => {
