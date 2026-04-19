@@ -1,8 +1,11 @@
-const CACHE_NAME = 'guiding-steps-v15';
+const CACHE_NAME = 'guiding-steps-v16';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './fonts/Fraunces-Regular.woff2',
+  './fonts/Inter-Medium.woff2',
+  './fonts/Inter-SemiBold.woff2'
 ];
 
 // Install -- pre-cache shell assets
@@ -23,8 +26,19 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch -- network-first strategy
+// Fetch -- network-first for HTML/app assets, cache-first for immutable fonts
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  if (url.pathname.includes('/fonts/') && url.pathname.endsWith('.woff2')) {
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request).then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return response;
+      }))
+    );
+    return;
+  }
   e.respondWith(
     fetch(e.request)
       .then(response => {

@@ -1,0 +1,3324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Guiding Steps — Storybook Canvas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // Edit-mode tweak defaults (the /*EDITMODE-...*/ block is how the host persists changes).
+  window.__GS_TWEAKS = /*EDITMODE-BEGIN*/{
+    "textSize": 1,
+    "darkMode": false,
+    "reduceMotion": false
+  }/*EDITMODE-END*/;
+</script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+
+// ====== lib/design-canvas.jsx ======
+
+// DesignCanvas.jsx — Figma-ish design canvas wrapper
+// Warm gray grid bg + Sections + Artboards + PostIt notes.
+// No assets, no deps.
+
+const DC = {
+  bg: '#f0eee9',
+  grid: 'rgba(0,0,0,0.06)',
+  label: 'rgba(60,50,40,0.7)',
+  title: 'rgba(40,30,20,0.85)',
+  subtitle: 'rgba(60,50,40,0.6)',
+  postitBg: '#fef4a8',
+  postitText: '#5a4a2a',
+  font: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+};
+
+// ─────────────────────────────────────────────────────────────
+// Main canvas — transform-based pan/zoom viewport
+//
+// Input mapping (Figma-style):
+//   • trackpad pinch  → zoom   (ctrlKey wheel; Safari gesture* events)
+//   • trackpad scroll → pan    (two-finger)
+//   • mouse wheel     → zoom   (notched; distinguished from trackpad scroll)
+//   • middle-drag / primary-drag-on-bg → pan
+//
+// Transform state lives in a ref and is written straight to the DOM
+// (translate3d + will-change) so wheel ticks don't go through React —
+// keeps pans at 60fps on dense canvases.
+// ─────────────────────────────────────────────────────────────
+function DesignCanvas({ children, minScale = 0.1, maxScale = 8, style = {} }) {
+  const vpRef = React.useRef(null);
+  const worldRef = React.useRef(null);
+  const tf = React.useRef({ x: 0, y: 0, scale: 1 });
+
+  const apply = React.useCallback(() => {
+    const { x, y, scale } = tf.current;
+    const el = worldRef.current;
+    if (el) el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+  }, []);
+
+  React.useEffect(() => {
+    const vp = vpRef.current;
+    if (!vp) return;
+
+    const zoomAt = (cx, cy, factor) => {
+      const r = vp.getBoundingClientRect();
+      const px = cx - r.left, py = cy - r.top;
+      const t = tf.current;
+      const next = Math.min(maxScale, Math.max(minScale, t.scale * factor));
+      const k = next / t.scale;
+      // keep the world point under the cursor fixed
+      t.x = px - (px - t.x) * k;
+      t.y = py - (py - t.y) * k;
+      t.scale = next;
+      apply();
+    };
+
+    // Mouse-wheel vs trackpad-scroll heuristic. A physical wheel sends
+    // line-mode deltas (Firefox) or large integer pixel deltas with no X
+    // component (Chrome/Safari, typically multiples of 100/120). Trackpad
+    // two-finger scroll sends small/fractional pixel deltas, often with
+    // non-zero deltaX. ctrlKey is set by the browser for trackpad pinch.
+    const isMouseWheel = (e) =>
+      e.deltaMode !== 0 ||
+      (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 40);
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (isGesturing) return; // Safari: gesture* owns the pinch — discard concurrent wheels
+      if (e.ctrlKey) {
+        // trackpad pinch (or explicit ctrl+wheel)
+        zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+      } else if (isMouseWheel(e)) {
+        // notched mouse wheel — fixed-ratio step per click
+        zoomAt(e.clientX, e.clientY, Math.exp(-Math.sign(e.deltaY) * 0.18));
+      } else {
+        // trackpad two-finger scroll — pan
+        tf.current.x -= e.deltaX;
+        tf.current.y -= e.deltaY;
+        apply();
+      }
+    };
+
+    // Safari sends native gesture* events for trackpad pinch with a smooth
+    // e.scale; preferring these over the ctrl+wheel fallback gives a much
+    // better feel there. No-ops on other browsers. Safari also fires
+    // ctrlKey wheel events during the same pinch — isGesturing makes
+    // onWheel drop those entirely so they neither zoom nor pan.
+    let gsBase = 1;
+    let isGesturing = false;
+    const onGestureStart = (e) => { e.preventDefault(); isGesturing = true; gsBase = tf.current.scale; };
+    const onGestureChange = (e) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, (gsBase * e.scale) / tf.current.scale);
+    };
+    const onGestureEnd = (e) => { e.preventDefault(); isGesturing = false; };
+
+    // Drag-pan: middle button anywhere, or primary button starting on the
+    // canvas background (not inside an artboard).
+    let drag = null;
+    const onPointerDown = (e) => {
+      const onBg = e.target === vp || e.target === worldRef.current;
+      if (!(e.button === 1 || (e.button === 0 && onBg))) return;
+      e.preventDefault();
+      vp.setPointerCapture(e.pointerId);
+      drag = { id: e.pointerId, lx: e.clientX, ly: e.clientY };
+      vp.style.cursor = 'grabbing';
+    };
+    const onPointerMove = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      tf.current.x += e.clientX - drag.lx;
+      tf.current.y += e.clientY - drag.ly;
+      drag.lx = e.clientX; drag.ly = e.clientY;
+      apply();
+    };
+    const onPointerUp = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      vp.releasePointerCapture(e.pointerId);
+      drag = null;
+      vp.style.cursor = '';
+    };
+
+    vp.addEventListener('wheel', onWheel, { passive: false });
+    vp.addEventListener('gesturestart', onGestureStart, { passive: false });
+    vp.addEventListener('gesturechange', onGestureChange, { passive: false });
+    vp.addEventListener('gestureend', onGestureEnd, { passive: false });
+    vp.addEventListener('pointerdown', onPointerDown);
+    vp.addEventListener('pointermove', onPointerMove);
+    vp.addEventListener('pointerup', onPointerUp);
+    vp.addEventListener('pointercancel', onPointerUp);
+    return () => {
+      vp.removeEventListener('wheel', onWheel);
+      vp.removeEventListener('gesturestart', onGestureStart);
+      vp.removeEventListener('gesturechange', onGestureChange);
+      vp.removeEventListener('gestureend', onGestureEnd);
+      vp.removeEventListener('pointerdown', onPointerDown);
+      vp.removeEventListener('pointermove', onPointerMove);
+      vp.removeEventListener('pointerup', onPointerUp);
+      vp.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [apply, minScale, maxScale]);
+
+  const gridSvg = `url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 0H0v120' fill='none' stroke='${encodeURIComponent(DC.grid)}' stroke-width='1'/%3E%3C/svg%3E")`;
+  return (
+    <div
+      ref={vpRef}
+      className="design-canvas"
+      style={{
+        height: '100vh', width: '100vw',
+        background: DC.bg,
+        overflow: 'hidden',
+        overscrollBehavior: 'none',
+        touchAction: 'none',
+        position: 'relative',
+        fontFamily: DC.font,
+        boxSizing: 'border-box',
+        ...style,
+      }}
+    >
+      <div
+        ref={worldRef}
+        style={{
+          position: 'absolute', top: 0, left: 0,
+          transformOrigin: '0 0',
+          willChange: 'transform',
+          width: 'max-content', minWidth: '100%',
+          minHeight: '100%',
+          padding: '60px 0 80px',
+          backgroundImage: gridSvg,
+          backgroundSize: '120px 120px',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Section — title + subtitle + h-stack of artboards (no wrap)
+// ─────────────────────────────────────────────────────────────
+function DCSection({ title, subtitle, children, gap = 48 }) {
+  return (
+    <div style={{ marginBottom: 80, position: 'relative' }}>
+      <div style={{ padding: '0 60px 36px' }}>
+        <div style={{
+          fontSize: 22, fontWeight: 600, color: DC.title,
+          letterSpacing: -0.3, marginBottom: 4,
+        }}>{title}</div>
+        {subtitle && (
+          <div style={{
+            fontSize: 14, fontWeight: 400, color: DC.subtitle,
+          }}>{subtitle}</div>
+        )}
+      </div>
+      {/* h-stack — clips offscreen, never wraps */}
+      <div style={{
+        display: 'flex', gap, padding: '0 60px',
+        alignItems: 'flex-start', width: 'max-content',
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Artboard — labeled card
+// ─────────────────────────────────────────────────────────────
+function DCArtboard({ label, children, width, height, style = {} }) {
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      {label && (
+        <div style={{
+          position: 'absolute', bottom: '100%', left: 0,
+          paddingBottom: 8,
+          fontSize: 12, fontWeight: 500, color: DC.label,
+          whiteSpace: 'nowrap',
+        }}>{label}</div>
+      )}
+      <div style={{
+        borderRadius: 2,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06)',
+        overflow: 'hidden',
+        width, height,
+        background: '#fff',
+        ...style,
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Post-it — absolute-positioned sticky note
+// ─────────────────────────────────────────────────────────────
+function DCPostIt({ children, top, left, right, bottom, rotate = -2, width = 180 }) {
+  return (
+    <div style={{
+      position: 'absolute', top, left, right, bottom, width,
+      background: DC.postitBg, padding: '14px 16px',
+      fontFamily: '"Comic Sans MS", "Marker Felt", "Segoe Print", cursive',
+      fontSize: 14, lineHeight: 1.4, color: DC.postitText,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
+      transform: `rotate(${rotate}deg)`,
+      zIndex: 5,
+    }}>{children}</div>
+  );
+}
+
+Object.assign(window, { DesignCanvas, DCSection, DCArtboard, DCPostIt });
+
+
+
+
+// ====== lib/ios-frame.jsx ======
+
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+});
+
+
+
+// ====== lib/shared.jsx ======
+// Shared utilities and icons used across all three directions.
+// Keeps icons as clean flat SVG (user asked to keep simple flat icons, cleaner).
+
+// ─── Flat step icons ────────────────────────────────────────
+// Each takes { size=56, palette } where palette is per-direction color tokens.
+// The goal: same silhouettes, different treatments per direction.
+
+const Icons = {
+  sun: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <circle cx="32" cy="32" r="11" fill={p.warm} />
+      <g stroke={p.warm} strokeWidth="3.2" strokeLinecap="round">
+        <line x1="32" y1="8"  x2="32" y2="15" />
+        <line x1="32" y1="49" x2="32" y2="56" />
+        <line x1="8"  y1="32" x2="15" y2="32" />
+        <line x1="49" y1="32" x2="56" y2="32" />
+        <line x1="15" y1="15" x2="20" y2="20" />
+        <line x1="44" y1="44" x2="49" y2="49" />
+        <line x1="49" y1="15" x2="44" y2="20" />
+        <line x1="15" y1="49" x2="20" y2="44" />
+      </g>
+    </svg>
+  ),
+  toilet: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <rect x="14" y="20" width="36" height="22" rx="6" fill={p.neutral} />
+      <rect x="18" y="42" width="28" height="12" rx="3" fill={p.neutralDeep} />
+      <ellipse cx="32" cy="26" rx="12" ry="4" fill={p.neutralDeep} opacity="0.4" />
+    </svg>
+  ),
+  toothbrush: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <rect x="27" y="8" width="10" height="32" rx="3" fill={p.cool} />
+      <rect x="24" y="38" width="16" height="8" rx="2" fill={p.neutral} />
+      <rect x="25" y="46" width="14" height="12" rx="3" fill={p.neutralDeep} />
+    </svg>
+  ),
+  pajamas: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <path d="M20 14 L32 10 L44 14 L46 26 L42 28 L42 54 L22 54 L22 28 L18 26 Z" fill={p.accent} />
+      <circle cx="32" cy="30" r="1.8" fill={p.accentDeep} />
+      <circle cx="32" cy="38" r="1.8" fill={p.accentDeep} />
+      <circle cx="32" cy="46" r="1.8" fill={p.accentDeep} />
+    </svg>
+  ),
+  book: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <rect x="10" y="14" width="44" height="36" rx="3" fill={p.warm} />
+      <line x1="32" y1="14" x2="32" y2="50" stroke="#fff" strokeWidth="2" opacity="0.6" />
+      <line x1="16" y1="24" x2="28" y2="24" stroke="#fff" strokeWidth="1.5" opacity="0.6" />
+      <line x1="16" y1="30" x2="28" y2="30" stroke="#fff" strokeWidth="1.5" opacity="0.6" />
+      <line x1="36" y1="24" x2="48" y2="24" stroke="#fff" strokeWidth="1.5" opacity="0.6" />
+      <line x1="36" y1="30" x2="48" y2="30" stroke="#fff" strokeWidth="1.5" opacity="0.6" />
+    </svg>
+  ),
+  lightbulb: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <path d="M32 10 C22 10 16 17 16 26 C16 32 20 36 23 40 L23 44 L41 44 L41 40 C44 36 48 32 48 26 C48 17 42 10 32 10 Z" fill={p.warm} />
+      <rect x="24" y="46" width="16" height="5" rx="1.5" fill={p.neutralDeep} />
+      <rect x="26" y="52" width="12" height="4" rx="1.5" fill={p.neutralDeep} />
+    </svg>
+  ),
+  heart: (p) => (
+    <svg viewBox="0 0 64 64" width={p.size} height={p.size} fill="none">
+      <path d="M32 52 C10 36 10 18 22 18 C28 18 32 22 32 26 C32 22 36 18 42 18 C54 18 54 36 32 52 Z" fill={p.accent} />
+    </svg>
+  ),
+  store: (p) => (
+    <svg viewBox="0 0 120 120" width={p.size} height={p.size} fill="none">
+      <rect x="20" y="40" width="80" height="60" rx="4" fill={p.coolPale} stroke={p.cool} strokeWidth="4" />
+      <rect x="30" y="52" width="16" height="16" rx="2" fill={p.coolPale} stroke={p.cool} strokeWidth="3" />
+      <rect x="52" y="52" width="16" height="16" rx="2" fill={p.coolPale} stroke={p.cool} strokeWidth="3" />
+      <rect x="74" y="52" width="16" height="16" rx="2" fill={p.coolPale} stroke={p.cool} strokeWidth="3" />
+      <rect x="48" y="74" width="24" height="26" rx="2" fill={p.cool} />
+    </svg>
+  ),
+  house: (p) => (
+    <svg viewBox="0 0 120 120" width={p.size} height={p.size} fill="none">
+      <path d="M20 58 L60 26 L100 58 L100 100 L20 100 Z" fill={p.warmPale} stroke={p.warm} strokeWidth="4" strokeLinejoin="round"/>
+      <rect x="50" y="66" width="20" height="34" fill={p.warm} />
+      <rect x="30" y="66" width="14" height="14" fill={p.warmPale} stroke={p.warm} strokeWidth="3"/>
+      <rect x="76" y="66" width="14" height="14" fill={p.warmPale} stroke={p.warm} strokeWidth="3"/>
+    </svg>
+  ),
+  scissors: (p) => (
+    <svg viewBox="0 0 120 120" width={p.size} height={p.size} fill="none">
+      <circle cx="38" cy="36" r="12" fill={p.accent} />
+      <circle cx="38" cy="84" r="12" fill={p.accent} />
+      <circle cx="38" cy="36" r="5" fill={p.coolPale} />
+      <circle cx="38" cy="84" r="5" fill={p.coolPale} />
+      <path d="M50 42 L94 66 M50 78 L94 54" stroke={p.neutralDeep} strokeWidth="5" strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
+// Tab icons — outlined, slightly different per direction weight
+const TabIcons = {
+  schedule: (c, w=2) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <line x1="5" y1="7" x2="7" y2="7" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="5" y1="12" x2="7" y2="12" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="5" y1="17" x2="7" y2="17" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="10" y1="7" x2="19" y2="7" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="10" y1="12" x2="19" y2="12" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="10" y1="17" x2="19" y2="17" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+    </svg>
+  ),
+  steps: (c, w=2, fill) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <path d="M12 3 L14.5 9 L21 9.5 L16 14 L17.5 20.5 L12 17 L6.5 20.5 L8 14 L3 9.5 L9.5 9 Z"
+        stroke={c} strokeWidth={w} strokeLinejoin="round" fill={fill || 'none'}/>
+    </svg>
+  ),
+  stories: (c, w=2, fill) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <rect x="5" y="3" width="14" height="18" rx="2" stroke={c} strokeWidth={w} fill={fill || 'none'}/>
+      <line x1="9" y1="3" x2="9" y2="21" stroke={c} strokeWidth={w}/>
+    </svg>
+  ),
+  settings: (c, w=2) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <circle cx="12" cy="12" r="3" stroke={c} strokeWidth={w}/>
+      <path d="M12 2 L13 5 M12 22 L13 19 M22 12 L19 13 M2 12 L5 13 M19 5 L17 7 M5 19 L7 17 M19 19 L17 17 M5 5 L7 7"
+        stroke={c} strokeWidth={w} strokeLinecap="round"/>
+    </svg>
+  ),
+  check: (c, w=3) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <path d="M5 12 L10 17 L19 7" stroke={c} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  close: (c, w=2) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <path d="M6 6 L18 18 M18 6 L6 18" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+    </svg>
+  ),
+  print: (c, w=2) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <rect x="6" y="3" width="12" height="6" stroke={c} strokeWidth={w}/>
+      <rect x="4" y="9" width="16" height="9" rx="2" stroke={c} strokeWidth={w}/>
+      <rect x="7" y="14" width="10" height="6" stroke={c} strokeWidth={w}/>
+    </svg>
+  ),
+  speaker: (c, w=2) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+      <path d="M4 9 L9 9 L14 5 L14 19 L9 15 L4 15 Z" stroke={c} strokeWidth={w} strokeLinejoin="round" fill={c} fillOpacity="0.15"/>
+      <path d="M17 9 Q19 12 17 15" stroke={c} strokeWidth={w} strokeLinecap="round" fill="none"/>
+    </svg>
+  ),
+  chevronL: (c, w=2.5) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <path d="M15 5 L8 12 L15 19" stroke={c} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  chevronR: (c, w=2.5) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <path d="M9 5 L16 12 L9 19" stroke={c} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  plus: (c, w=3) => (
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+      <line x1="12" y1="5" x2="12" y2="19" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+      <line x1="5" y1="12" x2="19" y2="12" stroke={c} strokeWidth={w} strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
+// Phone shell: rounded device-style rectangle, 390x844, bezel optional.
+function Phone({ bg, children, label }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{
+        width: 390, height: 844,
+        borderRadius: 48,
+        overflow: 'hidden',
+        position: 'relative',
+        background: bg,
+        boxShadow: '0 0 0 10px #1a1a1a, 0 0 0 12px #2a2a2a, 0 40px 80px rgba(0,0,0,0.18)',
+        fontFamily: 'inherit',
+      }}>
+        {/* dynamic island */}
+        <div style={{
+          position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+          width: 120, height: 34, borderRadius: 24, background: '#000', zIndex: 50,
+        }} />
+        {children}
+        {/* home indicator */}
+        <div style={{
+          position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)',
+          width: 134, height: 5, borderRadius: 99, background: 'rgba(0,0,0,0.3)', zIndex: 60,
+        }} />
+      </div>
+      {label && (
+        <div style={{
+          marginTop: 16, fontSize: 13, fontWeight: 500,
+          color: 'rgba(40,30,20,0.6)', letterSpacing: 0.1,
+          fontFamily: '-apple-system, system-ui',
+        }}>{label}</div>
+      )}
+    </div>
+  );
+}
+
+// Status bar — minimal; time on left, signal/wifi/battery on right
+function StatusBar({ color = '#000', time = '11:41' }) {
+  return (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, height: 54,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '18px 28px 0', zIndex: 40, pointerEvents: 'none',
+      fontFamily: '-apple-system, "SF Pro", system-ui',
+    }}>
+      <div style={{ fontSize: 16, fontWeight: 600, color }}>{time}</div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        {/* signal */}
+        <svg width="17" height="11" viewBox="0 0 17 11"><g fill={color}>
+          <rect x="0" y="7" width="3" height="4" rx="0.5"/>
+          <rect x="4.5" y="5" width="3" height="6" rx="0.5"/>
+          <rect x="9" y="3" width="3" height="8" rx="0.5"/>
+          <rect x="13.5" y="1" width="3" height="10" rx="0.5"/>
+        </g></svg>
+        {/* wifi */}
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+          <path d="M8 3 Q12 3 15 6" stroke={color} strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+          <path d="M8 6 Q10.5 6 12.5 8" stroke={color} strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+          <circle cx="8" cy="10" r="1.1" fill={color}/>
+        </svg>
+        {/* battery */}
+        <svg width="26" height="11" viewBox="0 0 26 11" fill="none">
+          <rect x="0.5" y="0.5" width="22" height="10" rx="2.5" stroke={color} strokeOpacity="0.5"/>
+          <rect x="2" y="2" width="19" height="7" rx="1" fill={color}/>
+          <rect x="23.5" y="4" width="1.5" height="3" rx="0.5" fill={color} fillOpacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { Icons, TabIcons, Phone, StatusBar });
+
+
+
+// ====== lib/direction-c.jsx ======
+// Direction C — "Storybook Canvas"
+// Calm, editorial, ultra-readable. Low-stimulation cream, single deep-teal accent,
+// Fraunces display + humanist sans. Progress: numbered breadcrumbs + a left "spine" line.
+// Done: long-press to confirm (ring fills).
+
+// Revised palette — shifts away from teal "gardening" toward a dusk/cocoa story-time
+// vibe. Single indigo accent on a warm ivory canvas. Calm, still low-stim.
+const C = {
+  bg: '#FBF6EC',           // warm ivory
+  bgAlt: '#F0E8D6',
+  card: '#FFFFFF',
+  ink: '#1B1D2E',          // indigo-black
+  inkSoft: '#4A4D63',
+  inkMuted: '#8F8FA3',
+  accent: '#4F46B8',       // deep indigo
+  accentSoft: '#E2DFF6',
+  accentDeep: '#2E2782',
+  warn: '#C5553A',         // terracotta for delete
+  hair: 'rgba(27,29,46,0.1)',
+  hairSoft: 'rgba(27,29,46,0.05)',
+  shadow: '0 1px 2px rgba(27,29,46,0.04), 0 8px 24px rgba(27,29,46,0.06)',
+
+  iconPalette: {
+    warm: '#E07B3E', warmPale: '#F7D9BF',
+    cool: '#4F46B8', coolPale: '#E2DFF6',
+    accent: '#C5553A', accentDeep: '#8A3520',
+    neutral: '#E6DEC9', neutralDeep: '#A69A7B',
+  },
+
+  fontDisplay: '"Fraunces", Georgia, serif',
+  fontBody: '"Inter", -apple-system, system-ui, sans-serif',
+};
+
+function DirC_TopBar({ title, eyebrow }) {
+  return (
+    <div style={{ padding: '58px 24px 14px' }}>
+      {eyebrow && (
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, fontWeight: 600,
+          color: C.inkMuted, letterSpacing: 1.4, textTransform: 'uppercase',
+          marginBottom: 4,
+        }}>{eyebrow}</div>
+      )}
+      <div style={{
+        fontFamily: C.fontDisplay, fontWeight: 400, fontSize: 34,
+        color: C.ink, letterSpacing: -0.8, lineHeight: 1.05,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// Spine-style progress: vertical line, numbered dots
+function DirC_StepSpine({ icon, label, active, done, num, isLast }) {
+  return (
+    <div style={{ display: 'flex', gap: 14, position: 'relative' }}>
+      {/* spine column */}
+      <div style={{
+        width: 32, flexShrink: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', position: 'relative', paddingTop: 18,
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 99, zIndex: 2,
+          background: done ? C.accent : (active ? C.ink : C.card),
+          border: `1.5px solid ${active || done ? (done?C.accent:C.ink) : C.hair}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: C.fontBody, fontSize: 12, fontWeight: 700,
+          color: done || active ? '#fff' : C.inkMuted,
+        }}>{done ? TabIcons.check('#fff', 3) : num}</div>
+        {!isLast && (
+          <div style={{
+            position: 'absolute', top: 44, bottom: -12, left: '50%',
+            width: 2, background: done ? C.accent : C.hair,
+            transform: 'translateX(-50%)',
+          }}/>
+        )}
+      </div>
+      {/* card */}
+      <div style={{
+        flex: 1, marginBottom: 14,
+        background: active ? C.card : 'transparent',
+        border: active ? `1px solid ${C.hair}` : 'none',
+        borderRadius: 18, padding: active ? 12 : '14px 4px 14px 0',
+        boxShadow: active ? C.shadow : 'none',
+        display: 'flex', alignItems: 'center', gap: 14,
+        opacity: done ? 0.55 : 1,
+      }}>
+        <div style={{
+          width: 54, height: 54, borderRadius: 12,
+          background: active ? C.accentSoft : C.bgAlt,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>{icon}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontFamily: C.fontDisplay, fontSize: 20, fontWeight: 500,
+            color: C.ink, letterSpacing: -0.3, lineHeight: 1.1,
+            textDecoration: done ? 'line-through' : 'none',
+          }}>{label}</div>
+        </div>
+        {active && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '0 4px',
+          }}>
+            {/* long-press ring */}
+            <div style={{
+              position: 'relative', width: 52, height: 52,
+            }}>
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: 99,
+                background: C.accent,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>{TabIcons.check('#fff', 3)}</div>
+              <svg width="52" height="52" style={{
+                position: 'absolute', inset: 0, transform: 'rotate(-90deg)',
+              }}>
+                <circle cx="26" cy="26" r="24" fill="none"
+                  stroke={C.accentDeep} strokeWidth="2.5"
+                  strokeDasharray="150.8" strokeDashoffset="113" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DirC_TabBar({ active = 'schedule' }) {
+  const tab = (key, Icon, label) => {
+    const isActive = key === active;
+    return (
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: 4, padding: '10px 0',
+        position: 'relative',
+      }}>
+        {isActive && (
+          <div style={{
+            position: 'absolute', top: 4, width: 24, height: 3,
+            borderRadius: 99, background: C.accent,
+          }}/>
+        )}
+        <div style={{ marginTop: 4 }}><Icon /></div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 10.5, fontWeight: isActive ? 600 : 500,
+          color: isActive ? C.accent : C.inkMuted, letterSpacing: 0.2,
+        }}>{label}</div>
+      </div>
+    );
+  };
+  return (
+    <div style={{
+      position: 'absolute', bottom: 0, left: 0, right: 0,
+      background: 'rgba(246,241,231,0.92)',
+      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+      borderTop: `1px solid ${C.hair}`,
+      padding: '0 12px 22px', display: 'flex', zIndex: 30,
+    }}>
+      {tab('schedule', () => TabIcons.schedule(active==='schedule'?C.accent:C.inkMuted, 1.8), 'Schedule')}
+      {tab('steps', () => TabIcons.steps(active==='steps'?C.accent:C.inkMuted, 1.8, active==='steps'?C.accent:'none'), 'Steps')}
+      {tab('stories', () => TabIcons.stories(active==='stories'?C.accent:C.inkMuted, 1.8, active==='stories'?C.accent:'none'), 'Stories')}
+      {tab('settings', () => TabIcons.settings(active==='settings'?C.accent:C.inkMuted, 1.8), 'Settings')}
+    </div>
+  );
+}
+
+// ─ SCREEN 1: Schedule ─
+function DirC_Schedule() {
+  const P = C.iconPalette;
+  return (
+    <Phone bg={C.bg} label="C · Schedule">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow="Tuesday · April 19" title="Morning Routine" />
+      <div style={{ padding: '0 24px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+          color: C.accent, letterSpacing: 0.1,
+        }}>Step 1 of 5</div>
+        <div style={{ flex: 1, height: 1, background: C.hair }}/>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+        }}>~15 min</div>
+      </div>
+      <div style={{ padding: '18px 24px 180px' }}>
+        <DirC_StepSpine num="1" active icon={Icons.sun({ size: 38, ...P })} label="Wake up" />
+        <DirC_StepSpine num="2" icon={Icons.toilet({ size: 38, ...P })} label="Go potty" />
+        <DirC_StepSpine num="3" icon={Icons.toothbrush({ size: 38, ...P })} label="Brush teeth" />
+        <DirC_StepSpine num="4" icon={<div style={{fontSize:28}}>👕</div>} label="Get dressed" />
+        <DirC_StepSpine num="5" icon={<div style={{fontSize:28}}>🥣</div>} label="Eat breakfast" isLast />
+      </div>
+      <div style={{
+        position: 'absolute', bottom: 88, left: 24, right: 24,
+        display: 'flex', gap: 10, zIndex: 25,
+      }}>
+        <button style={{
+          flex: 1, padding: '13px 16px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: C.ink,
+        }}>Set up schedule</button>
+        <button style={{
+          flex: 1, padding: '13px 16px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: C.ink,
+        }}>Edit templates</button>
+      </div>
+      <DirC_TabBar active="schedule" />
+    </Phone>
+  );
+}
+
+// ─ SCREEN 2: Steps (Bedtime) ─ [legacy, overridden by c-steps.jsx]
+function DirC_Steps_Legacy() {
+  const P = C.iconPalette;
+  return (
+    <Phone bg={C.bg} label="C · Steps (Bedtime)">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow="Bedtime · 6 steps" title="Bedtime" />
+      <div style={{ padding: '0 24px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+          color: C.accent, letterSpacing: 0.1,
+        }}>Step 1 of 6</div>
+        <div style={{ flex: 1, height: 1, background: C.hair }}/>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+        }}>~20 min</div>
+      </div>
+      <div style={{ padding: '18px 24px 180px' }}>
+        <DirC_StepSpine num="1" active icon={Icons.pajamas({ size: 38, ...P })} label="Put on pajamas" />
+        <DirC_StepSpine num="2" icon={Icons.toothbrush({ size: 38, ...P })} label="Brush teeth" />
+        <DirC_StepSpine num="3" icon={Icons.toilet({ size: 38, ...P })} label="Go potty" />
+        <DirC_StepSpine num="4" icon={Icons.book({ size: 38, ...P })} label="Read a book" />
+        <DirC_StepSpine num="5" icon={Icons.lightbulb({ size: 38, ...P })} label="Lights off" />
+        <DirC_StepSpine num="6" icon={Icons.heart({ size: 38, ...P })} label="Goodnight hug" isLast />
+      </div>
+      <div style={{
+        position: 'absolute', bottom: 88, left: 24, right: 24,
+        display: 'flex', gap: 8, zIndex: 25,
+      }}>
+        <button style={{
+          flex: 1, padding: '12px 10px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.ink,
+        }}>New chart</button>
+        <button style={{
+          flex: 1, padding: '12px 10px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.ink,
+        }}>Configure</button>
+        <button style={{
+          flex: 1, padding: '12px 10px', borderRadius: 12,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: '#fff',
+        }}>Start →</button>
+      </div>
+      <DirC_TabBar active="steps" />
+    </Phone>
+  );
+}
+
+// ─ SCREEN 3: Stories ─
+function DirC_StoryRow({ icon, title, reads, bg, when }) {
+  return (
+    <div style={{
+      display: 'flex', gap: 14, padding: 14,
+      background: C.card, borderRadius: 18, marginBottom: 10,
+      border: `1px solid ${C.hair}`,
+    }}>
+      <div style={{
+        width: 80, height: 80, borderRadius: 14,
+        background: bg, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 18, fontWeight: 500,
+          color: C.ink, letterSpacing: -0.3, lineHeight: 1.2,
+        }}>{title}</div>
+        {(reads || when) && (
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+            marginTop: 2, fontWeight: 500,
+          }}>
+            {reads ? `Read ${reads}× · 7 pages` : '7 pages'}
+            {when ? ` · ${when}` : ''}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 14, marginTop: 10 }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+            color: C.accent,
+          }}>Open</div>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 13, fontWeight: 500,
+            color: C.inkSoft,
+          }}>Edit</div>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 13, fontWeight: 500,
+            color: C.inkSoft,
+          }}>Share</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DirC_Stories() {
+  const P = C.iconPalette;
+  // Full library — 12 stories so the list obviously scrolls. Recency matters; parents
+  // keep month-old stories around for repeat trips.
+  const library = [
+    { icon: Icons.store, title: 'Going to the Grocery Store', reads: '3', bg: C.accentSoft, when: 'Read yesterday' },
+    { icon: Icons.house, title: 'First Day of School', reads: '1', bg: '#F0DDD2', when: 'Read last week' },
+    { icon: Icons.scissors, title: 'Getting a Haircut', bg: '#EDE5D5', when: 'Not yet read' },
+    { icon: Icons.store, title: 'Visiting the Dentist', reads: '4', bg: '#E3E7DE', when: 'Read 3 days ago' },
+    { icon: Icons.house, title: "Going to Grandma's House", reads: '7', bg: '#F0DDE7', when: 'Read last Sunday' },
+    { icon: Icons.store, title: 'Trip to the Library', reads: '2', bg: '#E7E2F0', when: 'Read last week' },
+    { icon: Icons.scissors, title: 'Getting a Flu Shot', reads: '1', bg: '#F2DCDC', when: 'Read 2 weeks ago' },
+    { icon: Icons.house, title: 'Family Car Ride to Auntie Jo', bg: '#E5E5D9', when: 'Not yet read' },
+    { icon: Icons.store, title: 'Ordering at a Restaurant', reads: '2', bg: '#EDE5D5', when: 'Read 3 weeks ago' },
+    { icon: Icons.heart, title: 'Saying Goodbye at Drop-off', reads: '9', bg: C.accentSoft, when: 'Read yesterday' },
+    { icon: Icons.book, title: 'Quiet Time at the Doctor', reads: '2', bg: '#F0DDD2', when: 'Read 2 weeks ago' },
+    { icon: Icons.heart, title: "When Dad Goes on a Trip", reads: '1', bg: '#F0DDE7', when: 'Read 3 weeks ago' },
+  ];
+  return (
+    <Phone bg={C.bg} label="C · Stories">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow={`Social stories · ${library.length} saved`} title="Stories" />
+      {/* Scroll region between the header and the sticky bottom bar */}
+      <div style={{
+        position: 'absolute', top: 140, bottom: 170, left: 0, right: 0,
+        overflowY: 'auto', padding: '0 24px 8px',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        {/* Section label: recents */}
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          margin: '6px 2px 8px',
+        }}>Recent</div>
+        {library.slice(0, 3).map((s, i) => (
+          <DirC_StoryRow key={i} icon={s.icon({ size: 60, ...P })} title={s.title} reads={s.reads} bg={s.bg} when={s.when}/>
+        ))}
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          margin: '14px 2px 8px',
+        }}>This month</div>
+        {library.slice(3).map((s, i) => (
+          <DirC_StoryRow key={i} icon={s.icon({ size: 60, ...P })} title={s.title} reads={s.reads} bg={s.bg} when={s.when}/>
+        ))}
+        {/* create row lives at the end of the list */}
+        <div style={{
+          display: 'flex', gap: 14, alignItems: 'center',
+          padding: 14, borderRadius: 18, marginTop: 10,
+          border: `1.5px dashed ${C.hair}`,
+        }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: 14,
+            background: C.bgAlt, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>{TabIcons.plus(C.accent, 2)}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: C.fontDisplay, fontSize: 18, fontWeight: 500,
+              color: C.accent, letterSpacing: -0.3,
+            }}>Create a new story</div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+              marginTop: 2, fontWeight: 500,
+            }}>Walk your child through something new</div>
+          </div>
+        </div>
+      </div>
+      {/* Soft fade at the bottom so rows bleed under the sticky bar */}
+      <div style={{
+        position: 'absolute', bottom: 158, left: 0, right: 0, height: 28,
+        background: `linear-gradient(to top, ${C.bg}, rgba(0,0,0,0))`,
+        pointerEvents: 'none', zIndex: 24,
+      }}/>
+      <div style={{
+        position: 'absolute', bottom: 88, left: 24, right: 24,
+        display: 'flex', gap: 10, zIndex: 25,
+      }}>
+        <button style={{
+          flex: 1, padding: '13px 16px', borderRadius: 12,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: '#fff',
+        }}>New story</button>
+        <button style={{
+          flex: 1, padding: '13px 16px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: C.ink,
+        }}>Import</button>
+      </div>
+      <DirC_TabBar active="stories" />
+    </Phone>
+  );
+}
+
+// ─ SCREEN 4: Reader ─
+function DirC_Reader() {
+  const P = C.iconPalette;
+  return (
+    <Phone bg={C.bg} label="C · Story Reader">
+      <StatusBar color={C.ink} />
+      <div style={{
+        position: 'absolute', top: 54, left: 0, right: 0,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '14px 18px', zIndex: 20,
+      }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: 99,
+          background: C.card, border: `1px solid ${C.hair}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>{TabIcons.close(C.ink, 2)}</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+          letterSpacing: 1.2, textTransform: 'uppercase', fontWeight: 600,
+        }}>Grocery Store · 1 / 7</div>
+        <div style={{
+          width: 38, height: 38, borderRadius: 99,
+          background: C.card, border: `1px solid ${C.hair}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>{TabIcons.print(C.ink, 2)}</div>
+      </div>
+
+      {/* page card */}
+      <div style={{
+        position: 'absolute', top: 118, left: 24, right: 24, bottom: 110,
+        borderRadius: 28, background: C.card,
+        border: `1px solid ${C.hair}`,
+        boxShadow: C.shadow, overflow: 'hidden',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        <div style={{
+          flex: 1, background: C.accentSoft,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'relative',
+        }}>
+          {Icons.store({ size: 200, ...P })}
+          {/* speaker */}
+          <div style={{
+            position: 'absolute', bottom: 16, right: 16,
+            width: 44, height: 44, borderRadius: 99,
+            background: C.card, border: `1px solid ${C.hair}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: C.shadow,
+          }}>{TabIcons.speaker(C.accent, 2)}</div>
+        </div>
+        <div style={{
+          padding: '24px 26px 28px',
+        }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 10.5, fontWeight: 600,
+            color: C.inkMuted, letterSpacing: 1.4, textTransform: 'uppercase',
+            marginBottom: 8,
+          }}>Page One</div>
+          <div style={{
+            fontFamily: C.fontDisplay, fontSize: 22, lineHeight: 1.35,
+            color: C.ink, letterSpacing: -0.3, fontWeight: 400,
+          }}>Today I am going to the grocery store with Mommy.</div>
+        </div>
+      </div>
+
+      {/* controls */}
+      <div style={{
+        position: 'absolute', bottom: 28, left: 0, right: 0,
+        display: 'flex', justifyContent: 'space-between',
+        padding: '0 28px', alignItems: 'center', zIndex: 20,
+      }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 99,
+          background: C.card, border: `1px solid ${C.hair}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: 0.4,
+        }}>{TabIcons.chevronL(C.ink)}</div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {[0,1,2,3,4,5,6].map(i => (
+            <div key={i} style={{
+              width: i===0 ? 20 : 6, height: 6, borderRadius: 99,
+              background: i===0 ? C.accent : C.hair,
+            }}/>
+          ))}
+        </div>
+        <div style={{
+          width: 48, height: 48, borderRadius: 99,
+          background: C.accent,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>{TabIcons.chevronR('#fff', 2.5)}</div>
+      </div>
+    </Phone>
+  );
+}
+
+// ─ SCREEN 5: Schedule w/ tooltip ─
+function DirC_ScheduleSettings() {
+  const P = C.iconPalette;
+  return (
+    <Phone bg={C.bg} label="C · Schedule + settings tooltip">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow="Tuesday · April 19" title="Morning Routine" />
+      <div style={{ padding: '0 24px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+          color: C.accent, letterSpacing: 0.1,
+        }}>Step 2 of 5</div>
+        <div style={{ flex: 1, height: 1, background: C.hair }}/>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+        }}>~15 min</div>
+      </div>
+      <div style={{ padding: '18px 24px 180px' }}>
+        <DirC_StepSpine num="1" done icon={Icons.sun({ size: 38, ...P })} label="Wake up" />
+        <DirC_StepSpine num="2" active icon={Icons.toilet({ size: 38, ...P })} label="Go potty" />
+        <DirC_StepSpine num="3" icon={Icons.toothbrush({ size: 38, ...P })} label="Brush teeth" />
+        <DirC_StepSpine num="4" icon={<div style={{fontSize:28}}>👕</div>} label="Get dressed" />
+        <DirC_StepSpine num="5" icon={<div style={{fontSize:28}}>🥣</div>} label="Eat breakfast" isLast />
+      </div>
+      <DirC_TabBar active="schedule" />
+      <div style={{
+        position: 'absolute', bottom: 82, right: 18, zIndex: 35,
+        padding: '10px 14px', background: C.ink, color: '#fff',
+        borderRadius: 10, fontFamily: C.fontBody,
+        fontSize: 12, fontWeight: 500, letterSpacing: 0.2,
+      }}>
+        Hold for settings
+      </div>
+    </Phone>
+  );
+}
+
+Object.assign(window, {
+  DirC_Schedule, DirC_Stories, DirC_Reader, DirC_ScheduleSettings,
+});
+
+
+
+// ====== lib/c-onboarding.jsx ======
+// Storybook Canvas — Onboarding (3 slides)
+// Flat ivory background, one decorative motif per slide, indigo primary.
+
+function DirC_OnbShell({ dotIndex, children }) {
+  return (
+    <Phone bg={C.bg} label={`C · Onboarding ${dotIndex + 1}/3`}>
+      <StatusBar color={C.ink} />
+      {children}
+      <div style={{
+        position: 'absolute', bottom: 70, left: 0, right: 0,
+        display: 'flex', justifyContent: 'center', gap: 8,
+      }}>
+        {[0,1,2].map(i => (
+          <div key={i} style={{
+            width: i === dotIndex ? 22 : 7, height: 7, borderRadius: 99,
+            background: i === dotIndex ? C.accent : C.hair,
+            transition: 'all 0.2s',
+          }}/>
+        ))}
+      </div>
+    </Phone>
+  );
+}
+
+// Rising sun with face and rays — clearly reads as sunrise
+function OnbMotif1() {
+  // 12 rays evenly around the disk
+  const rays = Array.from({length: 12}).map((_, i) => {
+    const angle = (i * 30 - 90) * Math.PI / 180;
+    const cx = 130, cy = 90, r1 = 48, r2 = i % 2 === 0 ? 64 : 58;
+    const x1 = cx + Math.cos(angle) * r1;
+    const y1 = cy + Math.sin(angle) * r1;
+    const x2 = cx + Math.cos(angle) * r2;
+    const y2 = cy + Math.sin(angle) * r2;
+    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+      stroke={C.iconPalette.warm} strokeWidth="3" strokeLinecap="round" opacity={i % 2 === 0 ? 1 : 0.7}/>;
+  });
+  return (
+    <svg width="260" height="180" viewBox="0 0 260 180" fill="none">
+      {/* horizon line — solid so it clearly reads as ground */}
+      <path d="M10 150 Q130 130 250 150" stroke={C.iconPalette.warm} strokeWidth="2" opacity="0.4" fill="none"/>
+      {/* sun disk */}
+      <circle cx="130" cy="90" r="42" fill={C.iconPalette.warmPale}/>
+      <circle cx="130" cy="90" r="42" fill="none" stroke={C.iconPalette.warm} strokeWidth="2.5"/>
+      {/* rays */}
+      {rays}
+      {/* friendly face */}
+      <circle cx="116" cy="85" r="3" fill={C.iconPalette.accentDeep}/>
+      <circle cx="144" cy="85" r="3" fill={C.iconPalette.accentDeep}/>
+      <path d="M113 98 Q130 110 147 98" stroke={C.iconPalette.accentDeep} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* rosy cheeks */}
+      <circle cx="108" cy="98" r="4" fill={C.iconPalette.accent} opacity="0.25"/>
+      <circle cx="152" cy="98" r="4" fill={C.iconPalette.accent} opacity="0.25"/>
+    </svg>
+  );
+}
+
+// Friendly child character — head connected to body via neck + shoulder line
+function OnbMotif2() {
+  return (
+    <svg width="200" height="210" viewBox="0 0 200 210" fill="none">
+      {/* body: torso shape that meets the head */}
+      <path d="M50 200 L55 150 Q60 128 80 124 L120 124 Q140 128 145 150 L150 200 Z"
+        fill={C.bgAlt} stroke={C.accent} strokeWidth="2" strokeLinejoin="round"/>
+      {/* neck: bridges head and torso so head isn't floating */}
+      <rect x="90" y="100" width="20" height="28" fill={C.accentSoft} stroke={C.accent} strokeWidth="2"/>
+      {/* head */}
+      <circle cx="100" cy="70" r="34" fill={C.accentSoft}/>
+      <circle cx="100" cy="70" r="34" fill="none" stroke={C.accent} strokeWidth="2"/>
+      {/* hair tuft */}
+      <path d="M78 48 Q90 36 100 42 Q108 34 122 48" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* face */}
+      <circle cx="90" cy="68" r="2.5" fill={C.ink}/>
+      <circle cx="110" cy="68" r="2.5" fill={C.ink}/>
+      <path d="M88 82 Q100 90 112 82" stroke={C.ink} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      {/* rosy cheeks */}
+      <circle cx="80" cy="78" r="3.5" fill={C.iconPalette.warm} opacity="0.35"/>
+      <circle cx="120" cy="78" r="3.5" fill={C.iconPalette.warm} opacity="0.35"/>
+      {/* little accent hearts */}
+      <path d="M40 150 C35 146 35 140 39 140 C41 140 43 142 43 144 C43 142 45 140 47 140 C51 140 51 146 43 154 Z" fill={C.iconPalette.accent} opacity="0.6"/>
+      <path d="M162 60 C157 56 157 50 161 50 C163 50 165 52 165 54 C165 52 167 50 169 50 C173 50 173 56 165 64 Z" fill={C.iconPalette.warm} opacity="0.6"/>
+    </svg>
+  );
+}
+
+function DirC_Onb_Welcome() {
+  return (
+    <DirC_OnbShell dotIndex={0}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        padding: '90px 32px 140px', alignItems: 'center',
+      }}>
+        <div style={{ flex: 0.4 }}/>
+        <OnbMotif1 />
+        <div style={{ flex: 0.25 }}/>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 32, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.6, lineHeight: 1.1,
+          textAlign: 'center', maxWidth: 320,
+        }}>Every day is a little easier when your child knows what's next.</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 15, color: C.inkSoft,
+          lineHeight: 1.5, marginTop: 16, textAlign: 'center', maxWidth: 300,
+        }}>Guiding Steps helps your child follow routines, earn rewards, and understand social situations.</div>
+        <div style={{ flex: 1 }}/>
+        <button style={{
+          width: '100%', padding: '16px', borderRadius: 14,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 16,
+          color: '#fff', letterSpacing: 0.1,
+        }}>Get started</button>
+        <button style={{
+          background: 'none', border: 'none', marginTop: 14,
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 14,
+          color: C.inkMuted,
+        }}>Skip</button>
+      </div>
+    </DirC_OnbShell>
+  );
+}
+
+function DirC_Onb_Name() {
+  return (
+    <DirC_OnbShell dotIndex={1}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        padding: '90px 32px 140px', alignItems: 'center',
+      }}>
+        <div style={{ flex: 0.4 }}/>
+        <OnbMotif2 />
+        <div style={{ flex: 0.15 }}/>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 30, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.6, lineHeight: 1.1,
+          textAlign: 'center',
+        }}>Who are we helping today?</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 14, color: C.inkSoft,
+          lineHeight: 1.5, marginTop: 12, textAlign: 'center', maxWidth: 280,
+        }}>We'll use their name to make stories and schedules feel personal.</div>
+        <div style={{ width: '100%', marginTop: 28 }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+            fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+            marginBottom: 8,
+          }}>Child's name</div>
+          <div style={{
+            padding: '16px 18px', borderRadius: 14,
+            background: C.card, border: `1.5px solid ${C.accent}`,
+            fontFamily: C.fontDisplay, fontSize: 20,
+            color: C.ink, letterSpacing: -0.3, position: 'relative',
+          }}>Sadie
+            <div style={{
+              position: 'absolute', right: 18, top: '50%',
+              transform: 'translateY(-50%)',
+              width: 1.5, height: 22, background: C.accent,
+              animation: 'none',
+            }}/>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}/>
+        <button style={{
+          width: '100%', padding: '16px', borderRadius: 14,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 16,
+          color: '#fff',
+        }}>Next</button>
+        <button style={{
+          background: 'none', border: 'none', marginTop: 14,
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 14,
+          color: C.inkMuted,
+        }}>Skip for now</button>
+      </div>
+    </DirC_OnbShell>
+  );
+}
+
+function OnbToolRow({ icon, title, sub }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 16, padding: '16px 18px',
+      background: C.card, borderRadius: 16, marginBottom: 12,
+      border: `1px solid ${C.hair}`,
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 12,
+        background: C.accentSoft, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{ flex: 1 }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 19, fontWeight: 500,
+          color: C.ink, letterSpacing: -0.3, lineHeight: 1,
+        }}>{title}</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, color: C.inkSoft,
+          marginTop: 4, lineHeight: 1.35,
+        }}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function DirC_Onb_Tools() {
+  return (
+    <DirC_OnbShell dotIndex={2}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        padding: '100px 28px 140px',
+      }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 30, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.6, lineHeight: 1.1,
+          textAlign: 'center', marginBottom: 8,
+        }}>Three tools, one app.</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, color: C.inkMuted,
+          lineHeight: 1.5, textAlign: 'center', marginBottom: 28,
+        }}>Use them together or on their own.</div>
+        <OnbToolRow icon={TabIcons.schedule(C.accent, 2)}
+          title="Schedules" sub="Visual routines your child can follow step by step."/>
+        <OnbToolRow icon={TabIcons.steps(C.accent, 2, C.accentSoft)}
+          title="Steps" sub="Task strips with rewards for daily routines."/>
+        <OnbToolRow icon={TabIcons.stories(C.accent, 2, C.accentSoft)}
+          title="Stories" sub="Social stories that teach what to expect."/>
+        <div style={{ flex: 1 }}/>
+        <button style={{
+          width: '100%', padding: '16px', borderRadius: 14,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 16,
+          color: '#fff',
+        }}>Let's go</button>
+      </div>
+    </DirC_OnbShell>
+  );
+}
+
+Object.assign(window, { DirC_Onb_Welcome, DirC_Onb_Name, DirC_Onb_Tools });
+
+
+
+// ====== lib/c-schedule-modals.jsx ======
+// Storybook Canvas — Schedule-related modals
+// Modal shell + Edit Templates / New Schedule / Edit Schedule
+
+// Generic modal shell — 356px wide floating card over dimmed background
+function DirC_ModalShell({ label, children, backdrop, align = 'center', padBottom = 0 }) {
+  return (
+    <Phone bg={C.bg} label={label}>
+      <StatusBar color={C.ink} />
+      {/* dimmed backdrop content (optional ghost of underlying screen) */}
+      {backdrop}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'rgba(27,29,46,0.28)',
+        backdropFilter: 'blur(1.5px)',
+        zIndex: 10,
+      }}/>
+      <div style={{
+        position: 'absolute',
+        left: 14, right: 14,
+        ...(align === 'top' ? { top: 60 } : { top: '50%', transform: 'translateY(-50%)' }),
+        background: C.bg, borderRadius: 22,
+        boxShadow: '0 8px 30px rgba(27,29,46,0.18), 0 24px 60px rgba(27,29,46,0.12)',
+        border: `1px solid ${C.hair}`,
+        padding: 0, overflow: 'hidden',
+        zIndex: 20,
+        maxHeight: 720,
+        display: 'flex', flexDirection: 'column',
+        paddingBottom: padBottom,
+      }}>{children}</div>
+    </Phone>
+  );
+}
+
+function ModalHeader({ title }) {
+  return (
+    <div style={{
+      padding: '22px 22px 6px',
+    }}>
+      <div style={{
+        fontFamily: C.fontDisplay, fontSize: 24, fontWeight: 400,
+        color: C.ink, letterSpacing: -0.5, lineHeight: 1,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// Soft ghosted schedule behind modals (for realism of overlay)
+function GhostSchedule() {
+  const P = C.iconPalette;
+  return (
+    <div style={{ position: 'absolute', inset: 0, opacity: 0.45 }}>
+      <DirC_TopBar eyebrow="Tuesday · April 19" title="Morning Routine" />
+      <div style={{ padding: '0 24px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ fontFamily: C.fontBody, fontSize: 13, fontWeight: 600, color: C.accent }}>Step 3 of 5</div>
+        <div style={{ flex: 1, height: 1, background: C.hair }}/>
+        <div style={{ fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted }}>~15 min</div>
+      </div>
+      <div style={{ padding: '18px 24px' }}>
+        <DirC_StepSpine num="1" done icon={Icons.sun({ size: 38, ...P })} label="Wake up" />
+        <DirC_StepSpine num="2" done icon={Icons.toilet({ size: 38, ...P })} label="Go potty" />
+        <DirC_StepSpine num="3" active icon={Icons.toothbrush({ size: 38, ...P })} label="Brush teeth" isLast />
+      </div>
+    </div>
+  );
+}
+
+// ─── Edit Templates ────────────────────────────────────────
+function TemplateRow({ name, steps }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '14px 16px', background: C.card,
+      border: `1px solid ${C.hair}`, borderRadius: 12,
+      marginBottom: 8,
+    }}>
+      <div style={{
+        fontFamily: C.fontDisplay, fontSize: 17, fontWeight: 500,
+        color: C.ink, letterSpacing: -0.2,
+      }}>{name}</div>
+      <div style={{
+        fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted, fontWeight: 500,
+      }}>{steps} steps</div>
+    </div>
+  );
+}
+
+function DirC_EditTemplates() {
+  return (
+    <DirC_ModalShell label="C · Edit Templates" backdrop={<GhostSchedule/>} align="top">
+      <ModalHeader title="Edit Templates" />
+      <div style={{ padding: '14px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <TemplateRow name="Full Day" steps={20}/>
+        <TemplateRow name="School Day" steps={18}/>
+        <TemplateRow name="Morning Routine" steps={5}/>
+        <TemplateRow name="Bedtime Routine" steps={7}/>
+        <TemplateRow name="Therapy Day" steps={22}/>
+        <TemplateRow name="Weekend / Fun Day" steps={18}/>
+
+        <div style={{
+          padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 6,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card,
+        }}>+ Create new template</div>
+        <div style={{
+          padding: '14px 16px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 8,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.ink, background: C.card,
+        }}>Import schedule</div>
+      </div>
+      <div style={{ padding: '14px 18px 18px' }}>
+        <div style={{
+          padding: '14px', borderRadius: 12,
+          background: C.bgAlt, textAlign: 'center',
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 500,
+          color: C.inkSoft,
+        }}>Close</div>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── New Schedule ────────────────────────────────────────
+function DirC_NewSchedule() {
+  return (
+    <DirC_ModalShell label="C · New Schedule" backdrop={<GhostSchedule/>}>
+      <ModalHeader title="New schedule" />
+      <div style={{ padding: '10px 22px 6px' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginTop: 14, marginBottom: 6,
+        }}>Schedule name</div>
+        <div style={{
+          padding: '14px 16px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, minHeight: 22,
+          fontFamily: C.fontDisplay, fontSize: 17, color: C.inkMuted, fontStyle: 'italic',
+        }}>Name this routine…</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginTop: 20, marginBottom: 6,
+        }}>Steps</div>
+        <div style={{
+          padding: '18px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center',
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card,
+        }}>+ Add first step</div>
+      </div>
+      <div style={{ padding: '22px 22px 22px', display: 'flex', gap: 10 }}>
+        <button style={{
+          flex: 1, padding: '13px', borderRadius: 12,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 14,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          flex: 1, padding: '13px', borderRadius: 12,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: '#fff',
+        }}>Save</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Edit Schedule (scrollable step list) ────────────────────────────────────────
+function ScheduleStepRow({ icon, label, showUp = true, showDown = true }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: 8, marginBottom: 8,
+      border: `1px solid ${C.hair}`, borderRadius: 12,
+      background: C.card,
+    }}>
+      <div style={{
+        width: 42, height: 42, borderRadius: 10,
+        background: C.bgAlt, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{
+        flex: 1, fontFamily: C.fontBody, fontSize: 14, fontWeight: 500,
+        color: C.ink, letterSpacing: -0.1,
+      }}>{label}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <button style={{
+          width: 26, height: 20, borderRadius: 6, border: `1px solid ${C.hair}`,
+          background: C.card, color: showUp ? C.accent : C.inkMuted,
+          fontSize: 10, padding: 0, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: showUp ? 1 : 0.3,
+        }}>▲</button>
+        <button style={{
+          width: 26, height: 20, borderRadius: 6, border: `1px solid ${C.hair}`,
+          background: C.card, color: showDown ? C.accent : C.inkMuted,
+          fontSize: 10, padding: 0, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: showDown ? 1 : 0.3,
+        }}>▼</button>
+      </div>
+      <button style={{
+        width: 26, height: 44, borderRadius: 8, border: `1px solid ${C.warn}30`,
+        background: `${C.warn}12`, color: C.warn,
+        fontSize: 13, fontWeight: 700, padding: 0, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>✕</button>
+    </div>
+  );
+}
+
+function DirC_EditSchedule() {
+  const P = C.iconPalette;
+  return (
+    <DirC_ModalShell label="C · Edit Schedule (top)" backdrop={<GhostSchedule/>} align="top">
+      <ModalHeader title="Edit Schedule" />
+      <div style={{ padding: '10px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginTop: 6, marginBottom: 6,
+        }}>Schedule name</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card,
+          fontFamily: C.fontDisplay, fontSize: 17, color: C.ink,
+          marginBottom: 16,
+        }}>Full Day</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 8,
+        }}>Steps · 10 of 20</div>
+
+        <ScheduleStepRow icon={Icons.sun({ size: 30, ...P })} label="Wake up" showUp={false}/>
+        <ScheduleStepRow icon={Icons.toilet({ size: 30, ...P })} label="Go potty"/>
+        <ScheduleStepRow icon={Icons.toothbrush({ size: 30, ...P })} label="Brush teeth"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>👕</div>} label="Get dressed"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>🥣</div>} label="Eat breakfast"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>🧱</div>} label="Play inside"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>🍎</div>} label="Snack"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>🌳</div>} label="Play outside"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>🥪</div>} label="Lunch"/>
+        <ScheduleStepRow icon={<div style={{fontSize:22}}>📺</div>} label="Screen time"/>
+
+        <div style={{
+          padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 4,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card, marginBottom: 6,
+        }}>+ Add step</div>
+      </div>
+      <div style={{
+        padding: '14px 16px',
+        borderTop: `1px solid ${C.hair}`, background: C.bg,
+        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 8,
+      }}>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: `${C.warn}15`, border: `1px solid ${C.warn}40`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.warn,
+        }}>Delete</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.ink,
+        }}>Export</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: '#fff',
+        }}>Save</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+Object.assign(window, { DirC_EditTemplates, DirC_NewSchedule, DirC_EditSchedule });
+
+
+
+// ====== lib/c-steps.jsx ======
+// Storybook Canvas — Steps feature (Task Strips with rewards)
+// Rebuilds DirC_Steps (replaces the old schedule-style one),
+// adds New Reward Chart, New Task Strip, Edit Task Strip.
+
+// Task strip row — icon tile + label, active gets indigo accent and long-press done ring
+function TaskStripRow({ icon, label, active, done }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 14,
+      padding: 14, marginBottom: 10,
+      background: active ? C.card : C.card,
+      border: `1px solid ${active ? C.accent : C.hair}`,
+      borderLeft: active ? `4px solid ${C.accent}` : `1px solid ${C.hair}`,
+      borderRadius: 16,
+      boxShadow: active ? C.shadow : 'none',
+      opacity: done ? 0.5 : 1,
+    }}>
+      <div style={{
+        width: 56, height: 56, borderRadius: 12,
+        background: active ? C.accentSoft : C.bgAlt, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{
+        flex: 1, fontFamily: C.fontDisplay, fontSize: 20, fontWeight: 500,
+        color: C.ink, letterSpacing: -0.3,
+        textDecoration: done ? 'line-through' : 'none',
+      }}>{label}</div>
+      {active && (
+        <div style={{
+          position: 'relative', width: 52, height: 52, flexShrink: 0,
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 99,
+            background: C.accent,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>{TabIcons.check('#fff', 3)}</div>
+          <svg width="52" height="52" style={{
+            position: 'absolute', inset: 0, transform: 'rotate(-90deg)',
+          }}>
+            <circle cx="26" cy="26" r="24" fill="none"
+              stroke={C.accentDeep} strokeWidth="2.5"
+              strokeDasharray="150.8" strokeDashoffset="113" strokeLinecap="round"/>
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Replace DirC_Steps — Steps/Bedtime routine as a Task Strip
+function DirC_Steps() {
+  const P = C.iconPalette;
+  return (
+    <Phone bg={C.bg} label="C · Steps (Bedtime task strip)">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow="Bedtime · task strip" title="Bedtime" />
+      <div style={{ padding: '0 24px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+          color: C.accent, letterSpacing: 0.1,
+        }}>Step 1 of 6</div>
+        <div style={{ flex: 1, height: 1, background: C.hair }}/>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+        }}>Reward: sticker</div>
+      </div>
+      <div style={{ padding: '14px 24px 200px' }}>
+        <TaskStripRow active icon={Icons.pajamas({ size: 40, ...P })} label="Put on pajamas" />
+        <TaskStripRow icon={Icons.toothbrush({ size: 40, ...P })} label="Brush teeth" />
+        <TaskStripRow icon={Icons.toilet({ size: 40, ...P })} label="Go potty" />
+        <TaskStripRow icon={Icons.book({ size: 40, ...P })} label="Read a book" />
+        <TaskStripRow icon={Icons.lightbulb({ size: 40, ...P })} label="Lights off" />
+        <TaskStripRow icon={Icons.heart({ size: 40, ...P })} label="Goodnight hug" />
+      </div>
+      {/* action buttons */}
+      <div style={{
+        position: 'absolute', bottom: 88, left: 24, right: 24,
+        zIndex: 25, display: 'grid', gridTemplateColumns: '1fr 1fr 44px', gap: 8,
+      }}>
+        <button style={{
+          padding: '12px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.ink,
+        }}>New chart</button>
+        <button style={{
+          padding: '12px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.ink,
+        }}>Configure</button>
+        <button style={{
+          padding: '12px 0', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 700, fontSize: 13,
+          color: C.ink,
+        }}>⋯</button>
+      </div>
+      <DirC_TabBar active="steps" />
+    </Phone>
+  );
+}
+
+// ─── New Reward Chart ────────────────────────────────────────
+function RewardTemplateRow({ title, route, steps }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '14px 16px', background: C.card,
+      border: `1px solid ${C.hair}`, borderRadius: 12,
+      marginBottom: 8,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 17, fontWeight: 500,
+          color: C.ink, letterSpacing: -0.2, lineHeight: 1.1,
+        }}>{title}</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+          marginTop: 3, fontWeight: 500,
+        }}>{route} · {steps} steps</div>
+      </div>
+      <button style={{
+        width: 28, height: 28, borderRadius: 8,
+        background: `${C.warn}12`, border: `1px solid ${C.warn}30`,
+        color: C.warn, fontSize: 12, fontWeight: 700,
+        cursor: 'pointer', padding: 0, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>✕</button>
+    </div>
+  );
+}
+
+// Ghost of Steps behind a modal
+function GhostSteps() {
+  const P = C.iconPalette;
+  return (
+    <div style={{ position: 'absolute', inset: 0, opacity: 0.45 }}>
+      <DirC_TopBar eyebrow="Bedtime · task strip" title="Bedtime" />
+      <div style={{ padding: '14px 24px' }}>
+        <TaskStripRow active icon={Icons.pajamas({ size: 40, ...P })} label="Put on pajamas" />
+        <TaskStripRow icon={Icons.toothbrush({ size: 40, ...P })} label="Brush teeth" />
+      </div>
+    </div>
+  );
+}
+
+function DirC_NewRewardChart() {
+  return (
+    <DirC_ModalShell label="C · New Reward Chart" backdrop={<GhostSteps/>} align="top">
+      <ModalHeader title="New reward chart" />
+      <div style={{
+        fontFamily: C.fontBody, fontSize: 13, color: C.inkSoft,
+        padding: '0 22px 10px', lineHeight: 1.4,
+      }}>Start from a template or build from scratch.</div>
+      <div style={{ padding: '6px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <RewardTemplateRow title="Bedtime Routine" route="Bedtime" steps={6}/>
+        <RewardTemplateRow title="Getting Dressed" route="Get Dressed → Looking good!" steps={5}/>
+        <RewardTemplateRow title="Handwashing" route="Wash Hands → Clean hands!" steps={6}/>
+        <RewardTemplateRow title="Potty Training" route="Potty Training → Great job!" steps={7}/>
+        <RewardTemplateRow title="Brushing Teeth" route="Brush Teeth → Sparkly teeth!" steps={5}/>
+
+        <div style={{
+          padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 8,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card,
+        }}>+ Start from scratch</div>
+      </div>
+      <div style={{ padding: '14px 18px 18px' }}>
+        <div style={{
+          padding: '14px', borderRadius: 12,
+          background: C.bgAlt, textAlign: 'center',
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 500,
+          color: C.inkSoft,
+        }}>Cancel</div>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Task Strip row in editor (numbered) ────────────────────────────────────────
+function EditTaskStripRow({ n, icon, label, placeholder, disableUp, disableDown }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      padding: 8, marginBottom: 10,
+      border: `1px solid ${C.hair}`, borderRadius: 14,
+      background: C.card,
+    }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: 99,
+        background: C.accent, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: C.fontBody, fontSize: 13, fontWeight: 700, color: '#fff',
+      }}>{n}</div>
+      <div style={{
+        width: 40, height: 40, borderRadius: 10,
+        border: `1.5px dashed ${C.hair}`, flexShrink: 0,
+        background: icon ? C.bgAlt : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon || <div style={{ fontSize: 18, color: C.inkMuted }}>+</div>}</div>
+      <div style={{
+        flex: 1,
+        padding: '10px 12px', border: `1px solid ${C.hair}`,
+        borderRadius: 10, background: C.card,
+        fontFamily: C.fontBody, fontSize: 14,
+        color: label ? C.ink : C.inkMuted,
+        minHeight: 18,
+      }}>{label || placeholder || 'Step name…'}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <button style={{
+          width: 24, height: 18, borderRadius: 5, border: `1px solid ${C.hair}`,
+          background: C.card, color: disableUp ? C.inkMuted : C.accent,
+          fontSize: 9, padding: 0, cursor: 'pointer',
+          opacity: disableUp ? 0.3 : 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>▲</button>
+        <button style={{
+          width: 24, height: 18, borderRadius: 5, border: `1px solid ${C.hair}`,
+          background: C.card, color: disableDown ? C.inkMuted : C.accent,
+          fontSize: 9, padding: 0, cursor: 'pointer',
+          opacity: disableDown ? 0.3 : 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>▼</button>
+      </div>
+      <button style={{
+        width: 26, height: 40, borderRadius: 8,
+        background: `${C.warn}12`, border: `1px solid ${C.warn}30`,
+        color: C.warn, fontSize: 12, fontWeight: 700,
+        cursor: 'pointer', padding: 0, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>✕</button>
+    </div>
+  );
+}
+
+// ─── New Task Strip ────────────────────────────────────────
+function DirC_NewTaskStrip() {
+  return (
+    <DirC_ModalShell label="C · New Task Strip" backdrop={<GhostSteps/>} align="top">
+      <ModalHeader title="New task strip" />
+      <div style={{ padding: '10px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>What is this routine?</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 16,
+          fontFamily: C.fontDisplay, fontSize: 17, color: C.inkMuted, fontStyle: 'italic',
+        }}>e.g. Bedtime</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 8,
+        }}>Steps · 2 of 8</div>
+
+        <EditTaskStripRow n="1" disableUp />
+        <EditTaskStripRow n="2" disableDown />
+
+        <div style={{
+          padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 4,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card, marginBottom: 16,
+        }}>+ Add step</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Reward (optional)</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 14,
+          fontFamily: C.fontBody, fontSize: 14, color: C.inkMuted, fontStyle: 'italic',
+        }}>e.g. Sticker, extra story…</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Reward image</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <button style={{
+            flex: 1, padding: '10px 12px', borderRadius: 10,
+            background: C.card, border: `1px solid ${C.hair}`,
+            fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+            color: C.accent,
+          }}>Upload image</button>
+          <button style={{
+            flex: 1, padding: '10px 12px', borderRadius: 10,
+            background: C.card, border: `1px solid ${C.hair}`,
+            fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+            color: C.inkSoft,
+          }}>Remove</button>
+        </div>
+
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 0', marginBottom: 6,
+        }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 14, fontWeight: 500, color: C.ink,
+          }}>Enable countdown timer</div>
+          <div style={{
+            width: 42, height: 24, borderRadius: 99,
+            background: C.bgAlt, border: `1px solid ${C.hair}`,
+            position: 'relative',
+          }}>
+            <div style={{
+              position: 'absolute', top: 2, left: 2,
+              width: 18, height: 18, borderRadius: 99,
+              background: C.card, boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+            }}/>
+          </div>
+        </div>
+      </div>
+      <div style={{
+        padding: '14px 16px',
+        borderTop: `1px solid ${C.hair}`, background: C.bg,
+        display: 'flex', gap: 10,
+      }}>
+        <button style={{
+          flex: 1, padding: '13px', borderRadius: 12,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 14,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          flex: 1.2, padding: '13px', borderRadius: 12,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 14,
+          color: '#fff',
+        }}>Save</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Edit Task Strip (existing bedtime strip, 6 of 8 steps) ────────────────────────────────────────
+function DirC_EditTaskStrip() {
+  const P = C.iconPalette;
+  return (
+    <DirC_ModalShell label="C · Edit Task Strip" backdrop={<GhostSteps/>} align="top">
+      <ModalHeader title="Edit task strip" />
+      <div style={{ padding: '10px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>What is this routine?</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 16,
+          fontFamily: C.fontDisplay, fontSize: 17, color: C.ink,
+        }}>Bedtime</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 8,
+        }}>Steps · 6 of 8</div>
+
+        <EditTaskStripRow n="1" icon={Icons.pajamas({ size: 26, ...P })} label="Put on pajamas" disableUp/>
+        <EditTaskStripRow n="2" icon={Icons.toothbrush({ size: 26, ...P })} label="Brush teeth"/>
+        <EditTaskStripRow n="3" icon={Icons.toilet({ size: 26, ...P })} label="Go potty"/>
+        <EditTaskStripRow n="4" icon={Icons.book({ size: 26, ...P })} label="Read a book"/>
+        <EditTaskStripRow n="5" icon={Icons.lightbulb({ size: 26, ...P })} label="Lights off"/>
+        <EditTaskStripRow n="6" icon={Icons.heart({ size: 26, ...P })} label="Goodnight hug" disableDown/>
+
+        <div style={{
+          padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+          borderRadius: 12, textAlign: 'center', marginTop: 4,
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+          color: C.accent, background: C.card, marginBottom: 16,
+        }}>+ Add step</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Reward</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 14,
+          fontFamily: C.fontBody, fontSize: 14, color: C.ink,
+        }}>Sticker in the kindness jar</div>
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 14 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 12,
+            background: C.accentSoft, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>{Icons.heart({ size: 32, ...P })}</div>
+          <div style={{ display: 'flex', gap: 8, flex: 1 }}>
+            <button style={{
+              flex: 1, padding: '10px 12px', borderRadius: 10,
+              background: C.card, border: `1px solid ${C.hair}`,
+              fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+              color: C.accent,
+            }}>Change</button>
+            <button style={{
+              flex: 1, padding: '10px 12px', borderRadius: 10,
+              background: C.card, border: `1px solid ${C.hair}`,
+              fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+              color: C.inkSoft,
+            }}>Remove</button>
+          </div>
+        </div>
+      </div>
+      <div style={{
+        padding: '14px 16px',
+        borderTop: `1px solid ${C.hair}`, background: C.bg,
+        display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: 8,
+      }}>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: `${C.warn}15`, border: `1px solid ${C.warn}40`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.warn,
+        }}>Delete</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: '#fff',
+        }}>Save</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+Object.assign(window, {
+  DirC_Steps, // override
+  DirC_NewRewardChart, DirC_NewTaskStrip, DirC_EditTaskStrip,
+});
+
+
+
+// ====== lib/c-stories-settings.jsx ======
+// Storybook Canvas — Stories modals + Settings sheet
+// Choose a Story sheet (2 states), Edit Story (Details + Page editor), Settings
+
+// ─── Ghosted Stories backdrop ────────────────────────────────────────
+function GhostStories() {
+  const P = C.iconPalette;
+  return (
+    <div style={{ position: 'absolute', inset: 0, opacity: 0.45 }}>
+      <DirC_TopBar eyebrow="Social stories · 3 saved" title="Stories" />
+      <div style={{ padding: '8px 24px' }}>
+        <DirC_StoryRow icon={Icons.store({ size: 60, ...P })} title="Going to the Grocery Store" reads="3" bg={C.accentSoft}/>
+        <DirC_StoryRow icon={Icons.house({ size: 60, ...P })} title="First Day of School" reads="1" bg="#F0DDD2"/>
+      </div>
+    </div>
+  );
+}
+
+// ─── Choose a Story row — icon + title + right action ────────────────
+function ChooseStoryRow({ icon, title, meta, action = 'Open', bg, danger }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: 12, marginBottom: 8,
+      background: C.card, borderRadius: 14,
+      border: `1px solid ${C.hair}`,
+    }}>
+      <div style={{
+        width: 52, height: 52, borderRadius: 10,
+        background: bg || C.accentSoft, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 16, fontWeight: 500,
+          color: C.ink, letterSpacing: -0.2, lineHeight: 1.15,
+        }}>{title}</div>
+        {meta && (
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+            marginTop: 3, fontWeight: 500,
+          }}>{meta}</div>
+        )}
+      </div>
+      <div style={{
+        fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+        color: danger ? C.warn : C.accent, padding: '6px 10px',
+      }}>{action}</div>
+    </div>
+  );
+}
+
+// ─── Choose a Story — top variant (newly opened sheet) ────────────────
+function DirC_ChooseStory() {
+  const P = C.iconPalette;
+  // Full library — month's worth of stories so the sheet scrolls.
+  const yours = [
+    { icon: Icons.store, title: 'Going to the Grocery Store', meta: 'Read 3× · 7 pages', bg: C.accentSoft },
+    { icon: Icons.house, title: 'First Day of School', meta: 'Read 1× · 9 pages', bg: '#F0DDD2' },
+    { icon: Icons.scissors, title: 'Getting a Haircut', meta: 'Not yet read · 6 pages', bg: '#EDE5D5' },
+    { icon: Icons.store, title: 'Visiting the Dentist', meta: 'Read 4× · 8 pages', bg: '#E3E7DE' },
+    { icon: Icons.house, title: "Going to Grandma's House", meta: 'Read 7× · 7 pages', bg: '#F0DDE7' },
+    { icon: Icons.book, title: 'Quiet Time at the Doctor', meta: 'Read 2× · 6 pages', bg: '#F0DDD2' },
+    { icon: Icons.heart, title: 'Saying Goodbye at Drop-off', meta: 'Read 9× · 5 pages', bg: C.accentSoft },
+    { icon: Icons.store, title: 'Ordering at a Restaurant', meta: 'Read 2× · 8 pages', bg: '#EDE5D5' },
+  ];
+  const templates = [
+    { icon: Icons.toothbrush, title: 'Going to the Dentist', meta: '8 pages · ready to read', bg: '#E3E7DE' },
+    { icon: Icons.heart, title: 'Visiting a New Place', meta: '6 pages · ready to read', bg: '#F0DDE7' },
+    { icon: Icons.store, title: 'Waiting in Line', meta: '5 pages · ready to read', bg: '#F2DCDC' },
+    { icon: Icons.house, title: 'Sleeping at a Friend’s House', meta: '10 pages · ready to read', bg: '#E7E2F0' },
+  ];
+  return (
+    <DirC_ModalShell label="C · Choose a Story" backdrop={<GhostStories/>} align="top">
+      {/* sticky header */}
+      <div style={{ padding: '20px 20px 10px', borderBottom: `1px solid ${C.hair}`, background: C.bg }}>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 22, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.4, lineHeight: 1,
+        }}>Choose a story</div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+          marginTop: 3, fontWeight: 500,
+        }}>{yours.length} yours · {templates.length} templates · scroll for more</div>
+      </div>
+
+      {/* Scroll region */}
+      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+        <div style={{
+          position: 'absolute', inset: 0, overflowY: 'auto',
+          padding: '8px 16px 10px', WebkitOverflowScrolling: 'touch',
+        }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+            fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+            margin: '4px 6px 8px',
+          }}>Your stories</div>
+          {yours.map((s, i) => (
+            <ChooseStoryRow key={i} icon={s.icon({ size: 30, ...P })} title={s.title} meta={s.meta} bg={s.bg}/>
+          ))}
+
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+            fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+            margin: '16px 6px 8px',
+          }}>Templates</div>
+          {templates.map((s, i) => (
+            <ChooseStoryRow key={i} icon={s.icon({ size: 30, ...P })} title={s.title} meta={s.meta} bg={s.bg} action="Add"/>
+          ))}
+
+          <div style={{
+            padding: '14px 16px', border: `1.5px dashed ${C.hair}`,
+            borderRadius: 12, textAlign: 'center', marginTop: 10,
+            fontFamily: C.fontBody, fontSize: 14, fontWeight: 600,
+            color: C.accent, background: C.card,
+          }}>+ Start from scratch</div>
+        </div>
+
+        {/* fade at bottom fold — signals more content below */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 28,
+          background: `linear-gradient(to top, ${C.bg}, rgba(0,0,0,0))`,
+          pointerEvents: 'none',
+        }}/>
+        {/* scroll track indicator (static; hints scroll affordance) */}
+        <div style={{
+          position: 'absolute', right: 4, top: 10, bottom: 34,
+          width: 3, borderRadius: 2, background: 'rgba(79,70,184,0.08)',
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            position: 'absolute', top: 6, left: 0, width: 3, height: 60,
+            borderRadius: 2, background: C.accent, opacity: 0.35,
+          }}/>
+        </div>
+      </div>
+
+      <div style={{
+        padding: '14px 18px', borderTop: `1px solid ${C.hair}`,
+        background: C.bg,
+      }}>
+        <div style={{
+          padding: '12px', borderRadius: 12,
+          background: C.bgAlt, textAlign: 'center',
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 500,
+          color: C.inkSoft,
+        }}>Cancel</div>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Choose a Story — scrolled variant (shows bottom, sticky search) ────
+function DirC_ChooseStoryScrolled() {
+  const P = C.iconPalette;
+  return (
+    <DirC_ModalShell label="C · Choose a Story (scrolled)" backdrop={<GhostStories/>} align="top">
+      {/* sticky header with search */}
+      <div style={{
+        padding: '18px 18px 12px',
+        borderBottom: `1px solid ${C.hair}`, background: C.bg,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 10,
+        }}>
+          <div style={{
+            fontFamily: C.fontDisplay, fontSize: 20, fontWeight: 400,
+            color: C.ink, letterSpacing: -0.3,
+          }}>Choose a story</div>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 12, color: C.inkMuted,
+            fontWeight: 500,
+          }}>8 total</div>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '10px 12px', borderRadius: 10,
+          background: C.card, border: `1px solid ${C.hair}`,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="6" stroke={C.inkMuted} strokeWidth="2"/>
+            <path d="M20 20 L16 16" stroke={C.inkMuted} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 13, color: C.ink, flex: 1,
+          }}>haircut</div>
+          <div style={{
+            width: 16, height: 16, borderRadius: 99,
+            background: C.bgAlt, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 10, color: C.inkMuted, fontWeight: 700,
+          }}>✕</div>
+        </div>
+      </div>
+
+      {/* Scrolled list — results section + templates */}
+      <div style={{ padding: '10px 16px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          margin: '4px 6px 8px',
+        }}>1 match in your stories</div>
+        <ChooseStoryRow icon={Icons.scissors({ size: 30, ...P })} title="Getting a Haircut" meta="Not yet read · 6 pages" bg="#EDE5D5"/>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 10.5, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          margin: '16px 6px 8px',
+        }}>2 matches in templates</div>
+        <ChooseStoryRow icon={Icons.scissors({ size: 30, ...P })} title="First Haircut" meta="5 pages · ready to add" bg="#F0DDE7" action="Add"/>
+        <ChooseStoryRow icon={Icons.scissors({ size: 30, ...P })} title="Salon Visit" meta="7 pages · ready to add" bg="#E3E7DE" action="Add"/>
+
+        <div style={{ height: 20 }}/>
+
+        {/* recently removed inline */}
+        <div style={{
+          padding: 14, borderRadius: 12,
+          background: C.bgAlt, border: `1px dashed ${C.hair}`,
+          marginTop: 6,
+        }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+            fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+            marginBottom: 4,
+          }}>Recently removed</div>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 13, color: C.inkSoft,
+            lineHeight: 1.4,
+          }}>"Visiting Grandma's" · removed yesterday · <span style={{ color: C.accent, fontWeight: 600 }}>Restore</span></div>
+        </div>
+      </div>
+
+      <div style={{
+        padding: '14px 18px', borderTop: `1px solid ${C.hair}`,
+        background: C.bg,
+      }}>
+        <div style={{
+          padding: '12px', borderRadius: 12,
+          background: C.bgAlt, textAlign: 'center',
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 500,
+          color: C.inkSoft,
+        }}>Cancel</div>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Edit Story — Details tab ────────────────────────────────────────
+function DirC_EditStoryDetails() {
+  const P = C.iconPalette;
+  return (
+    <DirC_ModalShell label="C · Edit Story — Details" backdrop={<GhostStories/>} align="top">
+      <div style={{
+        padding: '18px 22px 10px',
+        borderBottom: `1px solid ${C.hair}`,
+      }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.4, textTransform: 'uppercase',
+          marginBottom: 4,
+        }}>Edit story · 7 pages</div>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 24, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.5, lineHeight: 1,
+        }}>Going to the Grocery Store</div>
+        {/* tab bar */}
+        <div style={{
+          display: 'flex', gap: 0, marginTop: 14, borderBottom: `1px solid transparent`,
+        }}>
+          <div style={{
+            padding: '8px 0', marginRight: 24,
+            borderBottom: `2px solid ${C.accent}`,
+            fontFamily: C.fontBody, fontSize: 13, fontWeight: 600,
+            color: C.accent,
+          }}>Details</div>
+          <div style={{
+            padding: '8px 0',
+            fontFamily: C.fontBody, fontSize: 13, fontWeight: 500,
+            color: C.inkMuted,
+          }}>Pages · 7</div>
+        </div>
+      </div>
+      <div style={{ padding: '14px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Title</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 14,
+          fontFamily: C.fontDisplay, fontSize: 18, color: C.ink,
+        }}>Going to the Grocery Store</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Description (optional)</div>
+        <div style={{
+          padding: '12px 14px', border: `1px solid ${C.hair}`,
+          borderRadius: 12, background: C.card, marginBottom: 14,
+          fontFamily: C.fontBody, fontSize: 13, color: C.inkSoft,
+          lineHeight: 1.4, minHeight: 56,
+        }}>A story about our regular Tuesday trip to Foodco with Mommy.</div>
+
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+              fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+              marginBottom: 6,
+            }}>Cover</div>
+            <div style={{
+              width: '100%', aspectRatio: '1', borderRadius: 12,
+              background: C.accentSoft, border: `1px solid ${C.hair}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>{Icons.store({ size: 60, ...P })}</div>
+          </div>
+          <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 22 }}>
+            <div style={{
+              padding: '10px 12px', borderRadius: 10,
+              background: C.card, border: `1px solid ${C.hair}`,
+              fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+              color: C.accent, textAlign: 'center',
+            }}>Choose icon</div>
+            <div style={{
+              padding: '10px 12px', borderRadius: 10,
+              background: C.card, border: `1px solid ${C.hair}`,
+              fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+              color: C.inkSoft, textAlign: 'center',
+            }}>Upload photo</div>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 0', marginBottom: 4,
+        }}>
+          <div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 14, fontWeight: 500, color: C.ink,
+            }}>Read aloud on open</div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 11.5, color: C.inkMuted, marginTop: 2,
+            }}>Voice starts when first page appears</div>
+          </div>
+          <div style={{
+            width: 42, height: 24, borderRadius: 99,
+            background: C.accent, position: 'relative',
+          }}>
+            <div style={{
+              position: 'absolute', top: 2, right: 2,
+              width: 20, height: 20, borderRadius: 99,
+              background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+            }}/>
+          </div>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 0',
+        }}>
+          <div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 14, fontWeight: 500, color: C.ink,
+            }}>Share with co-parent</div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 11.5, color: C.inkMuted, marginTop: 2,
+            }}>Dana · read-only access</div>
+          </div>
+          <div style={{
+            width: 42, height: 24, borderRadius: 99,
+            background: C.bgAlt, border: `1px solid ${C.hair}`,
+            position: 'relative',
+          }}>
+            <div style={{
+              position: 'absolute', top: 2, left: 2,
+              width: 18, height: 18, borderRadius: 99,
+              background: C.card, boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+            }}/>
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        padding: '14px 16px', borderTop: `1px solid ${C.hair}`, background: C.bg,
+        display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: 8,
+      }}>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 13,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: `${C.warn}15`, border: `1px solid ${C.warn}40`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: C.warn,
+        }}>Delete</button>
+        <button style={{
+          padding: '11px 8px', borderRadius: 10,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 13,
+          color: '#fff',
+        }}>Save</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Edit Story — Page editor ────────────────────────────────────────
+function DirC_EditStoryPage() {
+  const P = C.iconPalette;
+  return (
+    <DirC_ModalShell label="C · Edit Story — Page 3" backdrop={<GhostStories/>} align="top">
+      <div style={{
+        padding: '18px 22px 10px',
+        borderBottom: `1px solid ${C.hair}`,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 4,
+        }}>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+            fontWeight: 600, letterSpacing: 1.4, textTransform: 'uppercase',
+          }}>Going to the Grocery Store</div>
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 11, color: C.accent,
+            fontWeight: 600,
+          }}>‹ Back to story</div>
+        </div>
+        <div style={{
+          fontFamily: C.fontDisplay, fontSize: 22, fontWeight: 400,
+          color: C.ink, letterSpacing: -0.4, lineHeight: 1,
+        }}>Page 3 of 7</div>
+        {/* page reel */}
+        <div style={{
+          display: 'flex', gap: 6, marginTop: 12, overflowX: 'auto', paddingBottom: 4,
+        }}>
+          {[1,2,3,4,5,6,7].map(i => (
+            <div key={i} style={{
+              width: 36, height: 44, borderRadius: 8,
+              background: i === 3 ? C.accentSoft : C.card,
+              border: `1px solid ${i === 3 ? C.accent : C.hair}`,
+              flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: C.fontBody, fontSize: 11, fontWeight: 600,
+              color: i === 3 ? C.accent : C.inkMuted,
+            }}>{i}</div>
+          ))}
+          <div style={{
+            width: 36, height: 44, borderRadius: 8,
+            border: `1.5px dashed ${C.hair}`, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: C.inkMuted, fontSize: 18, fontWeight: 400,
+          }}>+</div>
+        </div>
+      </div>
+      <div style={{ padding: '14px 18px 6px', flex: 1, overflowY: 'auto' }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Image</div>
+        <div style={{
+          width: '100%', aspectRatio: '16/10', borderRadius: 12,
+          background: C.accentSoft, border: `1px solid ${C.hair}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: 8, position: 'relative',
+        }}>
+          {Icons.store({ size: 80, ...P })}
+          <div style={{
+            position: 'absolute', bottom: 8, right: 8,
+            padding: '5px 10px', borderRadius: 8,
+            background: C.card, border: `1px solid ${C.hair}`,
+            fontFamily: C.fontBody, fontSize: 11, fontWeight: 600,
+            color: C.accent,
+          }}>Replace</div>
+        </div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6, marginTop: 14,
+        }}>Text</div>
+        <div style={{
+          padding: '14px 16px', border: `1.5px solid ${C.accent}`,
+          borderRadius: 12, background: C.card, marginBottom: 6,
+          fontFamily: C.fontDisplay, fontSize: 17, color: C.ink,
+          lineHeight: 1.35, minHeight: 70,
+        }}>
+          When we get inside, I can ride in the cart or walk next to Mommy.<span style={{ display: 'inline-block', width: 2, height: 18, background: C.accent, verticalAlign: 'text-bottom', marginLeft: 1, animation: 'none' }}/>
+        </div>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          marginBottom: 14, paddingLeft: 4,
+        }}>13 words · reads in about 7 seconds</div>
+
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+          fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+          marginBottom: 6,
+        }}>Voice note (optional)</div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '12px 14px', borderRadius: 12,
+          background: C.card, border: `1px solid ${C.hair}`,
+        }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 99,
+            background: C.accent, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#fff' }}/>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 13, fontWeight: 500, color: C.ink,
+            }}>Tap to record Mommy's voice</div>
+            <div style={{
+              fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted, marginTop: 2,
+            }}>Plays instead of read-aloud on this page</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        padding: '14px 16px', borderTop: `1px solid ${C.hair}`, background: C.bg,
+        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 6,
+      }}>
+        <button style={{
+          padding: '11px 4px', borderRadius: 10,
+          background: C.bgAlt, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 12,
+          color: C.inkSoft,
+        }}>Cancel</button>
+        <button style={{
+          padding: '11px 4px', borderRadius: 10,
+          background: C.card, border: `1px solid ${C.hair}`,
+          fontFamily: C.fontBody, fontWeight: 500, fontSize: 12,
+          color: C.inkSoft,
+        }}>Duplicate</button>
+        <button style={{
+          padding: '11px 4px', borderRadius: 10,
+          background: `${C.warn}12`, border: `1px solid ${C.warn}30`,
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 12,
+          color: C.warn,
+        }}>Delete</button>
+        <button style={{
+          padding: '11px 4px', borderRadius: 10,
+          background: C.accent, border: 'none',
+          fontFamily: C.fontBody, fontWeight: 600, fontSize: 12,
+          color: '#fff',
+        }}>Save page</button>
+      </div>
+    </DirC_ModalShell>
+  );
+}
+
+// ─── Settings sheet ────────────────────────────────────────
+function SettingsRow({ label, value, trailing = 'chevron', icon, meta }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '14px 16px',
+      background: C.card, borderBottom: `1px solid ${C.hairSoft}`,
+    }}>
+      {icon && (
+        <div style={{
+          width: 32, height: 32, borderRadius: 8,
+          background: C.accentSoft, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: C.accent,
+        }}>{icon}</div>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 14, fontWeight: 500, color: C.ink,
+        }}>{label}</div>
+        {meta && (
+          <div style={{
+            fontFamily: C.fontBody, fontSize: 11.5, color: C.inkMuted,
+            marginTop: 2,
+          }}>{meta}</div>
+        )}
+      </div>
+      {value && (
+        <div style={{
+          fontFamily: C.fontBody, fontSize: 13, color: C.inkSoft, fontWeight: 500,
+        }}>{value}</div>
+      )}
+      {trailing === 'chevron' && (
+        <div style={{ color: C.inkMuted }}>{TabIcons.chevronR(C.inkMuted, 2)}</div>
+      )}
+      {trailing === 'toggleOn' && (
+        <div style={{
+          width: 42, height: 24, borderRadius: 99,
+          background: C.accent, position: 'relative',
+        }}>
+          <div style={{
+            position: 'absolute', top: 2, right: 2,
+            width: 20, height: 20, borderRadius: 99,
+            background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+          }}/>
+        </div>
+      )}
+      {trailing === 'toggleOff' && (
+        <div style={{
+          width: 42, height: 24, borderRadius: 99,
+          background: C.bgAlt, border: `1px solid ${C.hair}`,
+          position: 'relative',
+        }}>
+          <div style={{
+            position: 'absolute', top: 2, left: 2,
+            width: 18, height: 18, borderRadius: 99,
+            background: C.card, boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+          }}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SettingsSection({ title, children }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{
+        fontFamily: C.fontBody, fontSize: 11, color: C.inkMuted,
+        fontWeight: 600, letterSpacing: 1.4, textTransform: 'uppercase',
+        padding: '0 18px 6px',
+      }}>{title}</div>
+      <div style={{
+        borderRadius: 14, overflow: 'hidden', marginInline: 14,
+        border: `1px solid ${C.hair}`,
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DirC_Settings() {
+  return (
+    <Phone bg={C.bg} label="C · Settings">
+      <StatusBar color={C.ink} />
+      <DirC_TopBar eyebrow="Account · Dana's family" title="Settings" />
+
+      <div style={{ overflowY: 'auto', paddingBottom: 120 }}>
+        <SettingsSection title="Child">
+          <SettingsRow label="Leo's profile" meta="Age 5 · reading level: emerging" trailing="chevron"/>
+          <SettingsRow label="Voice for read-aloud" value="Soft · female" trailing="chevron"/>
+          <SettingsRow label="Text size in stories" value="Large" trailing="chevron"/>
+        </SettingsSection>
+
+        <SettingsSection title="Routines & rewards">
+          <SettingsRow label="Show reward charts" trailing="toggleOn" meta="Hide stickers if overwhelming"/>
+          <SettingsRow label="Countdown timer" trailing="toggleOff" meta="Show minutes remaining on each step"/>
+          <SettingsRow label="Celebration sounds" trailing="toggleOn"/>
+        </SettingsSection>
+
+        <SettingsSection title="Accessibility">
+          <SettingsRow label="Reduce motion" trailing="toggleOn"/>
+          <SettingsRow label="High-contrast mode" trailing="toggleOff"/>
+          <SettingsRow label="Long-press duration" value="0.3s" trailing="chevron" meta="Range: 0.2–0.4s · prevents accidental Done taps"/>
+        </SettingsSection>
+
+        <SettingsSection title="Sharing & backup">
+          <SettingsRow label="Co-parent access" value="Dana · viewing" trailing="chevron"/>
+          <SettingsRow label="Export routines & stories" trailing="chevron" meta="PDF or printable flashcards"/>
+          <SettingsRow label="Backup to iCloud" trailing="toggleOn" meta="Last backup · yesterday 9:41pm"/>
+        </SettingsSection>
+
+        <SettingsSection title="About">
+          <SettingsRow label="Send feedback" trailing="chevron"/>
+          <SettingsRow label="Privacy" trailing="chevron"/>
+          <SettingsRow label="Version" value="1.4.2" trailing={null}/>
+        </SettingsSection>
+      </div>
+
+      <DirC_TabBar active="settings" />
+    </Phone>
+  );
+}
+
+Object.assign(window, {
+  DirC_ChooseStory, DirC_ChooseStoryScrolled,
+  DirC_EditStoryDetails, DirC_EditStoryPage,
+  DirC_Settings,
+});
+
+
+
+// ====== lib/app.jsx ======
+// Main app — Guiding Steps · Storybook Canvas working canvas.
+// Now organized into 4 sections: Onboarding, Schedule, Steps, Stories+Settings.
+
+function useTweaks() {
+  const [t, setT] = React.useState(window.__GS_TWEAKS || {});
+  const [editMode, setEditMode] = React.useState(false);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const d = e.data || {};
+      if (d.type === '__activate_edit_mode') setEditMode(true);
+      else if (d.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const update = (patch) => {
+    setT((prev) => {
+      const next = { ...prev, ...patch };
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: patch }, '*');
+      return next;
+    });
+  };
+  return [t, update, editMode];
+}
+
+function TweakPanel({ t, update }) {
+  const row = (label, ctrl) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 0' }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: '#333' }}>{label}</div>
+      {ctrl}
+    </div>
+  );
+  return (
+    <div style={{
+      position: 'fixed', right: 16, bottom: 16, zIndex: 1000,
+      width: 280, background: '#fff',
+      borderRadius: 16, padding: 16,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 20px 60px rgba(0,0,0,0.18)',
+      border: '1px solid rgba(0,0,0,0.08)',
+      fontFamily: '-apple-system, system-ui',
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: -0.1, marginBottom: 8 }}>Tweaks</div>
+      {row('Text size', <input type="range" min="0.85" max="1.2" step="0.05"
+        value={t.textSize} onChange={(e) => update({ textSize: parseFloat(e.target.value) })} style={{ width: 120 }}/>)}
+      {row('Dark mode', <input type="checkbox" checked={!!t.darkMode} onChange={(e) => update({ darkMode: e.target.checked })}/>)}
+      {row('Reduce motion', <input type="checkbox" checked={!!t.reduceMotion} onChange={(e) => update({ reduceMotion: e.target.checked })}/>)}
+    </div>
+  );
+}
+
+function DirHero({ letter, name, mood, palette, fonts, tagline }) {
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 2,
+      padding: '24px 28px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+      width: 680, marginBottom: 36,
+    }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: 18,
+          background: palette[0], color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: 40,
+          letterSpacing: -1, flexShrink: 0,
+        }}>{letter}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontFamily: 'Fraunces, serif', fontWeight: 500, fontSize: 28,
+            color: '#1a1a1a', letterSpacing: -0.5, lineHeight: 1,
+          }}>{name}</div>
+          <div style={{
+            fontFamily: '-apple-system, system-ui', fontSize: 14, color: '#666',
+            marginTop: 4, fontStyle: 'italic',
+          }}>{tagline}</div>
+          <div style={{ display: 'flex', gap: 20, marginTop: 14, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#999', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Mood</div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#222' }}>{mood}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#999', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Palette</div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {palette.map((c, i) => (
+                  <div key={i} style={{
+                    width: 22, height: 22, borderRadius: 6, background: c,
+                    border: '1px solid rgba(0,0,0,0.08)',
+                  }}/>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#999', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Fonts</div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#222' }}>{fonts}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Compact artboard wrapper — transparent bg so the device shadow shows.
+function AB({ children, label }) {
+  return (
+    <DCArtboard label={label} width={390} height={900}
+      style={{ background: 'transparent', boxShadow: 'none' }}>
+      {children}
+    </DCArtboard>
+  );
+}
+
+function App() {
+  const [t, update, editMode] = useTweaks();
+
+  const wrapStyle = {
+    fontSize: `${16 * (t.textSize || 1)}px`,
+    filter: t.darkMode ? 'invert(0.92) hue-rotate(180deg)' : 'none',
+  };
+
+  return (
+    <div style={wrapStyle}>
+      <DesignCanvas>
+        <div style={{ padding: '0 60px 40px', width: 1200 }}>
+          <div style={{
+            fontFamily: 'Fraunces, serif', fontSize: 44, fontWeight: 500,
+            color: '#1a1a1a', letterSpacing: -1.2, lineHeight: 1,
+          }}>Guiding Steps — Storybook Canvas</div>
+          <div style={{
+            fontFamily: '-apple-system, system-ui', fontSize: 15, color: '#666',
+            marginTop: 10, maxWidth: 760, lineHeight: 1.5,
+          }}>
+            Locked-in direction. Calm, editorial, dignified — warm ivory canvas, single
+            deep-indigo accent, numbered spine progress, long-press confirm. Four feature
+            sections below: Onboarding, Schedule, Steps, Stories &amp; Settings.
+          </div>
+        </div>
+
+        <div style={{ padding: '0 60px' }}>
+          <DirHero letter="C" name="Storybook Canvas"
+            tagline="Calm, editorial, dignified."
+            mood="Quiet · bookish · sensory-safe"
+            palette={['#4F46B8', '#E07B3E', '#E2DFF6', '#FBF6EC', '#1B1D2E']}
+            fonts="Fraunces display + Inter body"/>
+        </div>
+
+        {/* ───── 1 · Onboarding ───── */}
+        <DCSection title="1 · Onboarding"
+          subtitle="Three screens to set up the child's profile. Flat ivory, one decorative motif per slide."
+          gap={40}>
+          <AB label="1.1 · Welcome"><DirC_Onb_Welcome /></AB>
+          <AB label="1.2 · Name & age"><DirC_Onb_Name /></AB>
+          <AB label="1.3 · Tools to turn on"><DirC_Onb_Tools /></AB>
+          <DCPostIt top={-20} left={280} rotate={-2} width={200}>
+            Onboarding stays on flat ivory — no hero gradients — so it matches the home screens.
+          </DCPostIt>
+        </DCSection>
+
+        {/* ───── 2 · Schedule ───── */}
+        <DCSection title="2 · Schedule"
+          subtitle="Main routine view + templates sheet + create/edit modals. Numbered spine progress + long-press confirm."
+          gap={40}>
+          <AB label="2.1 · Today's schedule"><DirC_Schedule /></AB>
+          <AB label="2.2 · Schedule w/ tooltip"><DirC_ScheduleSettings /></AB>
+          <AB label="2.3 · Edit Templates sheet"><DirC_EditTemplates /></AB>
+          <AB label="2.4 · New Schedule modal"><DirC_NewSchedule /></AB>
+          <AB label="2.5 · Edit Schedule modal"><DirC_EditSchedule /></AB>
+          <DCPostIt top={420} left={-20} rotate={3} width={180}>
+            Long-press ring (0.2–0.4s) on the Done button — quick enough not to annoy, long enough to prevent accidental taps.
+          </DCPostIt>
+        </DCSection>
+
+        {/* ───── 3 · Steps ───── */}
+        <DCSection title="3 · Steps (Task Strips)"
+          subtitle="Reward-chart flow. Icon-tile rows, optional reward on completion. Create from template or scratch, then edit."
+          gap={40}>
+          <AB label="3.1 · Bedtime task strip"><DirC_Steps /></AB>
+          <AB label="3.2 · New reward chart"><DirC_NewRewardChart /></AB>
+          <AB label="3.3 · New task strip"><DirC_NewTaskStrip /></AB>
+          <AB label="3.4 · Edit task strip"><DirC_EditTaskStrip /></AB>
+          <DCPostIt top={-30} left={240} rotate={-1} width={200}>
+            Rewards are optional — small and contextual, not gamified confetti.
+          </DCPostIt>
+        </DCSection>
+
+        {/* ───── 4 · Stories, Reader & Settings ───── */}
+        <DCSection title="4 · Stories, Reader & Settings"
+          subtitle="Social stories library + reader + create/edit flows. Settings as a standalone tab."
+          gap={40}>
+          <AB label="4.1 · Stories library"><DirC_Stories /></AB>
+          <AB label="4.2 · Reader"><DirC_Reader /></AB>
+          <AB label="4.3 · Choose a story"><DirC_ChooseStory /></AB>
+          <AB label="4.4 · Choose a story · searched"><DirC_ChooseStoryScrolled /></AB>
+          <AB label="4.5 · Edit story — details"><DirC_EditStoryDetails /></AB>
+          <AB label="4.6 · Edit story — page editor"><DirC_EditStoryPage /></AB>
+          <AB label="4.7 · Settings"><DirC_Settings /></AB>
+          <DCPostIt top={-30} left={280} rotate={-2} width={200}>
+            Page editor shows numbered reel + active page highlighted in indigo.
+          </DCPostIt>
+        </DCSection>
+
+        <div style={{ height: 80 }}/>
+      </DesignCanvas>
+
+      {editMode && <TweakPanel t={t} update={update} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+
+
+</script>
+</body>
+</html>

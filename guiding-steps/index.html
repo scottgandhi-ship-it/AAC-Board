@@ -9,9 +9,33 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/Fraunces-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <title>Guiding Steps</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('fonts/Fraunces-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --chrome-primary: #7C74FF;
@@ -66,6 +90,41 @@
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
+}
+
+/* Storybook Canvas design tokens -- used by redesigned screens (PR-1 onward).
+   Coexists with --chrome-* until each tab is re-skinned. */
+:root {
+  --gs-bg: #FBF6EC;
+  --gs-bg-alt: #F0E8D6;
+  --gs-card: #FFFFFF;
+  --gs-ink: #1B1D2E;
+  --gs-ink-soft: #4A4D63;
+  --gs-ink-muted: #8F8FA3;
+  --gs-accent: #4F46B8;
+  --gs-accent-soft: #E2DFF6;
+  --gs-accent-deep: #2E2782;
+  --gs-warn: #C5553A;
+  --gs-hair: rgba(27, 29, 46, 0.1);
+  --gs-hair-soft: rgba(27, 29, 46, 0.05);
+  --gs-shadow: 0 1px 2px rgba(27,29,46,0.04), 0 8px 24px rgba(27,29,46,0.06);
+
+  --gs-font-display: "Fraunces", Georgia, serif;
+  --gs-font-body: "Inter", -apple-system, system-ui, sans-serif;
+
+  --gs-radius-sm: 10px;
+  --gs-radius-md: 12px;
+  --gs-radius-lg: 14px;
+  --gs-radius-xl: 18px;
+  --gs-radius-modal: 22px;
+  --gs-radius-pill: 99px;
+
+  --gs-icon-warm: #E07B3E;
+  --gs-icon-warm-pale: #F7D9BF;
+  --gs-icon-cool: #4F46B8;
+  --gs-icon-cool-pale: #E2DFF6;
+  --gs-icon-neutral: #E6DEC9;
+  --gs-icon-neutral-deep: #A69A7B;
 }
 
 html {
@@ -169,36 +228,72 @@ body {
   .parental-gate-ring.complete circle { stroke-dashoffset: 0; }
 }
 
-/* -- Onboarding Overlay -- */
+/* -- Onboarding Overlay (Storybook Canvas) -- */
 #gs-onboarding-overlay {
   display: none; position: fixed; inset: 0; z-index: 400;
-  background: linear-gradient(135deg, #ede8ff 0%, #fce4ec 30%, #fff3e0 60%, #e8f5e9 100%);
+  background: var(--gs-bg);
   justify-content: center; align-items: center; padding: 32px;
   flex-direction: column;
+  font-family: var(--gs-font-body);
+  color: var(--gs-ink);
 }
 #gs-onboarding-overlay.visible { display: flex; }
 .gs-onboarding-content {
-  max-width: 400px; width: 100%; text-align: center;
+  max-width: 380px; width: 100%; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.gs-onboarding-motif {
+  margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: center;
 }
 .gs-onboarding-headline {
-  font-size: 1.6rem; font-weight: 800; color: var(--chrome-text); margin-bottom: 8px; line-height: 1.3;
+  font-family: var(--gs-font-display);
+  font-size: 2rem; font-weight: 400; color: var(--gs-ink);
+  letter-spacing: -0.6px; line-height: 1.1;
+  margin-bottom: 14px; max-width: 320px;
 }
-.gs-onboarding-subhead {
-  font-size: 1.1rem; font-weight: 600; color: var(--chrome-primary, #7C74FF); margin-bottom: 16px;
-}
+.gs-onboarding-headline:focus { outline: none; }
 .gs-onboarding-body {
-  font-size: 1rem; color: var(--gray-700); line-height: 1.5; margin-bottom: 24px;
+  font-family: var(--gs-font-body);
+  font-size: 0.95rem; font-weight: 500; color: var(--gs-ink-soft);
+  line-height: 1.5; margin-bottom: 24px; max-width: 300px;
+}
+.gs-onboarding-label {
+  font-family: var(--gs-font-body);
+  font-size: 0.75rem; font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  text-align: left; width: 100%; margin-bottom: 8px; margin-top: 18px;
+}
+.gs-onboarding-input {
+  width: 100%; padding: 16px 18px; border-radius: 14px;
+  border: 1.5px solid var(--gs-hair); background: var(--gs-card);
+  font-family: var(--gs-font-display); font-size: 1.25rem;
+  color: var(--gs-ink); letter-spacing: -0.3px;
+  margin-bottom: 20px;
+  transition: border-color 0.15s;
+}
+.gs-onboarding-input:focus {
+  outline: none; border-color: var(--gs-accent);
 }
 .gs-onboarding-btn {
-  display: block; width: 100%; padding: 16px 48px; border: none; border-radius: 14px;
-  font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit;
-  background: linear-gradient(135deg, #7C74FF, #6C63FF); color: #fff;
-  box-shadow: 0 4px 12px rgba(124,116,255,0.3); margin-bottom: 12px; min-height: 48px;
+  display: block; width: 100%; padding: 16px; border: none; border-radius: 14px;
+  background: var(--gs-accent); color: #fff;
+  font-family: var(--gs-font-body); font-weight: 600; font-size: 1rem;
+  letter-spacing: 0.1px; cursor: pointer; min-height: 48px;
+  margin-bottom: 8px;
+  transition: transform 0.1s ease, background 0.15s;
 }
-.gs-onboarding-btn:active { transform: scale(0.98); }
+.gs-onboarding-btn:active { transform: scale(0.98); background: var(--gs-accent-deep); }
+.gs-onboarding-btn:focus-visible {
+  outline: 2px solid var(--gs-accent); outline-offset: 2px;
+}
 .gs-onboarding-skip {
-  display: block; width: 100%; background: none; border: none; color: #777;
-  font-size: 0.95rem; cursor: pointer; padding: 8px; font-family: inherit;
+  display: block; width: 100%; background: none; border: none;
+  font-family: var(--gs-font-body); font-weight: 500; font-size: 0.875rem;
+  color: var(--gs-ink-muted); cursor: pointer; padding: 10px; min-height: 44px;
+}
+.gs-onboarding-skip:focus-visible {
+  outline: 2px solid var(--gs-accent); outline-offset: 2px; border-radius: 8px;
 }
 .gs-onboarding-step { display: none; flex-direction: column; align-items: center; width: 100%; }
 .gs-onboarding-step.active { display: flex; }
@@ -206,18 +301,39 @@ body {
   display: flex; gap: 8px; justify-content: center; margin-top: 24px;
 }
 .gs-onboarding-dots .dot {
-  width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.15);
+  width: 7px; height: 7px; border-radius: 99px;
+  background: var(--gs-hair);
+  transition: width 0.2s, background 0.2s;
 }
-.gs-onboarding-dots .dot.active { background: #7C74FF; }
+.gs-onboarding-dots .dot.active {
+  width: 22px; background: var(--gs-accent);
+}
 .gs-feature-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; width: 100%; }
 .gs-feature-card {
-  display: flex; align-items: center; gap: 14px; padding: 16px;
-  background: rgba(255,255,255,0.85); border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: left;
+  display: flex; align-items: center; gap: 16px; padding: 16px 18px;
+  background: var(--gs-card); border: 1px solid var(--gs-hair);
+  border-radius: 16px; text-align: left;
 }
-.gs-feature-card-icon { font-size: 2rem; flex-shrink: 0; width: 48px; text-align: center; }
-.gs-feature-card-name { font-size: 1rem; font-weight: 700; color: var(--chrome-text); }
-.gs-feature-card-desc { font-size: 0.85rem; color: var(--chrome-text-secondary); margin-top: 2px; }
+.gs-feature-card-icon {
+  flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px;
+  background: var(--gs-accent-soft);
+  display: flex; align-items: center; justify-content: center;
+}
+.gs-feature-card-name {
+  font-family: var(--gs-font-display); font-size: 1.1875rem; font-weight: 500;
+  color: var(--gs-ink); letter-spacing: -0.3px; line-height: 1;
+}
+.gs-feature-card-desc {
+  font-family: var(--gs-font-body); font-size: 0.8125rem;
+  color: var(--gs-ink-soft); margin-top: 4px; line-height: 1.35;
+}
+.gs-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-onboarding-btn, .gs-onboarding-dots .dot, .gs-onboarding-input { transition: none; }
+}
 
 /* -- Coach Mark Tooltip -- */
 #gs-coach-backdrop {
@@ -264,7 +380,7 @@ body {
 }
 
 @media (max-width: 500px) {
-  .gs-onboarding-headline { font-size: 1.4rem; }
+  .gs-onboarding-headline { font-size: 1.75rem; }
   #gs-onboarding-overlay { padding: 24px 16px; }
 }
 
@@ -2194,7 +2310,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
   margin-bottom: 12px;
 }
 
-#editor-page-image-area { margin-bottom: 16px; text-align: center; }
+#editor-page-image-area { margin-bottom: 16px; text-align: center; position: relative; }
 #editor-page-image-preview {
   width: 100%; aspect-ratio: 4/3; background: #f0ede8; border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
@@ -2203,6 +2319,15 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 #editor-page-image-preview svg { width: 50%; height: 50%; }
 #editor-page-image-preview img { width: 100%; height: 100%; object-fit: cover; }
 #editor-page-image-btns { display: flex; gap: 8px; justify-content: center; }
+.paste-target { outline: 3px dashed var(--chrome-primary); outline-offset: -3px; }
+.paste-flash {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; border-radius: var(--radius-md); pointer-events: none;
+  animation: pasteFlash 0.8s ease-out forwards; z-index: 5;
+}
+.paste-flash.success { background: rgba(76,175,80,0.25); }
+.paste-flash.fail { background: rgba(244,67,54,0.15); }
+@keyframes pasteFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
 
 .sentence-type-group { display: flex; flex-wrap: wrap; gap: 6px; }
 .sentence-type-btn {
@@ -2758,7 +2883,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
         <div class="helper-step-title">What's the situation?</div>
         <div class="helper-coaching">Social stories work best when they're specific to your child's actual experience.</div>
         <div class="helper-field">
-          <div class="helper-field-label">Describe the situation</div>
+          <label for="helper-situation" class="helper-field-label">Describe the situation</label>
           <input type="text" id="helper-situation" autocomplete="off">
         </div>
         <div class="helper-field-label">Or pick a category to get started</div>
@@ -2825,7 +2950,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           <button type="button" class="helper-chip" data-val="unsure">Unsure</button>
         </div>
         <div class="helper-field">
-          <div class="helper-field-label">How might other people there be feeling? (optional)</div>
+          <label for="helper-others-feelings" class="helper-field-label">How might other people there be feeling? (optional)</label>
           <input type="text" id="helper-others-feelings" autocomplete="off">
         </div>
         <div class="helper-nav">
@@ -2849,11 +2974,11 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           <button type="button" class="helper-chip" data-val="close my eyes">Close my eyes</button>
         </div>
         <div class="helper-field">
-          <div class="helper-field-label">Any other strategies?</div>
+          <label for="helper-custom-coping" class="helper-field-label">Any other strategies?</label>
           <input type="text" id="helper-custom-coping" autocomplete="off">
         </div>
         <div class="helper-field">
-          <div class="helper-field-label">Who can help?</div>
+          <label for="helper-who-helps" class="helper-field-label">Who can help?</label>
           <input type="text" id="helper-who-helps" autocomplete="off">
         </div>
         <div class="helper-nav">
@@ -3017,6 +3142,20 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     <div class="settings-section">
       <h3>Privacy</h3>
       <p style="font-size:0.9rem;color:#666;line-height:1.5;">Your data stays on this device. We don't collect, store, or share any information about you or your child.</p>
+    </div>
+    <div class="settings-section parent-only">
+      <button type="button" id="companion-toggle" class="settings-accordion-btn" aria-expanded="false">
+        <span style="font-size:1rem;font-weight:700;color:#555;">Our Apps</span>
+        <span class="accordion-summary" id="companion-summary" style="font-size:0.8rem;color:#888;"></span>
+        <span class="accordion-chevron">&#9660;</span>
+      </button>
+      <div id="companion-details" class="accordion-details">
+        <div style="padding:12px;background:#f9f7ff;border-radius:10px;">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">Yappie</div>
+          <p style="font-size:0.85rem;color:#555;line-height:1.4;margin:0 0 8px;">Give your child a voice. Yappie is our AAC communication app with 400+ vocabulary words, activity-based boards, and smart word prediction.</p>
+          <button type="button" class="settings-btn" id="btn-open-yappie" style="background:#e8f5e9;color:#2E7D32;">View in App Store</button>
+        </div>
+      </div>
     </div>
     <button type="button" id="btn-close-settings">Done</button>
   </div>
@@ -3227,62 +3366,127 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
 </nav>
 
 <!-- Onboarding Overlay -->
-<div id="gs-onboarding-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Guiding Steps">
-  <div id="gs-onboarding-step-1" class="gs-onboarding-step active">
+<div id="gs-onboarding-overlay" role="dialog" aria-modal="true" aria-labelledby="gs-onb-step-1-headline">
+  <span id="gs-onboarding-announce" class="gs-sr-only" aria-live="polite"></span>
+
+  <div id="gs-onboarding-step-1" class="gs-onboarding-step active" aria-labelledby="gs-onb-step-1-headline">
     <div class="gs-onboarding-content">
-      <h1 class="gs-onboarding-headline">Every day is a little easier when your child knows what's next.</h1>
-      <p class="gs-onboarding-subhead">Guiding Steps helps your child follow routines, earn rewards, and understand social situations.</p>
-      <button type="button" class="gs-onboarding-btn" id="gs-btn-start">Get Started</button>
+      <div class="gs-onboarding-motif" aria-hidden="true">
+        <svg viewBox="0 0 260 180" width="240" height="166" fill="none">
+          <path d="M10 150 Q130 130 250 150" stroke="#E07B3E" stroke-width="2" opacity="0.4" fill="none"/>
+          <circle cx="130" cy="90" r="42" fill="#F7D9BF"/>
+          <circle cx="130" cy="90" r="42" fill="none" stroke="#E07B3E" stroke-width="2.5"/>
+          <g stroke="#E07B3E" stroke-width="3" stroke-linecap="round">
+            <line x1="130" y1="42" x2="130" y2="26" opacity="1"/>
+            <line x1="154" y1="48" x2="159" y2="40" opacity="0.7"/>
+            <line x1="172" y1="66" x2="185" y2="58" opacity="1"/>
+            <line x1="178" y1="90" x2="188" y2="90" opacity="0.7"/>
+            <line x1="172" y1="114" x2="185" y2="122" opacity="1"/>
+            <line x1="154" y1="132" x2="159" y2="140" opacity="0.7"/>
+            <line x1="130" y1="138" x2="130" y2="154" opacity="1"/>
+            <line x1="106" y1="132" x2="101" y2="140" opacity="0.7"/>
+            <line x1="88" y1="114" x2="75" y2="122" opacity="1"/>
+            <line x1="82" y1="90" x2="72" y2="90" opacity="0.7"/>
+            <line x1="88" y1="66" x2="75" y2="58" opacity="1"/>
+            <line x1="106" y1="48" x2="101" y2="40" opacity="0.7"/>
+          </g>
+          <circle cx="116" cy="85" r="3" fill="#8A3520"/>
+          <circle cx="144" cy="85" r="3" fill="#8A3520"/>
+          <path d="M113 98 Q130 110 147 98" stroke="#8A3520" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="108" cy="98" r="4" fill="#C5553A" opacity="0.25"/>
+          <circle cx="152" cy="98" r="4" fill="#C5553A" opacity="0.25"/>
+        </svg>
+      </div>
+      <h1 id="gs-onb-step-1-headline" class="gs-onboarding-headline" tabindex="-1">Every day is a little easier when your child knows what's next.</h1>
+      <p class="gs-onboarding-body">Guiding Steps helps your child follow routines, earn rewards, and understand social situations.</p>
+      <button type="button" class="gs-onboarding-btn" id="gs-btn-start">Get started</button>
       <button type="button" class="gs-onboarding-skip" id="gs-btn-skip-1">Skip</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="gs-onboarding-dots" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3" aria-label="Onboarding progress">
+      <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+    </div>
   </div>
-  <div id="gs-onboarding-step-2" class="gs-onboarding-step">
+
+  <div id="gs-onboarding-step-2" class="gs-onboarding-step" aria-labelledby="gs-onb-step-2-headline">
     <div class="gs-onboarding-content">
-      <h2 class="gs-onboarding-headline" style="font-size:1.5rem;">Who are we helping today?</h2>
+      <div class="gs-onboarding-motif" aria-hidden="true">
+        <svg viewBox="0 0 200 210" width="180" height="189" fill="none">
+          <path d="M50 200 L55 150 Q60 128 80 124 L120 124 Q140 128 145 150 L150 200 Z" fill="#F0E8D6" stroke="#4F46B8" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="90" y="100" width="20" height="28" fill="#E2DFF6" stroke="#4F46B8" stroke-width="2"/>
+          <circle cx="100" cy="70" r="34" fill="#E2DFF6"/>
+          <circle cx="100" cy="70" r="34" fill="none" stroke="#4F46B8" stroke-width="2"/>
+          <path d="M78 48 Q90 36 100 42 Q108 34 122 48" stroke="#4F46B8" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="90" cy="68" r="2.5" fill="#1B1D2E"/>
+          <circle cx="110" cy="68" r="2.5" fill="#1B1D2E"/>
+          <path d="M88 82 Q100 90 112 82" stroke="#1B1D2E" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <circle cx="80" cy="78" r="3.5" fill="#E07B3E" opacity="0.35"/>
+          <circle cx="120" cy="78" r="3.5" fill="#E07B3E" opacity="0.35"/>
+          <path d="M40 150 C35 146 35 140 39 140 C41 140 43 142 43 144 C43 142 45 140 47 140 C51 140 51 146 43 154 Z" fill="#C5553A" opacity="0.6"/>
+          <path d="M162 60 C157 56 157 50 161 50 C163 50 165 52 165 54 C165 52 167 50 169 50 C173 50 173 56 165 64 Z" fill="#E07B3E" opacity="0.6"/>
+        </svg>
+      </div>
+      <h2 id="gs-onb-step-2-headline" class="gs-onboarding-headline" style="font-size:1.875rem;" tabindex="-1">Who are we helping today?</h2>
       <p class="gs-onboarding-body">We'll use their name to make stories and schedules feel personal.</p>
-      <label for="gs-onboarding-child-name" style="display:block;font-size:0.9rem;color:#666;margin-bottom:6px;text-align:left;">Child's name</label>
-      <input type="text" id="gs-onboarding-child-name" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;padding:14px;border:2px solid #ddd;border-radius:12px;font-size:1.1rem;font-family:inherit;box-sizing:border-box;margin-bottom:16px;">
+      <label for="gs-onboarding-child-name" class="gs-onboarding-label">Child's name</label>
+      <input type="text" id="gs-onboarding-child-name" class="gs-onboarding-input" aria-label="Child's name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false">
       <button type="button" class="gs-onboarding-btn" id="gs-btn-name-next">Next</button>
       <button type="button" class="gs-onboarding-skip" id="gs-btn-name-skip">Skip for now</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+    <div class="gs-onboarding-dots" role="progressbar" aria-valuenow="2" aria-valuemin="1" aria-valuemax="3" aria-label="Onboarding progress">
+      <span class="dot"></span><span class="dot active"></span><span class="dot"></span>
+    </div>
   </div>
-  <div id="gs-onboarding-step-3" class="gs-onboarding-step">
+
+  <div id="gs-onboarding-step-3" class="gs-onboarding-step" aria-labelledby="gs-onb-step-3-headline">
     <div class="gs-onboarding-content">
-      <h2 class="gs-onboarding-headline" style="font-size:1.5rem;">Three tools, one app.</h2>
+      <h2 id="gs-onb-step-3-headline" class="gs-onboarding-headline" style="font-size:1.875rem;" tabindex="-1">Three tools, one app.</h2>
+      <p class="gs-onboarding-body">Use them together or on their own.</p>
       <div class="gs-feature-cards">
         <div class="gs-feature-card">
-          <div class="gs-feature-card-icon">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#7C74FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <div class="gs-feature-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+              <line x1="5" y1="7" x2="7" y2="7" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="5" y1="12" x2="7" y2="12" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="5" y1="17" x2="7" y2="17" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="10" y1="7" x2="19" y2="7" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="10" y1="12" x2="19" y2="12" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="10" y1="17" x2="19" y2="17" stroke="#4F46B8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
           </div>
           <div>
             <div class="gs-feature-card-name">Schedules</div>
-            <div class="gs-feature-card-desc">Visual routines your child can follow step by step</div>
+            <div class="gs-feature-card-desc">Visual routines your child can follow step by step.</div>
           </div>
         </div>
         <div class="gs-feature-card">
-          <div class="gs-feature-card-icon">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div class="gs-feature-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+              <path d="M12 3 L14.5 9 L21 9.5 L16 14 L17.5 20.5 L12 17 L6.5 20.5 L8 14 L3 9.5 L9.5 9 Z" stroke="#4F46B8" stroke-width="2" stroke-linejoin="round" fill="#E2DFF6"/>
+            </svg>
           </div>
           <div>
             <div class="gs-feature-card-name">Steps</div>
-            <div class="gs-feature-card-desc">Visual task strips for daily routines</div>
+            <div class="gs-feature-card-desc">Task strips with rewards for daily routines.</div>
           </div>
         </div>
         <div class="gs-feature-card">
-          <div class="gs-feature-card-icon">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <div class="gs-feature-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+              <rect x="5" y="3" width="14" height="18" rx="2" stroke="#4F46B8" stroke-width="2" fill="#E2DFF6"/>
+              <line x1="9" y1="3" x2="9" y2="21" stroke="#4F46B8" stroke-width="2"/>
+            </svg>
           </div>
           <div>
             <div class="gs-feature-card-name">Stories</div>
-            <div class="gs-feature-card-desc">Social stories that teach what to expect</div>
+            <div class="gs-feature-card-desc">Social stories that teach what to expect.</div>
           </div>
         </div>
       </div>
-      <button type="button" class="gs-onboarding-btn" id="gs-btn-tour-done">Let's Go</button>
+      <button type="button" class="gs-onboarding-btn" id="gs-btn-tour-done">Let's go</button>
     </div>
-    <div class="gs-onboarding-dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+    <div class="gs-onboarding-dots" role="progressbar" aria-valuenow="3" aria-valuemin="1" aria-valuemax="3" aria-label="Onboarding progress">
+      <span class="dot"></span><span class="dot"></span><span class="dot active"></span>
+    </div>
   </div>
 </div>
 
@@ -3520,6 +3724,64 @@ function compressImage(blob, maxEdge = 800) {
     img.onerror = () => { URL.revokeObjectURL(img.src); resolve(blob); };
     img.src = URL.createObjectURL(blob);
   });
+}
+
+// -- Clipboard Image Paste Utility (native bridge on iOS, paste event on web) --
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const binary = atob(parts[1]);
+  const arr = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+async function readClipboardImageBlob() {
+  const plugin = window.Capacitor?.Plugins?.ClipboardImage;
+  if (!plugin) return null;
+  try {
+    const { value: hasImg } = await plugin.hasImage();
+    if (!hasImg) return null;
+    const { value: dataUrl } = await plugin.readImage();
+    if (!dataUrl) return null;
+    return dataUrlToBlob(dataUrl);
+  } catch (e) {
+    return null;
+  }
+}
+
+function showPasteFlash(container, type) {
+  const existing = container.querySelector('.paste-flash');
+  if (existing) existing.remove();
+  const flash = document.createElement('div');
+  flash.className = 'paste-flash ' + type;
+  const isSmall = container.offsetWidth < 80;
+  flash.style.fontSize = isSmall ? '1.2rem' : '2.5rem';
+  flash.textContent = type === 'success' ? '\u2713' : '\u2718';
+  container.appendChild(flash);
+  flash.addEventListener('animationend', () => flash.remove());
+}
+
+function initLongPressPaste(el, onPaste) {
+  const pos = getComputedStyle(el).position;
+  if (pos === 'static') el.style.position = 'relative';
+  let timer = null;
+  el.addEventListener('touchstart', () => {
+    timer = setTimeout(async () => {
+      timer = null;
+      el.classList.add('paste-target');
+      const blob = await readClipboardImageBlob();
+      el.classList.remove('paste-target');
+      if (blob) {
+        await onPaste(blob);
+        showPasteFlash(el, 'success');
+      } else {
+        showPasteFlash(el, 'fail');
+      }
+    }, 500);
+  }, { passive: true });
+  el.addEventListener('touchend', () => { if (timer) { clearTimeout(timer); timer = null; } });
+  el.addEventListener('touchmove', () => { if (timer) { clearTimeout(timer); timer = null; } el.classList.remove('paste-target'); });
 }
 
 async function loadTracks() {
@@ -3921,7 +4183,7 @@ function updateSensorySummary() {
   document.getElementById('sensory-summary').textContent = labels.length ? labels.join(', ') : 'All off';
 }
 
-['sensory', 'schedule', 'voice', 'progress'].forEach(key => {
+['sensory', 'schedule', 'voice', 'progress', 'companion'].forEach(key => {
   document.getElementById(key + '-toggle').addEventListener('click', () => {
     const btn = document.getElementById(key + '-toggle');
     const details = document.getElementById(key + '-details');
@@ -3929,6 +4191,10 @@ function updateSensorySummary() {
     btn.setAttribute('aria-expanded', String(!expanded));
     details.classList.toggle('open', !expanded);
   });
+});
+
+document.getElementById('btn-open-yappie').addEventListener('click', () => {
+  window.open('https://apps.apple.com/app/yappie/id0000000000', '_blank');
 });
 
 // -- Progress Narrative --
@@ -5329,6 +5595,21 @@ function renderEditorSteps() {
     imgDiv.setAttribute('role', 'button');
     imgDiv.setAttribute('aria-label', 'Change image for ' + step.label);
     imgDiv.addEventListener('click', () => { openScheduleStepImagePicker(idx); });
+    // Clipboard paste: schedule step image
+    initLongPressPaste(imgDiv, async (blob) => {
+      const compressed = await compressImage(blob);
+      const stepId = editorSteps[idx].stepId;
+      const templateId = editingTemplateId || 'tmpl-new';
+      const imageKey = 'sched-' + templateId + '-' + stepId;
+      if (editorSteps[idx].imageType === 'custom' && editorSteps[idx].customImageKey) {
+        await deleteImage(editorSteps[idx].customImageKey);
+      }
+      await saveImage(imageKey, compressed);
+      editorSteps[idx].imageType = 'custom';
+      editorSteps[idx].defaultImageKey = null;
+      editorSteps[idx].customImageKey = imageKey;
+      renderEditorSteps();
+    });
     if (step.imageType === 'default' && step.defaultImageKey) {
       const act = DEFAULT_SCHEDULE_ACTIVITIES.find(a => a.key === step.defaultImageKey);
       if (act) imgDiv.innerHTML = act.svg;
@@ -5538,6 +5819,14 @@ document.getElementById('btn-custom-step-clear').addEventListener('click', () =>
   customStepImageBlob = null;
   document.getElementById('custom-step-preview').style.display = 'none';
   document.getElementById('custom-step-preview').src = '';
+});
+
+// Clipboard paste: custom step image
+initLongPressPaste(document.getElementById('custom-step-preview'), async (blob) => {
+  customStepImageBlob = blob;
+  const preview = document.getElementById('custom-step-preview');
+  preview.src = URL.createObjectURL(blob);
+  preview.style.display = 'block';
 });
 
 document.getElementById('btn-add-custom-step').addEventListener('click', async () => {
@@ -6604,6 +6893,16 @@ document.getElementById('btn-reward-clear-img').addEventListener('click', async 
   preview.src = '';
 });
 
+// Clipboard paste: reward image
+initLongPressPaste(document.getElementById('reward-image-preview'), async (blob) => {
+  const trackId = editingTrackId || 'reward-temp';
+  const imageKey = 'reward-' + trackId;
+  await saveImage(imageKey, await compressImage(blob));
+  const preview = document.getElementById('reward-image-preview');
+  preview.src = URL.createObjectURL(blob);
+  preview.style.display = 'block';
+});
+
 document.getElementById('btn-reward-save').addEventListener('click', async () => {
   const taskLabel = document.getElementById('reward-task-input').value.trim();
   const rewardLabel = document.getElementById('reward-label-input').value.trim();
@@ -6962,6 +7261,14 @@ function renderStepEditor() {
       stepImageTargetIdx = i;
       openStepImagePicker(i);
     });
+    // Clipboard paste: reward step image
+    initLongPressPaste(imgBtn, async (blob) => {
+      const compressed = await compressImage(blob);
+      configSteps[i].imageType = 'uploaded';
+      configSteps[i].imageBlob = compressed;
+      configSteps[i].imageKey = null;
+      renderStepEditor();
+    });
     row.appendChild(imgBtn);
 
     const labelInput = document.createElement('input');
@@ -7125,6 +7432,14 @@ document.getElementById('btn-task-image-remove').addEventListener('click', () =>
   updateTaskImagePreview();
 });
 
+// Clipboard paste: task image preview box
+initLongPressPaste(document.getElementById('task-image-preview-box'), async (blob) => {
+  configTaskImageType = 'uploaded';
+  configTaskDefaultImageKey = null;
+  configTaskImageBlob = blob;
+  updateTaskImagePreview();
+});
+
 // ── Task Image Picker Modal ──
 let taskCustomImageBlob = null;
 
@@ -7207,6 +7522,14 @@ document.getElementById('btn-task-custom-clear').addEventListener('click', () =>
   taskCustomImageBlob = null;
   document.getElementById('task-custom-preview').style.display = 'none';
   document.getElementById('task-custom-preview').src = '';
+});
+
+// Clipboard paste: task custom image
+initLongPressPaste(document.getElementById('task-custom-preview'), async (blob) => {
+  taskCustomImageBlob = blob;
+  const preview = document.getElementById('task-custom-preview');
+  preview.src = URL.createObjectURL(blob);
+  preview.style.display = 'block';
 });
 
 document.getElementById('btn-task-custom-use').addEventListener('click', () => {
@@ -8937,6 +9260,16 @@ document.getElementById('editor-page-remove-img').addEventListener('click', asyn
   renderEditorPage();
 });
 
+// Clipboard paste: story page image
+initLongPressPaste(document.getElementById('editor-page-image-preview'), async (blob) => {
+  if (!editingStory) return;
+  const key = 'story-' + editingStory.id + '-page-' + editingPageIdx;
+  await saveImage(key, await compressImage(blob));
+  editingStory.pages[editingPageIdx].imageType = 'custom';
+  editingStory.pages[editingPageIdx].customImageKey = key;
+  renderEditorPage();
+});
+
 // Split page
 function splitTextAtSentenceBoundary(text) {
   if (typeof Intl !== 'undefined' && Intl.Segmenter) {
@@ -9326,6 +9659,9 @@ const GSOnboarding = {
     return state && state.complete === true;
   },
 
+  _previousFocus: null,
+  _trapHandler: null,
+
   init() {
     if (this.isComplete()) return;
     const state = this.getState();
@@ -9333,6 +9669,8 @@ const GSOnboarding = {
     if (step === 4) {
       this.showCoachMark();
     } else {
+      this._previousFocus = document.activeElement;
+      this._installFocusTrap();
       this.showStep(step);
     }
   },
@@ -9340,14 +9678,21 @@ const GSOnboarding = {
   showStep(step) {
     const overlay = document.getElementById('gs-onboarding-overlay');
     overlay.classList.add('visible');
+    overlay.setAttribute('aria-labelledby', 'gs-onb-step-' + step + '-headline');
     overlay.querySelectorAll('.gs-onboarding-step').forEach(s => s.classList.remove('active'));
     const stepEl = document.getElementById('gs-onboarding-step-' + step);
     if (stepEl) stepEl.classList.add('active');
     this.setState({ currentStep: step, date: this.getState()?.date || Date.now() });
 
+    const announce = document.getElementById('gs-onboarding-announce');
+    if (announce) announce.textContent = 'Step ' + step + ' of 3';
+
     if (step === 2) {
       const nameInput = document.getElementById('gs-onboarding-child-name');
       if (nameInput) setTimeout(() => nameInput.focus(), 100);
+    } else {
+      const headline = document.getElementById('gs-onb-step-' + step + '-headline');
+      if (headline) setTimeout(() => headline.focus(), 100);
     }
   },
 
@@ -9359,6 +9704,49 @@ const GSOnboarding = {
   complete() {
     this.setState({ complete: true });
     document.getElementById('gs-onboarding-overlay').classList.remove('visible');
+    this._removeFocusTrap();
+    if (this._previousFocus && typeof this._previousFocus.focus === 'function') {
+      try { this._previousFocus.focus(); } catch { /* ignore */ }
+    }
+    this._previousFocus = null;
+  },
+
+  _activeSlide() {
+    return document.querySelector('#gs-onboarding-overlay .gs-onboarding-step.active');
+  },
+
+  _installFocusTrap() {
+    if (this._trapHandler) return;
+    this._trapHandler = (e) => {
+      const slide = this._activeSlide();
+      if (!slide) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        const step = this.getState()?.currentStep || 1;
+        if (step === 1) document.getElementById('gs-btn-skip-1').click();
+        else if (step === 2) document.getElementById('gs-btn-name-skip').click();
+        else document.getElementById('gs-btn-tour-done').click();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusables = slide.querySelectorAll('button, input, [href], [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', this._trapHandler);
+  },
+
+  _removeFocusTrap() {
+    if (this._trapHandler) {
+      document.removeEventListener('keydown', this._trapHandler);
+      this._trapHandler = null;
+    }
   }
 };
 
@@ -9698,11 +10086,6 @@ document.getElementById('gs-btn-tour-done').addEventListener('click', () => {
   GSOnboarding.showCoachMark();
 });
 
-document.getElementById('gs-onboarding-overlay').addEventListener('click', (e) => {
-  if (!e.target.closest('.gs-onboarding-content') && !e.target.closest('.gs-onboarding-btn')) {
-    GSOnboarding.complete();
-  }
-});
 
 // -- Init --
 async function init() {

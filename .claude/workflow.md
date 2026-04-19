@@ -129,9 +129,10 @@ Steps:
 2. Run Lighthouse audit (Performance, Accessibility, Best Practices, PWA)
 3. Test on mobile device (touch, orientation, PWA install)
 4. Update notes with validation results
-5. **Steve reviews branch before merge to master** (automatic -- full diff, regressions, cache list, data safety)
-6. Mark feature complete in .project/notes.md
-7. Move to "Completed Features" section
+5. **Open PR from develop to master** (`gh pr create --base master --head develop`)
+6. **Run `/review <PR-url>` in Claude Code before merging** (invokes Steve's pre-merge review -- full diff, regressions, cache list, data safety, CLAUDE.md rule compliance). Do not merge until review passes.
+7. Mark feature complete in .project/notes.md
+8. Move to "Completed Features" section
 
 ---
 

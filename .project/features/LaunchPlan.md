@@ -134,12 +134,14 @@ main (or master) -- production/live builds, App Store releases
 
 1. Feature freeze on `develop`
 2. QA pass on `develop` (Internal Testing group)
-3. Merge `develop` -> `master`
-4. Tag release (`v1.0.0`)
-5. Fastlane builds from `master`
-6. Push to External Testing group for final beta validation
-7. Submit to App Store Review
-8. Post-release: merge `master` back to `develop` (picks up any hotfix tags)
+3. Open PR from `develop` to `master`
+4. **Pre-merge gate: run `/review <PR-url>` in Claude Code.** Address any blockers Steve flags before merging. No merge without a clean review.
+5. Merge `develop` -> `master`
+6. Tag release (`v1.0.0`)
+7. Fastlane builds from `master`
+8. Push to External Testing group for final beta validation
+9. Submit to App Store Review
+10. Post-release: merge `master` back to `develop` (picks up any hotfix tags)
 
 ---
 
