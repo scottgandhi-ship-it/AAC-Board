@@ -676,9 +676,9 @@ body {
 
 .task-tile {
   aspect-ratio: 1;
-  border-radius: var(--radius-lg);
-  border: 3px solid #e0e0e0;
-  background: var(--gs-bg-alt);
+  border-radius: var(--gs-radius-lg);
+  border: 1px solid var(--gs-hair);
+  background: var(--gs-card);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -693,9 +693,10 @@ body {
 }
 
 .task-tile-number {
+  font-family: var(--gs-font-body);
   font-size: 1.4rem;
-  font-weight: 800;
-  color: #bbb;
+  font-weight: 700;
+  color: var(--gs-ink-muted);
   line-height: 1;
   transition: all 0.25s ease;
 }
@@ -740,20 +741,20 @@ body {
 
 /* Completed tile */
 .task-tile.completed {
-  border-color: #43A047;
-  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-color: var(--gs-accent);
+  background: var(--gs-accent-soft);
 }
 
 .task-tile.completed .task-tile-number {
   font-size: 0.75rem;
-  color: #81C784;
+  color: var(--gs-accent);
 }
 
 .task-tile-check {
   display: none;
   font-size: 2rem;
   line-height: 1;
-  color: #43A047;
+  color: var(--gs-accent);
 }
 
 .task-tile.completed .task-tile-check {
@@ -763,9 +764,10 @@ body {
 /* Active / next tile — tappable */
 .task-tile.active {
   border-color: var(--gs-accent);
+  border-width: 2px;
   background: var(--gs-card);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(79, 70, 184, 0.15);
   animation: tileGlow 2s ease-in-out 3;
   animation-fill-mode: forwards;
 }
@@ -792,8 +794,8 @@ body {
 }
 
 @keyframes tileGlow {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15); }
-  50% { box-shadow: 0 0 0 8px rgba(124, 77, 255, 0.25); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(79, 70, 184, 0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(79, 70, 184, 0.25); }
 }
 
 /* Step label for task strips */
@@ -6366,6 +6368,10 @@ function renderPath(track) {
         row.classList.add('current');
       }
 
+      // Wrap inner content in gs-step-card so the active-row card styling applies
+      const card = document.createElement('div');
+      card.className = 'gs-step-card';
+
       // Step image
       const imgDiv = document.createElement('div');
       imgDiv.className = 'sched-step-img';
@@ -6382,29 +6388,31 @@ function renderPath(track) {
         const act = DEFAULT_TASK_IMAGES.find(a => a.key === step.imageKey);
         if (act) imgDiv.innerHTML = act.svg;
       }
-      row.appendChild(imgDiv);
+      card.appendChild(imgDiv);
 
       // Step label
       const label = document.createElement('span');
       label.className = 'sched-step-label';
       label.textContent = step.label;
-      row.appendChild(label);
+      card.appendChild(label);
 
-      // Done checkmark (for completed steps)
-      const check = document.createElement('div');
-      check.className = 'sched-step-check';
-      check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>';
-      row.appendChild(check);
+      row.appendChild(card);
 
-      // Done button (for current step)
+      // Done button (long-press ring, matches Schedule)
       if (i === track.currentCount) {
         const doneBtn = document.createElement('button');
-        doneBtn.className = 'sched-step-done-btn';
-        doneBtn.textContent = 'Done!';
-        doneBtn.addEventListener('click', (e) => { e.stopPropagation(); handleTileTap(track); });
+        doneBtn.className = 'sched-step-done-btn gs-lp-btn';
+        doneBtn.type = 'button';
+        doneBtn.setAttribute('aria-label', 'Hold to mark ' + step.label + ' as done');
+        doneBtn.innerHTML =
+          '<svg class="gs-lp-ring-svg" viewBox="0 0 52 52">' +
+          '<circle class="gs-lp-ring" cx="26" cy="26" r="24"/>' +
+          '</svg>' +
+          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="position:relative;z-index:1;">' +
+          '<path d="M5 12 L10 17 L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>';
         row.appendChild(doneBtn);
-        row.style.cursor = 'pointer';
-        row.addEventListener('click', () => handleTileTap(track));
+        GSLongPress.bind(doneBtn, () => handleTileTap(track));
       }
 
       pathEl.appendChild(row);
@@ -9954,7 +9962,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-schedule .sched-step.current .sched-step-done-btn'),
-          text: () => 'When they finish, tap Done! to move to the next step.',
+          text: () => 'When they finish, hold the Done button to move to the next step.',
           placement: 'bottom',
           btnLabel: null,
           waitForAction: true,
@@ -9988,7 +9996,7 @@ const GSCoachMarks = {
         },
         {
           target: () => document.querySelector('#view-rewards .sched-step.current .sched-step-done-btn'),
-          text: () => 'Tap Done! to complete each step and work toward the reward.',
+          text: () => 'Press and hold the Done button to complete each step and work toward the reward.',
           placement: 'bottom',
           btnLabel: 'Got it!',
           waitForAction: false,
