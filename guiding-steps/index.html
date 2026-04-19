@@ -563,7 +563,7 @@ body {
 }
 .seg-btn + .seg-btn { border-left: 1px solid var(--gs-hair); }
 .seg-btn[aria-checked="true"] { background: var(--gs-accent); color: #fff; }
-.seg-btn:active { background: rgba(124,116,255,0.15); }
+.seg-btn:active { background: var(--gs-accent-soft); }
 #btn-close-settings {
   display: block; width: 100%; padding: 14px; border: none; border-radius: 10px;
   font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
@@ -5373,9 +5373,10 @@ function renderSchedule() {
       row.setAttribute('aria-label', step.label + ' - ' + step.status);
     }
 
-    // Spine column: numbered circle + connector line
+    // Spine column: numbered circle + connector line (decorative)
     const spine = document.createElement('div');
     spine.className = 'gs-spine-col';
+    spine.setAttribute('aria-hidden', 'true');
     const num = document.createElement('div');
     num.className = 'gs-step-num';
     if (step.status === 'done') {
