@@ -2074,13 +2074,83 @@ body.sensory-high-contrast .task-tile {
   border: 2px solid rgba(0,0,0,0.3) !important;
 }
 
-/* -- Stories List -- */
-#stories-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-#stories-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-  padding: 12px; flex: 1; overflow-y: auto; align-content: start;
+/* -- Stories List (Storybook Canvas) -- */
+#stories-content {
+  display: flex; flex-direction: column; flex: 1;
+  overflow: hidden; background: var(--gs-bg);
+  font-family: var(--gs-font-body);
 }
-@media (min-width: 600px) { #stories-grid { grid-template-columns: repeat(3, 1fr); } }
+#stories-grid {
+  display: flex; flex-direction: column;
+  padding: 14px 24px 120px;
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gs-story-section-label {
+  font-family: var(--gs-font-body); font-size: 0.65625rem;
+  font-weight: 600; color: var(--gs-ink-muted);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin: 14px 2px 8px;
+}
+.gs-story-section-label:first-child { margin-top: 4px; }
+.gs-story-row {
+  display: flex; gap: 14px; padding: 14px;
+  background: var(--gs-card); border-radius: 18px;
+  border: 1px solid var(--gs-hair);
+  margin-bottom: 10px; cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.gs-story-row:active { transform: scale(0.98); }
+.gs-story-row-icon {
+  width: 80px; height: 80px; border-radius: 14px;
+  flex-shrink: 0; overflow: hidden;
+  background: var(--gs-accent-soft);
+  display: flex; align-items: center; justify-content: center;
+}
+.gs-story-row-icon svg { width: 70%; height: 70%; }
+.gs-story-row-icon img { width: 100%; height: 100%; object-fit: cover; }
+.gs-story-row-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+.gs-story-row-title {
+  font-family: var(--gs-font-display); font-size: 1.125rem;
+  font-weight: 500; color: var(--gs-ink);
+  letter-spacing: -0.3px; line-height: 1.2;
+}
+.gs-story-row-meta {
+  font-family: var(--gs-font-body); font-size: 0.75rem;
+  color: var(--gs-ink-muted); margin-top: 2px; font-weight: 500;
+}
+.gs-story-row-actions {
+  display: flex; gap: 14px; margin-top: 10px;
+}
+.gs-story-row-action {
+  background: none; border: none; padding: 0;
+  font-family: var(--gs-font-body); font-size: 0.8125rem;
+  font-weight: 500; color: var(--gs-ink-soft);
+  cursor: pointer; min-height: 28px;
+}
+.gs-story-row-action.primary {
+  color: var(--gs-accent); font-weight: 600;
+}
+.gs-story-row-action.danger { color: var(--gs-warn); }
+.gs-story-row-action:focus-visible {
+  outline: 2px solid var(--gs-accent); outline-offset: 2px; border-radius: 4px;
+}
+.gs-story-row-create {
+  border: 1.5px dashed var(--gs-hair);
+  background: transparent;
+  margin-top: 10px;
+}
+.gs-story-row-create .gs-story-row-icon {
+  background: var(--gs-bg-alt);
+  color: var(--gs-accent);
+}
+.gs-story-row-icon-plus {
+  color: var(--gs-accent);
+}
+.gs-story-row-title-create { color: var(--gs-accent); }
 
 .story-card {
   background: var(--gs-card); border-radius: var(--radius-md); overflow: hidden;
@@ -2122,12 +2192,23 @@ body.sensory-high-contrast .task-tile {
 #stories-empty-new:active { transform: scale(0.97); }
 
 #stories-parent-controls {
-  display: flex; gap: 8px; padding: 8px 16px; flex-shrink: 0;
+  display: flex; gap: 10px;
+  padding: 10px 24px max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  flex-shrink: 0;
+  background: var(--gs-bg);
+  border-top: 1px solid var(--gs-hair);
 }
 .stories-parent-btn {
-  flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm);
-  background: var(--gs-accent); color: #fff; font-size: 0.95rem;
-  font-weight: 600; cursor: pointer; font-family: inherit;
+  flex: 1; padding: 13px 16px; border-radius: 12px;
+  font-family: var(--gs-font-body); font-size: 0.9375rem;
+  font-weight: 600; cursor: pointer; min-height: 48px;
+}
+#btn-new-story.stories-parent-btn {
+  background: var(--gs-accent); color: #fff; border: none;
+}
+#btn-import-story.stories-parent-btn {
+  background: var(--gs-card); color: var(--gs-ink);
+  border: 1px solid var(--gs-hair);
 }
 
 /* -- Story Reader -- */
@@ -7988,79 +8069,163 @@ async function initStories() {
   renderStoriesList();
 }
 
+// Split stories into "Recent" (read in last 7 days) and "This month" (older or unread).
+// Declared as function so it is hoisted and safe to call from top-level code.
+function splitStoriesBySection(stories) {
+  const now = Date.now();
+  const sevenDaysAgo = now - 7 * 86400000;
+  const recent = [], older = [];
+  for (const s of stories) {
+    // Clamp future timestamps (clock skew) so they don't pin to Recent forever
+    const raw = typeof s.lastReadAt === 'number' && s.lastReadAt > 0 ? s.lastReadAt : 0;
+    const lastRead = raw > 0 ? Math.min(raw, now) : 0;
+    if (lastRead >= sevenDaysAgo) recent.push({ story: s, lastRead });
+    else older.push({ story: s, lastRead });
+  }
+  recent.sort((a, b) => b.lastRead - a.lastRead);
+  older.sort((a, b) => {
+    const la = a.lastRead || (a.story.createdAt || a.story.updatedAt || 0);
+    const lb = b.lastRead || (b.story.createdAt || b.story.updatedAt || 0);
+    return lb - la;
+  });
+  return { recent: recent.map(x => x.story), older: older.map(x => x.story) };
+}
+
+function formatRelativeRead(lastReadAt) {
+  if (!lastReadAt) return 'Not yet read';
+  const days = Math.floor((Date.now() - lastReadAt) / 86400000);
+  if (days <= 0) return 'Read today';
+  if (days === 1) return 'Read yesterday';
+  if (days < 7) return 'Read ' + days + ' days ago';
+  if (days < 14) return 'Read last week';
+  if (days < 30) return 'Read ' + Math.floor(days / 7) + ' weeks ago';
+  return 'Read ' + Math.floor(days / 30) + ' month' + (days < 60 ? '' : 's') + ' ago';
+}
+
 function renderStoriesList() {
-  const grid = document.getElementById('stories-grid');
+  const list = document.getElementById('stories-grid');
   const empty = document.getElementById('stories-empty');
-  grid.innerHTML = '';
+  list.innerHTML = '';
   if (stories.length === 0) {
-    grid.style.display = 'none';
+    list.style.display = 'none';
     empty.style.display = 'flex';
     return;
   }
   empty.style.display = 'none';
-  grid.style.display = 'grid';
-  const sorted = [...stories].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-  sorted.forEach(story => {
-    const card = document.createElement('div');
-    card.className = 'story-card';
-    const cover = document.createElement('div');
-    cover.className = 'story-card-cover';
-    const firstPage = story.pages[0];
+  list.style.display = '';
+
+  const { recent, older } = splitStoriesBySection(stories);
+
+  const appendSectionLabel = (text) => {
+    const label = document.createElement('div');
+    label.className = 'gs-story-section-label';
+    label.textContent = text;
+    list.appendChild(label);
+  };
+
+  const appendStoryRow = (story) => {
+    const row = document.createElement('div');
+    row.className = 'gs-story-row';
+
+    const icon = document.createElement('div');
+    icon.className = 'gs-story-row-icon';
+    const firstPage = story.pages && story.pages[0];
     if (firstPage && firstPage.imageType === 'custom' && firstPage.customImageKey) {
       loadImage(firstPage.customImageKey).then(blob => {
-        if (blob) { const img = document.createElement('img'); img.src = URL.createObjectURL(blob); img.alt = story.title; cover.innerHTML = ''; cover.appendChild(img); }
+        if (blob) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(blob);
+          img.alt = story.title;
+          icon.innerHTML = '';
+          icon.appendChild(img);
+        }
       });
     } else if (firstPage && firstPage.stockKey && STORY_SVGS[firstPage.stockKey]) {
-      cover.innerHTML = STORY_SVGS[firstPage.stockKey];
+      icon.innerHTML = STORY_SVGS[firstPage.stockKey];
     }
-    card.appendChild(cover);
+    row.appendChild(icon);
 
-    const info = document.createElement('div');
-    info.className = 'story-card-info';
+    const body = document.createElement('div');
+    body.className = 'gs-story-row-body';
+
     const title = document.createElement('div');
-    title.className = 'story-card-title';
+    title.className = 'gs-story-row-title';
     title.textContent = story.title;
-    info.appendChild(title);
+    body.appendChild(title);
+
     const meta = document.createElement('div');
-    meta.className = 'story-card-meta';
-    meta.textContent = (story.childName || '') + (story.readCount ? ' \u00B7 Read ' + story.readCount + 'x' : '');
-    info.appendChild(meta);
-    card.appendChild(info);
+    meta.className = 'gs-story-row-meta';
+    const pages = story.pages ? story.pages.length : 0;
+    const parts = [];
+    if (story.readCount) parts.push('Read ' + story.readCount + 'x');
+    parts.push(pages + (pages === 1 ? ' page' : ' pages'));
+    parts.push(formatRelativeRead(story.lastReadAt));
+    meta.textContent = parts.join(' \u00B7 ');
+    body.appendChild(meta);
 
     const actions = document.createElement('div');
-    actions.className = 'story-card-actions';
+    actions.className = 'gs-story-row-actions';
+    const openBtn = document.createElement('button');
+    openBtn.className = 'gs-story-row-action primary';
+    openBtn.textContent = 'Open';
+    openBtn.addEventListener('click', (e) => { e.stopPropagation(); openStoryReader(story); });
+    actions.appendChild(openBtn);
     const editBtn = document.createElement('button');
-    editBtn.className = 'story-card-action-btn';
+    editBtn.className = 'gs-story-row-action';
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => { e.stopPropagation(); openStoryEditor(story); });
     actions.appendChild(editBtn);
     const shareBtn = document.createElement('button');
-    shareBtn.className = 'story-card-action-btn';
+    shareBtn.className = 'gs-story-row-action';
     shareBtn.textContent = 'Share';
     shareBtn.addEventListener('click', (e) => { e.stopPropagation(); exportStory(story); });
     actions.appendChild(shareBtn);
     const delBtn = document.createElement('button');
-    delBtn.className = 'story-card-action-btn danger';
+    delBtn.className = 'gs-story-row-action danger';
     delBtn.textContent = 'Delete';
     delBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (confirm('Delete "' + story.title + '"?')) {
-        deleteStory(story.id).then(() => { stories = stories.filter(s => s.id !== story.id); renderStoriesList(); showToast('Story deleted'); });
+        deleteStory(story.id).then(() => {
+          stories = stories.filter(s => s.id !== story.id);
+          renderStoriesList();
+          showToast('Story deleted');
+        });
       }
     });
     actions.appendChild(delBtn);
-    card.appendChild(actions);
+    body.appendChild(actions);
 
-    card.addEventListener('click', () => openStoryReader(story));
-    grid.appendChild(card);
-  });
+    row.appendChild(body);
+    row.addEventListener('click', () => openStoryReader(story));
+    list.appendChild(row);
+  };
 
+  if (recent.length > 0) {
+    appendSectionLabel('Recent');
+    recent.forEach(appendStoryRow);
+  }
+  if (older.length > 0) {
+    appendSectionLabel(recent.length > 0 ? 'This month' : 'All stories');
+    older.forEach(appendStoryRow);
+  }
+
+  // Create-new dashed card at end of list
   const createCard = document.createElement('div');
-  createCard.className = 'story-card story-card-create';
-  createCard.innerHTML = '<div class="story-card-cover" style="display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#aaa;">+</div>'
-    + '<div class="story-card-info"><div class="story-card-title" style="color:#7C74FF;">Create Story</div></div>';
+  createCard.className = 'gs-story-row gs-story-row-create';
+  createCard.innerHTML =
+    '<div class="gs-story-row-icon gs-story-row-icon-plus">' +
+    '<svg viewBox="0 0 24 24" width="28" height="28" fill="none">' +
+    '<line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+    '<line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+    '</svg>' +
+    '</div>' +
+    '<div class="gs-story-row-body">' +
+    '<div class="gs-story-row-title gs-story-row-title-create">Create a new story</div>' +
+    '<div class="gs-story-row-meta">Walk your child through something new</div>' +
+    '</div>';
   createCard.addEventListener('click', () => openStoryEditor(null));
-  grid.appendChild(createCard);
+  list.appendChild(createCard);
 }
 
 // -- Story Reader --
@@ -10013,12 +10178,12 @@ const GSCoachMarks = {
     stories: {
       steps: [
         {
-          target: () => document.querySelector('#stories-grid .story-card'),
+          target: () => document.querySelector('#stories-grid .gs-story-row'),
           text: () => 'Social stories help prepare ' + GSCoachMarks._childName().replace("'s", '') + ' for new experiences. Tap a story to read it together.',
           placement: 'bottom',
           btnLabel: null,
           waitForAction: true,
-          guard: () => !!document.querySelector('#stories-grid .story-card')
+          guard: () => !!document.querySelector('#stories-grid .gs-story-row')
         },
         {
           target: () => document.getElementById('reader-text-area'),
