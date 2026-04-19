@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#7C74FF">
+<meta name="theme-color" content="#4F46B8">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <link rel="preload" href="fonts/Fraunces-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <title>Guiding Steps</title>
@@ -137,7 +135,7 @@ body {
   top: 0; left: 0; right: 0; bottom: 0;
   display: flex; flex-direction: column;
   overflow: hidden;
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--gs-font-body);
   background: linear-gradient(160deg, #e8eaf6 0%, #fce4ec 40%, #fff8e1 80%, #e8f5e9 100%);
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -2601,7 +2599,7 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
     display: block !important;
     position: static;
     width: 100%;
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--gs-font-body);
     color: #333;
   }
   .print-page {
@@ -3080,6 +3078,12 @@ body.sensory-reduced-motion .reader-slide-enter-back { animation: readerFadeIn 0
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="4">4</button>
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="5">5</button>
           <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="6">6</button>
+        </div>
+        <label style="font-weight:600;font-size:0.9rem;color:#555;display:block;margin:16px 0 8px;">Long-press Done duration</label>
+        <div class="seg-group" id="long-press-group" role="radiogroup" aria-label="Long-press Done duration">
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="200">0.2s</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="300">0.3s</button>
+          <button type="button" class="seg-btn" role="radio" aria-checked="false" data-value="400">0.4s</button>
         </div>
       </div>
     </div>
@@ -4373,6 +4377,31 @@ document.getElementById('visible-steps-group').addEventListener('click', (e) => 
 
 document.getElementById('visible-steps-group').addEventListener('keydown', (e) => {
   const btns = [...document.querySelectorAll('#visible-steps-group .seg-btn')];
+  const idx = btns.indexOf(e.target);
+  if (idx === -1) return;
+  let next = -1;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % btns.length;
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + btns.length) % btns.length;
+  if (next !== -1) { e.preventDefault(); btns[next].focus(); btns[next].click(); }
+});
+
+// -- Long-press Done duration setting --
+function applyLongPressDurationSetting() {
+  const current = GSLongPress.getDuration();
+  document.querySelectorAll('#long-press-group .seg-btn').forEach(btn => {
+    btn.setAttribute('aria-checked', String(parseInt(btn.dataset.value, 10) === current));
+  });
+}
+applyLongPressDurationSetting();
+
+document.getElementById('long-press-group').addEventListener('click', (e) => {
+  const btn = e.target.closest('.seg-btn');
+  if (!btn) return;
+  GSLongPress.setDuration(parseInt(btn.dataset.value, 10));
+  applyLongPressDurationSetting();
+});
+document.getElementById('long-press-group').addEventListener('keydown', (e) => {
+  const btns = [...document.querySelectorAll('#long-press-group .seg-btn')];
   const idx = btns.indexOf(e.target);
   if (idx === -1) return;
   let next = -1;
