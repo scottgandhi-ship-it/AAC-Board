@@ -36,20 +36,8 @@
 }
 
 :root {
-  --chrome-primary: #7C74FF;
-  --chrome-primary-dark: #5A52D5;
-  --chrome-accent: #F5A623;
-  --chrome-bg: #f5f5f5;
-  --chrome-surface: #ffffff;
-  --chrome-surface-alt: #fafafa;
-  --chrome-text: #333333;
-  --chrome-text-secondary: #666666;
-  --chrome-text-muted: #888888;
-  --chrome-border: #e0e0e0;
-  --chrome-border-light: #eeeeee;
-  --chrome-success: #43A047;
-  --chrome-danger: #D32F2F;
-  --chrome-warning: #FB8C00;
+  /* Legacy --bar-bg kept for parental-gate-ring circle. --chrome-* tokens
+     fully retired as of Phase 3 (all selectors migrated to --gs-*). */
   --bar-bg: var(--gs-accent);
   --bar-bg-dark: var(--gs-accent-deep);
   /* ── Gray Scale ── */
@@ -90,8 +78,8 @@
   --radius-sm: 10px;
 }
 
-/* Storybook Canvas design tokens -- used by redesigned screens (PR-1 onward).
-   Coexists with --chrome-* until each tab is re-skinned. */
+/* Storybook Canvas design tokens -- single source of truth for all screens
+   as of Phase 3. Legacy --chrome-* tokens have been fully retired. */
 :root {
   --gs-bg: #FBF6EC;
   --gs-bg-alt: #F0E8D6;
@@ -9457,17 +9445,17 @@ function updateWordCounter(text) {
     warnEl.style.display = 'none';
     splitWrap.style.display = 'none';
   } else if (limitState.state === 'over') {
-    countEl.style.color = 'var(--chrome-accent)';
-    barEl.style.background = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
+    barEl.style.background = 'var(--gs-accent)';
     coachEl.textContent = 'Shorter pages are easier to follow -- you know your child best';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
     warnEl.style.display = 'none';
     splitWrap.style.display = 'none';
   } else if (limitState.state === 'nearcap') {
-    countEl.style.color = 'var(--chrome-accent)';
-    barEl.style.background = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
+    barEl.style.background = 'var(--gs-accent)';
     coachEl.textContent = 'Getting long -- splitting into two pages can help';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
     warnEl.style.display = 'none';
     splitWrap.style.display = '';
   } else if (limitState.state === 'hardcap') {
@@ -9784,9 +9772,9 @@ function renderHelperSeqList() {
       } else {
         hint.style.display = '';
         hint.querySelector('.word-counter-count').textContent = wc + ' / ' + ls.soft + ' words';
-        hint.querySelector('.word-counter-count').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--chrome-accent)';
+        hint.querySelector('.word-counter-count').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--gs-accent)';
         hint.querySelector('.word-counter-coaching').textContent = 'Shorter pages are easier to follow';
-        hint.querySelector('.word-counter-coaching').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--chrome-accent)';
+        hint.querySelector('.word-counter-coaching').style.color = ls.state === 'hardcap' ? 'var(--gs-warn)' : 'var(--gs-accent)';
       }
     });
     row.appendChild(input);
@@ -9876,9 +9864,9 @@ function updateHelperWordHint(hintId, text) {
     coachEl.textContent = 'Page is full -- try shorter sentences';
     coachEl.style.color = 'var(--gs-warn)';
   } else {
-    countEl.style.color = 'var(--chrome-accent)';
+    countEl.style.color = 'var(--gs-accent)';
     coachEl.textContent = 'Shorter pages are easier to follow';
-    coachEl.style.color = 'var(--chrome-accent)';
+    coachEl.style.color = 'var(--gs-accent)';
   }
 }
 
