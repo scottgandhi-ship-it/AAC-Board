@@ -1,4 +1,4 @@
-const CACHE_NAME = 'guiding-steps-v18';
+const CACHE_NAME = 'guiding-steps-v19';
 const ASSETS = [
   './',
   './index.html',
