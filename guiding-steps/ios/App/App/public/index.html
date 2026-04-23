@@ -432,15 +432,20 @@ body {
 
 /* -- Done button (Storybook Canvas) -- */
 .gs-done-btn {
+  position: relative; z-index: 2;
   width: 52px; height: 52px;
   border-radius: 99px; border: none;
   background: var(--gs-accent); color: #fff;
   cursor: pointer; padding: 0; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s, transform 0.1s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 .gs-done-btn:active { background: var(--gs-accent-deep); transform: scale(0.96); }
 .gs-done-btn:focus-visible { outline: 2px solid var(--gs-accent-deep); outline-offset: 3px; }
+/* Prevent the inner SVG from swallowing taps; let the click reach the button */
+.gs-done-btn > svg { pointer-events: none; }
 
 /* -- Coach Mark Tooltip -- */
 #gs-coach-backdrop {
@@ -5707,7 +5712,8 @@ function renderSchedule() {
 
     row.appendChild(card);
 
-    // Done button on current step (single tap)
+    // Done button on current step (single tap). Row-level click also fires
+    // so the hit target is the full card, not just the 52px checkmark circle.
     if (step.status === 'current') {
       const doneBtn = document.createElement('button');
       doneBtn.className = 'sched-step-done-btn gs-done-btn';
@@ -5719,6 +5725,8 @@ function renderSchedule() {
         '</svg>';
       doneBtn.addEventListener('click', (e) => { e.stopPropagation(); completeCurrentStep(idx); });
       row.appendChild(doneBtn);
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', () => completeCurrentStep(idx));
     }
 
     stepsEl.appendChild(row);
@@ -6718,6 +6726,11 @@ function renderPath(track) {
           '</svg>';
         doneBtn.addEventListener('click', (e) => { e.stopPropagation(); handleTileTap(track); });
         row.appendChild(doneBtn);
+        // Also accept a tap anywhere on the active row as "done". The 52px
+        // checkmark hit box was reported as unreliable; row-level tap is a
+        // larger target and covers both intents.
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => handleTileTap(track));
       }
 
       pathEl.appendChild(row);
