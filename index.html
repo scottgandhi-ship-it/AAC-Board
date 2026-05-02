@@ -3316,29 +3316,38 @@ function createCell(btn) {
     }
   });
 
+  // Numbers and shapes render the label itself as the prominent content
+  // (no emoji icon -- the digit or shape word IS the icon).
+  const isNumberOrShape = btn.id.startsWith('num-') || btn.id.startsWith('shp-');
+
   // Show emoji icon for all buttons (folder icon or button-specific icon)
   const bigText = document.createElement('span');
   bigText.className = 'cell-big-text';
   if (btn.type === 'folder') {
     const folderId = btn.id.replace('folder-', '');
     bigText.textContent = FOLDER_ICONS[folderId] || '📁';
+  } else if (isNumberOrShape) {
+    bigText.textContent = getPrimaryLabel(btn);
+    cell.classList.add('cell--text-only');
   } else {
     bigText.textContent = BUTTON_ICONS[btn.id] || '💬';
   }
   cell.appendChild(bigText);
 
-  const label = document.createElement('span');
-  label.className = 'cell-label';
-  const primaryText = getPrimaryLabel(btn);
-  const secondaryText = getSecondaryLabel(btn);
-  label.textContent = primaryText;
-  if (secondaryText) {
-    const sec = document.createElement('span');
-    sec.className = 'cell-label-secondary';
-    sec.textContent = secondaryText;
-    label.appendChild(sec);
+  if (!isNumberOrShape) {
+    const label = document.createElement('span');
+    label.className = 'cell-label';
+    const primaryText = getPrimaryLabel(btn);
+    const secondaryText = getSecondaryLabel(btn);
+    label.textContent = primaryText;
+    if (secondaryText) {
+      const sec = document.createElement('span');
+      sec.className = 'cell-label-secondary';
+      sec.textContent = secondaryText;
+      label.appendChild(sec);
+    }
+    cell.appendChild(label);
   }
-  cell.appendChild(label);
 
   // No per-cell event listeners -- handled by delegated grid listeners
   return cell;

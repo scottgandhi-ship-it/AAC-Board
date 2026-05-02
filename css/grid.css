@@ -302,6 +302,22 @@ body.grid-1 .cell { padding: 16px 12px; gap: 8px; }
 body.grid-1 .cell .cell-label { font-size: clamp(2rem, 7vw, 3rem); }
 body.grid-1 .cell .cell-big-text { font-size: clamp(4rem, 15vw, 7rem); }
 
+/* Numbers and shapes: render the digit/word as the big content (no emoji icon, no separate label).
+   Sized larger than emoji icons and uses regular font instead of the emoji font stack. */
+.cell.cell--text-only .cell-big-text {
+  font-family: inherit;
+  font-size: clamp(2.6rem, 9vw, 4rem);
+  color: #364153;
+  filter: none;
+  letter-spacing: 0.01em;
+}
+body.grid-6 .cell.cell--text-only .cell-big-text { font-size: clamp(2rem, 5vw, 2.6rem); }
+body.grid-5 .cell.cell--text-only .cell-big-text { font-size: clamp(2.2rem, 6vw, 3rem); }
+body.grid-3 .cell.cell--text-only .cell-big-text { font-size: clamp(3rem, 9vw, 4.5rem); }
+body.grid-2 .cell.cell--text-only .cell-big-text { font-size: clamp(4rem, 13vw, 6rem); }
+body.grid-21 .cell.cell--text-only .cell-big-text { font-size: clamp(4.5rem, 15vw, 7rem); }
+body.grid-1 .cell.cell--text-only .cell-big-text { font-size: clamp(5rem, 18vw, 9rem); }
+
 /* Early learner empty slot */
 .early-learner-empty-slot {
   border: 2px dashed var(--gray-300);
