@@ -1616,7 +1616,7 @@ function renderWordPickerList(filter) {
 
       const icon = document.createElement('span');
       icon.className = 'word-picker-item-icon';
-      icon.textContent = BUTTON_ICONS[w.id] || '💬';
+      icon.textContent = BUTTON_ICONS[w.id] || (w.id.startsWith('num-') || w.id.startsWith('letter-') ? w.label : '💬');
 
       const label = document.createElement('span');
       label.className = 'word-picker-item-label';
@@ -2412,9 +2412,12 @@ function renderGrid() {
       cell.setAttribute('data-id', w.id);
       if (earlyLearner) cell.setAttribute('data-slot', String(i));
 
+      const isNumOrLetter = w.id.startsWith('num-') || w.id.startsWith('letter-');
+      if (isNumOrLetter) cell.classList.add('character-only');
+
       const bigText = document.createElement('span');
       bigText.className = 'cell-big-text';
-      bigText.textContent = w.icon || '💬';
+      bigText.textContent = w.icon || (isNumOrLetter ? w.label : '💬');
       cell.appendChild(bigText);
 
       loadImage(w.id).then(data => {
@@ -2429,18 +2432,20 @@ function renderGrid() {
         }
       });
 
-      const label = document.createElement('span');
-      label.className = 'cell-label';
-      const primaryText = currentLang === 'es' ? w.labelEs : w.label;
-      const secondaryText = (currentLang === 'both') ? w.labelEs : null;
-      label.textContent = primaryText;
-      if (secondaryText) {
-        const sec = document.createElement('span');
-        sec.className = 'cell-label-secondary';
-        sec.textContent = secondaryText;
-        label.appendChild(sec);
+      if (!isNumOrLetter) {
+        const label = document.createElement('span');
+        label.className = 'cell-label';
+        const primaryText = currentLang === 'es' ? w.labelEs : w.label;
+        const secondaryText = (currentLang === 'both') ? w.labelEs : null;
+        label.textContent = primaryText;
+        if (secondaryText) {
+          const sec = document.createElement('span');
+          sec.className = 'cell-label-secondary';
+          sec.textContent = secondaryText;
+          label.appendChild(sec);
+        }
+        cell.appendChild(label);
       }
-      cell.appendChild(label);
 
       cell.classList.add('animate-in');
       cell.style.animationDelay = `${i * 25}ms`;
@@ -3317,28 +3322,33 @@ function createCell(btn) {
   });
 
   // Show emoji icon for all buttons (folder icon or button-specific icon)
+  const isNumOrLetter = btn.id.startsWith('num-') || btn.id.startsWith('letter-');
+  if (isNumOrLetter) cell.classList.add('character-only');
+
   const bigText = document.createElement('span');
   bigText.className = 'cell-big-text';
   if (btn.type === 'folder') {
     const folderId = btn.id.replace('folder-', '');
     bigText.textContent = FOLDER_ICONS[folderId] || '📁';
   } else {
-    bigText.textContent = BUTTON_ICONS[btn.id] || '💬';
+    bigText.textContent = BUTTON_ICONS[btn.id] || (isNumOrLetter ? btn.label : '💬');
   }
   cell.appendChild(bigText);
 
-  const label = document.createElement('span');
-  label.className = 'cell-label';
-  const primaryText = getPrimaryLabel(btn);
-  const secondaryText = getSecondaryLabel(btn);
-  label.textContent = primaryText;
-  if (secondaryText) {
-    const sec = document.createElement('span');
-    sec.className = 'cell-label-secondary';
-    sec.textContent = secondaryText;
-    label.appendChild(sec);
+  if (!isNumOrLetter) {
+    const label = document.createElement('span');
+    label.className = 'cell-label';
+    const primaryText = getPrimaryLabel(btn);
+    const secondaryText = getSecondaryLabel(btn);
+    label.textContent = primaryText;
+    if (secondaryText) {
+      const sec = document.createElement('span');
+      sec.className = 'cell-label-secondary';
+      sec.textContent = secondaryText;
+      label.appendChild(sec);
+    }
+    cell.appendChild(label);
   }
-  cell.appendChild(label);
 
   // No per-cell event listeners -- handled by delegated grid listeners
   return cell;
@@ -3631,7 +3641,7 @@ function createSearchCell(btn, folderLabels) {
 
   const icon = document.createElement('span');
   icon.className = 'search-icon';
-  icon.textContent = BUTTON_ICONS[btn.id] || '💬';
+  icon.textContent = BUTTON_ICONS[btn.id] || (btn.id.startsWith('num-') || btn.id.startsWith('letter-') ? btn.label : '💬');
   cell.appendChild(icon);
 
   const label = document.createElement('span');

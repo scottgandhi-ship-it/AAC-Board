@@ -94,6 +94,13 @@
   font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 
+.cell.character-only .cell-big-text {
+  font-size: clamp(3.5rem, 14vw, 6rem);
+  font-family: inherit;
+  color: rgba(0,0,0,0.85);
+  filter: none;
+}
+
 /* Folder buttons get a special card style */
 .cell.folder-btn {
   background: var(--chrome-surface) !important;
